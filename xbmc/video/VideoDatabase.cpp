@@ -98,8 +98,12 @@ bool CVideoDatabase::CreateTables()
     CDatabase::CreateTables();
 
     CLog::Log(LOGINFO, "create bookmark table");
-    m_pDS->exec("CREATE TABLE bookmark ( idBookmark integer primary key, idFile integer, timeInSeconds double, totalTimeInSeconds double, thumbNailImage text, player text, playerState text, type integer)\n");
-    m_pDS->exec("CREATE INDEX ix_bookmark ON bookmark (idFile, type)");
+#ifdef HAS_DS_PLAYER
+	m_pDS->exec("CREATE TABLE bookmark ( idBookmark integer primary key, idFile integer, timeInSeconds double, totalTimeInSeconds double, thumbNailImage text, edition text, editionNumber integer, player text, playerState text, type integer)\n");
+#else
+	m_pDS->exec("CREATE TABLE bookmark ( idBookmark integer primary key, idFile integer, timeInSeconds double, totalTimeInSeconds double, thumbNailImage text, player text, playerState text, type integer)\n");
+#endif
+	m_pDS->exec("CREATE INDEX ix_bookmark ON bookmark (idFile, type)");
 
     CLog::Log(LOGINFO, "create settings table");
     m_pDS->exec("CREATE TABLE settings ( idFile integer, Deinterlace bool,"
@@ -2419,6 +2423,10 @@ void CVideoDatabase::GetBookMarksForFile(const CStdString& strFilenameAndPath, V
         bookmark.playerState = m_pDS->fv("playerState").get_asString();
         bookmark.player = m_pDS->fv("player").get_asString();
         bookmark.type = type;
+#ifdef HAS_DS_PLAYER
+		bookmark.edition = m_pDS->fv("edition").get_asString();
+		bookmark.editionNumber = m_pDS->fv("editionNumber").get_asInt();
+#endif
         if (type == CBookmark::EPISODE)
         {
           CStdString strSQL2=PrepareSQL("select c%02d, c%02d from episode where c%02d=%i order by c%02d, c%02d", VIDEODB_ID_EPISODE_EPISODE, VIDEODB_ID_EPISODE_SEASON, VIDEODB_ID_EPISODE_BOOKMARK, m_pDS->fv("idBookmark").get_asInt(), VIDEODB_ID_EPISODE_SORTSEASON, VIDEODB_ID_EPISODE_SORTEPISODE);
@@ -2525,10 +2533,16 @@ void CVideoDatabase::AddBookMarkToFile(const CStdString& strFilenameAndPath, con
       m_pDS->close();
     }
     // update or insert depending if it existed before
-    if (idBookmark >= 0 )
-      strSQL=PrepareSQL("update bookmark set timeInSeconds = %f, totalTimeInSeconds = %f, thumbNailImage = '%s', player = '%s', playerState = '%s' where idBookmark = %i", bookmark.timeInSeconds, bookmark.totalTimeInSeconds, bookmark.thumbNailImage.c_str(), bookmark.player.c_str(), bookmark.playerState.c_str(), idBookmark);
-    else
-      strSQL=PrepareSQL("insert into bookmark (idBookmark, idFile, timeInSeconds, totalTimeInSeconds, thumbNailImage, player, playerState, type) values(NULL,%i,%f,%f,'%s','%s','%s', %i)", idFile, bookmark.timeInSeconds, bookmark.totalTimeInSeconds, bookmark.thumbNailImage.c_str(), bookmark.player.c_str(), bookmark.playerState.c_str(), (int)type);
+	if (idBookmark >= 0 )
+#ifdef HAS_DS_PLAYER
+		strSQL=PrepareSQL("update bookmark set timeInSeconds = %f, totalTimeInSeconds = %f, thumbNailImage = '%s', edition = '%s', editionNumber = '%i', player = '%s', playerState = '%s' where idBookmark = %i", bookmark.timeInSeconds, bookmark.totalTimeInSeconds, bookmark.thumbNailImage.c_str(), bookmark.edition.c_str(), bookmark.editionNumber, bookmark.player.c_str(), bookmark.playerState.c_str(), idBookmark);
+	else
+		strSQL=PrepareSQL("insert into bookmark (idBookmark, idFile, timeInSeconds, totalTimeInSeconds, thumbNailImage, edition, editionNumber, player, playerState, type) values(NULL,%i,%f,%f,'%s', '%s', %i, '%s','%s', %i)", idFile, bookmark.timeInSeconds, bookmark.totalTimeInSeconds, bookmark.thumbNailImage.c_str(), bookmark.edition.c_str(), bookmark.editionNumber, bookmark.player.c_str(), bookmark.playerState.c_str(), (int)type);
+#else
+		strSQL=PrepareSQL("update bookmark set timeInSeconds = %f, totalTimeInSeconds = %f, thumbNailImage = '%s', player = '%s', playerState = '%s' where idBookmark = %i", bookmark.timeInSeconds, bookmark.totalTimeInSeconds, bookmark.thumbNailImage.c_str(), bookmark.player.c_str(), bookmark.playerState.c_str(), idBookmark);
+	else
+		strSQL=PrepareSQL("insert into bookmark (idBookmark, idFile, timeInSeconds, totalTimeInSeconds, thumbNailImage, player, playerState, type) values(NULL,%i,%f,%f,'%s','%s','%s', %i)", idFile, bookmark.timeInSeconds, bookmark.totalTimeInSeconds, bookmark.thumbNailImage.c_str(), bookmark.player.c_str(), bookmark.playerState.c_str(), (int)type);
+#endif
 
     m_pDS->exec(strSQL.c_str());
   }
@@ -2613,6 +2627,10 @@ bool CVideoDatabase::GetBookMarkForEpisode(const CVideoInfoTag& tag, CBookmark& 
       bookmark.playerState = m_pDS->fv("playerState").get_asString();
       bookmark.player = m_pDS->fv("player").get_asString();
       bookmark.type = (CBookmark::EType)m_pDS->fv("type").get_asInt();
+#ifdef HAS_DS_PLAYER
+	  bookmark.edition = m_pDS->fv("edition").get_asString();
+	  bookmark.editionNumber = m_pDS->fv("editionNumber").get_asInt();
+#endif
     }
     else
     {
@@ -4093,6 +4111,14 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
     }
     m_pDS->exec("DROP TABLE IF EXISTS setlinkmovie");
   }
+#ifdef HAS_DS_PLAYER
+  if(iVersion < 69)
+  {
+	  m_pDS->exec("ALTER TABLE bookmark ADD edition text");
+	  m_pDS->exec("ALTER TABLE bookmark ADD editionNumber integer");
+  }
+#endif
+
   // always recreate the view after any table change
   CreateViews();
   return true;

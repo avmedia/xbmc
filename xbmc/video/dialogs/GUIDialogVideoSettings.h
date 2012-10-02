@@ -35,5 +35,10 @@ public:
 protected:
   virtual void CreateSettings();
   virtual void OnSettingChanged(SettingInfo &setting);
+
+#ifdef HAS_DS_PLAYER
+private:
+	int m_scalingMethod;
+#endif
 };
 

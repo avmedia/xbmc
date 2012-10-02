@@ -59,6 +59,15 @@ enum ERENDERFEATURE
   RENDERFEATURE_ROTATION
 };
 
+#ifdef HAS_DS_PLAYER
+typedef enum _RENDERERTYPE
+{
+	RENDERER_UNINIT = 0,
+	RENDERER_NORMAL = 1,
+	RENDERER_DSHOW  = 2
+} RENDERERTYPE;
+#endif
+
 typedef void (*RenderUpdateCallBackFn)(const void *ctx, const CRect &SrcRect, const CRect &DestRect);
 
 struct DVDVideoPicture;

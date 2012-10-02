@@ -793,7 +793,16 @@ void CGUISettings::Initialize()
 
   AddInt(sub, "subtitles.style", 736, FONT_STYLE_BOLD, fontStyles, SPIN_CONTROL_TEXT);
   AddInt(sub, "subtitles.color", 737, SUBTITLE_COLOR_START + 1, SUBTITLE_COLOR_START, 1, SUBTITLE_COLOR_END, SPIN_CONTROL_TEXT);
+#ifdef HAS_DS_PLAYER
+  AddInt(sub, "subtitles.border", 55050, SUBTITLE_BORDER_OUTLINE, SUBTITLE_BORDER_OUTLINE, 1, SUBTITLE_BORDER_OPAQUE, SPIN_CONTROL_TEXT);
+  AddInt(sub, "subtitles.outline.width", 55053, 2, 0, 1, 100, SPIN_CONTROL_INT);
+  AddInt(sub, "subtitles.shadow.depth", 55054, 3, 0, 1, 100, SPIN_CONTROL_INT);
+  AddInt(sub, "subtitles.alpha", 55055, 0, 0, 5, 255, SPIN_CONTROL_INT);
+#endif
   AddString(sub, "subtitles.charset", 735, "DEFAULT", SPIN_CONTROL_TEXT);
+#ifdef HAS_DS_PLAYER
+  AddString(sub, "subtitles.ds.font", 55056, "Arial", BUTTON_CONTROL_STANDARD);
+#endif
   AddBool(sub,"subtitles.overrideassfonts", 21368, false);
   AddSeparator(sub, "subtitles.sep1");
   AddPath(sub, "subtitles.custompath", 21366, "", BUTTON_CONTROL_PATH_INPUT, false, 657);
@@ -814,6 +823,23 @@ void CGUISettings::Initialize()
   AddDefaultAddon(NULL, "scrapers.moviesdefault", 21413, "metadata.themoviedb.org", ADDON_SCRAPER_MOVIES);
   AddDefaultAddon(NULL, "scrapers.tvshowsdefault", 21414, "metadata.tvdb.com", ADDON_SCRAPER_TVSHOWS);
   AddDefaultAddon(NULL, "scrapers.musicvideosdefault", 21415, "metadata.musicvideos.last.fm", ADDON_SCRAPER_MUSICVIDEOS);
+
+#ifdef HAS_DS_PLAYER
+  //Dsplayer
+  CSettingsCategory* dsp = AddCategory(5, "dsplayer", 55000);
+  AddBool(dsp, "dsplayer.defaultvideoplayer", 55031, true);
+  //If vista or higher non default is vmr9
+  AddBool(dsp, "dsplayer.forcenondefaultrenderer", g_sysinfo.IsVistaOrHigher() ? 55001 : 55002 , false);
+  AddString(dsp, "dsplayer.audiorenderer", 55003, "Default", SPIN_CONTROL_TEXT);
+  AddSeparator(dsp, "dsplayer.sep1");
+
+  AddBool(dsp, "dsplayer.useinternalfilters", 55020, false);
+  AddBool(dsp, "dsplayer.autofiltersettings", 55021, false);
+  AddBool(dsp, "dsplayer.bdautoloadindex", 55030, true);
+  AddBool(dsp, "dsplayer.showbdtitlechoice", 55032, true);
+  AddInt(dsp, "dsplayer.mintitlelength", 55022, 30, 0, 1, 300, SPIN_CONTROL_INT); 
+
+#endif
 
   // service settings
   AddGroup(SETTINGS_SERVICE, 14036);
@@ -1529,7 +1555,7 @@ RESOLUTION CGUISettings::GetResFromString(const CStdString &res)
       float score = 10 * (square_error((float)info.iWidth, (float)width) +
         square_error((float)info.iHeight, (float)height) +
         square_error(info.fRefreshRate, refresh) +
-        square_error((float)((info.dwFlags & D3DPRESENTFLAG_INTERLACED) ? 100:200), interlaced));
+        square_error((float)((info.dwFlags & D3DPRESENTFLAG_INTERLACED) ? 100:200), (float)interlaced));
       if (score < bestScore)
       {
         bestScore = score;

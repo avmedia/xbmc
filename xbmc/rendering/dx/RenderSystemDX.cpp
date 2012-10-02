@@ -33,6 +33,10 @@
 #include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
 #include "utils/SystemInfo.h"
+#ifdef HAS_DS_PLAYER
+#include "Filters\RendererSettings.h"
+#include "cores/VideoRenderers/RenderManager.h"
+#endif
 #include "Application.h"
 #include "Util.h"
 #include "win32/WIN32Util.h"
@@ -46,6 +50,11 @@
 #endif
 
 using namespace std;
+
+#ifdef HAS_DS_PLAYER
+// DSPlayer needs to recreate the D3DDevice when the device is lost.
+#define IS_DSPLAYER ( (g_renderManager.GetRendererType() == RENDERER_DSHOW) )
+#endif
 
 // Dynamic loading of Direct3DCreate9Ex to keep compatibility with 2000/XP.
 typedef HRESULT (WINAPI *LPDIRECT3DCREATE9EX)( UINT SDKVersion, IDirect3D9Ex **ppD3D);
@@ -253,57 +262,70 @@ BOOL CRenderSystemDX::IsDepthFormatOk(D3DFORMAT DepthFormat, D3DFORMAT RenderTar
 
 void CRenderSystemDX::BuildPresentParameters()
 {
-  OSVERSIONINFOEX osvi;
-  ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-  osvi.dwOSVersionInfoSize = sizeof(osvi);
-  GetVersionEx((OSVERSIONINFO *)&osvi);
+	OSVERSIONINFOEX osvi;
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+	osvi.dwOSVersionInfoSize = sizeof(osvi);
+	GetVersionEx((OSVERSIONINFO *)&osvi);
 
-  ZeroMemory( &m_D3DPP, sizeof(D3DPRESENT_PARAMETERS) );
-  m_D3DPP.Windowed           = m_useWindowedDX;
-  m_D3DPP.SwapEffect         = D3DSWAPEFFECT_FLIP;
-  m_D3DPP.BackBufferCount    = 2;
+	ZeroMemory( &m_D3DPP, sizeof(D3DPRESENT_PARAMETERS) );
+	m_D3DPP.Windowed           = m_useWindowedDX;
+	m_D3DPP.SwapEffect         = D3DSWAPEFFECT_FLIP;
+	if (m_useWindowedDX)
+		m_D3DPP.BackBufferCount    = 1;
+	else
+		m_D3DPP.BackBufferCount    = 3;
 
-  if(m_useD3D9Ex && (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion >= 1 || osvi.dwMajorVersion > 6))
-  {
+	if(m_useD3D9Ex && (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion >= 1 || osvi.dwMajorVersion > 6))
+	{
 #if D3DX_SDK_VERSION >= 42
-    //m_D3DPP.SwapEffect       = D3DSWAPEFFECT_FLIPEX;
+		//m_D3DPP.SwapEffect       = D3DSWAPEFFECT_FLIPEX;
 #else
 #   pragma message("D3D SDK version is too old to support D3DSWAPEFFECT_FLIPEX")
-    CLog::Log(LOGWARNING, "CRenderSystemDX::BuildPresentParameters - xbmc compiled with an d3d sdk not supporting D3DSWAPEFFECT_FLIPEX");
+		CLog::Log(LOGWARNING, "CRenderSystemDX::BuildPresentParameters - xbmc compiled with an d3d sdk not supporting D3DSWAPEFFECT_FLIPEX");
 #endif
-  }
+	}
 
-  m_D3DPP.hDeviceWindow      = m_hDeviceWnd;
-  m_D3DPP.BackBufferWidth    = m_nBackBufferWidth;
-  m_D3DPP.BackBufferHeight   = m_nBackBufferHeight;
-  m_D3DPP.Flags              = D3DPRESENTFLAG_VIDEO;
-  m_D3DPP.PresentationInterval = (m_bVSync) ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-  m_D3DPP.FullScreen_RefreshRateInHz = (m_useWindowedDX) ? 0 : (int)m_refreshRate;
-  m_D3DPP.BackBufferFormat   = D3DFMT_X8R8G8B8;
-  m_D3DPP.MultiSampleType    = D3DMULTISAMPLE_NONE;
-  m_D3DPP.MultiSampleQuality = 0;
+	m_D3DPP.hDeviceWindow      = m_hDeviceWnd;
+	m_D3DPP.BackBufferWidth    = m_nBackBufferWidth;
+	m_D3DPP.BackBufferHeight   = m_nBackBufferHeight;
+	m_D3DPP.Flags              = D3DPRESENTFLAG_VIDEO;
+#ifdef HAS_DS_PLAYER
+	m_D3DPP.SwapEffect = (m_useWindowedDX) ? D3DSWAPEFFECT_COPY : D3DSWAPEFFECT_DISCARD;
+	m_D3DPP.PresentationInterval = (m_bVSync || g_dsSettings.pRendererSettings->vSync) ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+#else
+	m_D3DPP.PresentationInterval = (m_bVSync) ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+#endif
+	m_D3DPP.FullScreen_RefreshRateInHz = (m_useWindowedDX) ? 0 : (int)m_refreshRate;
+#ifdef HAS_DS_PLAYER
+	bool bHighColorResolution = g_dsSettings.isEVR && ((CEVRRendererSettings *)g_dsSettings.pRendererSettings)->highColorResolution;
+	m_D3DPP.BackBufferFormat = (bHighColorResolution) ? D3DFMT_A2R10G10B10 : D3DFMT_X8R8G8B8;
+#else
+	m_D3DPP.BackBufferFormat   = D3DFMT_X8R8G8B8;
+#endif
+	m_D3DPP.MultiSampleType    = D3DMULTISAMPLE_NONE;
+	m_D3DPP.MultiSampleQuality = 0;
 
-  D3DFORMAT zFormat = D3DFMT_D16;
-  if      (IsDepthFormatOk(D3DFMT_D32, m_D3DPP.BackBufferFormat))           zFormat = D3DFMT_D32;
-  else if (IsDepthFormatOk(D3DFMT_D24S8, m_D3DPP.BackBufferFormat))         zFormat = D3DFMT_D24S8;
-  else if (IsDepthFormatOk(D3DFMT_D24X4S4, m_D3DPP.BackBufferFormat))       zFormat = D3DFMT_D24X4S4;
-  else if (IsDepthFormatOk(D3DFMT_D24X8, m_D3DPP.BackBufferFormat))         zFormat = D3DFMT_D24X8;
-  else if (IsDepthFormatOk(D3DFMT_D16, m_D3DPP.BackBufferFormat))           zFormat = D3DFMT_D16;
-  else if (IsDepthFormatOk(D3DFMT_D15S1, m_D3DPP.BackBufferFormat))         zFormat = D3DFMT_D15S1;
+	D3DFORMAT zFormat = D3DFMT_D16;
+	if      (IsDepthFormatOk(D3DFMT_D32, m_D3DPP.BackBufferFormat))           zFormat = D3DFMT_D32;
+	else if (IsDepthFormatOk(D3DFMT_D24S8, m_D3DPP.BackBufferFormat))         zFormat = D3DFMT_D24S8;
+	else if (IsDepthFormatOk(D3DFMT_D24X4S4, m_D3DPP.BackBufferFormat))       zFormat = D3DFMT_D24X4S4;
+	else if (IsDepthFormatOk(D3DFMT_D24X8, m_D3DPP.BackBufferFormat))         zFormat = D3DFMT_D24X8;
+	else if (IsDepthFormatOk(D3DFMT_D16, m_D3DPP.BackBufferFormat))           zFormat = D3DFMT_D16;
+	else if (IsDepthFormatOk(D3DFMT_D15S1, m_D3DPP.BackBufferFormat))         zFormat = D3DFMT_D15S1;
 
-  m_D3DPP.EnableAutoDepthStencil = TRUE;
-  m_D3DPP.AutoDepthStencilFormat = zFormat;
+	m_D3DPP.EnableAutoDepthStencil = TRUE;
+	m_D3DPP.AutoDepthStencilFormat = zFormat;
 
-  if (m_useD3D9Ex)
-  {
-    ZeroMemory( &m_D3DDMEX, sizeof(D3DDISPLAYMODEEX) );
-    m_D3DDMEX.Size             = sizeof(D3DDISPLAYMODEEX);
-    m_D3DDMEX.Width            = m_D3DPP.BackBufferWidth;
-    m_D3DDMEX.Height           = m_D3DPP.BackBufferHeight;
-    m_D3DDMEX.RefreshRate      = m_D3DPP.FullScreen_RefreshRateInHz;
-    m_D3DDMEX.Format           = m_D3DPP.BackBufferFormat;
-    m_D3DDMEX.ScanLineOrdering = m_interlaced ? D3DSCANLINEORDERING_INTERLACED : D3DSCANLINEORDERING_PROGRESSIVE;
-  }
+	if (m_useD3D9Ex)
+	{
+		ZeroMemory( &m_D3DDMEX, sizeof(D3DDISPLAYMODEEX) );
+		m_D3DDMEX.Size             = sizeof(D3DDISPLAYMODEEX);
+		m_D3DDMEX.Width            = m_D3DPP.BackBufferWidth;
+		m_D3DDMEX.Height           = m_D3DPP.BackBufferHeight;
+		m_D3DDMEX.RefreshRate      = m_D3DPP.FullScreen_RefreshRateInHz;
+		m_D3DDMEX.Format           = m_D3DPP.BackBufferFormat;
+		m_D3DDMEX.ScanLineOrdering = m_interlaced ? D3DSCANLINEORDERING_INTERLACED : D3DSCANLINEORDERING_PROGRESSIVE;
+	}
 }
 
 bool CRenderSystemDX::DestroyRenderSystem()
@@ -333,26 +355,34 @@ void CRenderSystemDX::DeleteDevice()
 
 void CRenderSystemDX::OnDeviceLost()
 {
-  CSingleLock lock(m_resourceSection);
-  g_windowManager.SendMessage(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_RENDERER_LOST);
-  SAFE_RELEASE(m_stateBlock);
+	CSingleLock lock(m_resourceSection);
+	g_windowManager.SendMessage(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_RENDERER_LOST);
+	SAFE_RELEASE(m_stateBlock);
 
-  if (m_needNewDevice)
-    DeleteDevice();
-  else
-  {
-    // just resetting the device
-    for (vector<ID3DResource *>::iterator i = m_resources.begin(); i != m_resources.end(); i++)
-      (*i)->OnLostDevice();
-  }
+#ifdef HAS_DS_PLAYER
+	if (m_needNewDevice || (!m_useD3D9Ex && IS_DSPLAYER))
+#else
+	if (m_needNewDevice)
+#endif
+		DeleteDevice();
+	else
+	{
+		// just resetting the device
+		for (vector<ID3DResource *>::iterator i = m_resources.begin(); i != m_resources.end(); i++)
+			(*i)->OnLostDevice();
+	}
 }
 
 void CRenderSystemDX::OnDeviceReset()
 {
   CSingleLock lock(m_resourceSection);
 
+#ifdef HAS_DS_PLAYER
+  if (m_needNewDevice || (!m_useD3D9Ex && IS_DSPLAYER))
+#else
   if (m_needNewDevice)
-    CreateDevice();
+#endif
+	  CreateDevice();
   else
   {
     // just need a reset
@@ -452,6 +482,12 @@ bool CRenderSystemDX::CreateDevice()
       }
     }
   }
+
+#ifdef HAS_DS_PLAYER
+  // SetDialogBoxMode is not supported for D3DSWAPEFFECT_FLIPEX swap effect
+  if (!m_useD3D9Ex && g_dsSettings.pRendererSettings->fullscreenGUISupport && m_bFullScreenDevice)
+	  hr = m_pD3DDevice->SetDialogBoxMode(TRUE); //To be able to show a com dialog over a fullscreen video playing we need this
+#endif
 
   if(m_pD3D->GetAdapterIdentifier(m_adapter, 0, &m_AIdentifier) == D3D_OK)
   {
@@ -601,6 +637,13 @@ bool CRenderSystemDX::PresentRenderImpl(const CDirtyRegionList &dirty)
   }
 
   hr = m_pD3DDevice->Present( NULL, NULL, 0, NULL );
+
+#ifdef HAS_DS_PLAYER
+  if ( g_application.GetCurrentPlayer() == PCID_DSPLAYER )
+  {
+	  g_renderManager.OnAfterPresent(); // We need to do some stuff after Present
+  }
+#endif
 
   if( D3DERR_DEVICELOST == hr )
   {

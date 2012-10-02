@@ -34,7 +34,11 @@ public:
   virtual bool OnAction(const CAction &action);
 
   void PlayMovie(const CFileItem *item);
+#ifdef HAS_DS_PLAYER
+  static void GetResumeItemOffset(const CFileItem *item, int& startoffset, int& partNumber, CStdString& strEdition);
+#else
   static void GetResumeItemOffset(const CFileItem *item, int& startoffset, int& partNumber);
+#endif
   static bool HasResumeItemOffset(const CFileItem *item);
 
   void AddToDatabase(int iItem);

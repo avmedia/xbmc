@@ -43,6 +43,10 @@
 #include "network/Zeroconf.h"
 #include "network/ZeroconfBrowser.h"
 
+#ifdef HAS_DS_PLAYER
+#include "DSConfig.h"
+#endif
+
 #ifdef _WIN32
 
 using namespace PERIPHERALS;
@@ -571,6 +575,16 @@ LRESULT CALLBACK CWinEventsWin32::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         g_Windowing.ShowOSMouse(true);
       break;
     case WM_MOUSEMOVE:
+#ifdef HAS_DS_PLAYER
+		if (g_application.GetCurrentPlayer() == PCID_DSPLAYER)
+		{
+			if ( g_application.m_pPlayer && g_application.m_pPlayer->IsInMenu())
+			{
+				CDSGraph::PostMessage( new CDSMsgInt(CDSMsg::PLAYER_DVD_MOUSE_MOVE, lParam), false);
+				return(0);
+			}
+		}
+#endif
       newEvent.type = XBMC_MOUSEMOTION;
       newEvent.motion.x = GET_X_LPARAM(lParam);
       newEvent.motion.y = GET_Y_LPARAM(lParam);
@@ -578,6 +592,16 @@ LRESULT CALLBACK CWinEventsWin32::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
       m_pEventFunc(newEvent);
       return(0);
     case WM_LBUTTONDOWN:
+#ifdef HAS_DS_PLAYER
+		if (g_application.GetCurrentPlayer() == PCID_DSPLAYER)
+		{
+			if ( g_application.m_pPlayer && g_application.m_pPlayer->IsInMenu())
+			{
+				CDSGraph::PostMessage( new CDSMsgInt(CDSMsg::PLAYER_DVD_MOUSE_CLICK, lParam), false);
+				return(0);
+			}
+		}
+#endif
     case WM_MBUTTONDOWN:
     case WM_RBUTTONDOWN:
       newEvent.type = XBMC_MOUSEBUTTONDOWN;

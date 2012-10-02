@@ -163,6 +163,9 @@ public:
     type = STREAM_VIDEO;
     iOrientation = 0;
     iBitsPerPixel = 0;
+#ifdef HAS_DS_PLAYER
+	iCodecTag = 0;
+#endif
   }
 
   virtual ~CDemuxStreamVideo() {}
@@ -178,6 +181,9 @@ public:
   bool bForcedAspect; // aspect is forced from container
   int iOrientation; // orientation of the video in degress counter clockwise
   int iBitsPerPixel;
+#ifdef HAS_DS_PLAYER
+  int iCodecTag;
+#endif
 };
 
 class CDemuxStreamAudio : public CDemuxStream

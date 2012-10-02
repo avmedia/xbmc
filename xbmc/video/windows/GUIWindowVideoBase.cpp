@@ -819,7 +819,11 @@ void CGUIWindowVideoBase::AddItemToPlayList(const CFileItemPtr &pItem, CFileItem
   }
 }
 
+#ifdef HAS_DS_PLAYER
+void CGUIWindowVideoBase::GetResumeItemOffset(const CFileItem *item, int& startoffset, int& partNumber, CStdString& strEdition)
+#else
 void CGUIWindowVideoBase::GetResumeItemOffset(const CFileItem *item, int& startoffset, int& partNumber)
+#endif
 {
   // do not resume livetv
   if (item->IsLiveTV())
@@ -852,7 +856,10 @@ void CGUIWindowVideoBase::GetResumeItemOffset(const CFileItem *item, int& starto
       {
         startoffset = (int)(bookmark.timeInSeconds*75);
         partNumber = bookmark.partNumber;
-      }
+#ifdef HAS_DS_PLAYER
+		strEdition = bookmark.edition;
+#endif
+	  }
       db.Close();
     }
   }
@@ -860,8 +867,14 @@ void CGUIWindowVideoBase::GetResumeItemOffset(const CFileItem *item, int& starto
 
 bool CGUIWindowVideoBase::HasResumeItemOffset(const CFileItem *item)
 {
-  int startoffset = 0, partNumber = 0;
-  GetResumeItemOffset(item, startoffset, partNumber);
+	int startoffset = 0, partNumber = 0;
+#ifdef HAS_DS_PLAYER
+	CStdString editionString;
+	GetResumeItemOffset(item, startoffset, partNumber, editionString);
+#else
+	GetResumeItemOffset(item, startoffset, partNumber);
+#endif
+
   return startoffset > 0;
 }
 
@@ -1003,11 +1016,17 @@ void CGUIWindowVideoBase::OnRestartItem(int iItem)
 
 CStdString CGUIWindowVideoBase::GetResumeString(const CFileItem &item)
 {
-  CStdString resumeString;
-  int startOffset = 0, startPart = 0;
-  GetResumeItemOffset(&item, startOffset, startPart);
-  if (startOffset > 0)
-  {
+	CStdString resumeString;
+	int startOffset = 0, startPart = 0;
+#ifdef HAS_DS_PLAYER
+	CStdString editionString;
+	GetResumeItemOffset(&item, startOffset, startPart, editionString);
+#else
+	GetResumeItemOffset(&item, startOffset, startPart);
+#endif
+
+	if (startOffset > 0)
+	{
     resumeString.Format(g_localizeStrings.Get(12022).c_str(), StringUtils::SecondsToTimeString(startOffset/75).c_str());
     if (startPart > 0)
     {
@@ -1015,6 +1034,14 @@ CStdString CGUIWindowVideoBase::GetResumeString(const CFileItem &item)
       partString.Format(g_localizeStrings.Get(23051).c_str(), startPart);
       resumeString += " (" + partString + ")";
     }
+#ifdef HAS_DS_PLAYER
+	else if(!editionString.IsEmpty())
+	{
+		resumeString += " [";
+		resumeString += editionString;
+		resumeString += "]";
+	}
+#endif
   }
   return resumeString;
 }
@@ -1271,10 +1298,15 @@ bool CGUIWindowVideoBase::OnPlayStackPart(int iItem)
         CContextButtons choices;
         choices.Add(SELECT_ACTION_RESUME, resumeString);
         choices.Add(SELECT_ACTION_PLAY, 12021);   // Start from beginning
-        int value = CGUIDialogContextMenu::ShowAndGetChoice(choices);
-        if (value == SELECT_ACTION_RESUME)
-          GetResumeItemOffset(parts[selectedFile - 1].get(), stack->m_lStartOffset, stack->m_lStartPartNumber);
-        else if (value != SELECT_ACTION_PLAY)
+		int value = CGUIDialogContextMenu::ShowAndGetChoice(choices);
+		if (value == SELECT_ACTION_RESUME){
+#ifdef HAS_DS_PLAYER
+			CStdString editonString;
+			GetResumeItemOffset(parts[selectedFile - 1].get(), stack->m_lStartOffset, stack->m_lStartPartNumber, editonString);
+#else
+			GetResumeItemOffset(parts[selectedFile - 1].get(), stack->m_lStartOffset, stack->m_lStartPartNumber);
+#endif
+		}else if (value != SELECT_ACTION_PLAY)
           return false; // if not selected PLAY, then we changed our mind so return
       }
       stack->m_lStartPartNumber = selectedFile;

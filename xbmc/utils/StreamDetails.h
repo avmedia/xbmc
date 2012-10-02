@@ -32,6 +32,12 @@ public:
     VIDEO,
     AUDIO,
     SUBTITLE
+#ifdef HAS_DS_PLAYER
+	,
+	EDITION	= 18,	
+	BD_TITLE,
+	PROGRAMM
+#endif
   };
 
   CStreamDetail(StreamType type) : m_eType(type), m_pParent(NULL) {};
@@ -59,6 +65,9 @@ public:
   float m_fAspect;
   int m_iDuration;
   CStdString m_strCodec;
+#ifdef HAS_DS_PLAYER
+  unsigned long m_iFourcc;
+#endif
 };
 
 class CStreamDetailAudio : public CStreamDetail
@@ -85,6 +94,17 @@ public:
   CStdString m_strLanguage;
 };
 
+#ifdef HAS_DS_PLAYER
+class CStreamDetailEditon : public CStreamDetail
+{
+public:
+	CStreamDetailEditon();
+	virtual void Archive(CArchive& ar);
+	virtual void Serialize(CVariant& value);
+	CStdString m_strName;
+};
+#endif
+
 class CStreamDetails : public IArchivable, public ISerializable
 {
 public:
@@ -108,7 +128,9 @@ public:
   int GetVideoWidth(int idx = 0) const;
   int GetVideoHeight(int idx = 0) const;
   int GetVideoDuration(int idx = 0) const;
-
+#ifdef HAS_DS_PLAYER
+  CStdString GetVideoFourcc(int idx = 0) const;
+#endif
   CStdString GetAudioCodec(int idx = 0) const;
   CStdString GetAudioLanguage(int idx = 0) const;
   int GetAudioChannels(int idx = 0) const;

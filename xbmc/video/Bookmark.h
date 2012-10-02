@@ -47,6 +47,10 @@ public:
   CStdString player;
   long seasonNumber;
   long episodeNumber;
+#ifdef HAS_DS_PLAYER
+  CStdString edition;
+  unsigned int editionNumber;
+#endif
 
   enum EType
   {

@@ -347,6 +347,10 @@ bool CDVDFileInfo::DemuxerToStreamDetails(CDVDInputStream *pInputStream, CDVDDem
       pDemux->GetStreamCodecName(iStream, p->m_strCodec);
       p->m_iDuration = pDemux->GetStreamLength();
 
+#ifdef HAS_DS_PLAYER
+	  p->m_iFourcc = ((CDemuxStreamVideo *) stream)->iCodecTag;
+#endif
+
       // stack handling
       if (URIUtils::IsStack(path))
       {

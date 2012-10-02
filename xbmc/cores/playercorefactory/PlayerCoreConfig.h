@@ -31,6 +31,9 @@
 #include "cores/omxplayer/OMXPlayer.h"
 #endif
 #include "cores/ExternalPlayer/ExternalPlayer.h"
+#ifdef HAS_DS_PLAYER
+#include "DSPlayer.h"
+#endif
 #include "utils/log.h"
 
 class CPlayerCoreConfig
@@ -96,6 +99,9 @@ public:
 #endif
 #if defined(HAS_OMXPLAYER)
       case EPC_OMXPLAYER: pPlayer = new COMXPlayer(callback); break;
+#endif
+#ifdef HAS_DS_PLAYER
+	  case EPC_DSPLAYER: pPlayer = new CDSPlayer(callback); break;
 #endif
       default: return NULL;
     }

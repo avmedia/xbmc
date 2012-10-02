@@ -127,7 +127,14 @@ public:
   virtual void GetAudioStreamName(int iStream, CStdString &strStreamName){};
   virtual void SetAudioStream(int iStream){};
   virtual void GetAudioStreamLanguage(int iStream, CStdString &strLanguage){};
-
+#ifdef HAS_DS_PLAYER
+  virtual int  GetEditionsCount()		{ return 0; }
+  virtual int  GetEdition()				{ return -1; }
+  virtual void GetEditionInfo(int iEdition, CStdString &strEditionName, REFERENCE_TIME *prt){};
+  virtual void SetEdition(int iEdition){};
+  virtual bool IsMatroskaEditions()		{ return false; }
+  virtual void ShowEditionDlg(bool playStart){};
+#endif
   virtual TextCacheStruct_t* GetTeletextCache() { return NULL; };
   virtual void LoadPage(int p, int sp, unsigned char* buffer) {};
 

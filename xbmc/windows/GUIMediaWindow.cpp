@@ -66,6 +66,9 @@
 #if defined(TARGET_ANDROID)
 #include "xbmc/android/activity/XBMCApp.h"
 #endif
+#ifdef HAS_DS_PLAYER
+#include "video/windows/GUIWindowVideoBase.h"
+#endif
 
 #define CONTROL_BTNVIEWASICONS     2
 #define CONTROL_BTNSORTBY          3
@@ -872,7 +875,15 @@ bool CGUIMediaWindow::OnClick(int iItem)
 {
   if ( iItem < 0 || iItem >= (int)m_vecItems->Size() ) return true;
   CFileItemPtr pItem = m_vecItems->Get(iItem);
+#ifdef HAS_DS_PLAYER
+  if(g_guiSettings.GetBool("dsplayer.bdautoloadindex") && pItem->IsHD() && XFILE::CFile::Exists(pItem->GetPath() + "BDMV\\index.bdmv"))
+  {
+	  CFileItemPtr pBDItem(new CFileItem(pItem->GetPath() + "BDMV\\index.bdmv", false));
+	  m_vecItems->Add(pBDItem);
 
+	  return CGUIWindowVideoBase::ShowResumeMenu(*pBDItem) ? OnPlayMedia(pBDItem) : true;
+  }
+#endif
   if (pItem->IsParentFolder())
   {
     GoParentFolder();
@@ -1207,24 +1218,29 @@ void CGUIMediaWindow::SetHistoryForPath(const CStdString& strDirectory)
 // This function is called by OnClick()
 bool CGUIMediaWindow::OnPlayMedia(int iItem)
 {
-  // Reset Playlistplayer, playback started now does
-  // not use the playlistplayer.
-  g_playlistPlayer.Reset();
-  g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_NONE);
-  CFileItemPtr pItem=m_vecItems->Get(iItem);
+	CFileItemPtr pItem=m_vecItems->Get(iItem);
+	return OnPlayMedia(pItem);
+}
 
-  CLog::Log(LOGDEBUG, "%s %s", __FUNCTION__, pItem->GetPath().c_str());
+bool CGUIMediaWindow::OnPlayMedia(const CFileItemPtr &pItem)
+{
+	// Reset Playlistplayer, playback started now does
+	// not use the playlistplayer.
+	g_playlistPlayer.Reset();
+	g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_NONE);
 
-  bool bResult = false;
-  if (pItem->IsInternetStream() || pItem->IsPlayList())
-    bResult = g_application.PlayMedia(*pItem, m_guiState->GetPlaylist());
-  else
-    bResult = g_application.PlayFile(*pItem);
+	CLog::Log(LOGDEBUG, "%s %s", __FUNCTION__, pItem->GetPath().c_str());
 
-  if (pItem->m_lStartOffset == STARTOFFSET_RESUME)
-    pItem->m_lStartOffset = 0;
+	bool bResult = false;
+	if (pItem->IsInternetStream() || pItem->IsPlayList())
+		bResult = g_application.PlayMedia(*pItem, m_guiState->GetPlaylist());
+	else
+		bResult = g_application.PlayFile(*pItem);
 
-  return bResult;
+	if (pItem->m_lStartOffset == STARTOFFSET_RESUME)
+		pItem->m_lStartOffset = 0;
+
+	return bResult;
 }
 
 // \brief Override if you want to change the default behavior of what is done

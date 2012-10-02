@@ -37,6 +37,10 @@
 #include "guilib/LocalizeStrings.h"
 #include "pvr/PVRManager.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
+#ifdef HAS_DS_PLAYER
+#include "guilib/GUIWindowManager.h"
+#include "dialogs/GUIDialogSelect.h"
+#endif
 
 using namespace std;
 using namespace XFILE;
@@ -68,6 +72,11 @@ CGUIDialogAudioSubtitleSettings::~CGUIDialogAudioSubtitleSettings(void)
 #define SUBTITLE_SETTINGS_STREAM          10
 #define SUBTITLE_SETTINGS_BROWSER         11
 #define AUDIO_SETTINGS_MAKE_DEFAULT       12
+
+#ifdef HAS_DS_PLAYER
+// separator
+#define EDITONS_SETTINGS		          13
+#endif
 
 void CGUIDialogAudioSubtitleSettings::CreateSettings()
 {
@@ -101,6 +110,13 @@ void CGUIDialogAudioSubtitleSettings::CreateSettings()
   AddSubtitleStreams(SUBTITLE_SETTINGS_STREAM);
   AddButton(SUBTITLE_SETTINGS_BROWSER,13250);
   AddButton(AUDIO_SETTINGS_MAKE_DEFAULT, 12376);
+#ifdef HAS_DS_PLAYER
+  if(g_application.m_pPlayer->GetEditionsCount())
+  {
+	  AddSeparator(7);
+	  AddButton(EDITONS_SETTINGS, g_application.m_pPlayer->IsMatroskaEditions() ? 55023 : 55024);
+  }
+#endif
 }
 
 void CGUIDialogAudioSubtitleSettings::AddAudioStreams(unsigned int id)
@@ -349,6 +365,12 @@ void CGUIDialogAudioSubtitleSettings::OnSettingChanged(SettingInfo &setting)
       g_settings.Save();
     }
   }
+#ifdef HAS_DS_PLAYER
+  else if(setting.id == EDITONS_SETTINGS)
+  {
+	  g_application.m_pPlayer->ShowEditionDlg(false);
+  }
+#endif
 
   if (g_PVRManager.IsPlayingRadio() || g_PVRManager.IsPlayingTV())
     g_PVRManager.TriggerSaveChannelSettings();

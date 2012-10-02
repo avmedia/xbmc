@@ -157,7 +157,28 @@ bool CStreamDetailSubtitle::IsWorseThan(CStreamDetail *that)
   }
   return false;
 }
+#ifdef HAS_DS_PLAYER
+CStreamDetailEditon::CStreamDetailEditon():CStreamDetail(CStreamDetail::EDITION)
+{
+}
 
+void CStreamDetailEditon::Archive(CArchive& ar)
+{
+	CStreamDetail::Archive(ar);
+	if (ar.IsStoring())
+	{
+		ar << m_strName;
+	}
+	else
+	{
+		ar >> m_strName;
+	}
+}
+void CStreamDetailEditon::Serialize(CVariant& value)
+{
+	value["name"] = m_strName;
+}
+#endif
 CStreamDetails& CStreamDetails::operator=(const CStreamDetails &that)
 {
   if (this != &that)
@@ -297,6 +318,22 @@ CStdString CStreamDetails::GetVideoCodec(int idx) const
   else
     return "";
 }
+
+#ifdef HAS_DS_PLAYER
+CStdString CStreamDetails::GetVideoFourcc(int idx) const
+{
+	CStreamDetailVideo *item = (CStreamDetailVideo *)GetNthStream(CStreamDetail::VIDEO, idx);
+	if (item)
+	{
+		CStdString fourcc = "";
+		int iFourcc = item->m_iFourcc;
+		fourcc.Format("%c%c%c%c", iFourcc >> 24 & 0xff, iFourcc >> 16 & 0xff, iFourcc >> 8 & 0xff, iFourcc & 0xff);
+		return fourcc;
+	}
+	else
+		return "";
+}
+#endif
 
 float CStreamDetails::GetVideoAspect(int idx) const
 {

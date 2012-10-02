@@ -331,7 +331,10 @@ unsigned int CXBMCRenderManager::PreInit()
   m_bIsStarted = false;
   m_bPauseDrawing = false;
 #ifdef HAS_DS_PLAYER
-  m_pRendererType = RENDERER_NORMAL;
+  if(m_pRenderer && rendtype != m_pRendererType)
+  {
+	  SAFE_DELETE(m_pRenderer);
+  }
 #endif
   if (!m_pRenderer)
   {

@@ -1,5 +1,3 @@
-#pragma once
-
 /*
  *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
@@ -20,23 +18,11 @@
  *
  */
 
-#include "DVDOverlayCodec.h"
+(function () {
+    "use strict"
 
-class CDVDOverlayText;
+    var mediaLibrary = new MediaLibrary(),
+        nowPlayingManager = new NowPlayingManager();
+    applyDeviceFixes();
+}());
 
-class CDVDOverlayCodecText : public CDVDOverlayCodec
-{
-public:
-  CDVDOverlayCodecText();
-  virtual ~CDVDOverlayCodecText();
-  virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
-  virtual void Dispose();
-  virtual int Decode(DemuxPacket *pPacket);
-  virtual void Reset();
-  virtual void Flush();
-  virtual CDVDOverlay* GetOverlay();
-
-private:
-  bool             m_bIsSSA;
-  CDVDOverlayText* m_pOverlay;
-};

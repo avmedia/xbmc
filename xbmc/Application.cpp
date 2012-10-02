@@ -900,7 +900,7 @@ bool CApplication::CreateGUI()
     return false;
 
   int iResolution = g_graphicsContext.GetVideoResolution();
-  CLog::Log(LOGINFO, "GUI format %ix%i %s",
+  CLog::Log(LOGINFO, "GUI format %ix%i, Display %s",
             g_settings.m_ResInfo[iResolution].iWidth,
             g_settings.m_ResInfo[iResolution].iHeight,
             g_settings.m_ResInfo[iResolution].strMode.c_str());
@@ -1834,10 +1834,7 @@ void CApplication::StopZeroconf()
 void CApplication::StartPVRManager()
 {
   if (g_guiSettings.GetBool("pvrmanager.enabled"))
-  {
-    g_EpgContainer.Start();
-    g_PVRManager.Start();
-  }
+    g_PVRManager.Start(true);
 }
 
 void CApplication::StopPVRManager()
@@ -2225,24 +2222,6 @@ bool CApplication::RenderNoPresent()
   }
 
   bool hasRendered = g_windowManager.Render();
-
-  // if we're recording an audio stream then show blinking REC
-  if (!g_graphicsContext.IsFullScreenVideo())
-  {
-    if (m_pPlayer && m_pPlayer->IsRecording() )
-    {
-      static int iBlinkRecord = 0;
-      iBlinkRecord++;
-      if (iBlinkRecord > 25)
-      {
-        CGUIFont* pFont = g_fontManager.GetFont("font13");
-        CGUITextLayout::DrawText(pFont, 60, 50, 0xffff0000, 0, "REC", 0);
-      }
-
-      if (iBlinkRecord > 50)
-        iBlinkRecord = 0;
-    }
-  }
 
   g_graphicsContext.Unlock();
 
@@ -2973,6 +2952,10 @@ void CApplication::UpdateLCD()
   {
     if (g_application.NavigationIdleTime() < 5)
       g_lcd->Render(ILCD::LCD_MODE_NAVIGATION);
+    else if (g_PVRManager.IsPlayingTV())
+      g_lcd->Render(ILCD::LCD_MODE_PVRTV);
+    else if (g_PVRManager.IsPlayingRadio())
+      g_lcd->Render(ILCD::LCD_MODE_PVRRADIO);
     else if (IsPlayingVideo())
       g_lcd->Render(ILCD::LCD_MODE_VIDEO);
     else if (IsPlayingAudio())

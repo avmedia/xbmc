@@ -73,11 +73,13 @@
       { "name": "notifications", "type": "object",
         "properties": {
           "Player": { "$ref": "Optional.Boolean" },
+          "Playlist": { "$ref": "Optional.Boolean" },
           "GUI": { "$ref": "Optional.Boolean" },
           "System": { "$ref": "Optional.Boolean" },
           "AudioLibrary": { "$ref": "Optional.Boolean" },
           "VideoLibrary": { "$ref": "Optional.Boolean" },
           "Application": { "$ref": "Optional.Boolean" },
+          "Input": { "$ref": "Optional.Boolean" },
           "Other": { "$ref": "Optional.Boolean" }
         }
       }
@@ -116,6 +118,15 @@
               "path": { "type": "string", "required": true },
               "random": { "type": "boolean", "default": true, "description": "Deprecated, use the shuffled property of the options parameter instead" },
               "recursive": { "type": "boolean", "default": true }
+            }
+          },
+          { "type": "object", "required": true, "additionalProperties": false,
+            "properties": {
+              "partymode": { "type": [
+                  { "type": "string", "required": true, "enum": [ "music", "video" ] },
+                  { "type": "string", "required": true, "minLength": 5, "description": "Path to a smartplaylist (*.xsp) file" }
+                ]
+              }
             }
           }
         ]
@@ -381,6 +392,17 @@
     "params": [
       { "name": "playerid", "$ref": "Player.Id", "required": true },
       { "name": "state", "$ref": "Player.Repeat", "required": true }
+    ],
+    "returns": "string"
+  },
+  "Player.SetPartymode": {
+    "type": "method",
+    "description": "Turn partymode on or off",
+    "transport": "Response",
+    "permission": "ControlPlayback",
+    "params": [
+      { "name": "playerid", "$ref": "Player.Id", "required": true },
+      { "name": "partymode", "$ref": "Global.Toggle", "required": true }
     ],
     "returns": "string"
   },
@@ -1464,6 +1486,17 @@
     "transport": "Response",
     "permission": "RemoveData",
     "params": [ ],
+    "returns": "string"
+  },
+  "GUI.ActivateWindow": {
+    "type": "method",
+    "description": "Activates the given window",
+    "transport": "Response",
+    "permission": "ControlGUI",
+    "params": [
+      { "name": "window", "$ref": "GUI.Window", "required": true },
+      { "name": "parameters", "type": "array", "items": { "type": "string", "minLength": 1, "required": true }, "minItems": 1 }
+    ],
     "returns": "string"
   },
   "GUI.ShowNotification": {

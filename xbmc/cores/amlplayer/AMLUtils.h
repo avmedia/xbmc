@@ -1,7 +1,6 @@
 #pragma once
-
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2011-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,23 +19,11 @@
  *
  */
 
-#include "DVDOverlayCodec.h"
+int aml_set_sysfs_str(const char *path, const char *val);
+int aml_get_sysfs_str(const char *path, char *valstr, const int size);
+int aml_set_sysfs_int(const char *path, const int val);
+int aml_get_sysfs_int(const char *path);
 
-class CDVDOverlayText;
-
-class CDVDOverlayCodecText : public CDVDOverlayCodec
-{
-public:
-  CDVDOverlayCodecText();
-  virtual ~CDVDOverlayCodecText();
-  virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
-  virtual void Dispose();
-  virtual int Decode(DemuxPacket *pPacket);
-  virtual void Reset();
-  virtual void Flush();
-  virtual CDVDOverlay* GetOverlay();
-
-private:
-  bool             m_bIsSSA;
-  CDVDOverlayText* m_pOverlay;
-};
+bool aml_present();
+void aml_cpufreq_limit(bool limit);
+void aml_set_audio_passthrough(bool passthrough);

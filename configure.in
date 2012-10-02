@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([xbmc], [11.9.6], [http://trac.xbmc.org])
+AC_INIT([xbmc], [11.9.7], [http://trac.xbmc.org])
 AC_CONFIG_HEADERS([xbmc/config.h])
 AH_TOP([#pragma once])
 m4_include([m4/ax_python_devel.m4])
@@ -1585,6 +1585,12 @@ fi
 
 echo "Checking for SWIG installation"
 AC_PATH_PROG(SWIG_EXE, swig, "none")
+if test "$SWIG_EXE" = "none"; then
+  AC_PATH_PROG(SWIG20_EXE, swig2.0, "none")
+  if test "$SWIG20_EXE" != "none" ; then
+    SWIG_EXE=$SWIG20_EXE
+  fi
+fi
 if test "$SWIG_EXE" = "none"; then
   AC_MSG_ERROR($missing_program)
 fi

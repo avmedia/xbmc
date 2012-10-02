@@ -1,5 +1,3 @@
-#pragma once
-
 /*
  *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
@@ -20,23 +18,28 @@
  *
  */
 
-#include "DVDOverlayCodec.h"
+(function (document) {
+    "use strict";
 
-class CDVDOverlayText;
+    var i,
+        script,
+        debug = false, /* Set to true to disable cached javascript */
+        version = (debug ? Math.random() : '2.0.3'),
+        scripts = [
+            "js/jquery-1.5.2.min.js",
+            "js/jquery.lazyload.js",
+            "js/iscroll-min.js",
+            "js/Core.js",
+            "js/MediaLibrary.js",
+            "js/NowPlayingManager.js",
+            "js/xbmc.init.js"
+        ];
 
-class CDVDOverlayCodecText : public CDVDOverlayCodec
-{
-public:
-  CDVDOverlayCodecText();
-  virtual ~CDVDOverlayCodecText();
-  virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
-  virtual void Dispose();
-  virtual int Decode(DemuxPacket *pPacket);
-  virtual void Reset();
-  virtual void Flush();
-  virtual CDVDOverlay* GetOverlay();
+    for (i = 0; i < scripts.length; i += 1) {
+        script = '<script type="text/javascript" src="';
+        script += scripts[i] + '?' + version;
+        script += '"><\/script>';
+        document.write(script);
+    }
+}(window.document));
 
-private:
-  bool             m_bIsSSA;
-  CDVDOverlayText* m_pOverlay;
-};

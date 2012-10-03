@@ -291,15 +291,6 @@ void CSlideShowPic::Process(unsigned int currentTime, CDirtyRegionList &dirtyreg
           }
           m_bNoEffect = (m_fZoomAmount != 1.0f); // turn effect rendering back on.
         }
-        /* not really needed anymore as we support arbitrary rotations
-        else if (m_transistionTemp.type == TRANSISTION_ROTATE)
-        { // round to nearest of 0, 90, 180 and 270
-          float reminder = fmodf(m_fAngle, 90.0f);
-          if (reminder < 45.0f)
-            m_fAngle -= reminder;
-          else
-            m_fAngle += 90.0f - reminder;
-        }*/
         m_transistionTemp.type = TRANSISTION_NONE;
       }
       else
@@ -663,6 +654,17 @@ void CSlideShowPic::Rotate(float fRotateAngle, bool immediate /* = false */)
     m_fAngle += fRotateAngle;
     return;
   }
+
+  // if there is a rotation ongoing already
+  // add the new angle to the old destination angle
+  float remainder =  0;
+  if (m_transistionTemp.type == TRANSISTION_ROTATE && 
+      m_transistionTemp.start + m_transistionTemp.length > m_iCounter)
+  {
+    remainder = m_transistionTemp.start + m_transistionTemp.length - m_iCounter;
+    fRotateAngle += m_fTransistionAngle * remainder;
+  }
+
   m_transistionTemp.type = TRANSISTION_ROTATE;
   m_transistionTemp.start = m_iCounter;
   m_transistionTemp.length = IMMEDIATE_TRANSISTION_TIME;

@@ -2966,6 +2966,9 @@
     <ClCompile Include="..\..\xbmc\interfaces\python\test\TestSwig.cpp">
       <Filter>interfaces\python\test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\interfaces\json-rpc\AddonsOperations.cpp">
+      <Filter>interfaces\json-rpc</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.cpp">
       <Filter>cores\DSPlayer</Filter>
     </ClCompile>
@@ -5877,6 +5880,9 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\music\tags\MusicInfoTagLoaderWav.h">
       <Filter>music\tags</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\interfaces\json-rpc\AddonsOperations.h">
+      <Filter>interfaces\json-rpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.h">
       <Filter>cores\DSPlayer</Filter>

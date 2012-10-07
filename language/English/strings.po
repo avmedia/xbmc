@@ -11098,7 +11098,7 @@ msgid "Force internal filters"
 msgstr ""
 
 msgctxt "#55021"
-msgid "Auto filters settings (DirectShow merits)"
+msgid "Use system filters (DirectShow merits)"
 msgstr ""
 
 msgctxt "#55022"
@@ -11126,15 +11126,15 @@ msgid "Show all Blu-ray Titles"
 msgstr ""
 
 msgctxt "#55030"
-msgid "Auto start .bdmv Bly-ray"
+msgid "Auto start .bdmv in Blu-ray folders"
 msgstr ""
 
 msgctxt "#55031"
-msgid "Default video player"
+msgid "Use as the default video player"
 msgstr ""
 
 msgctxt "#55032"
-msgid "Show Blu-ray titles and Matroska Editions choice dialog"
+msgid "Show Blu-ray titles and Matroska Editions choice dialog (AVSplitter only)"
 msgstr ""
 
 #. 55050-55100 Directshow Subtitles 

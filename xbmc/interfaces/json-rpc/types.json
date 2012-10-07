@@ -251,6 +251,7 @@
           "album": { "type": "string" },
           "artist": { "type": "string" },
           "track": { "type": "integer" }
+        }
       },
       { "type": "object", "description": "A picture has a file path.",
         "properties": {
@@ -989,6 +990,11 @@
               "xbmc.player.musicviz", "xbmc.python.pluginsource", "xbmc.python.script", "xbmc.python.weather",
               "xbmc.python.subtitles", "xbmc.python.lyrics", "xbmc.gui.skin", "xbmc.gui.webinterface",
               "xbmc.addon.video", "xbmc.addon.audio", "xbmc.addon.image", "xbmc.addon.executable", "xbmc.service" ],
+    "default": "unknown"
+  },
+  "Addon.Content": {
+    "type": "string",
+    "enum": [ "unknown", "video", "audio", "image", "executable" ],
     "default": "unknown"
   },
   "Addon.Fields": {

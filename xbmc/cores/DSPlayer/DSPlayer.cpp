@@ -93,7 +93,7 @@ void CDSPlayer::ShowEditionDlg(bool playStart)
 	if (count < 2)
 		return;
 
-	if(playStart && currentFileItem.m_lStartOffset == STARTOFFSET_RESUME)
+	if(playStart && m_PlayerOptions.starttime > 0)
 	{
 		CVideoDatabase db;
 		if (db.Open())

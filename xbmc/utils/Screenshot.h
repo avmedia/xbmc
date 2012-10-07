@@ -1,3 +1,4 @@
+#pragma once
 /*
  *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
@@ -18,28 +19,25 @@
  *
  */
 
-(function (document) {
-    "use strict";
+#include "utils/StdString.h"
 
-    var i,
-        script,
-        debug = false, /* Set to true to disable cached javascript */
-        version = (debug ? Math.random() : '2.0.5'),
-        scripts = [
-            "js/jquery-1.5.2.min.js",
-            "js/jquery.lazyload.js",
-            "js/iscroll-min.js",
-            "js/Core.js",
-            "js/MediaLibrary.js",
-            "js/NowPlayingManager.js",
-            "js/xbmc.init.js"
-        ];
+class CScreenshotSurface
+{
 
-    for (i = 0; i < scripts.length; i += 1) {
-        script = '<script type="text/javascript" src="';
-        script += scripts[i] + '?' + version;
-        script += '"><\/script>';
-        document.write(script);
-    }
-}(window.document));
+public:
+  int            m_width;
+  int            m_height;
+  int            m_stride;
+  unsigned char* m_buffer;
 
+  CScreenshotSurface(void);
+  bool capture( void );
+};
+
+class CScreenShot
+{
+
+public:
+  static void TakeScreenshot();
+  static void TakeScreenshot(const CStdString &filename, bool sync);
+};

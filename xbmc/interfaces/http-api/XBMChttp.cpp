@@ -19,6 +19,7 @@
 
 #include "playlists/PlayListFactory.h"
 #include "Util.h"
+#include "utils/Screenshot.h"
 #include "PlayListPlayer.h"
 #include "playlists/PlayList.h"
 #include "filesystem/CurlFile.h" 
@@ -46,6 +47,7 @@
 #include "settings/AdvancedSettings.h"
 #include "settings/GUISettings.h"
 #include "filesystem/DirectoryFactory.h"
+#include "filesystem/File.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/StringUtils.h"
 #include "utils/TimeUtils.h"
@@ -2869,7 +2871,7 @@ int CXbmcHttp::xbmcTakeScreenshot(int numParas, CStdString paras[])
 //filename can be blank
 {
   if (numParas<1)
-    CUtil::TakeScreenshot();
+    CScreenShot::TakeScreenshot();
   else
     return SetResponse(openTag+"Error: xbmcTakeScreenshot with params depracated");
   return SetResponse(openTag+"OK");

@@ -61,7 +61,7 @@ void CPixelShaderList::SaveXML()
   if (XFILE::CFile::Exists(xmlFile))
     XFILE::CFile::Delete(xmlFile);
 
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
   TiXmlNode* pRoot = xmlDoc.InsertEndChild( TiXmlElement("shaders") );
 
   for (PixelShaderVector::iterator it = m_pixelShaders.begin();
@@ -90,7 +90,7 @@ bool CPixelShaderList::LoadXMLFile(const CStdString& xmlFile)
     return false;
   }
 
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
   if (! xmlDoc.LoadFile(xmlFile))
   {
     CLog::Log(LOGERROR, "Error loading %s, Line %d (%s)", xmlFile.c_str(), xmlDoc.ErrorRow(), xmlDoc.ErrorDesc());

@@ -540,7 +540,7 @@ clean:
 
 HRESULT CFGLoader::LoadConfig()
 {
-	TiXmlDocument configXML;
+	CXBMCTinyXML configXML;
 	if (configXML.LoadFile("special://xbmc/system/players/dsplayer/dsplayerconfig.xml"))
 	{
 		TiXmlElement *pElement = configXML.RootElement();
@@ -609,7 +609,7 @@ bool CFGLoader::LoadFilterCoreFactorySettings( const CStdString& fileStr, ESetti
     return false;
   }
 
-  TiXmlDocument filterCoreFactoryXML;
+  CXBMCTinyXML filterCoreFactoryXML;
   if (!filterCoreFactoryXML.LoadFile(fileStr))
   {
     CLog::Log(LOGERROR, "Error loading %s, Line %d (%s)", fileStr.c_str(), filterCoreFactoryXML.ErrorRow(), filterCoreFactoryXML.ErrorDesc());

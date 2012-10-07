@@ -94,7 +94,7 @@ void CDSConfig::CreatePropertiesXml()
   CStdString pStrName;
   CStdString pStrId;
   int pIntId = 0;
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
   TiXmlElement xmlRootElement("strings");
   TiXmlNode *pRoot = xmlDoc.InsertEndChild(xmlRootElement);
   if (!pRoot) 

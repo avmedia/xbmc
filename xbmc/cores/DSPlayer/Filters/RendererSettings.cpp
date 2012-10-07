@@ -92,7 +92,7 @@ void CDSSettings::LoadConfig()
   }
   
   // load the xml file
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
 
   if (!xmlDoc.LoadFile(strDsConfigFile))
   {

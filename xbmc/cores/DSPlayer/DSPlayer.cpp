@@ -44,6 +44,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "dialogs/GUIDialogSelect.h"
 #include "video/windows/GUIWindowVideoBase.h"
+#include "cores/AudioEngine/AEFactory.h"
 
 using namespace std;
 
@@ -328,14 +329,26 @@ void CDSPlayer::OnExit()
 
 void CDSPlayer::Process()
 {
+	/* Suspend AE temporarily so exclusive or hog-mode sinks */
+	/* don't block DSPlayer access to audio device  */
+	if (!CAEFactory::Suspend())
+	{
+		CLog::Log(LOGNOTICE, __FUNCTION__, "Failed to suspend AudioEngine before launching DSPlayer");
+	}
 
-  // Create the messages queue
-  MSG msg;
-  PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
+	// Create the messages queue
+	MSG msg;
+	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
 
-  while (!m_bStop && PlayerState != DSPLAYER_CLOSED)
-    // Process thread message
-    g_dsGraph->ProcessThreadMessages();
+	while (!m_bStop && PlayerState != DSPLAYER_CLOSED)
+		// Process thread message
+		g_dsGraph->ProcessThreadMessages();
+
+	/* Resume AE processing of XBMC native audio */
+	if (!CAEFactory::Resume())
+	{
+		CLog::Log(LOGFATAL, __FUNCTION__, "Failed to restart AudioEngine after return from DSPlayer");
+	}
 }
 
 void CDSPlayer::Stop()

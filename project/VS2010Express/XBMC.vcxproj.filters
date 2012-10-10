@@ -5877,7 +5877,7 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\dialogs\GUIDialogMediaFilter.h">
       <Filter>dialogs</Filter>
-    </ClInclude
+    </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.h">
       <Filter>cores\DSPlayer</Filter>
     </ClInclude>

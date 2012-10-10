@@ -22,6 +22,7 @@
 #include "GUIWindowVideoBase.h"
 #include "Util.h"
 #include "video/VideoInfoDownloader.h"
+#include "video/VideoInfoScanner.h"
 #include "utils/RegExp.h"
 #include "utils/Variant.h"
 #include "addons/AddonManager.h"
@@ -29,7 +30,6 @@
 #include "addons/IAddon.h"
 #include "video/dialogs/GUIDialogVideoInfo.h"
 #include "GUIWindowVideoNav.h"
-#include "video/dialogs/GUIDialogVideoScan.h"
 #include "dialogs/GUIDialogSmartPlaylistEditor.h"
 #include "dialogs/GUIDialogProgress.h"
 #include "dialogs/GUIDialogYesNo.h"
@@ -1247,11 +1247,15 @@ void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &but
       {
         buttons.Add(CONTEXT_BUTTON_RESUME_ITEM, GetResumeString(*(item.get())));     // Resume Video
       }
-      //if the item isn't a folder, is a member of a list rather than a single item
-      //and we're not on the last element of the list, then add the 'play from here' option
-      if (!item->m_bIsFolder && m_vecItems->Size() > 1 && itemNumber < m_vecItems->Size()-1)
+      //if the item isn't a folder or script, is a member of a list rather than a single item
+      //and we're not on the last element of the list, 
+      //then add add either 'play from here' or 'play only this' depending on default behaviour
+      if (!(item->m_bIsFolder || item->IsScript()) && m_vecItems->Size() > 1 && itemNumber < m_vecItems->Size()-1)
       {
-        buttons.Add(CONTEXT_BUTTON_PLAY_AND_QUEUE, 13412);
+        if (!g_guiSettings.GetBool("videoplayer.autoplaynextitem"))
+          buttons.Add(CONTEXT_BUTTON_PLAY_AND_QUEUE, 13412);
+        else
+          buttons.Add(CONTEXT_BUTTON_PLAY_ONLY_THIS, 13434);
       }
       if (item->IsSmartPlayList() || m_vecItems->IsSmartPlayList())
         buttons.Add(CONTEXT_BUTTON_EDIT_SMART_PLAYLIST, 586);
@@ -1462,6 +1466,8 @@ bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     return true;
   case CONTEXT_BUTTON_PLAY_AND_QUEUE:
     return OnPlayAndQueueMedia(item);
+  case CONTEXT_BUTTON_PLAY_ONLY_THIS:
+    return OnPlayMedia(itemNumber);
   default:
     break;
   }
@@ -1809,7 +1815,34 @@ bool CGUIWindowVideoBase::Update(const CStdString &strDirectory)
 
 bool CGUIWindowVideoBase::GetDirectory(const CStdString &strDirectory, CFileItemList &items)
 {
-  bool bResult = CGUIMediaWindow::GetDirectory(strDirectory,items);
+  CStdString directory = strDirectory;
+
+  // check if the path contains a filter and if so load it and
+  // remove it from the path to get proper GUI view states etc
+  CSmartPlaylist filterXsp;
+  CVideoDbUrl videoUrl;
+  if (videoUrl.FromString(strDirectory))
+  {
+    CVariant filter;
+    if (videoUrl.GetOption("filter", filter))
+    {
+      // load the filter and if it's type does not match the
+      // path's item type reset it
+      if (filterXsp.LoadFromJson(filter.asString()) && !filterXsp.GetType().Equals(videoUrl.GetItemType().c_str()))
+        filterXsp.Reset();
+
+      // remove the "filter" option from the path
+      videoUrl.AddOption("filter", "");
+    }
+    directory = videoUrl.ToString();
+  }
+
+  bool bResult = CGUIMediaWindow::GetDirectory(directory, items);
+
+  // (re-)apply the previously retrieved filter
+  // because it was reset in CGUIMediaWindow::GetDirectory()
+  if (!filterXsp.IsEmpty())
+    m_filter = filterXsp;
 
   // add in the "New Playlist" item if we're in the playlists folder
   if ((items.GetPath() == "special://videoplaylists/") && !items.Contains("newplaylist://"))
@@ -1835,7 +1868,7 @@ bool CGUIWindowVideoBase::GetDirectory(const CStdString &strDirectory, CFileItem
   // we may also be in a tvshow files listing
   // (ideally this should be removed, and our stack regexps tidied up if necessary
   // No "normal" episodes should stack, and multi-parts should be supported)
-  ADDON::ScraperPtr info = m_database.GetScraperForPath(strDirectory);
+  ADDON::ScraperPtr info = m_database.GetScraperForPath(directory);
   if (info && info->Content() == CONTENT_TVSHOWS)
     m_stackingAvailable = false;
 
@@ -1854,6 +1887,15 @@ bool CGUIWindowVideoBase::StackingAvailable(const CFileItemList &items) const
 
 void CGUIWindowVideoBase::OnPrepareFileItems(CFileItemList &items)
 {
+}
+
+bool CGUIWindowVideoBase::CheckFilterAdvanced(CFileItemList &items)
+{
+  CStdString content = items.GetContent();
+  if (items.IsVideoDb() && (content.Equals("movies") || content.Equals("tvshows") || content.Equals("episodes") || content.Equals("musicvideos")))
+    return true;
+
+  return false;
 }
 
 void CGUIWindowVideoBase::AddToDatabase(int iItem)

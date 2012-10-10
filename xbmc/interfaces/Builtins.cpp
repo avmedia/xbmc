@@ -31,10 +31,8 @@
 #include "dialogs/GUIDialogFileBrowser.h"
 #include "guilib/GUIKeyboardFactory.h"
 #include "dialogs/GUIDialogKaiToast.h"
-#include "music/dialogs/GUIDialogMusicScan.h"
 #include "dialogs/GUIDialogNumeric.h"
 #include "dialogs/GUIDialogProgress.h"
-#include "video/dialogs/GUIDialogVideoScan.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "GUIUserMessages.h"
 #include "windows/GUIWindowLoginScreen.h"
@@ -55,6 +53,7 @@
 #include "utils/URIUtils.h"
 #include "Util.h"
 #include "URL.h"
+#include "music/MusicDatabase.h"
 
 #include "filesystem/PluginDirectory.h"
 #ifdef HAS_FILESYSTEM_RAR
@@ -1239,22 +1238,10 @@ int CBuiltins::Execute(const CStdString& execString)
 
     g_application.StopPlaying();
     if (g_application.IsMusicScanning())
-    {
       g_application.StopMusicScan();
-      CGUIDialogMusicScan *musicScan = (CGUIDialogMusicScan *)g_windowManager.GetWindow(WINDOW_DIALOG_MUSIC_SCAN);
-      if (musicScan)
-        musicScan->Close(true);
-    }
 
     if (g_application.IsVideoScanning())
-    {
       g_application.StopVideoScan();
-      CGUIDialogVideoScan *videoScan = (CGUIDialogVideoScan *)g_windowManager.GetWindow(WINDOW_DIALOG_VIDEO_SCAN);
-      if (videoScan)
-      {
-        videoScan->Close(true);
-      }
-    }
 
     ADDON::CAddonMgr::Get().StopServices(true);
 

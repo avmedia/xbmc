@@ -104,6 +104,8 @@ namespace INFO
 #define PLAYER_SEEKOFFSET            47
 #define PLAYER_PROGRESS_CACHE        48
 #define PLAYER_ITEM_PROPERTY         49
+#define PLAYER_CAN_PAUSE             50
+#define PLAYER_CAN_SEEK              51
 
 #define WEATHER_CONDITIONS          100
 #define WEATHER_TEMPERATURE         101
@@ -288,6 +290,10 @@ namespace INFO
 #define LASTFM_RADIOPLAYING         330
 #define LASTFM_CANLOVE              331
 #define LASTFM_CANBAN               332
+
+#define CONTAINER_CAN_FILTER         342
+#define CONTAINER_CAN_FILTERADVANCED 343
+#define CONTAINER_FILTERED           344
 
 #define CONTAINER_SCROLL_PREVIOUS   345 // NOTE: These 5 must be kept in this consecutive order
 #define CONTAINER_MOVE_PREVIOUS     346

@@ -1,5 +1,6 @@
+#pragma once
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -18,11 +19,8 @@
  *
  */
 
-#pragma once
+#include "DVDDemux.h"
 
-#include "ICodec.h"
-#include "filesystem/File.h"
-#include "CachingCodec.h"
 #ifdef _WIN32
 #define __attribute__(dummy_val)
 #else
@@ -42,33 +40,46 @@ typedef struct
   uint32_t sampleRate;
   uint32_t bitsPerSample;
   uint64_t durationMs;
-} __attribute__((__packed__)) BXA_FmtHeader;
-
-typedef struct
-{
-  char fourcc[4];
-  uint32_t type;
-  uint32_t length;
-} __attribute__((__packed__)) BXA_DataHeader;
+} __attribute__((__packed__)) Demux_BXA_FmtHeader;
 
 #ifdef _WIN32
 #pragma pack(pop)
 #endif
 
-#define BXA_PACKET_TYPE_FMT  1
-#define BXA_PACKET_TYPE_DATA 2
+#include <vector>
 
-class BXACodec : public CachingCodec
+#define BXA_PACKET_TYPE_FMT_DEMUX 1
+
+class CDemuxStreamAudioBXA;
+
+class CDVDDemuxBXA : public CDVDDemux
 {
 public:
-  BXACodec();
-  virtual ~BXACodec();
 
-  virtual bool Init(const CStdString &strFile, unsigned int filecache);
-  virtual void DeInit();
-  virtual int64_t Seek(int64_t iSeekTime);
-  virtual int ReadPCM(BYTE *pBuffer, int size, int *actualsize);
-  virtual bool CanInit();
-  virtual CAEChannelInfo GetChannelInfo();
+  CDVDDemuxBXA();
+  ~CDVDDemuxBXA();
+
+  bool Open(CDVDInputStream* pInput);
+  void Dispose();
+  void Reset();
+  void Abort();
+  void Flush();
+  DemuxPacket* Read();
+  bool SeekTime(int time, bool backwords = false, double* startpts = NULL) { return false; }
+  void SetSpeed(int iSpeed) {};
+  int GetStreamLength() { return m_header.durationMs; }
+  CDemuxStream* GetStream(int iStreamId);
+  int GetNrOfStreams();
+  std::string GetFileName();
+  virtual void GetStreamCodecName(int iStreamId, CStdString &strName);
+
+protected:
+  friend class CDemuxStreamAudioBXA;
+  CDVDInputStream* m_pInput;
+  double m_pts;
+
+  CDemuxStreamAudioBXA *m_stream;
+
+  Demux_BXA_FmtHeader m_header;
 };
 

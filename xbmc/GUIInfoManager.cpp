@@ -195,7 +195,9 @@ const infomap player_labels[] =  {{ "hasmedia",         PLAYER_HAS_MEDIA },     
                                   { "chaptername",      PLAYER_CHAPTERNAME },
                                   { "starrating",       PLAYER_STAR_RATING },
                                   { "folderpath",       PLAYER_PATH },
-                                  { "filenameandpath",  PLAYER_FILEPATH }};
+                                  { "filenameandpath",  PLAYER_FILEPATH },
+                                  { "pauseenabled",     PLAYER_CAN_PAUSE },
+                                  { "seekenabled",      PLAYER_CAN_SEEK }};
 
 const infomap player_param[] =   {{ "property",         PLAYER_ITEM_PROPERTY }};
 
@@ -271,7 +273,6 @@ const infomap system_labels[] =  {{ "hasnetwork",       SYSTEM_ETHERNET_LINK_ACT
                                   { "haspvr",           SYSTEM_HAS_PVR }};
 
 const infomap system_param[] =   {{ "hasalarm",         SYSTEM_HAS_ALARM },
-                                  { "getbool",          SYSTEM_GET_BOOL },
                                   { "hascoreid",        SYSTEM_HAS_CORE_ID },
                                   { "setting",          SYSTEM_SETTING },
                                   { "hasaddon",         SYSTEM_HAS_ADDON },
@@ -432,7 +433,10 @@ const infomap container_bools[] ={{ "onnext",           CONTAINER_MOVE_NEXT },
                                   { "currentpage",      CONTAINER_CURRENT_PAGE },
                                   { "scrolling",        CONTAINER_SCROLLING },
                                   { "hasnext",          CONTAINER_HAS_NEXT },
-                                  { "hasprevious",      CONTAINER_HAS_PREVIOUS }};
+                                  { "hasprevious",      CONTAINER_HAS_PREVIOUS },
+                                  { "canfilter",        CONTAINER_CAN_FILTER },
+                                  { "canfilteradvanced",CONTAINER_CAN_FILTERADVANCED },
+                                  { "filtered",         CONTAINER_FILTERED }};
 
 const infomap container_ints[] = {{ "row",              CONTAINER_ROW },
                                   { "column",           CONTAINER_COLUMN },
@@ -712,7 +716,7 @@ void CGUIInfoManager::SplitInfoString(const CStdString &infoString, vector<Prope
 /// efficient retrieval of data.
 int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
 {
-  // trim whitespace, and convert to lowercase
+  // trim whitespaces
   CStdString strTest = strCondition;
   strTest.TrimLeft(" \t\r\n");
   strTest.TrimRight(" \t\r\n");
@@ -846,6 +850,12 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
       if (prop.num_params() == 1)
       {
         const CStdString &param = prop.param();
+        if (prop.name == "getbool")
+        {
+          std::string paramCopy = param;
+          StringUtils::ToLower(paramCopy);
+          return AddMultiInfo(GUIInfo(SYSTEM_GET_BOOL, ConditionalStringParameter(paramCopy, true)));
+        }
         for (size_t i = 0; i < sizeof(system_param) / sizeof(infomap); i++)
         {
           if (prop.name == system_param[i].str)
@@ -2199,6 +2209,24 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
         bReturn = control->GetCondition(condition, 0);
     }
   }
+  else if (condition == CONTAINER_CAN_FILTER)
+  {
+    CGUIWindow *window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
+    if (window)
+      bReturn = !((CGUIMediaWindow*)window)->CanFilterAdvanced();
+  }
+  else if (condition == CONTAINER_CAN_FILTERADVANCED)
+  {
+    CGUIWindow *window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
+    if (window)
+      bReturn = ((CGUIMediaWindow*)window)->CanFilterAdvanced();
+  }
+  else if (condition == CONTAINER_FILTERED)
+  {
+    CGUIWindow *window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
+    if (window)
+      bReturn = ((CGUIMediaWindow*)window)->IsFiltered();
+  }
   else if (condition == VIDEOPLAYER_HAS_INFO)
     bReturn = ((m_currentFile->HasVideoInfoTag() && !m_currentFile->GetVideoInfoTag()->IsEmpty()) ||
                (m_currentFile->HasPVRChannelInfoTag()  && !m_currentFile->GetPVRChannelInfoTag()->IsEmpty()));
@@ -2291,6 +2319,12 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
       break;
     case PLAYER_CAN_RECORD:
       bReturn = g_application.m_pPlayer->CanRecord();
+      break;
+    case PLAYER_CAN_PAUSE:
+      bReturn = g_application.m_pPlayer->CanPause();
+      break;
+    case PLAYER_CAN_SEEK:
+      bReturn = g_application.m_pPlayer->CanSeek();
       break;
     case PLAYER_RECORDING:
       bReturn = g_application.m_pPlayer->IsRecording();

@@ -22,7 +22,6 @@
 #include "VideoDatabase.h"
 #include "addons/Scraper.h"
 #include "NfoFile.h"
-#include "XBDateTime.h"
 
 class CRegExp;
 
@@ -37,34 +36,6 @@ namespace VIDEO
     bool noupdate;          /* exclude from update library function */
     bool exclude;           /* exclude this path from scraping */
   } SScanSettings;
-
-  typedef struct SEpisode
-  {
-    CStdString strPath;
-    CStdString strTitle;
-    int iSeason;
-    int iEpisode;
-    int iSubepisode;
-    bool isFolder;
-    CDateTime cDate;
-  } SEpisode;
-
-  typedef std::vector<SEpisode> EPISODES;
-
-  enum SCAN_STATE { PREPARING = 0, REMOVING_OLD, CLEANING_UP_DATABASE, FETCHING_MOVIE_INFO, FETCHING_MUSICVIDEO_INFO, FETCHING_TVSHOW_INFO, COMPRESSING_DATABASE, WRITING_CHANGES };
-
-  class IVideoInfoScannerObserver
-  {
-  public:
-    virtual ~IVideoInfoScannerObserver() { }
-    virtual void OnStateChanged(SCAN_STATE state) = 0;
-    virtual void OnDirectoryChanged(const CStdString& strDirectory) = 0;
-    virtual void OnDirectoryScanned(const CStdString& strDirectory) = 0;
-    virtual void OnSetProgress(int currentItem, int itemCount)=0;
-    virtual void OnSetCurrentProgress(int currentItem, int itemCount)=0;
-    virtual void OnSetTitle(const CStdString& strTitle) = 0;
-    virtual void OnFinished() = 0;
-  };
 
   /*! \brief return values from the information lookup functions
    */
@@ -87,9 +58,11 @@ namespace VIDEO
      */
     void Start(const CStdString& strDirectory, bool scanAll = false);
     bool IsScanning();
-    void CleanDatabase(IVideoInfoScannerObserver* pObserver=NULL, const std::set<int>* paths=NULL);
+    void CleanDatabase(CGUIDialogProgressBarHandle* handle=NULL, const std::set<int>* paths=NULL);
     void Stop();
-    void SetObserver(IVideoInfoScannerObserver* pObserver);
+
+    //! \brief Set whether or not to show a progress dialog
+    void ShowDialog(bool show) { m_showDialog = show; }
 
     /*! \brief Add an item to the database.
      \param pItem item to add to the database.
@@ -177,14 +150,14 @@ namespace VIDEO
      \param defaultSeason Season to use if not found in reg.
      \return true on success (2 matches), false on failure (fewer than 2 matches)
      */
-    bool GetEpisodeAndSeasonFromRegExp(CRegExp &reg, SEpisode &episodeInfo, int defaultSeason);
+    bool GetEpisodeAndSeasonFromRegExp(CRegExp &reg, EPISODE &episodeInfo, int defaultSeason);
 
     /*! \brief Extract episode air-date from a processed regexp
      \param reg Regular expression object with at least 3 matches
      \param episodeInfo Episode information to fill in.
      \return true on success (3 matches), false on failure (fewer than 3 matches)
      */
-    bool GetAirDateFromRegExp(CRegExp &reg, SEpisode &episodeInfo);
+    bool GetAirDateFromRegExp(CRegExp &reg, EPISODE &episodeInfo);
 
     /*! \brief Fetch thumbs for actors
      Updates each actor with their thumb (local or online)
@@ -225,11 +198,11 @@ namespace VIDEO
      \return INFO_ERROR on failure, INFO_CANCELLED on cancellation,
      INFO_NOT_FOUND if an episode isn't found, or INFO_ADDED if all episodes are added.
      */
-    INFO_RET OnProcessSeriesFolder(EPISODES& files, const ADDON::ScraperPtr &scraper, bool useLocal, int idShow, const CStdString& strShowTitle, CGUIDialogProgress* pDlgProgress = NULL);
+    INFO_RET OnProcessSeriesFolder(EPISODELIST& files, const ADDON::ScraperPtr &scraper, bool useLocal, int idShow, const CStdString& strShowTitle, CGUIDialogProgress* pDlgProgress = NULL);
 
-    void EnumerateSeriesFolder(CFileItem* item, EPISODES& episodeList);
-    bool EnumerateEpisodeItem(const CFileItemPtr item, EPISODES& episodeList);
-    bool ProcessItemByVideoInfoTag(const CFileItemPtr item, EPISODES &episodeList);
+    void EnumerateSeriesFolder(CFileItem* item, EPISODELIST& episodeList);
+    bool EnumerateEpisodeItem(const CFileItemPtr item, EPISODELIST& episodeList);
+    bool ProcessItemByVideoInfoTag(const CFileItemPtr item, EPISODELIST &episodeList);
 
     CStdString GetnfoFile(CFileItem *item, bool bGrabAny=false) const;
 
@@ -239,7 +212,8 @@ namespace VIDEO
      */
     CStdString GetParentDir(const CFileItem &item) const;
 
-    IVideoInfoScannerObserver* m_pObserver;
+    bool m_showDialog;
+    CGUIDialogProgressBarHandle* m_handle;
     int m_currentItem;
     int m_itemCount;
     bool m_bRunning;

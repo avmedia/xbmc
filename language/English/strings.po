@@ -3201,6 +3201,12 @@ msgctxt "#1273"
 msgid "AirPlay"
 msgstr ""
 
+#empty string id 1274
+
+msgctxt "#1275"
+msgid "Filter %s"
+msgstr ""
+
 #empty strings from id 1274 to 1299
 
 msgctxt "#1300"
@@ -4831,7 +4837,15 @@ msgctxt "#13432"
 msgid "Allow hardware acceleration (VideoToolbox)"
 msgstr ""
 
-#empty strings from id 13433 to 13499
+msgctxt "#13433"
+msgid "Play the next video automatically"
+msgstr ""
+
+msgctxt "#13434"
+msgid "Play only this"
+msgstr ""
+
+#empty strings from id 13435 to 13499
 
 msgctxt "#13500"
 msgid "A/V sync method"
@@ -6068,7 +6082,7 @@ msgid "or use phrases to find an exact match, like \"The wizard of Oz\"."
 msgstr ""
 
 msgctxt "#19003"
-msgid "Find similar programme"
+msgid "Find similar programs"
 msgstr ""
 
 msgctxt "#19004"
@@ -7127,7 +7141,23 @@ msgctxt "#19274"
 msgid "Please visit xbmc.org/pvr to learn more."
 msgstr ""
 
-#empty strings from id 19275 to 19498
+msgctxt "#19275"
+msgid "Conflict warning"
+msgstr ""
+
+msgctxt "#19276"
+msgid "Conflict error"
+msgstr ""
+
+msgctxt "#19277"
+msgid "Recording conflict"
+msgstr ""
+
+msgctxt "#19278"
+msgid "Recording error"
+msgstr ""
+
+#empty strings from id 19279 to 19498
 
 msgctxt "#19499"
 msgid "Other/Unknown"
@@ -9392,7 +9422,23 @@ msgctxt "#21465"
 msgid "Above video"
 msgstr ""
 
-#empty strings from id 21466 to 21799
+msgctxt "#21466"
+msgid "between"
+msgstr ""
+
+msgctxt "#21467"
+msgid "%.1f to %.1f"
+msgstr ""
+
+msgctxt "#21468"
+msgid "%d to %d"
+msgstr ""
+
+msgctxt "#21469"
+msgid "%s to %s"
+msgstr ""
+
+#empty strings from id 21470 to 21799
 
 msgctxt "#21800"
 msgid "File name"

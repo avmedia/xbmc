@@ -1291,9 +1291,6 @@
     <ClCompile Include="..\..\xbmc\music\dialogs\GUIDialogMusicOverlay.cpp">
       <Filter>music\dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\music\dialogs\GUIDialogMusicScan.cpp">
-      <Filter>music\dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\music\dialogs\GUIDialogSongInfo.cpp">
       <Filter>music\dialogs</Filter>
     </ClCompile>
@@ -1729,9 +1726,6 @@
     <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogVideoOverlay.cpp">
       <Filter>video\dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogVideoScan.cpp">
-      <Filter>video\dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogVideoSettings.cpp">
       <Filter>video\dialogs</Filter>
     </ClCompile>
@@ -2031,9 +2025,6 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\guilib\JpegIO.cpp">
       <Filter>guilib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\cores\paplayer\BXAcodec.cpp">
-      <Filter>cores\paplayer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\interfaces\info\SkinVariable.cpp">
       <Filter>interfaces\info</Filter>
@@ -2971,6 +2962,12 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\interfaces\json-rpc\AddonsOperations.cpp">
       <Filter>interfaces\json-rpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxBXA.cpp">
+      <Filter>cores\dvdplayer\DVDDemuxers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\dialogs\GUIDialogMediaFilter.cpp">
+      <Filter>dialogs</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.cpp">
       <Filter>cores\DSPlayer</Filter>
@@ -4251,9 +4248,6 @@
     <ClInclude Include="..\..\xbmc\music\dialogs\GUIDialogMusicOverlay.h">
       <Filter>music\dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\music\dialogs\GUIDialogMusicScan.h">
-      <Filter>music\dialogs</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\music\dialogs\GUIDialogSongInfo.h">
       <Filter>music\dialogs</Filter>
     </ClInclude>
@@ -4728,9 +4722,6 @@
     <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogVideoOverlay.h">
       <Filter>video\dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogVideoScan.h">
-      <Filter>video\dialogs</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogVideoSettings.h">
       <Filter>video\dialogs</Filter>
     </ClInclude>
@@ -5052,9 +5043,6 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\guilib\JpegIO.h">
       <Filter>guilib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\paplayer\BXAcodec.h">
-      <Filter>cores\paplayer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\interfaces\info\SkinVariable.h">
       <Filter>interfaces\info</Filter>
@@ -5629,9 +5617,6 @@
     <ClInclude Include="..\..\xbmc\NfoFile.h" />
     <ClInclude Include="..\..\xbmc\PartyModeManager.h" />
     <ClInclude Include="..\..\xbmc\PasswordManager.h" />
-    <ClCompile Include="..\..\xbmc\utils\Screenshot.h">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClInclude Include="..\..\xbmc\SortFileItem.h" />
     <ClInclude Include="..\..\xbmc\SectionLoader.h" />
     <ClInclude Include="..\..\xbmc\Temperature.h" />
@@ -5884,6 +5869,15 @@
     <ClInclude Include="..\..\xbmc\interfaces\json-rpc\AddonsOperations.h">
       <Filter>interfaces\json-rpc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxBXA.h">
+      <Filter>cores\dvdplayer\DVDDemuxers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\utils\Screenshot.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\dialogs\GUIDialogMediaFilter.h">
+      <Filter>dialogs</Filter>
+    </ClInclude
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.h">
       <Filter>cores\DSPlayer</Filter>
     </ClInclude>

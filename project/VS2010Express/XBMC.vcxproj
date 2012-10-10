@@ -429,10 +429,10 @@
     <ClCompile Include="..\..\xbmc\cores\DSPlayer\Utils\MacrovisionKicker.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPassthrough.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Video\CrystalHD.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxBXA.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxPVRClient.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamBluray.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamPVRManager.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\paplayer\BXAcodec.cpp" />
     <ClCompile Include="..\..\xbmc\cores\paplayer\PCMCodec.cpp" />
     <ClCompile Include="..\..\xbmc\cores\VideoRenderers\RenderCapture.cpp" />
     <ClCompile Include="..\..\xbmc\cores\VideoRenderers\VideoShaders\WinVideoFilter.cpp" />
@@ -455,6 +455,7 @@
     <ClCompile Include="..\..\xbmc\dialogs\GUIDialogGamepad.cpp" />
     <ClCompile Include="..\..\xbmc\dialogs\GUIDialogKaiToast.cpp" />
     <ClCompile Include="..\..\xbmc\dialogs\GUIDialogKeyboardGeneric.cpp" />
+    <ClCompile Include="..\..\xbmc\dialogs\GUIDialogMediaFilter.cpp" />
     <ClCompile Include="..\..\xbmc\dialogs\GUIDialogMediaSource.cpp" />
     <ClCompile Include="..\..\xbmc\dialogs\GUIDialogMuteBug.cpp" />
     <ClCompile Include="..\..\xbmc\dialogs\GUIDialogNumeric.cpp" />
@@ -808,7 +809,6 @@
     <ClCompile Include="..\..\xbmc\music\dialogs\GUIDialogMusicInfo.cpp" />
     <ClCompile Include="..\..\xbmc\music\dialogs\GUIDialogMusicOSD.cpp" />
     <ClCompile Include="..\..\xbmc\music\dialogs\GUIDialogMusicOverlay.cpp" />
-    <ClCompile Include="..\..\xbmc\music\dialogs\GUIDialogMusicScan.cpp" />
     <ClCompile Include="..\..\xbmc\music\dialogs\GUIDialogSongInfo.cpp" />
     <ClCompile Include="..\..\xbmc\music\dialogs\GUIDialogVisualisationPresetList.cpp" />
     <ClCompile Include="..\..\xbmc\music\GUIViewStateMusic.cpp" />
@@ -1095,11 +1095,13 @@
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\Utils\MacrovisionKicker.h" />
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\Utils\SmartList.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPassthrough.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxBXA.h" />
     <ClInclude Include="..\..\xbmc\cores\paplayer\PCMCodec.h" />
     <ClInclude Include="..\..\xbmc\cores\VideoRenderers\WinBaseRenderer.h" />
     <ClInclude Include="..\..\xbmc\cores\VideoRenderers\WinDsRenderer.h" />
     <ClInclude Include="..\..\xbmc\dialogs\GUIDialogKeyboardGeneric.h" />
     <ClInclude Include="..\..\xbmc\DbUrl.h" />
+    <ClInclude Include="..\..\xbmc\dialogs\GUIDialogMediaFilter.h" />
     <ClInclude Include="..\..\xbmc\filesystem\ImageFile.h" />
     <ClInclude Include="..\..\xbmc\filesystem\VideoDatabaseDirectory\DirectoryNodeTags.h" />
     <ClInclude Include="..\..\xbmc\filesystem\windows\WINFileSMB.h" />
@@ -1684,7 +1686,6 @@
     <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogVideoInfo.cpp" />
     <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogVideoOSD.cpp" />
     <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogVideoOverlay.cpp" />
-    <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogVideoScan.cpp" />
     <ClCompile Include="..\..\xbmc\video\dialogs\GUIDialogVideoSettings.cpp" />
     <ClCompile Include="..\..\xbmc\video\GUIViewStateVideo.cpp" />
     <ClCompile Include="..\..\xbmc\video\Teletext.cpp" />
@@ -2027,7 +2028,6 @@
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxPVRClient.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamBluray.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamPVRManager.h" />
-    <ClInclude Include="..\..\xbmc\cores\paplayer\BXAcodec.h" />
     <ClInclude Include="..\..\xbmc\cores\VideoRenderers\RenderCapture.h" />
     <ClInclude Include="..\..\xbmc\cores\VideoRenderers\VideoShaders\WinVideoFilter.h" />
     <ClInclude Include="..\..\xbmc\CueDocument.h" />
@@ -2243,7 +2243,6 @@
     <ClInclude Include="..\..\xbmc\music\dialogs\GUIDialogMusicInfo.h" />
     <ClInclude Include="..\..\xbmc\music\dialogs\GUIDialogMusicOSD.h" />
     <ClInclude Include="..\..\xbmc\music\dialogs\GUIDialogMusicOverlay.h" />
-    <ClInclude Include="..\..\xbmc\music\dialogs\GUIDialogMusicScan.h" />
     <ClInclude Include="..\..\xbmc\music\dialogs\GUIDialogSongInfo.h" />
     <ClInclude Include="..\..\xbmc\music\dialogs\GUIDialogVisualisationPresetList.h" />
     <ClInclude Include="..\..\xbmc\music\GUIViewStateMusic.h" />
@@ -2531,7 +2530,6 @@
     <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogVideoInfo.h" />
     <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogVideoOSD.h" />
     <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogVideoOverlay.h" />
-    <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogVideoScan.h" />
     <ClInclude Include="..\..\xbmc\video\dialogs\GUIDialogVideoSettings.h" />
     <ClInclude Include="..\..\xbmc\video\GUIViewStateVideo.h" />
     <ClInclude Include="..\..\xbmc\video\Teletext.h" />

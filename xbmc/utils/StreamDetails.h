@@ -42,7 +42,7 @@ public:
 
   CStreamDetail(StreamType type) : m_eType(type), m_pParent(NULL) {};
   virtual void Archive(CArchive& ar);
-  virtual void Serialize(CVariant& value);
+  virtual void Serialize(CVariant& value) const;
   virtual bool IsWorseThan(CStreamDetail *that) { return true; };
 
   const StreamType m_eType;
@@ -57,7 +57,7 @@ class CStreamDetailVideo : public CStreamDetail
 public:
   CStreamDetailVideo();
   virtual void Archive(CArchive& ar);
-  virtual void Serialize(CVariant& value);
+  virtual void Serialize(CVariant& value) const;
   virtual bool IsWorseThan(CStreamDetail *that);
 
   int m_iWidth;
@@ -75,7 +75,7 @@ class CStreamDetailAudio : public CStreamDetail
 public:
   CStreamDetailAudio();
   virtual void Archive(CArchive& ar);
-  virtual void Serialize(CVariant& value);
+  virtual void Serialize(CVariant& value) const;
   virtual bool IsWorseThan(CStreamDetail *that);
 
   int m_iChannels;
@@ -88,7 +88,7 @@ class CStreamDetailSubtitle : public CStreamDetail
 public:
   CStreamDetailSubtitle();
   virtual void Archive(CArchive& ar);
-  virtual void Serialize(CVariant& value);
+  virtual void Serialize(CVariant& value) const;
   virtual bool IsWorseThan(CStreamDetail *that);
 
   CStdString m_strLanguage;
@@ -142,7 +142,7 @@ public:
   void DetermineBestStreams(void);
 
   virtual void Archive(CArchive& ar);
-  virtual void Serialize(CVariant& value);
+  virtual void Serialize(CVariant& value) const;
 
   // Language to use for "best" subtitle stream
   CStdString m_strLanguage;

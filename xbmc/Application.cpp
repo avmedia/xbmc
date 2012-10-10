@@ -178,6 +178,7 @@
 #include "peripherals/dialogs/GUIDialogPeripheralManager.h"
 #include "peripherals/dialogs/GUIDialogPeripheralSettings.h"
 #include "peripherals/devices/PeripheralImon.h"
+#include "music/infoscanner/MusicInfoScanner.h"
 
 // Windows includes
 #include "guilib/GUIWindowManager.h"
@@ -219,6 +220,7 @@
 #include "video/dialogs/GUIDialogVideoOSD.h"
 #include "music/dialogs/GUIDialogMusicOverlay.h"
 #include "video/dialogs/GUIDialogVideoOverlay.h"
+#include "video/VideoInfoScanner.h"
 
 // Dialog includes
 #include "music/dialogs/GUIDialogMusicOSD.h"
@@ -232,7 +234,6 @@
 #include "settings/GUIDialogProfileSettings.h"
 #include "settings/GUIDialogLockSettings.h"
 #include "settings/GUIDialogContentSettings.h"
-#include "video/dialogs/GUIDialogVideoScan.h"
 #include "dialogs/GUIDialogBusy.h"
 #include "dialogs/GUIDialogKeyboardGeneric.h"
 #include "dialogs/GUIDialogYesNo.h"
@@ -251,7 +252,6 @@
 #include "dialogs/GUIDialogFavourites.h"
 #include "dialogs/GUIDialogButtonMenu.h"
 #include "dialogs/GUIDialogContextMenu.h"
-#include "music/dialogs/GUIDialogMusicScan.h"
 #include "dialogs/GUIDialogPlayerControls.h"
 #include "music/dialogs/GUIDialogSongInfo.h"
 #include "dialogs/GUIDialogSmartPlaylistEditor.h"
@@ -288,6 +288,7 @@
 #include "guilib/GUIControlFactory.h"
 #include "dialogs/GUIDialogCache.h"
 #include "dialogs/GUIDialogPlayEject.h"
+#include "dialogs/GUIDialogMediaFilter.h"
 #include "utils/XMLUtils.h"
 #include "addons/AddonInstaller.h"
 
@@ -1272,7 +1273,6 @@ bool CApplication::Initialize()
     g_windowManager.Add(new CGUIDialogNumeric);            // window id = 109
     g_windowManager.Add(new CGUIDialogGamepad);            // window id = 110
     g_windowManager.Add(new CGUIDialogButtonMenu);         // window id = 111
-    g_windowManager.Add(new CGUIDialogMusicScan);          // window id = 112
     g_windowManager.Add(new CGUIDialogMuteBug);            // window id = 113
     g_windowManager.Add(new CGUIDialogPlayerControls);     // window id = 114
 #ifdef HAS_KARAOKE
@@ -1289,7 +1289,6 @@ bool CApplication::Initialize()
     g_windowManager.Add(new CGUIDialogNetworkSetup);  // window id = 128
     g_windowManager.Add(new CGUIDialogMediaSource);   // window id = 129
     g_windowManager.Add(new CGUIDialogProfileSettings); // window id = 130
-    g_windowManager.Add(new CGUIDialogVideoScan);      // window id = 133
     g_windowManager.Add(new CGUIDialogFavourites);     // window id = 134
     g_windowManager.Add(new CGUIDialogSongInfo);       // window id = 135
     g_windowManager.Add(new CGUIDialogSmartPlaylistEditor);       // window id = 136
@@ -1310,6 +1309,8 @@ bool CApplication::Initialize()
 
     g_windowManager.Add(new CGUIDialogPeripheralManager);
     g_windowManager.Add(new CGUIDialogPeripheralSettings);
+    
+    g_windowManager.Add(new CGUIDialogMediaFilter);   // window id = 151
 
     g_windowManager.Add(new CGUIWindowMusicPlayList);          // window id = 500
     g_windowManager.Add(new CGUIWindowMusicSongs);             // window id = 501
@@ -1396,14 +1397,6 @@ bool CApplication::Initialize()
 
   CLog::Log(LOGINFO, "removing tempfiles");
   CUtil::RemoveTempFiles();
-
-  // if the user shutoff the system during music scan
-  // restore the settings
-  if (g_settings.m_bMyMusicIsScanning)
-  {
-    CLog::Log(LOGWARNING,"System rebooted during music scan! ... restoring UseTags and FindRemoteThumbs");
-    RestoreMusicScanSettings();
-  }
 
   if (!g_settings.UsingLoginScreen())
   {
@@ -2785,7 +2778,7 @@ bool CApplication::OnAction(const CAction &action)
     return true;
   }
 
-  if (IsPlaying() && !CurrentFileItem().IsLiveTV())
+  if (IsPlaying())
   {
     // pause : pauses current audio song
     if (action.GetID() == ACTION_PAUSE && m_iPlaySpeed == 1)
@@ -3480,7 +3473,6 @@ bool CApplication::Cleanup()
     g_windowManager.Delete(WINDOW_DIALOG_SUB_MENU);
     g_windowManager.Delete(WINDOW_DIALOG_BUTTON_MENU);
     g_windowManager.Delete(WINDOW_DIALOG_CONTEXT_MENU);
-    g_windowManager.Delete(WINDOW_DIALOG_MUSIC_SCAN);
     g_windowManager.Delete(WINDOW_DIALOG_PLAYER_CONTROLS);
     g_windowManager.Delete(WINDOW_DIALOG_KARAOKE_SONGSELECT);
     g_windowManager.Delete(WINDOW_DIALOG_KARAOKE_SELECTOR);
@@ -3498,7 +3490,6 @@ bool CApplication::Cleanup()
     g_windowManager.Delete(WINDOW_DIALOG_VIDEO_OSD_SETTINGS);
     g_windowManager.Delete(WINDOW_DIALOG_AUDIO_OSD_SETTINGS);
     g_windowManager.Delete(WINDOW_DIALOG_VIDEO_BOOKMARKS);
-    g_windowManager.Delete(WINDOW_DIALOG_VIDEO_SCAN);
     g_windowManager.Delete(WINDOW_DIALOG_CONTENT_SETTINGS);
     g_windowManager.Delete(WINDOW_DIALOG_FAVOURITES);
     g_windowManager.Delete(WINDOW_DIALOG_SONG_INFO);
@@ -3510,6 +3501,7 @@ bool CApplication::Cleanup()
     g_windowManager.Delete(WINDOW_DIALOG_ADDON_SETTINGS);
     g_windowManager.Delete(WINDOW_DIALOG_ACCESS_POINTS);
     g_windowManager.Delete(WINDOW_DIALOG_SLIDER);
+    g_windowManager.Delete(WINDOW_DIALOG_MEDIA_FILTER);
 
     /* Delete PVR related windows and dialogs */
     g_windowManager.Delete(WINDOW_PVR);
@@ -5852,21 +5844,6 @@ PLAYERCOREID CApplication::GetCurrentPlayer()
   return m_eCurrentPlayer;
 }
 
-// when a scan is initiated, save current settings
-// and enable tag reading and remote thums
-void CApplication::SaveMusicScanSettings()
-{
-  CLog::Log(LOGINFO,"Music scan has started... Enabling tag reading, and remote thumbs");
-  g_settings.m_bMyMusicIsScanning = true;
-  g_settings.Save();
-}
-
-void CApplication::RestoreMusicScanSettings()
-{
-  g_settings.m_bMyMusicIsScanning = false;
-  g_settings.Save();
-}
-
 void CApplication::UpdateLibraries()
 {
   if (g_guiSettings.GetBool("videolibrary.updateonstartup"))
@@ -5917,15 +5894,8 @@ void CApplication::StartVideoScan(const CStdString &strDirectory, bool scanAll)
   if (m_videoInfoScanner->IsScanning())
     return;
 
-  if (!g_guiSettings.GetBool("videolibrary.backgroundupdate"))
-  {
-    CGUIDialogVideoScan *videoScan = (CGUIDialogVideoScan *)g_windowManager.GetWindow(WINDOW_DIALOG_VIDEO_SCAN);
-    if (videoScan)
-    {
-      m_videoInfoScanner->SetObserver(videoScan);
-      videoScan->ShowScan();
-    }
-  }
+  m_videoInfoScanner->ShowDialog(true);
+
   m_videoInfoScanner->Start(strDirectory,scanAll);
 }
 
@@ -5943,15 +5913,8 @@ void CApplication::StartMusicScan(const CStdString &strDirectory, int flags)
   }
 
   if (!(flags & CMusicInfoScanner::SCAN_BACKGROUND))
-  {
-    CGUIDialogMusicScan *musicScan = (CGUIDialogMusicScan *)g_windowManager.GetWindow(WINDOW_DIALOG_MUSIC_SCAN);
-    if (musicScan)
-    {
-      m_musicInfoScanner->SetObserver(musicScan);
-      musicScan->ShowScan();
-    }
-  }
-  SaveMusicScanSettings();
+    m_musicInfoScanner->ShowDialog(true);
+
   m_musicInfoScanner->Start(strDirectory, flags);
 }
 
@@ -5961,16 +5924,8 @@ void CApplication::StartMusicAlbumScan(const CStdString& strDirectory,
   if (m_musicInfoScanner->IsScanning())
     return;
 
-  if (!g_guiSettings.GetBool("musiclibrary.backgroundupdate"))
-  {
-    CGUIDialogMusicScan *musicScan = (CGUIDialogMusicScan *)g_windowManager.GetWindow(WINDOW_DIALOG_MUSIC_SCAN);
-    if (musicScan)
-    {
-      m_musicInfoScanner->SetObserver(musicScan);
-      musicScan->ShowScan();
-    }
-  }
-  SaveMusicScanSettings();
+  m_musicInfoScanner->ShowDialog(true);
+
   m_musicInfoScanner->FetchAlbumInfo(strDirectory,refresh);
 }
 
@@ -5980,18 +5935,9 @@ void CApplication::StartMusicArtistScan(const CStdString& strDirectory,
   if (m_musicInfoScanner->IsScanning())
     return;
 
-  if (!g_guiSettings.GetBool("musiclibrary.backgroundupdate"))
-  {
-    CGUIDialogMusicScan *musicScan = (CGUIDialogMusicScan *)g_windowManager.GetWindow(WINDOW_DIALOG_MUSIC_SCAN);
-    if (musicScan)
-    {
-      m_musicInfoScanner->SetObserver(musicScan);
-      musicScan->ShowScan();
-    }
-  }
-  SaveMusicScanSettings();
-  m_musicInfoScanner->FetchArtistInfo(strDirectory,refresh);
+  m_musicInfoScanner->ShowDialog(true);
 
+  m_musicInfoScanner->FetchArtistInfo(strDirectory,refresh);
 }
 
 void CApplication::CheckPlayingProgress()

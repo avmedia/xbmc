@@ -10656,9 +10656,8 @@ msgid "Use as the default video player"
 msgstr "Использовать как проигрыватель видео по умолчанию"
 
 msgctxt "#55032"
-msgid ""
-"Show Blu-ray titles and Matroska Editions choice dialog (AVsplitter only)"
-msgstr "Показывать тайтлы Blu-ray и версии видео MKV (только AVsplitter)"
+msgid "Show Blu-ray titles and Matroska Editions choice dialog (AVSplitter only)"
+msgstr "Показывать тайтлы Blu-ray и версии видео MKV (только AVSplitter)"
 
 #. 55050-55100 Directshow Subtitles
 msgctxt "#55050"

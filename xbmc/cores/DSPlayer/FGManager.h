@@ -31,7 +31,6 @@
 #define _DSPLAYER_DEBUG
 
 #include "FGFilter.h"
-#include "DSConfig.h"
 #include "Filters/IffdshowDecVideo.h"
 #include "filesystem/File.h"
 #include "FileItem.h"

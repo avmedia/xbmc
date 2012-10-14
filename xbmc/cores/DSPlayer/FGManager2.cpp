@@ -29,9 +29,6 @@ HRESULT CFGManager2::RenderFileXbmc(const CFileItem& pFileItem)
 
 	HRESULT hr = S_OK;
 
-	//Clearing config need to be done before the file is loaded. Some config are set when the pin are getting connected
-	g_dsconfig.ClearConfig();
-
 	// We *need* those informations for filter loading. If the user wants it, be sure it's loaded
 	// before using it.
 	bool hasStreamDetails = false;
@@ -78,7 +75,6 @@ HRESULT CFGManager2::RenderFileXbmc(const CFileItem& pFileItem)
 
 	RemoveUnconnectedFilters(g_dsGraph->pFilterGraph);
 
-	g_dsconfig.ConfigureFilters();
 #ifdef _DSPLAYER_DEBUG
 	LogFilterGraph();
 #endif

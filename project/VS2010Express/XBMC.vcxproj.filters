@@ -2972,9 +2972,6 @@
     <ClCompile Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.cpp">
       <Filter>cores\DSPlayer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\cores\DSPlayer\DSConfig.cpp">
-      <Filter>cores\DSPlayer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\DSPlayer\DSGraph.cpp">
       <Filter>cores\DSPlayer</Filter>
     </ClCompile>
@@ -5879,9 +5876,6 @@
       <Filter>dialogs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.h">
-      <Filter>cores\DSPlayer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\DSPlayer\DSConfig.h">
       <Filter>cores\DSPlayer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\DSGraph.h">

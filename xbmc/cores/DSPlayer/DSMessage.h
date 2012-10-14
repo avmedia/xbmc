@@ -26,7 +26,7 @@
 #error DSPlayer's header file included without HAS_DS_PLAYER defined
 #endif
 
-#include "Event.h"
+#include "threads/Event.h"
 
 class CDSMsg
 {

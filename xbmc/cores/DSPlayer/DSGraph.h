@@ -33,7 +33,6 @@
 #include <dvdmedia.h>
 #include "util.h"
 #include "DVDClock.h"
-#include "dsconfig.h"
 #include "fgmanager.h"
 #include "DSUtil/DSUtil.h"
 #include "DSUtil/SmartPtr.h"

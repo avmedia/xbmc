@@ -342,8 +342,6 @@ HRESULT CFGManager::RenderFileXbmc(const CFileItem& pFileItem)
   //TODO move updateregistry to the xbmc gui like setting the stable codecs for ffdshow
   //UpdateRegistry();
 
-  //Clearing config need to be done before the file is loaded. Some config are set when the pin are getting connected
-  g_dsconfig.ClearConfig();
   START_PERFORMANCE_COUNTER
   if (FAILED(m_CfgLoader->LoadFilterRules(pFileItem)))
   {
@@ -371,7 +369,6 @@ HRESULT CFGManager::RenderFileXbmc(const CFileItem& pFileItem)
   //And its also going to be needed for error in the filters set by the user are not getting connected
   RemoveUnconnectedFilters(g_dsGraph->pFilterGraph);
 
-  g_dsconfig.ConfigureFilters();
 #ifdef _DSPLAYER_DEBUG
   LogFilterGraph();
 #endif

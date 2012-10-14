@@ -44,7 +44,7 @@
 #include "network/ZeroconfBrowser.h"
 
 #ifdef HAS_DS_PLAYER
-#include "DSConfig.h"
+#include "DSGraph.h"
 #endif
 
 #ifdef _WIN32

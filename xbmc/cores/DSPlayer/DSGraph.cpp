@@ -48,6 +48,7 @@
 #include "GUIUserMessages.h"
 #include "DSUtil/MediaTypeEx.h"
 #include "utils/timeutils.h"
+#include "utils/ipinhook.h"
 
 enum 
 {
@@ -57,7 +58,6 @@ enum
 
 /*#include "utils/win32exception.h"*/
 #include "Filters/EVRAllocatorPresenter.h"
-#include "DSConfig.h"
 #include "FGManager2.h"
 
 using namespace std;
@@ -89,8 +89,6 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
   m_VideoInfo.Clear();
   m_DvdState.Clear();
 
-  //Reset the g_dsconfig for not getting unwanted interface from last file into the player
-  g_dsconfig.ClearConfig();
   m_pGraphBuilder = new CFGManager2();
   m_pGraphBuilder->InitManager();
 
@@ -615,9 +613,6 @@ HRESULT CDSGraph::UnloadGraph()
 
   CLog::Log(LOGDEBUG, "%s Deleting filters ...", __FUNCTION__);
 
-  /* Release config interfaces */
-  g_dsconfig.ClearConfig();
-
   CGraphFilters::Destroy();
 
   CLog::Log(LOGDEBUG, "%s ... done!", __FUNCTION__);
@@ -814,8 +809,9 @@ CStdString CDSGraph::GetVideoInfo()
   if (!m_pStrCurrentFrameRate.empty())
     videoInfo += m_pStrCurrentFrameRate.c_str();
 
-  if (!g_dsconfig.GetDXVAMode().empty())
-    videoInfo += " | " + g_dsconfig.GetDXVAMode();
+  CStdString strDXVA = GetDXVADecoderDescription();
+  if (!strDXVA.empty())
+    videoInfo += " | " + strDXVA;
 
   return videoInfo;
 }

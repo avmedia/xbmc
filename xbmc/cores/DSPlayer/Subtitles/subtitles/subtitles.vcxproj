@@ -66,7 +66,7 @@
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>..\..\..\..\;..\..\..\..\..\guilib;..\..\..\..\win32;..\..\include;..\..\baseclasses;..\..\DshowUtil/;..\..\;..\..\..\..\..\project\BuildDependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <DisableSpecificWarnings>4996;4005;%(DisableSpecificWarnings)</DisableSpecificWarnings>

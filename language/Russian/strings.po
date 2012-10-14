@@ -10624,8 +10624,8 @@ msgid "Use system filters (DirectShow merits)"
 msgstr "Использовать системные фильтры (приоритеты DirectShow)"
 
 msgctxt "#55022"
-msgid "Min Blu-ray title length"
-msgstr "Минимальная длина тайтла Blu-ray"
+msgid "Min. Blu-ray title length (min.)"
+msgstr "Мин. длительность тайтла Blu-ray (мин.)"
 
 msgctxt "#55023"
 msgid "Matroska Editions"

@@ -37,8 +37,8 @@ using namespace std;
 using namespace PVR;
 
 #ifdef HAS_DS_PLAYER
-#include "cores/DSPlayer/DSConfig.h"
 #include "cores/DSPlayer/Filters/RendererSettings.h"
+#include "cores/DSPlayer/dsgraph.h"
 #include "DSUtil/DSUtil.h"
 #include "utils/CharsetConverter.h"
 #include "guilib/LocalizeStrings.h"
@@ -225,17 +225,29 @@ void CGUIDialogVideoSettings::CreateSettings()
 #ifdef HAS_DS_PLAYER
   if (g_application.GetCurrentPlayer() == PCID_DSPLAYER)
   {
+	  SettingInfo setting;
+	  setting.type = SettingInfo::BUTTON;
+	  setting.id = VIDEO_SETTINGS_DS_FILTERS;
 
-	  int size = g_dsconfig.GetFiltersWithPropertyPages().size();
+	  BeginEnumFilters(g_dsGraph->pFilterGraph, pEF, pBF)
+	  {
+		  if ((pBF == CGraphFilters::Get()->AudioRenderer.pBF && CGraphFilters::Get()->AudioRenderer.guid != CLSID_ReClock) || pBF == CGraphFilters::Get()->VideoRenderer.pBF )
+			  continue;
 
-	  if (size != 0)
-		  AddSeparator(8);
-
-	  uint32_t offset = g_localizeStrings.LoadBlock("6000", "special://temp//dslang.xml", "");
-
-	  for (int i = 0; i < size; i++)
-		  AddButton(VIDEO_SETTINGS_DS_FILTERS + i, offset + i);
-
+		  Com::SmartQIPtr<ISpecifyPropertyPages> pProp = pBF;
+		  CAUUID pPages;
+		  if ( pProp )
+		  {
+			  pProp->GetPages(&pPages);
+			  if (pPages.cElems > 0)
+			  {
+				  g_charsetConverter.wToUTF8(GetFilterName(pBF), setting.name);
+				  m_settings.push_back(setting);
+			  }
+			  CoTaskMemFree(pPages.pElems);
+		  } 
+	  }
+	  EndEnumFilters
   }
 #endif
   if (g_renderManager.Supports(RENDERFEATURE_NOISE))
@@ -311,14 +323,17 @@ void CGUIDialogVideoSettings::OnSettingChanged(SettingInfo &setting)
     }
   }
 #ifdef HAS_DS_PLAYER
-  else if ( (setting.id & VIDEO_SETTINGS_DS_FILTERS) == VIDEO_SETTINGS_DS_FILTERS)
+  else if (setting.id  == VIDEO_SETTINGS_DS_FILTERS)
   {
-	  int filterId = setting.id - VIDEO_SETTINGS_DS_FILTERS;
-
-	  IBaseFilter *pBF = g_dsconfig.GetFiltersWithPropertyPages()[filterId];
-	  HRESULT hr = S_OK;
-	  //Showing the property page for this filter
-	  g_dsconfig.ShowPropertyPage(pBF);    
+	  IBaseFilter *pBF = NULL;
+	  CStdStringW strNameW;
+	  g_charsetConverter.utf8ToW(setting.name, strNameW);
+	  if(SUCCEEDED(g_dsGraph->pFilterGraph->FindFilterByName(strNameW, &pBF)))
+	  {
+		  //Showing the property page for this filter
+		  m_pDSPropertyPage = new CDSPropertyPage(pBF);
+		  m_pDSPropertyPage->Initialize();
+	  }
   }
 #endif
   else if (setting.id == VIDEO_SETTINGS_DEINTERLACEMODE)
@@ -343,4 +358,5 @@ CStdString CGUIDialogVideoSettings::FormatFloat(float value, float minimum)
   text.Format("%2.2f", value);
   return text;
 }
+
 

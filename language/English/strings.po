@@ -6082,7 +6082,7 @@ msgid "or use phrases to find an exact match, like \"The wizard of Oz\"."
 msgstr ""
 
 msgctxt "#19003"
-msgid "Find similar programs"
+msgid "Find similar programme"
 msgstr ""
 
 msgctxt "#19004"
@@ -11148,7 +11148,7 @@ msgid "Use system filters (DirectShow merits)"
 msgstr ""
 
 msgctxt "#55022"
-msgid "Min Blu-ray title length"
+msgid "Min. Blu-ray title length (min.)"
 msgstr ""
 
 msgctxt "#55023"

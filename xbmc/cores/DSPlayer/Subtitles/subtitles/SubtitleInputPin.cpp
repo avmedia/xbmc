@@ -323,7 +323,7 @@ STDMETHODIMP CSubtitleInputPin::Receive(IMediaSample* pSample)
   {
     CAutoLock cAutoLock(m_pSubLock);
 
-    if(m_mt.subtype == MEDIASUBTYPE_UTF8 || m_mt.subtype == MEDIASUBTYPE_SSA || m_mt.subtype == MEDIASUBTYPE_ASS || m_mt.subtype == MEDIASUBTYPE_ASS2)
+    if(m_mt.subtype == MEDIASUBTYPE_UTF8||m_mt.subtype == MEDIASUBTYPE_SSA || m_mt.subtype == MEDIASUBTYPE_ASS || m_mt.subtype == MEDIASUBTYPE_ASS2)
     {
       CRenderedTextSubtitle* pRTS = (CRenderedTextSubtitle*)(ISubStream*)m_pSubStream;
 
@@ -332,6 +332,43 @@ STDMETHODIMP CSubtitleInputPin::Receive(IMediaSample* pSample)
       {
         pRTS->Add(str, true, (int)(tStart / 10000), (int)(tStop / 10000));
         fInvalidate = true;
+      }
+    }
+    else if(m_mt.subtype == MEDIASUBTYPE_SSA || m_mt.subtype == MEDIASUBTYPE_ASS || m_mt.subtype == MEDIASUBTYPE_ASS2)
+    {
+      CRenderedTextSubtitle* pRTS = (CRenderedTextSubtitle*)(ISubStream*)m_pSubStream;
+
+      CStdStringW str = UTF8To16(CStdStringA((LPCSTR)pData, len)).Trim();
+      if(!str.IsEmpty())
+      {
+        STSEntry stse;
+
+        int fields = m_mt.subtype == MEDIASUBTYPE_ASS2 ? 10 : 9;
+
+        std::list<CStdStringW> sl;
+        Explode(str, sl, ',', fields);
+        if(sl.size() == (size_t)fields)
+        {
+          stse.readorder = wcstol(sl.front(), NULL, 10); sl.pop_front();
+          stse.layer = wcstol(sl.front(), NULL, 10); sl.pop_front();
+          stse.style = sl.front(); sl.pop_front();
+          stse.actor = sl.front(); sl.pop_front();
+          stse.marginRect.left = wcstol(sl.front(), NULL, 10); sl.pop_front();
+          stse.marginRect.right = wcstol(sl.front(), NULL, 10); sl.pop_front();
+          stse.marginRect.top = stse.marginRect.bottom = wcstol(sl.front(), NULL, 10); sl.pop_front();
+          if(fields == 10) { 
+			  stse.marginRect.bottom = wcstol(sl.front(), NULL, 10); sl.pop_front();
+		  }
+          stse.effect = sl.front(); sl.pop_front();
+          stse.str = sl.front(); sl.pop_front();
+        }
+
+        if(!stse.str.IsEmpty())
+        {
+          pRTS->Add(stse.str, true, (int)(tStart / 10000), (int)(tStop / 10000), 
+            stse.style, stse.actor, stse.effect, stse.marginRect, stse.layer, stse.readorder);
+          fInvalidate = true;
+        }
       }
     }
     else if(m_mt.subtype == MEDIASUBTYPE_SSF)

@@ -323,7 +323,7 @@ STDMETHODIMP CSubtitleInputPin::Receive(IMediaSample* pSample)
   {
     CAutoLock cAutoLock(m_pSubLock);
 
-    if(m_mt.subtype == MEDIASUBTYPE_UTF8||m_mt.subtype == MEDIASUBTYPE_SSA || m_mt.subtype == MEDIASUBTYPE_ASS || m_mt.subtype == MEDIASUBTYPE_ASS2)
+    if(m_mt.subtype == MEDIASUBTYPE_UTF8)
     {
       CRenderedTextSubtitle* pRTS = (CRenderedTextSubtitle*)(ISubStream*)m_pSubStream;
 
@@ -347,7 +347,7 @@ STDMETHODIMP CSubtitleInputPin::Receive(IMediaSample* pSample)
 
         std::list<CStdStringW> sl;
         Explode(str, sl, ',', fields);
-        if(sl.size() == (size_t)fields)
+        if(sl.size() == fields)
         {
           stse.readorder = wcstol(sl.front(), NULL, 10); sl.pop_front();
           stse.layer = wcstol(sl.front(), NULL, 10); sl.pop_front();
@@ -356,9 +356,7 @@ STDMETHODIMP CSubtitleInputPin::Receive(IMediaSample* pSample)
           stse.marginRect.left = wcstol(sl.front(), NULL, 10); sl.pop_front();
           stse.marginRect.right = wcstol(sl.front(), NULL, 10); sl.pop_front();
           stse.marginRect.top = stse.marginRect.bottom = wcstol(sl.front(), NULL, 10); sl.pop_front();
-          if(fields == 10) { 
-			  stse.marginRect.bottom = wcstol(sl.front(), NULL, 10); sl.pop_front();
-		  }
+          if(fields == 10) { stse.marginRect.bottom = wcstol(sl.front(), NULL, 10); sl.pop_front(); }
           stse.effect = sl.front(); sl.pop_front();
           stse.str = sl.front(); sl.pop_front();
         }

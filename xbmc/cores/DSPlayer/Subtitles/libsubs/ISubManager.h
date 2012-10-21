@@ -86,7 +86,7 @@ public:
   virtual void SetSizes(Com::SmartRect window, Com::SmartRect video) = 0;
   virtual void SetTime(REFERENCE_TIME rtNow) = 0;
   virtual void SetSubPicProvider(ISubStream* pSubStream) = 0;
-  virtual void SetStyle(SSubStyle* style) = 0;
+  virtual void SetStyle(SSubStyle* style, bool bOverride) = 0;
   virtual void StopThread() = 0;
   virtual void StartThread(IDirect3DDevice9* pD3DDevice) = 0;
   virtual HRESULT InsertPassThruFilter(IGraphBuilder* pGB) = 0;

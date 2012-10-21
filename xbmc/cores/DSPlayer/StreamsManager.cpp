@@ -1009,7 +1009,8 @@ void CSubtitleManager::Initialize()
   if (style.fontName)
     wcscpy_s(style.fontName, fontName.length() + 1, fontName.c_str());
 
-  m_pManager->SetStyle(&style);
+  bool override = g_guiSettings.GetBool("subtitles.overrideassfonts");
+  m_pManager->SetStyle(&style, override);
 
   if (FAILED(m_pManager->InsertPassThruFilter(g_dsGraph->pFilterGraph)))
   {

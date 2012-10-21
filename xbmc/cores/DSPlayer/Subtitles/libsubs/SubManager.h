@@ -19,7 +19,7 @@ public:
   void SetTimePerFrame(REFERENCE_TIME timePerFrame);
   void SetTime(REFERENCE_TIME rtNow);
 
-  void SetStyle(SSubStyle* style);
+  void SetStyle(SSubStyle* style, bool bOverride);
   void SetSubPicProvider(ISubStream* pSubStream);
   void SetTextureSize(Com::SmartSize& pSize);
   void SetSizes(Com::SmartRect window, Com::SmartRect video);
@@ -55,7 +55,7 @@ private:
   double m_fps;
   
   STSStyle m_style;
-  bool m_useDefaultStyle;
+  bool m_bOverrideStyle;
 
   SSubSettings m_settings;
   Com::SmartSize m_lastSize;

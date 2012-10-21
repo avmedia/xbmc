@@ -15,7 +15,7 @@ BOOL g_overrideUserStyles;
 
 CSubManager::CSubManager(IDirect3DDevice9* d3DDev, SIZE size, SSubSettings settings, HRESULT& hr) :
   m_d3DDev(d3DDev), m_iSubtitleSel(-1), m_rtNow(-1), m_lastSize(size),
-  m_rtTimePerFrame(0), m_useDefaultStyle(true), m_pSubPicProvider(NULL)
+  m_rtTimePerFrame(0), m_bOverrideStyle(false), m_pSubPicProvider(NULL)
 {
   if (! d3DDev)
   {
@@ -78,7 +78,7 @@ void CSubManager::StartThread(IDirect3DDevice9* pD3DDevice)
   m_pSubPicQueue->SetSubPicProvider(m_pSubPicProvider);
 }
 
-void CSubManager::SetStyle(SSubStyle* style)
+void CSubManager::SetStyle(SSubStyle* style, bool bOverride)
 {
   m_style.SetDefault();
 
@@ -99,7 +99,7 @@ void CSubManager::SetStyle(SSubStyle* style)
   if (style->fontName)
     CoTaskMemFree(style->fontName);
 
-  m_useDefaultStyle = false;
+  m_bOverrideStyle = bOverride;
 }
 void CSubManager::ApplyStyle(CRenderedTextSubtitle* pRTS)
 {
@@ -108,7 +108,7 @@ void CSubManager::ApplyStyle(CRenderedTextSubtitle* pRTS)
 
 void CSubManager::ApplyStyleSubStream(ISubStream* pSubStream)
 {
-  if (m_useDefaultStyle || !pSubStream)
+  if (!pSubStream)
     return;
 
   CLSID clsid;
@@ -120,7 +120,8 @@ void CSubManager::ApplyStyleSubStream(ISubStream* pSubStream)
     CRenderedTextSubtitle* pRTS = (CRenderedTextSubtitle*)(ISubStream*)pSubStream;
 
     pRTS->SetDefaultStyle(m_style);
-    //pRTS->SetOverride(true, &m_style); // Don't override, or maybe set an option on gui
+
+    pRTS->SetOverride(m_bOverrideStyle, &m_style); 
 
     pRTS->Deinit();
   }

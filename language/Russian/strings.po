@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Unofficial XBMC Russian translation project\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
 "POT-Creation-Date: 2012-05-04 12:46+0000\n"
-"PO-Revision-Date: 2012-10-04 20:34+0000\n"
+"PO-Revision-Date: 2012-10-16 09:02+0000\n"
 "Last-Translator: Roman Miroshnychenko <romanvm@yandex.ru>\n"
 "Language-Team: Russian (http://www.transifex.com/projects/p/xbmc_ru/language/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -553,6 +553,10 @@ msgstr "Диск в приводе"
 msgctxt "#166"
 msgid "Skin"
 msgstr "Обложка"
+
+msgctxt "#167"
+msgid "Cancel file operations"
+msgstr "Отмена операции с файлами"
 
 msgctxt "#169"
 msgid "Resolution"
@@ -3090,6 +3094,10 @@ msgctxt "#1273"
 msgid "AirPlay"
 msgstr "AirPlay"
 
+msgctxt "#1275"
+msgid "Filter %s"
+msgstr "Фильтр %s"
+
 msgctxt "#1300"
 msgid "Custom audio device"
 msgstr "Другое аудиоустройство"
@@ -4608,6 +4616,14 @@ msgctxt "#13432"
 msgid "Allow hardware acceleration (VideoToolbox)"
 msgstr "Включить аппаратное ускорение (VideoToolbox)"
 
+msgctxt "#13433"
+msgid "Play the next video automatically"
+msgstr "Автоматически проигрывать следующий видеофайл"
+
+msgctxt "#13434"
+msgid "Play only this"
+msgstr "Проиграть только этот файл"
+
 msgctxt "#13500"
 msgid "A/V sync method"
 msgstr "Синхронизация А/В"
@@ -5063,6 +5079,10 @@ msgstr "Воспроизвести"
 msgctxt "#14099"
 msgid "Eject disc when CD ripping is complete"
 msgstr "Извлекать CD по окончании оцифровки"
+
+msgctxt "#14100"
+msgid "Stop ripping CD"
+msgstr "Остановить оцифровку CD"
 
 msgctxt "#15015"
 msgid "Remove"
@@ -6814,6 +6834,22 @@ msgstr "серверное ПО и соответствующее дополне
 msgctxt "#19274"
 msgid "Please visit xbmc.org/pvr to learn more."
 msgstr "Посетите xbmc.org/pvr для получения подробностей."
+
+msgctxt "#19275"
+msgid "Conflict warning"
+msgstr "Предупреждение о конфликте"
+
+msgctxt "#19276"
+msgid "Conflict error"
+msgstr "Ошибка из-за конфликта"
+
+msgctxt "#19277"
+msgid "Recording conflict"
+msgstr "Конфликт записи"
+
+msgctxt "#19278"
+msgid "Recording error"
+msgstr "Ошибка записи"
 
 msgctxt "#19499"
 msgid "Other/Unknown"
@@ -9007,6 +9043,22 @@ msgctxt "#21465"
 msgid "Above video"
 msgstr "Над видео"
 
+msgctxt "#21466"
+msgid "between"
+msgstr "между"
+
+msgctxt "#21467"
+msgid "%.1f to %.1f"
+msgstr "%.1f — %.1f"
+
+msgctxt "#21468"
+msgid "%d to %d"
+msgstr "%d — %d"
+
+msgctxt "#21469"
+msgid "%s to %s"
+msgstr "%s — %s"
+
 msgctxt "#21800"
 msgid "File name"
 msgstr "Имя файла"
@@ -10370,9 +10422,15 @@ msgctxt "#35009"
 msgid "Do not use the custom keymap for this device"
 msgstr "Не использовать пользовательскую раскладку для этого устройства"
 
+#: xbmc/settings/GUISettings.cpp
 msgctxt "#35100"
 msgid "Enable joystick and gamepad support"
 msgstr "Включить поддержку джойстика и геймпада"
+
+#: xbmc/settings/GUISettings.cpp
+msgctxt "#35101"
+msgid "Disable joystick when iMON is present"
+msgstr "Отключить джойстик при наличии iMON"
 
 msgctxt "#35500"
 msgid "Location"
@@ -10656,7 +10714,8 @@ msgid "Use as the default video player"
 msgstr "Использовать как проигрыватель видео по умолчанию"
 
 msgctxt "#55032"
-msgid "Show Blu-ray titles and Matroska Editions choice dialog (AVSplitter only)"
+msgid ""
+"Show Blu-ray titles and Matroska Editions choice dialog (AVSplitter only)"
 msgstr "Показывать тайтлы Blu-ray и версии видео MKV (только AVSplitter)"
 
 #. 55050-55100 Directshow Subtitles

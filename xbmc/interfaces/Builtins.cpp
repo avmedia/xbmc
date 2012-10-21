@@ -771,13 +771,7 @@ int CBuiltins::Execute(const CStdString& execString)
     else if( parameter.Equals("record") )
     {
       if( g_application.IsPlaying() && g_application.m_pPlayer && g_application.m_pPlayer->CanRecord())
-      {
-#ifdef HAS_WEB_SERVER_BROADCAST
-        if (m_pXbmcHttp && g_settings.m_HttpApiBroadcastLevel>=1)
-          CApplicationMessenger::Get().HttpApi(g_application.m_pPlayer->IsRecording()?"broadcastlevel; RecordStopping;1":"broadcastlevel; RecordStarting;1");
-#endif
         g_application.m_pPlayer->Record(!g_application.m_pPlayer->IsRecording());
-      }
     }
     else if (parameter.Left(9).Equals("partymode"))
     {
@@ -1192,6 +1186,19 @@ int CBuiltins::Execute(const CStdString& execString)
     else // execute.Equals("skin.setpath"))
     {
       g_mediaManager.GetNetworkLocations(localShares);
+      if (params.size() > 1)
+      {
+        value = params[1];
+        URIUtils::AddSlashAtEnd(value);
+        bool bIsSource;
+        if (CUtil::GetMatchingSource(value,localShares,bIsSource) < 0) // path is outside shares - add it as a separate one
+        {
+          CMediaSource share;
+          share.strName = g_localizeStrings.Get(13278);
+          share.strPath = value;
+          localShares.push_back(share);
+        }
+      }
       if (CGUIDialogFileBrowser::ShowAndGetDirectory(localShares, g_localizeStrings.Get(1031), value))
         g_settings.SetSkinString(string, value);
     }

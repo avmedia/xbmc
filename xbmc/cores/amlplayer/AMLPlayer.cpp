@@ -25,7 +25,7 @@
 #include "FileItem.h"
 #include "FileURLProtocol.h"
 #include "GUIInfoManager.h"
-#include "ThumbLoader.h"
+#include "video/VideoThumbLoader.h"
 #include "Util.h"
 #include "cores/VideoRenderers/RenderFlags.h"
 #include "cores/VideoRenderers/RenderFormats.h"
@@ -46,7 +46,6 @@
 #include "utils/LangCodeExpander.h"
 #include "utils/Variant.h"
 #include "windowing/WindowingFactory.h"
-#include "windowing/egl/WinEGLPlatform.h"
 
 // for external subtitles
 #include "xbmc/cores/dvdplayer/DVDClock.h"

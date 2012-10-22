@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: en\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n;"
 
 msgctxt "#0"
 msgid "Programs"
@@ -214,77 +214,121 @@ msgctxt "#62"
 msgid "Dec"
 msgstr ""
 
+#strings from 71 to 97 are reserved for weather translation
 #empty strings from id 63 to 70
 
+#. Weather token
 msgctxt "#71"
 msgid "N"
 msgstr ""
 
+#. Weather token
 msgctxt "#72"
 msgid "NNE"
 msgstr ""
 
+#. Weather token
 msgctxt "#73"
 msgid "NE"
 msgstr ""
 
+#. Weather token
 msgctxt "#74"
 msgid "ENE"
 msgstr ""
 
+#. Weather token
 msgctxt "#75"
 msgid "E"
 msgstr ""
 
+#. Weather token
 msgctxt "#76"
 msgid "ESE"
 msgstr ""
 
+#. Weather token
 msgctxt "#77"
 msgid "SE"
 msgstr ""
 
+#. Weather token
 msgctxt "#78"
 msgid "SSE"
 msgstr ""
 
+#. Weather token
 msgctxt "#79"
 msgid "S"
 msgstr ""
 
+#. Weather token
 msgctxt "#80"
 msgid "SSW"
 msgstr ""
 
+#. Weather token
 msgctxt "#81"
 msgid "SW"
 msgstr ""
 
+#. Weather token
 msgctxt "#82"
 msgid "WSW"
 msgstr ""
 
+#. Weather token
 msgctxt "#83"
 msgid "W"
 msgstr ""
 
+#. Weather token
 msgctxt "#84"
 msgid "WNW"
 msgstr ""
 
+#. Weather token
 msgctxt "#85"
 msgid "NW"
 msgstr ""
 
+#. Weather token
 msgctxt "#86"
 msgid "NNW"
 msgstr ""
 
+#. Weather token
 msgctxt "#87"
 msgid "VAR"
 msgstr ""
 
-#empty strings from id 88 to 97
+#. Weather token
+msgctxt "#88"
+msgid "South"
+msgstr ""
+
+#. Weather token
+msgctxt "#89"
+msgid "North"
+msgstr ""
+
+#. Weather token
+msgctxt "#90"
+msgid "West"
+msgstr ""
+
+#. Weather token
+msgctxt "#91"
+msgid "East"
+msgstr ""
+
+#. Weather token
+msgctxt "#92"
+msgid "Variable"
+msgstr ""
+
+#strings through to 97 reserved for weather translation
+#empty strings from id 93 to 97
 
 msgctxt "#98"
 msgid "View: Auto"
@@ -1338,106 +1382,134 @@ msgctxt "#369"
 msgid "Title"
 msgstr ""
 
+#strings from 370 to 395 are reserved for weather translation
+
+#. Weather token
 msgctxt "#370"
 msgid "Thunderstorms"
 msgstr ""
 
+#. Weather token
 msgctxt "#371"
 msgid "Partly"
 msgstr ""
 
+#. Weather token
 msgctxt "#372"
 msgid "Mostly"
 msgstr ""
 
+#. Weather token
 msgctxt "#373"
 msgid "Sunny"
 msgstr ""
 
+#. Weather token
 msgctxt "#374"
 msgid "Cloudy"
 msgstr ""
 
+#. Weather token
 msgctxt "#375"
 msgid "Snow"
 msgstr ""
 
+#. Weather token
 msgctxt "#376"
 msgid "Rain"
 msgstr ""
 
+#. Weather token
 msgctxt "#377"
 msgid "Light"
 msgstr ""
 
+#. Weather token
 msgctxt "#378"
 msgid "AM"
 msgstr ""
 
+#. Weather token
 msgctxt "#379"
 msgid "PM"
 msgstr ""
 
+#. Weather token
 msgctxt "#380"
 msgid "Showers"
 msgstr ""
 
+#. Weather token
 msgctxt "#381"
 msgid "Few"
 msgstr ""
 
+#. Weather token
 msgctxt "#382"
 msgid "Scattered"
 msgstr ""
 
+#. Weather token
 msgctxt "#383"
 msgid "Wind"
 msgstr ""
 
+#. Weather token
 msgctxt "#384"
 msgid "Strong"
 msgstr ""
 
+#. Weather token
 msgctxt "#385"
 msgid "Fair"
 msgstr ""
 
+#. Weather token
 msgctxt "#386"
 msgid "Clear"
 msgstr ""
 
+#. Weather token
 msgctxt "#387"
 msgid "Clouds"
 msgstr ""
 
+#. Weather token
 msgctxt "#388"
 msgid "Early"
 msgstr ""
 
+#. Weather token
 msgctxt "#389"
 msgid "Shower"
 msgstr ""
 
+#. Weather token
 msgctxt "#390"
 msgid "Flurries"
 msgstr ""
 
+#. Weather token
 msgctxt "#391"
 msgid "Low"
 msgstr ""
 
+#. Weather token
 msgctxt "#392"
 msgid "Medium"
 msgstr ""
 
+#. Weather token
 msgctxt "#393"
 msgid "High"
 msgstr ""
 
+#. Weather token
 msgctxt "#394"
 msgid "Fog"
 msgstr ""
 
+#. Weather token
 msgctxt "#395"
 msgid "Haze"
 msgstr ""
@@ -3220,122 +3292,280 @@ msgctxt "#1301"
 msgid "Custom passthrough device"
 msgstr ""
 
+#strings from 1396 to 1449 are reserved for weather translation
 #empty strings from id 1302 to 1395
 
+#. Weather token
 msgctxt "#1396"
 msgid "Drifting"
 msgstr ""
 
+#. Weather token
 msgctxt "#1397"
 msgid "and"
 msgstr ""
 
+#. Weather token
 msgctxt "#1398"
 msgid "Freezing"
 msgstr ""
 
+#. Weather token
 msgctxt "#1399"
 msgid "Late"
 msgstr ""
 
+#. Weather token
 msgctxt "#1400"
 msgid "Isolated"
 msgstr ""
 
+#. Weather token
 msgctxt "#1401"
 msgid "Thundershowers"
 msgstr ""
 
+#. Weather token
 msgctxt "#1402"
 msgid "Thunder"
 msgstr ""
 
+#. Weather token
 msgctxt "#1403"
 msgid "Sun"
 msgstr ""
 
+#. Weather token
 msgctxt "#1404"
 msgid "Heavy"
 msgstr ""
 
+#. Weather token
 msgctxt "#1405"
 msgid "in"
 msgstr ""
 
+#. Weather token
 msgctxt "#1406"
 msgid "the"
 msgstr ""
 
+#. Weather token
 msgctxt "#1407"
 msgid "Vicinity"
 msgstr ""
 
+#. Weather token
 msgctxt "#1408"
 msgid "Ice"
 msgstr ""
 
+#. Weather token
 msgctxt "#1409"
 msgid "Crystals"
 msgstr ""
 
+#. Weather token
 msgctxt "#1410"
 msgid "Calm"
 msgstr ""
 
+#. Weather token
 msgctxt "#1411"
 msgid "with"
 msgstr ""
 
+#. Weather token
 msgctxt "#1412"
 msgid "windy"
 msgstr ""
 
+#. Weather token
 msgctxt "#1413"
-msgid "drizzle"
+msgid "Patches"
 msgstr ""
 
+#. Weather token
 msgctxt "#1414"
 msgid "Thunderstorm"
 msgstr ""
 
+#. Weather token
 msgctxt "#1415"
 msgid "Drizzle"
 msgstr ""
 
+#. Weather token
 msgctxt "#1416"
 msgid "Foggy"
 msgstr ""
 
+#. Weather token
 msgctxt "#1417"
 msgid "Grains"
 msgstr ""
 
+#. Weather token
 msgctxt "#1418"
-msgid "T-Storms"
+msgid "Thunderstorms"
 msgstr ""
 
+#. Weather token
 msgctxt "#1419"
-msgid "T-Showers"
+msgid "Shallow"
 msgstr ""
 
+#. Weather token
 msgctxt "#1420"
 msgid "Moderate"
 msgstr ""
 
+#. Weather token
 msgctxt "#1421"
 msgid "Very High"
 msgstr ""
 
+#. Weather token
 msgctxt "#1422"
 msgid "Windy"
 msgstr ""
 
+#. Weather token
 msgctxt "#1423"
 msgid "Mist"
 msgstr ""
 
-#strings through to 1450 reserved for weather translation
-#empty strings from id 1424 to 1449
+#. Weather token
+msgctxt "#1424"
+msgid "Overcast"
+msgstr ""
+
+#. Weather token
+msgctxt "#1425"
+msgid "Pellets"
+msgstr ""
+
+#. Weather token
+msgctxt "#1426"
+msgid "Hail"
+msgstr ""
+
+#. Weather token
+msgctxt "#1427"
+msgid "Smoke"
+msgstr ""
+
+#. Weather token
+msgctxt "#1428"
+msgid "Volcanic"
+msgstr ""
+
+#. Weather token
+msgctxt "#1429"
+msgid "Ash"
+msgstr ""
+
+#. Weather token
+msgctxt "#1430"
+msgid "Widespread"
+msgstr ""
+
+#. Weather token
+msgctxt "#1431"
+msgid "Dust"
+msgstr ""
+
+#. Weather token
+msgctxt "#1432"
+msgid "Sand"
+msgstr ""
+
+#. Weather token
+msgctxt "#1433"
+msgid "Spray"
+msgstr ""
+
+#. Weather token
+msgctxt "#1434"
+msgid "Whirls"
+msgstr ""
+
+#. Weather token
+msgctxt "#1435"
+msgid "Sandstorm"
+msgstr ""
+
+#. Weather token
+msgctxt "#1436"
+msgid "Blowing"
+msgstr ""
+
+#. Weather token
+msgctxt "#1437"
+msgid "Pellet"
+msgstr ""
+
+#. Weather token
+msgctxt "#1438"
+msgid "Small"
+msgstr ""
+
+#. Weather token
+msgctxt "#1439"
+msgid "and"
+msgstr ""
+
+#. Weather token
+msgctxt "#1440"
+msgid "Sleet"
+msgstr ""
+
+#. Weather token
+msgctxt "#1441"
+msgid "with"
+msgstr ""
+
+#. Weather token
+msgctxt "#1442"
+msgid "Chance"
+msgstr ""
+
+#. Weather token
+msgctxt "#1443"
+msgid "of"
+msgstr ""
+
+#. Weather token
+msgctxt "#1444"
+msgid "Funnel"
+msgstr ""
+
+#. Weather token
+msgctxt "#1445"
+msgid "Cloud"
+msgstr ""
+
+#. Weather token
+msgctxt "#1446"
+msgid "Unknown"
+msgstr ""
+
+#. Weather token
+msgctxt "#1447"
+msgid "Squals"
+msgstr ""
+
+#. Weather token
+msgctxt "#1448"
+msgid "Precipitation"
+msgstr ""
+
+#. Weather token
+msgctxt "#1449"
+msgid "Partial"
+msgstr ""
+
+#strings through to 1449 reserved for weather translation
 
 msgctxt "#1450"
 msgid "Put display to sleep when idle"

@@ -629,7 +629,7 @@ void CPeripheralCecAdapter::SetMenuLanguage(const char *strLanguage)
     CLog::Log(LOGWARNING, "%s - TV menu language set to unknown value '%s'", __FUNCTION__, strLanguage);
 }
 
-int CPeripheralCecAdapter::CecCommand(void *cbParam, const cec_command &command)
+int CPeripheralCecAdapter::CecCommand(void *cbParam, const cec_command command)
 {
   CPeripheralCecAdapter *adapter = (CPeripheralCecAdapter *)cbParam;
   if (!adapter)
@@ -703,7 +703,7 @@ int CPeripheralCecAdapter::CecCommand(void *cbParam, const cec_command &command)
   return 1;
 }
 
-int CPeripheralCecAdapter::CecConfiguration(void *cbParam, const libcec_configuration &config)
+int CPeripheralCecAdapter::CecConfiguration(void *cbParam, const libcec_configuration config)
 {
   CPeripheralCecAdapter *adapter = (CPeripheralCecAdapter *)cbParam;
   if (!adapter)
@@ -714,7 +714,7 @@ int CPeripheralCecAdapter::CecConfiguration(void *cbParam, const libcec_configur
   return 1;
 }
 
-int CPeripheralCecAdapter::CecAlert(void *cbParam, const libcec_alert alert, const libcec_parameter &data)
+int CPeripheralCecAdapter::CecAlert(void *cbParam, const libcec_alert alert, const libcec_parameter data)
 {
   CPeripheralCecAdapter *adapter = (CPeripheralCecAdapter *)cbParam;
   if (!adapter)
@@ -759,7 +759,7 @@ int CPeripheralCecAdapter::CecAlert(void *cbParam, const libcec_alert alert, con
   return 1;
 }
 
-int CPeripheralCecAdapter::CecKeyPress(void *cbParam, const cec_keypress &key)
+int CPeripheralCecAdapter::CecKeyPress(void *cbParam, const cec_keypress key)
 {
   CPeripheralCecAdapter *adapter = (CPeripheralCecAdapter *)cbParam;
   if (!adapter)
@@ -1168,7 +1168,7 @@ void CPeripheralCecAdapter::CecSourceActivated(void *cbParam, const CEC::cec_log
   }
 }
 
-int CPeripheralCecAdapter::CecLogMessage(void *cbParam, const cec_log_message &message)
+int CPeripheralCecAdapter::CecLogMessage(void *cbParam, const cec_log_message message)
 {
   CPeripheralCecAdapter *adapter = (CPeripheralCecAdapter *)cbParam;
   if (!adapter)

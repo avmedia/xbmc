@@ -11355,15 +11355,8 @@ msgid "On start/stop"
 msgstr ""
 
 #: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
-
-
-
-
-
-
-
-
-
+msgctxt "#36037"
+msgid "TV"
 msgstr ""
 
 #: xbmc/peripherals/devices/PeripheralCecAdapter.cpp

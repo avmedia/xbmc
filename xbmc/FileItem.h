@@ -367,7 +367,13 @@ public:
   CStdString m_strLockCode;
   int m_iHasLock; // 0 - no lock 1 - lock, but unlocked 2 - locked
   int m_iBadPwdCount;
-
+#ifdef HAS_DS_PLAYER
+  enum ItemType {
+	  ITEM_TYPE_NONE = 0, 
+	  ITEM_TYPE_BD, 
+	  ITEM_TYPE_DVD
+  } m_itemType;
+#endif
 private:
   CStdString m_strPath;            ///< complete path to item
 

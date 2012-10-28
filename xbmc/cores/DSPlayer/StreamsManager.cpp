@@ -150,7 +150,7 @@ void CStreamsManager::GetAudioStreamName(int iStream, CStdString &strStreamName)
 
 void CStreamsManager::SetAudioStream(int iStream)
 {
-  if (! m_init)
+  if (! m_init || m_audioStreams.size() == 0)
     return;
 
   if (CGraphFilters::Get()->IsDVD())

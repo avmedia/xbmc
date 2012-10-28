@@ -49,7 +49,7 @@ public:
   long episodeNumber;
 #ifdef HAS_DS_PLAYER
   CStdString edition;
-  unsigned int editionNumber;
+  int editionNumber;
 #endif
 
   enum EType

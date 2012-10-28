@@ -71,6 +71,7 @@
 #include "URL.h"
 #include "utils/EdenVideoArtUpdater.h"
 #include "GUIInfoManager.h"
+#include "filesystem/File.h"
 
 using namespace std;
 using namespace XFILE;
@@ -840,6 +841,9 @@ void CGUIWindowVideoBase::GetResumeItemOffset(const CFileItem *item, int& starto
     {
       startoffset = (int)(item->GetVideoInfoTag()->m_resumePoint.timeInSeconds*75);
       partNumber = item->GetVideoInfoTag()->m_resumePoint.partNumber;
+#ifdef HAS_DS_PLAYER
+	  strEdition = item->GetVideoInfoTag()->m_resumePoint.edition;
+#endif
     }
     else
     {
@@ -1582,6 +1586,11 @@ void CGUIWindowVideoBase::PlayMovie(const CFileItem *item)
 {
   CFileItemPtr movieItem(new CFileItem(*item));
 
+#ifdef HAS_DS_PLAYER
+  if(AutoLoadBD(movieItem))
+	  return;
+#endif
+
   if(!ShowPlaySelection(movieItem))
     return;
 
@@ -1761,6 +1770,11 @@ void CGUIWindowVideoBase::PlayItem(int iItem)
   // the currently playing temp playlist
 
   const CFileItemPtr pItem = m_vecItems->Get(iItem);
+
+#ifdef HAS_DS_PLAYER
+  if(AutoLoadBD(pItem))
+	  return;
+#endif
   // if its a folder, build a temp playlist
   if (pItem->m_bIsFolder && !pItem->IsPlugin())
   {
@@ -2192,3 +2206,30 @@ void CGUIWindowVideoBase::OnInitWindow()
     }
   }
 }
+
+#ifdef HAS_DS_PLAYER
+bool CGUIWindowVideoBase::AutoLoadBD(const CFileItemPtr &item)
+{
+	bool dsplayer = g_guiSettings.GetBool("dsplayer.defaultvideoplayer");
+	PLAYERCOREID defaultPlayer = dsplayer ? EPC_DSPLAYER : CPlayerCoreFactory::GetPlayerCore("videodefaultplayer");
+
+	if((g_application.m_eForcedNextPlayer == EPC_DSPLAYER ||(defaultPlayer == EPC_DSPLAYER && g_application.m_eForcedNextPlayer == EPC_NONE)) && g_guiSettings.GetBool("dsplayer.bdautoloadindex") )
+	{
+		CStdString strPath;
+		if (item->IsVideoDb() && item->HasVideoInfoTag())
+			strPath = item->GetVideoInfoTag()->m_strFileNameAndPath;
+		else if(item->IsBDFile())
+			strPath = item->GetPath();
+		else
+			strPath = item->GetPath() + "BDMV\\index.bdmv";
+
+		CStdString strFileName = URIUtils::GetFileName(strPath);
+		if(strFileName.Equals("index.bdmv") && XFILE::CFile::Exists(strPath))
+		{
+			item->SetPath(strPath);
+			return item->m_lStartOffset == STARTOFFSET_RESUME || ShowResumeMenu(*item) ? CGUIMediaWindow::OnPlayMedia(item) : true;
+		} 
+	}
+	return false;
+}
+#endif

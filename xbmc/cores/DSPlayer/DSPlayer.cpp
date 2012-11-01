@@ -365,6 +365,9 @@ void CDSPlayer::Stop()
 
 void CDSPlayer::Pause()
 {
+  if (PlayerState == DSPLAYER_LOADING || PlayerState == DSPLAYER_LOADED)
+	return;
+
   m_pGraphThread.SetSpeedChanged(true);
   if ( PlayerState == DSPLAYER_PAUSED )
   {

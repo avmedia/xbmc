@@ -49,7 +49,7 @@
 						<visible>!Window.IsVisible(Videos)</visible>
 					</control>
 					<control type="label">
-						<posx>557</posx>
+						<posx>620</posx>
 						<posy>0</posy>
 						<width>400</width>
 						<height>40</height>
@@ -63,9 +63,9 @@
 						<animation effect="slide" start="0,0" end="40,0" delay="0" time="0" condition="![Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]">conditional</animation>
 					</control>
 					<control type="image">
-						<posx>562</posx>
+						<posx>625</posx>
 						<posy>8</posy>
-						<width>63</width>
+						<width>40</width>
 						<height>26</height>
 						<texture>$INFO[ListItem.ItemType,flagging/lists/,.png]</texture>
 						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
@@ -76,7 +76,7 @@
 						<width>40</width>
 						<height>26</height>
 						<texture>$INFO[ListItem.VideoResolution,flagging/lists/,.png]</texture>
-						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
+						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)] + IsEmpty(ListItem.ItemType)</visible>
 					</control>
 					<control type="image">
 						<posx>665</posx>
@@ -148,7 +148,7 @@
 						<visible>!Window.IsVisible(Videos)</visible>
 					</control>
 					<control type="label">
-						<posx>557</posx>
+						<posx>620</posx>
 						<posy>0</posy>
 						<width>400</width>
 						<height>40</height>
@@ -162,9 +162,9 @@
 						<animation effect="slide" start="0,0" end="40,0" delay="0" time="0" condition="![Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]">conditional</animation>
 					</control>
 					<control type="image">
-						<posx>562</posx>
+						<posx>625</posx>
 						<posy>8</posy>
-						<width>63</width>
+						<width>40</width>
 						<height>26</height>
 						<texture>$INFO[ListItem.ItemType,flagging/lists/,.png]</texture>
 						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
@@ -175,7 +175,7 @@
 						<width>40</width>
 						<height>26</height>
 						<texture>$INFO[ListItem.VideoResolution,flagging/lists/,.png]</texture>
-						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
+						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)] + IsEmpty(ListItem.ItemType)</visible>
 					</control>
 					<control type="image">
 						<posx>665</posx>
@@ -554,7 +554,7 @@
 						<visible>!Window.IsVisible(Videos)</visible>
 					</control>
 					<control type="label">
-						<posx>942</posx>
+						<posx>1005</posx>
 						<posy>0</posy>
 						<width>940</width>
 						<height>40</height>
@@ -568,9 +568,9 @@
 						<animation effect="slide" start="0,0" end="40,0" delay="0" time="0" condition="![Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]">conditional</animation>
 					</control>
 					<control type="image">
-						<posx>947</posx>
+						<posx>1010</posx>
 						<posy>8</posy>
-						<width>63</width>
+						<width>40</width>
 						<height>26</height>
 						<texture>$INFO[ListItem.ItemType,flagging/lists/,.png]</texture>
 						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
@@ -581,7 +581,7 @@
 						<width>40</width>
 						<height>26</height>
 						<texture>$INFO[ListItem.VideoResolution,flagging/lists/,.png]</texture>
-						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
+						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)] + IsEmpty(ListItem.ItemType)</visible>
 					</control>
 					<control type="image">
 						<posx>1050</posx>
@@ -637,7 +637,7 @@
 					<control type="label">
 						<posx>60</posx>
 						<posy>0</posy>
-						<width>880</width>
+						<width>950</width>
 						<height>40</height>
 						<font>font13</font>
 						<textcolor>white</textcolor>
@@ -660,7 +660,7 @@
 						<visible>!Window.IsVisible(Videos)</visible>
 					</control>
 					<control type="label">
-						<posx>942</posx>
+						<posx>1005</posx>
 						<posy>0</posy>
 						<width>940</width>
 						<height>40</height>
@@ -674,9 +674,9 @@
 						<animation effect="slide" start="0,0" end="40,0" delay="0" time="0" condition="![Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]">conditional</animation>
 					</control>
 					<control type="image">
-						<posx>947</posx>
+						<posx>1010</posx>
 						<posy>8</posy>
-						<width>63</width>
+						<width>40</width>
 						<height>26</height>
 						<texture>$INFO[ListItem.ItemType,flagging/lists/,.png]</texture>
 						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
@@ -687,7 +687,7 @@
 						<width>40</width>
 						<height>26</height>
 						<texture>$INFO[ListItem.VideoResolution,flagging/lists/,.png]</texture>
-						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
+						<visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)] + IsEmpty(ListItem.ItemType)</visible>
 					</control>
 					<control type="image">
 						<posx>1050</posx>

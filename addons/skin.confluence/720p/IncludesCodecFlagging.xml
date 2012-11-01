@@ -20,7 +20,7 @@
 	<include name="VideoCodecFlaggingConditions">
 		<control type="image">
 			<description>Folder Type</description>
-			<width>80</width>
+			<width>55</width>
 			<height>35</height>
 			<aspectratio align="right">keep</aspectratio>
 			<texture>$INFO[ListItem.ItemType,flagging/video/,.png]</texture>

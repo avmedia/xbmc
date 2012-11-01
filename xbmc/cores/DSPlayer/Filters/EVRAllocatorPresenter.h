@@ -191,7 +191,7 @@
     Com::SmartPtr<IDirect3DDeviceManager9>    m_pD3DManager;
     Com::SmartPtr<IMFTransform>               m_pMixer;
     Com::SmartPtr<IMediaEventSink>            m_pSink;
-    Com::SmartPtr<IMFVideoMediaType>          m_pMediaType;
+    Com::SmartPtr<IMFMediaType>				  m_pMediaType;
     MFVideoAspectRatioMode                    m_dwVideoAspectRatioMode;
     MFVideoRenderPrefs                        m_dwVideoRenderPrefs;
     COLORREF                                  m_BorderColor;

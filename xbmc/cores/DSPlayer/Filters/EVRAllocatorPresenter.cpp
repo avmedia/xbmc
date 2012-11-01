@@ -900,11 +900,12 @@ HRESULT CEVRAllocatorPresenter::CreateProposedOutputType(IMFMediaType* pMixerTyp
   AM_MEDIA_TYPE*    pAMMedia = NULL;
   LARGE_INTEGER    i64Size;
   MFVIDEOFORMAT*    VideoFormat;
+  Com::SmartPtr<IMFVideoMediaType> pMediaType;
 
   CheckHR (pMixerType->GetRepresentation  (FORMAT_MFVideoFormat, (void**)&pAMMedia));
   
   VideoFormat = (MFVIDEOFORMAT*)pAMMedia->pbFormat;
-  hr = pfMFCreateVideoMediaType(VideoFormat, &m_pMediaType);
+  hr = pfMFCreateVideoMediaType(VideoFormat, &pMediaType);
 
   if (0)
   {
@@ -941,23 +942,23 @@ HRESULT CEVRAllocatorPresenter::CreateProposedOutputType(IMFMediaType* pMixerTyp
   {
     i64Size.HighPart = VideoFormat->videoInfo.dwWidth;
     i64Size.LowPart   = VideoFormat->videoInfo.dwHeight;
-    m_pMediaType->SetUINT64 (MF_MT_FRAME_SIZE, i64Size.QuadPart);
+    pMediaType->SetUINT64 (MF_MT_FRAME_SIZE, i64Size.QuadPart);
 
-    m_pMediaType->SetUINT32 (MF_MT_PAN_SCAN_ENABLED, 0);
+    pMediaType->SetUINT32 (MF_MT_PAN_SCAN_ENABLED, 0);
     
     if ( ((CEVRRendererSettings *)g_dsSettings.pRendererSettings)->outputRange == OUTPUT_RANGE_16_235)
-      m_pMediaType->SetUINT32 (MF_MT_VIDEO_NOMINAL_RANGE, MFNominalRange_16_235);
+      pMediaType->SetUINT32 (MF_MT_VIDEO_NOMINAL_RANGE, MFNominalRange_16_235);
     else
-      m_pMediaType->SetUINT32 (MF_MT_VIDEO_NOMINAL_RANGE, MFNominalRange_0_255);
+      pMediaType->SetUINT32 (MF_MT_VIDEO_NOMINAL_RANGE, MFNominalRange_0_255);
 
     m_LastSetOutputRange = ((CEVRRendererSettings *)g_dsSettings.pRendererSettings)->outputRange;
 
     i64Size.HighPart = m_AspectRatio.cx;
     i64Size.LowPart  = m_AspectRatio.cy;
-    m_pMediaType->SetUINT64 (MF_MT_PIXEL_ASPECT_RATIO, i64Size.QuadPart);
+    pMediaType->SetUINT64 (MF_MT_PIXEL_ASPECT_RATIO, i64Size.QuadPart);
 
     MFVideoArea Area = MakeArea (0, 0, VideoFormat->videoInfo.dwWidth, VideoFormat->videoInfo.dwHeight);
-    m_pMediaType->SetBlob(MF_MT_GEOMETRIC_APERTURE, (UINT8*)&Area, sizeof(MFVideoArea));
+    pMediaType->SetBlob(MF_MT_GEOMETRIC_APERTURE, (UINT8*)&Area, sizeof(MFVideoArea));
 
   }
 
@@ -987,27 +988,28 @@ HRESULT CEVRAllocatorPresenter::CreateProposedOutputType(IMFMediaType* pMixerTyp
   }
   
   pMixerType->FreeRepresentation (FORMAT_MFVideoFormat, (void*)pAMMedia);
-  m_pMediaType->QueryInterface (__uuidof(IMFMediaType), (void**) pType);
+  pMediaType->QueryInterface (__uuidof(IMFMediaType), (void**) pType);
 
   return hr;
 }
 
 HRESULT CEVRAllocatorPresenter::SetMediaType(IMFMediaType* pType)
 {
-  HRESULT        hr;
-  AM_MEDIA_TYPE*    pAMMedia = NULL;
-  CStdString        strTemp;
+	HRESULT        hr;
+	AM_MEDIA_TYPE*    pAMMedia = NULL;
+	CStdString        strTemp;
+	m_pMediaType = NULL;
+	CheckPointer (pType, E_POINTER);
+	CheckHR (pType->GetRepresentation(FORMAT_VideoInfo2, (void**)&pAMMedia));
 
-  CheckPointer (pType, E_POINTER);
-  CheckHR (pType->GetRepresentation(FORMAT_VideoInfo2, (void**)&pAMMedia));
-  
-  hr = InitializeDevice (pAMMedia);
-  if (SUCCEEDED (hr))
-  {
-    strTemp = GetMediaTypeName (pAMMedia->subtype);
-    strTemp.Replace ("MEDIASUBTYPE_", "");
-    m_strStatsMsg[MSG_MIXEROUT].Format ("Mixer output : %s", strTemp);
-  }
+	hr = InitializeDevice (pAMMedia);
+	if (SUCCEEDED (hr))
+	{
+		m_pMediaType = pType;
+		strTemp = GetMediaTypeName (pAMMedia->subtype);
+		strTemp.Replace ("MEDIASUBTYPE_", "");
+		m_strStatsMsg[MSG_MIXEROUT].Format ("Mixer output : %s", strTemp);
+	}
 
   pType->FreeRepresentation (FORMAT_VideoInfo2, (void*)pAMMedia);
 
@@ -1083,7 +1085,6 @@ HRESULT CEVRAllocatorPresenter::RenegotiateMediaType()
     {
       pMixerType   = NULL;
       pType     = NULL;
-      m_pMediaType = NULL;
 
       // Step 1. Get the next media type supported by mixer.
       hr = m_pMixer->GetOutputAvailableType(0, iTypeIndex++, &pMixerType);

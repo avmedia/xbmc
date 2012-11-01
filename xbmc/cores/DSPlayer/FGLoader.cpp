@@ -263,9 +263,8 @@ HRESULT CFGLoader::InsertSplitter(const CFileItem& pFileItem, const CStdString& 
 
 HRESULT CFGLoader::InsertAudioRenderer(const CStdString& filterName)
 {
-  HRESULT hr = S_OK;
+  HRESULT hr = S_FALSE;
   CFGFilterRegistry* pFGF;
-  CStdString currentGuid, currentName;
 
   if (! filterName.empty())
   {
@@ -283,46 +282,38 @@ HRESULT CFGLoader::InsertAudioRenderer(const CStdString& filterName)
 
   //see if there a config first 
   const CStdString renderer = g_guiSettings.GetString("dsplayer.audiorenderer");
-  for (std::vector<DSFilterInfo>::const_iterator iter = deviceList.begin();
-    !renderer.empty() && (iter != deviceList.end()); ++iter)
+  for (std::vector<DSFilterInfo>::const_iterator iter = deviceList.begin(); !renderer.empty() && (iter != deviceList.end()); ++iter)
   {
     DSFilterInfo dev = *iter;
     if (renderer.Equals(dev.lpstrName))
     {
-      currentGuid = dev.lpstrGuid;
-      currentName = dev.lpstrName;
-      break;
-    }
+	  START_PERFORMANCE_COUNTER
+		  pFGF = new CFGFilterRegistry(GUIDFromString(dev.lpstrGuid));
+	  hr = pFGF->Create(&CGraphFilters::Get()->AudioRenderer.pBF);
+	  delete pFGF;
+	  END_PERFORMANCE_COUNTER("Loaded audio renderer from registry");
+
+	  if (FAILED(hr))
+	  {
+		  CLog::Log(LOGERROR, "%s Failed to create the audio renderer (%X)", __FUNCTION__, hr);
+		  return hr;
+	  }
+
+	  CGraphFilters::Get()->AudioRenderer.osdname = dev.lpstrName;
+	  CGraphFilters::Get()->AudioRenderer.guid = GUIDFromString(dev.lpstrGuid);
+
+	  START_PERFORMANCE_COUNTER
+		  hr = g_dsGraph->pFilterGraph->AddFilter(CGraphFilters::Get()->AudioRenderer.pBF, AnsiToUTF16(dev.lpstrName));
+	  END_PERFORMANCE_COUNTER("Added audio renderer to the graph");
+
+	  break;
+	}
   }
-  if (currentName.IsEmpty())
-  {
-    currentGuid = StringFromGUID(CLSID_DSoundRender);
-    currentName.Format("Default DirectSound Device");
-  }
-
-  START_PERFORMANCE_COUNTER
-  pFGF = new CFGFilterRegistry(GUIDFromString(currentGuid));
-  hr = pFGF->Create(&CGraphFilters::Get()->AudioRenderer.pBF);
-  delete pFGF;
-  END_PERFORMANCE_COUNTER("Loaded audio renderer from registry");
-
-  if (FAILED(hr))
-  {
-    CLog::Log(LOGERROR, "%s Failed to create the audio renderer (%X)", __FUNCTION__, hr);
-    return hr;
-  }
-
-  CGraphFilters::Get()->AudioRenderer.osdname = currentName;
-  CGraphFilters::Get()->AudioRenderer.guid = GUIDFromString(currentGuid);
-
-  START_PERFORMANCE_COUNTER
-  hr = g_dsGraph->pFilterGraph->AddFilter(CGraphFilters::Get()->AudioRenderer.pBF, AnsiToUTF16(currentName));
-  END_PERFORMANCE_COUNTER("Added audio renderer to the graph");
 
   if (SUCCEEDED(hr))
-    CLog::Log(LOGNOTICE, "%s Successfully added \"%s\" to the graph", __FUNCTION__, CGraphFilters::Get()->AudioRenderer.osdname.c_str());
+	  CLog::Log(LOGNOTICE, "%s Successfully added \"%s\" to the graph", __FUNCTION__, CGraphFilters::Get()->AudioRenderer.osdname.c_str());
   else
-    CLog::Log(LOGNOTICE, "%s Failed to add \"%s\" to the graph (result: %X)", __FUNCTION__, CGraphFilters::Get()->AudioRenderer.osdname.c_str(), hr);
+	  CLog::Log(LOGNOTICE, "%s Failed to add \"%s\" to the graph (result: %X)", __FUNCTION__, CGraphFilters::Get()->AudioRenderer.osdname.c_str(), hr);
 
   return hr;
 }
@@ -351,12 +342,10 @@ HRESULT CFGLoader::InsertVideoRenderer()
   if (CGraphFilters::Get()->GetCurrentRenderer() == DIRECTSHOW_RENDERER_EVR)
   {
     m_pFGF = new CFGFilterVideoRenderer(CLSID_EVRAllocatorPresenter, L"Xbmc EVR");
-    CGraphFilters::Get()->VideoRenderer.osdname = _T("Enhanced Video Renderer");
   }
   else
   {
     m_pFGF = new CFGFilterVideoRenderer(CLSID_VMR9AllocatorPresenter, L"Xbmc VMR9");
-    CGraphFilters::Get()->VideoRenderer.osdname = _T("VMR9 (Renderless)");
   }
 
   

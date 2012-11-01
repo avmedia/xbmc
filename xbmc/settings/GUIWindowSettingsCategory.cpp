@@ -3066,11 +3066,12 @@ void CGUIWindowSettingsCategory::FillInDirectShowAudioRenderers(CSetting* pSetti
 	//in case dsplayer didnt do it yet
 	CGUISpinControlEx *pControl = (CGUISpinControlEx *)GetControl(GetSetting(pSetting->GetSetting())->GetID());
 	pControl->Clear();
+	pControl->AddLabel("System Default", 0);
 	CAudioEnumerator p_dsound;
 	std::vector<DSFilterInfo> deviceList;
 	p_dsound.GetAudioRenderers(deviceList);
 	std::vector<DSFilterInfo>::const_iterator iter = deviceList.begin();
-	for (int i=0; iter != deviceList.end(); i++)
+	for (int i = 1; iter != deviceList.end(); i++)
 	{
 		DSFilterInfo dev = *iter;
 		pControl->AddLabel(dev.lpstrName, i);

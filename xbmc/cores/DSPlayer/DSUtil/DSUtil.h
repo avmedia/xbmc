@@ -64,6 +64,8 @@ extern CStdStringA GetPinMainTypeString(IPin* pPin);
 extern int  CountPins(IBaseFilter* pBF, int& nIn, int& nOut, int& nInC, int& nOutC);
 extern bool IsSplitter(IBaseFilter* pBF, bool fCountConnectedOnly = false);
 extern bool IsStreamEnd(IBaseFilter* pBF);
+extern bool IsVideoRenderer(IBaseFilter* pBF);
+extern bool IsAudioWaveRenderer(IBaseFilter* pBF);
 extern HRESULT RemoveUnconnectedFilters(IFilterGraph2 *pGraph);
 extern IPin* GetFirstPin(IBaseFilter* pBF, PIN_DIRECTION dir = PINDIR_INPUT);
 extern CStdStringW GetPinName(IPin* pPin);

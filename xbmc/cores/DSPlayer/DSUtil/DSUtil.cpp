@@ -628,6 +628,64 @@ bool IsStreamEnd(IBaseFilter* pBF)
   return(nOut == 0);
 }
 
+bool IsVideoRenderer(IBaseFilter* pBF)
+{
+	int nIn, nOut, nInC, nOutC;
+	CountPins(pBF, nIn, nOut, nInC, nOutC);
+
+	if (nInC > 0 && nOut == 0) {
+		BeginEnumPins(pBF, pEP, pPin) {
+			AM_MEDIA_TYPE mt;
+			if (S_OK != pPin->ConnectionMediaType(&mt)) {
+				continue;
+			}
+
+			FreeMediaType(mt);
+
+			return !!(mt.majortype == MEDIATYPE_Video);
+			/*&& (mt.formattype == FORMAT_VideoInfo || mt.formattype == FORMAT_VideoInfo2));*/
+		}
+		EndEnumPins;
+	}
+
+	CLSID clsid;
+	memcpy(&clsid, &GUID_NULL, sizeof(clsid));
+	pBF->GetClassID(&clsid);
+
+	return (clsid == CLSID_VideoRenderer || clsid == CLSID_VideoRendererDefault);
+}
+
+DEFINE_GUID(CLSID_ReClock,
+	0x9dc15360, 0x914c, 0x46b8, 0xb9, 0xdf, 0xbf, 0xe6, 0x7f, 0xd3, 0x6c, 0x6a);
+
+bool IsAudioWaveRenderer(IBaseFilter* pBF)
+{
+	int nIn, nOut, nInC, nOutC;
+	CountPins(pBF, nIn, nOut, nInC, nOutC);
+
+	if (nInC > 0 && nOut == 0 && Com::SmartQIPtr<IBasicAudio>(pBF)) {
+		BeginEnumPins(pBF, pEP, pPin) {
+			AM_MEDIA_TYPE mt;
+			if (S_OK != pPin->ConnectionMediaType(&mt)) {
+				continue;
+			}
+
+			FreeMediaType(mt);
+
+			return !!(mt.majortype == MEDIATYPE_Audio);
+			/*&& mt.formattype == FORMAT_WaveFormatEx);*/
+		}
+		EndEnumPins;
+	}
+
+	CLSID clsid;
+	memcpy(&clsid, &GUID_NULL, sizeof(clsid));
+	pBF->GetClassID(&clsid);
+
+	return (clsid == CLSID_DSoundRender || clsid == CLSID_AudioRender || clsid == CLSID_ReClock
+		|| clsid == __uuidof(CNullAudioRenderer) || clsid == __uuidof(CNullUAudioRenderer));
+}
+
 HRESULT RemoveUnconnectedFilters(IFilterGraph2 *pGraph)
 {
   if (!pGraph)
@@ -1587,3 +1645,4 @@ void memsetw(void* dst, unsigned short c, size_t nbytes)
   if ((n - o) == 1)
     ((WORD*)dst)[o] = c;
 }
+

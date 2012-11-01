@@ -103,20 +103,6 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
 
   if (FAILED(hr))
     return hr;
-  /* Usually the call coming from IMediaSeeking is done on renderers and is passed upstream
-     In every case i seen so far its much better to directly query the IMediaSeeking from the splitter
-     directly which avoid confusion when the codecs dont pass the call correctly upstream
-  */
-  /* blinkseb: Unfortunatly, this does _not_ work. Haali always returns 0, and mkvsource's time is
-    translated by about 30 seconds */
-  /*BeginEnumFilters(pFilterGraph, pEF, pBF)
-  {
-    if (IsSplitter(pBF))
-      hr = pBF->QueryInterface(__uuidof(m_pMediaSeeking), (void**)&m_pMediaSeeking);
-  }
-  EndEnumFilters
-  if (!m_pMediaSeeking)
-    hr = pFilterGraph->QueryInterface(__uuidof(m_pMediaSeeking), (void**)&m_pMediaSeeking);*/
 
   hr = pFilterGraph->QueryInterface(__uuidof(m_pMediaSeeking), (void**)&m_pMediaSeeking);
   hr = pFilterGraph->QueryInterface(__uuidof(m_pMediaControl), (void**)&m_pMediaControl);
@@ -142,7 +128,21 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
   m_VideoInfo.isDVD = CGraphFilters::Get()->IsDVD();
   m_threadID = GetCurrentThreadId();
   
+  CStdString filterName;
+  BeginEnumFilters(pFilterGraph, pEF, pBF)
+  {
+	  if (IsVideoRenderer(pBF)) {
+		  g_charsetConverter.wToUTF8(GetFilterName(pBF), filterName);
+		  CGraphFilters::Get()->VideoRenderer.osdname = filterName;
+	  } else if(IsAudioWaveRenderer(pBF)) {
+		  g_charsetConverter.wToUTF8(GetFilterName(pBF), filterName);
+		  CGraphFilters::Get()->AudioRenderer.osdname = filterName;
+	  }
 
+	  if(!CGraphFilters::Get()->AudioRenderer.osdname.IsEmpty() && !CGraphFilters::Get()->VideoRenderer.osdname.IsEmpty())
+		  break;
+  }
+  EndEnumFilters
 
   SetVolume(g_settings.m_fVolumeLevel);
   

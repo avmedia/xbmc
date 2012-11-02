@@ -27,6 +27,7 @@
 #include "DSUtil/DSUtil.h"
 #include "DSUtil/SmartPtr.h"
 #include "streams.h"
+#include "utils/CharsetConverter.h"
 
 /// Informations about a filter
 struct SFilterInfos
@@ -43,6 +44,14 @@ struct SFilterInfos
     guid = GUID_NULL;
     isinternal = false;
     pData = NULL;
+  }
+
+  void SetFilterInfo(IBaseFilter * pBF)
+  {
+	  CStdString filterName;
+	  g_charsetConverter.wToUTF8(GetFilterName(pBF), filterName);
+	  osdname = filterName;
+	  guid = GetCLSID(pBF);
   }
 
   Com::SmartPtr<IBaseFilter> pBF; ///< Pointer to the IBaseFilter interface. May be NULL

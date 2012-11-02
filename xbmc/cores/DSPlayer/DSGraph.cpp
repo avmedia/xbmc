@@ -132,11 +132,9 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
   BeginEnumFilters(pFilterGraph, pEF, pBF)
   {
 	  if (IsVideoRenderer(pBF)) {
-		  g_charsetConverter.wToUTF8(GetFilterName(pBF), filterName);
-		  CGraphFilters::Get()->VideoRenderer.osdname = filterName;
+		  CGraphFilters::Get()->VideoRenderer.SetFilterInfo(pBF);
 	  } else if(IsAudioWaveRenderer(pBF)) {
-		  g_charsetConverter.wToUTF8(GetFilterName(pBF), filterName);
-		  CGraphFilters::Get()->AudioRenderer.osdname = filterName;
+		  CGraphFilters::Get()->AudioRenderer.SetFilterInfo(pBF);
 	  }
 
 	  if(!CGraphFilters::Get()->AudioRenderer.osdname.IsEmpty() && !CGraphFilters::Get()->VideoRenderer.osdname.IsEmpty())

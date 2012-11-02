@@ -299,9 +299,6 @@ HRESULT CFGLoader::InsertAudioRenderer(const CStdString& filterName)
 		  return hr;
 	  }
 
-	  CGraphFilters::Get()->AudioRenderer.osdname = dev.lpstrName;
-	  CGraphFilters::Get()->AudioRenderer.guid = GUIDFromString(dev.lpstrGuid);
-
 	  START_PERFORMANCE_COUNTER
 		  hr = g_dsGraph->pFilterGraph->AddFilter(CGraphFilters::Get()->AudioRenderer.pBF, AnsiToUTF16(dev.lpstrName));
 	  END_PERFORMANCE_COUNTER("Added audio renderer to the graph");

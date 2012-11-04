@@ -66,9 +66,12 @@ CDSGraph* g_dsGraph = NULL;
 int32_t CDSGraph::m_threadID = 0;
 
 CDSGraph::CDSGraph(CDVDClock* pClock, IPlayerCallback& callback)
-    : m_pGraphBuilder(NULL), m_iCurrentFrameRefreshCycle(0),
-    m_userId(0xACDCACDC), m_bReachedEnd(false), m_callback(callback),
-    m_canSeek(-1), m_currentVolume(0)
+    : m_pGraphBuilder(NULL), 
+	m_iCurrentFrameRefreshCycle(0),
+    m_userId(0xACDCACDC), 
+	m_callback(callback),
+    m_canSeek(-1), 
+	m_currentVolume(0)
 {
   m_threadID = 0;
 }
@@ -104,12 +107,12 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
   if (FAILED(hr))
     return hr;
 
-  hr = pFilterGraph->QueryInterface(__uuidof(m_pMediaSeeking), (void**)&m_pMediaSeeking);
-  hr = pFilterGraph->QueryInterface(__uuidof(m_pMediaControl), (void**)&m_pMediaControl);
-  hr = pFilterGraph->QueryInterface(__uuidof(m_pMediaEvent), (void**)&m_pMediaEvent);
-  hr = pFilterGraph->QueryInterface(__uuidof(m_pBasicAudio), (void**)&m_pBasicAudio);
-  hr = pFilterGraph->QueryInterface(__uuidof(m_pBasicVideo), (void**)&m_pBasicVideo);
-  hr = pFilterGraph->QueryInterface(__uuidof(m_pVideoWindow), (void**)&m_pVideoWindow);
+  m_pMediaSeeking = pFilterGraph;
+  m_pMediaControl = pFilterGraph;
+  m_pMediaEvent   = pFilterGraph;
+  m_pBasicAudio	  = pFilterGraph;
+  m_pBasicVideo   = pFilterGraph;
+  m_pVideoWindow  = pFilterGraph;
 
   // Be sure we are using TIME_FORMAT_MEDIA_TIME
   hr = m_pMediaSeeking->SetTimeFormat(&TIME_FORMAT_MEDIA_TIME);
@@ -172,7 +175,6 @@ void CDSGraph::CloseFile()
     m_State.Clear();
     
     m_userId = 0xACDCACDC;
-    m_bReachedEnd = false;
 
     SAFE_DELETE(m_pGraphBuilder);
     g_dsGraph->pFilterGraph = NULL;
@@ -221,9 +223,6 @@ void CDSGraph::UpdateTime()
     CStreamsManager::Get()->UpdateDVDStream();
     return;
   }
-
-  if (( m_State.time_total != 0 && m_State.time >= m_State.time_total ))
-    m_bReachedEnd = true;
 
   CChaptersManager::Get()->UpdateChapters(m_State.time);
 }
@@ -331,6 +330,7 @@ HRESULT CDSGraph::HandleGraphEvent()
         break;
       case EC_COMPLETE:
         CLog::Log(LOGDEBUG,"%s EC_COMPLETE", __FUNCTION__);
+		m_State.eof = true;
         g_application.m_pPlayer->CloseFile();
         break;
       case EC_USERABORT:

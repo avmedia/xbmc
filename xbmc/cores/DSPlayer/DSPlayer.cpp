@@ -53,8 +53,11 @@ CFileItem CDSPlayer::currentFileItem;
 CGUIDialogBoxBase *CDSPlayer::errorWindow = NULL;
 
 CDSPlayer::CDSPlayer(IPlayerCallback& callback)
-    : IPlayer(callback), CThread("CDSPlayer thread"), m_hReadyEvent(true),
-    m_pGraphThread(this),m_bFileReachedEnd(false)
+    : IPlayer(callback), 
+	CThread("CDSPlayer thread"), 
+	m_hReadyEvent(true),
+    m_pGraphThread(this),
+	m_bEof(false)
 {
   // Change DVD Clock, time base
   CDVDClock::SetTimeBase((int64_t) DS_TIME_BASE);
@@ -174,75 +177,86 @@ void CDSPlayer::ShowEditionDlg(bool playStart)
 
 bool CDSPlayer::OpenFile(const CFileItem& file,const CPlayerOptions &options)
 {
-  if(PlayerState != DSPLAYER_CLOSED)
-    CloseFile();
+	try
+	{
+		CLog::Log(LOGNOTICE, "%s - DSPlayer: Opening: %s", __FUNCTION__, file.GetPath().c_str());
+		if(PlayerState != DSPLAYER_CLOSED)
+			CloseFile();
 
-  PlayerState = DSPLAYER_LOADING;
-  m_bFileReachedEnd = false;
-  currentFileItem = file;
-  m_Filename = file.GetAsUrl();
-  m_PlayerOptions = options;
-  m_pGraphThread.SetCurrentRate(1);
-  
-  m_hReadyEvent.Reset();
-  Create();
+		PlayerState = DSPLAYER_LOADING;
+		currentFileItem = file;
+		m_Filename = file.GetAsUrl();
+		m_PlayerOptions = options;
+		m_pGraphThread.SetCurrentRate(1);
 
-  /* Show busy dialog while SetFile() not returned */
-  if(!m_hReadyEvent.WaitMSec(100))
-  {
-    CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
-    dialog->Show();
-    while(!m_hReadyEvent.WaitMSec(1))
-      g_windowManager.Process(true);
-    dialog->Close();
-  }
+		m_hReadyEvent.Reset();
+		Create();
 
-  
-  
-  if (PlayerState != DSPLAYER_ERROR)
-  {
-	  if(g_guiSettings.GetBool("dsplayer.showbdtitlechoice"))
-		  ShowEditionDlg(true);
+		/* Show busy dialog while SetFile() not returned */
+		if(!m_hReadyEvent.WaitMSec(100))
+		{
+			CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+			dialog->Show();
+			while(!m_hReadyEvent.WaitMSec(1))
+				g_windowManager.Process(true);
+			dialog->Close();
+		}
 
-	  // Seek
-	  if (m_PlayerOptions.starttime > 0)
-		  g_dsGraph->PostMessage( new CDSMsgPlayerSeekTime(SEC_TO_DS_TIME(m_PlayerOptions.starttime), 1U, false) , false );
-	  else
-		  g_dsGraph->PostMessage( new CDSMsgPlayerSeekTime(0, 1U, false) , false );
+		if (PlayerState != DSPLAYER_ERROR)
+		{
+			if(g_guiSettings.GetBool("dsplayer.showbdtitlechoice"))
+				ShowEditionDlg(true);
 
-	  // Starts playback
-	  g_dsGraph->PostMessage( new CDSMsgBool(CDSMsg::PLAYER_PLAY, true), false );
-	  if (CGraphFilters::Get()->IsDVD())
-		  CStreamsManager::Get()->LoadDVDStreams();
-  }
+			// Seek
+			if (m_PlayerOptions.starttime > 0)
+				g_dsGraph->PostMessage( new CDSMsgPlayerSeekTime(SEC_TO_DS_TIME(m_PlayerOptions.starttime), 1U, false) , false );
+			else
+				g_dsGraph->PostMessage( new CDSMsgPlayerSeekTime(0, 1U, false) , false );
 
-  return (PlayerState != DSPLAYER_ERROR);
+			// Starts playback
+			g_dsGraph->PostMessage( new CDSMsgBool(CDSMsg::PLAYER_PLAY, true), false );
+			if (CGraphFilters::Get()->IsDVD())
+				CStreamsManager::Get()->LoadDVDStreams();
+		}
+
+		return (PlayerState != DSPLAYER_ERROR);
+	}
+	catch(...)
+	{
+		CLog::Log(LOGERROR, "%s - Exception thrown on open", __FUNCTION__);
+		return false;
+	}
 }
+
 bool CDSPlayer::CloseFile()
 {
   if (PlayerState == DSPLAYER_CLOSED || PlayerState == DSPLAYER_CLOSING)
     return true;
-  
+
+//   if (PlayerState == DSPLAYER_ERROR)
+//   {
+// 	 
+// 	 // Something to show?
+//     if (errorWindow)
+//     {
+//       errorWindow->DoModal();
+//       errorWindow = NULL;
+//     } else {
+//       CGUIDialogOK *dialog = (CGUIDialogOK *)g_windowManager.GetWindow(WINDOW_DIALOG_OK);
+//       if (dialog)
+//       {
+//         dialog->SetHeading("Error");
+//         dialog->SetLine(0, "An error occured when trying to render the file.");
+//         dialog->SetLine(1, "Please look at the debug log for more informations.");
+//         dialog->DoModal();
+//       }
+//     }
+//   }
+
   PlayerState = DSPLAYER_CLOSING;
 
-  if (PlayerState == DSPLAYER_ERROR)
-  {
-    // Something to show?
-    if (errorWindow)
-    {
-      errorWindow->DoModal();
-      errorWindow = NULL;
-    } else {
-      CGUIDialogOK *dialog = (CGUIDialogOK *)g_windowManager.GetWindow(WINDOW_DIALOG_OK);
-      if (dialog)
-      {
-        dialog->SetHeading("Error");
-        dialog->SetLine(0, "An error occured when trying to render the file.");
-        dialog->SetLine(1, "Please look at the debug log for more informations.");
-        dialog->DoModal();
-      }
-    }
-  }
+  // set the abort request so that other threads can finish up
+  m_bEof = g_dsGraph->IsEof();
 
   g_dsGraph->CloseFile();
   
@@ -293,45 +307,49 @@ void CDSPlayer::GetGeneralInfo(CStdString& strGeneralInfo)
 //CThread
 void CDSPlayer::OnStartup()
 {
+	try
+	{
+		HRESULT hr = E_FAIL;
+		CLog::Log(LOGNOTICE, "%s - Creating DS Graph",  __FUNCTION__);
 
-  CoInitializeEx(NULL, COINIT_MULTITHREADED);
+		CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
-  START_PERFORMANCE_COUNTER
-  if (FAILED(g_dsGraph->SetFile(currentFileItem, m_PlayerOptions)))
-    PlayerState = DSPLAYER_ERROR;
-  END_PERFORMANCE_COUNTER("Loading file");
+		START_PERFORMANCE_COUNTER
+			hr = g_dsGraph->SetFile(currentFileItem, m_PlayerOptions);
+		END_PERFORMANCE_COUNTER("Loading file");
+		CHECK_HR(hr);
+		// Start playback
+		// If there's an error, the lock must be released in order to show the error dialog
+		m_hReadyEvent.Set();
 
-  // Start playback
-  // If there's an error, the lock must be released in order to show the error dialog
-  m_hReadyEvent.Set();
+		m_pGraphThread.Create();
+		CLog::Log(LOGNOTICE, "%s - Successfully creating DS Graph",  __FUNCTION__);
+		return;
+	}
+	catch(...)
+	{
+		CLog::Log(LOGERROR, "%s - Exception thrown when creating DS Graph", __FUNCTION__);
+	}
 
-  if (PlayerState == DSPLAYER_ERROR)
-  {
-    //CloseFile();
-    CThread::StopThread(false);
-    return;
-  }
-
-  m_pGraphThread.Create();
-
+done:
+	CLog::Log(LOGERROR, "%s - Failed creating DS Graph", __FUNCTION__);
+	PlayerState = DSPLAYER_ERROR;
+	CThread::StopThread(false);
 }
 
 void CDSPlayer::OnExit()
 {
-  if (PlayerState == DSPLAYER_LOADING)
-    PlayerState = DSPLAYER_ERROR;
+	if (PlayerState == DSPLAYER_LOADING)
+		PlayerState = DSPLAYER_ERROR;
 
-  // In case of, set the ready event
-  // Prevent a dead loop
-  m_hReadyEvent.Set();
+	// In case of, set the ready event
+	// Prevent a dead loop
+	m_hReadyEvent.Set();
 
-  if (m_bFileReachedEnd)
-    m_callback.OnPlayBackEnded();
-  
-  m_callback.OnPlayBackStopped();
-
-  m_bStop = true;
-  CoUninitialize();
+	if(m_PlayerOptions.identify == false)
+	{		if (!m_bEof || PlayerState == DSPLAYER_ERROR)			m_callback.OnPlayBackStopped();		else			m_callback.OnPlayBackEnded();	}
+	m_bStop = true;
+	CoUninitialize();
 }
 
 void CDSPlayer::Process()
@@ -610,13 +628,6 @@ void CGraphManagementThread::Process()
     Sleep(250);
     if (CDSPlayer::PlayerState == DSPLAYER_CLOSED)
       break;
-    if (g_dsGraph->FileReachedEnd())
-    { 
-      CLog::Log(LOGDEBUG,"%s Graph detected end of video file",__FUNCTION__);
-      m_pPlayer->ReachedEnd();
-      m_pPlayer->CloseFile();
-      break;
-    }
   }
 }
 #endif

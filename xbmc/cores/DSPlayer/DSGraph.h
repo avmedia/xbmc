@@ -104,13 +104,12 @@ public:
   //void SetDynamicRangeCompression(long drc);
 
   virtual HRESULT HandleGraphEvent();
-  /** @return True if the file reached end, false else */
-  bool FileReachedEnd(){ return m_bReachedEnd; };
 
   /** @return True if the graph is paused, false else */
   virtual bool IsPaused() const;
   
   virtual bool IsDvd() { return m_VideoInfo.isDVD; };
+  bool IsEof() { return m_State.eof; };
   bool IsInMenu() const;
   bool OnMouseMove(tagPOINT pt);
   bool OnMouseClick(tagPOINT pt);
@@ -198,7 +197,6 @@ private:
   Com::SmartPtr<IDvdState>              m_pDvdState;
   DVD_STATUS	                          m_pDvdStatus;
   std::vector<DvdTitle*>                m_pDvdTitles;
-  bool m_bReachedEnd;
   static int32_t m_threadID;
   int8_t m_canSeek; //<-1: not queried; 0: false; 1: true
   long m_currentVolume;
@@ -220,11 +218,13 @@ private:
 
     void Clear()
     {
+	  eof = false;
       time = 0;
       time_total = 0;
       player_state = "";
       current_filter_state = State_Stopped;
     }
+	bool eof;
     uint64_t time;              // current playback time in millisec
     uint64_t time_total;        // total playback time in millisec
     FILTER_STATE current_filter_state;

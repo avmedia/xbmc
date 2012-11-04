@@ -192,7 +192,6 @@ public:
   virtual void Stop();
   CDVDClock&  GetClock() { return m_pClock; }
   IPlayerCallback& GetPlayerCallback() { return m_callback; }
-  void ReachedEnd() { m_bFileReachedEnd = true; }
 
   static DSPLAYER_STATE PlayerState;
   static CFileItem currentFileItem;
@@ -211,5 +210,5 @@ protected:
   CPlayerOptions m_PlayerOptions;
   CURL m_Filename;
   CEvent m_hReadyEvent;
-  bool m_bFileReachedEnd;
+  bool m_bEof;
 };

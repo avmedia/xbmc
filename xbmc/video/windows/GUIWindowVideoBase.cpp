@@ -1204,7 +1204,6 @@ void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &but
 	if(!path.IsEmpty())
 	{
 		item.SetPath(path);
-		item.m_bIsFolder = false;
 	}
 
     if (!item.IsParentFolder())
@@ -1380,6 +1379,9 @@ bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     return true;
 
   case CONTEXT_BUTTON_PLAY_ITEM:
+#ifdef HAS_DS_PLAYER
+	  item->m_lStartOffset = STARTOFFSET_BEGIN;
+#endif
     PlayItem(itemNumber);
     return true;
 
@@ -2253,8 +2255,10 @@ bool CGUIWindowVideoBase::LaunchBD(const CFileItemPtr &item)
 			CFileItemPtr movieItem(new CFileItem(*item));
 			movieItem->SetPath(strPath);
 			movieItem->m_bIsFolder = false;
-
-			return item->m_lStartOffset == STARTOFFSET_RESUME || ShowResumeMenu(*movieItem) ? CGUIMediaWindow::OnPlayMedia(movieItem) : true;
+			return 
+				item->m_lStartOffset == STARTOFFSET_RESUME || 
+				item->m_lStartOffset == STARTOFFSET_BEGIN || 
+				ShowResumeMenu(*movieItem) ? CGUIMediaWindow::OnPlayMedia(movieItem) : true;
 		} 
 	}
 	return false;

@@ -63,6 +63,9 @@ class CURL;
 
 /* special startoffset used to indicate that we wish to resume */
 #define STARTOFFSET_RESUME (-1)
+#ifdef HAS_DS_PLAYER
+#define STARTOFFSET_BEGIN  (STARTOFFSET_RESUME - 1)
+#endif
 
 class CMediaSource;
 

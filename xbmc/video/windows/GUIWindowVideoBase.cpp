@@ -1149,7 +1149,11 @@ bool CGUIWindowVideoBase::OnResumeItem(int iItem)
   if (iItem < 0 || iItem >= m_vecItems->Size()) return true;
   CFileItemPtr item = m_vecItems->Get(iItem);
 
-  if (item->m_bIsFolder)
+  if (item->m_bIsFolder
+#ifdef HAS_DS_PLAYER
+	  || (IsLaunchBD() && !GetBDPath(item).IsEmpty())
+#endif
+	  )
   {
     // resuming directories isn't supported yet. play.
     PlayItem(iItem);
@@ -1188,21 +1192,29 @@ void CGUIWindowVideoBase::OnStreamDetails(const CStreamDetails &details, const C
 
 void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &buttons)
 {
-  CFileItemPtr item;
+  CFileItemPtr pItem;
   if (itemNumber >= 0 && itemNumber < m_vecItems->Size())
-    item = m_vecItems->Get(itemNumber);
+    pItem = m_vecItems->Get(itemNumber);
 
   // contextual buttons
-  if (item && !item->GetProperty("pluginreplacecontextitems").asBoolean())
+  if (pItem && !pItem->GetProperty("pluginreplacecontextitems").asBoolean())
   {
-    if (!item->IsParentFolder())
-    {
-      CStdString path(item->GetPath());
-      if (item->IsVideoDb() && item->HasVideoInfoTag())
-        path = item->GetVideoInfoTag()->m_strFileNameAndPath;
+	CFileItem item (*pItem);
+	CStdString path = GetBDPath(pItem);
+	if(!path.IsEmpty())
+	{
+		item.SetPath(path);
+		item.m_bIsFolder = false;
+	}
 
-      if (!item->GetPath().Equals("add") && !item->IsPlugin() &&
-          !item->IsScript() && !item->IsAddonsPath() && !item->IsLiveTV())
+    if (!item.IsParentFolder())
+    {
+      CStdString path(item.GetPath());
+      if (item.IsVideoDb() && item.HasVideoInfoTag())
+        path = item.GetVideoInfoTag()->m_strFileNameAndPath;
+
+      if (!item.GetPath().Equals("add") && !item.IsPlugin() &&
+          !item.IsScript() && !item.IsAddonsPath() && !item.IsLiveTV())
       {
         if (URIUtils::IsStack(path))
         {
@@ -1211,37 +1223,37 @@ void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &but
             buttons.Add(CONTEXT_BUTTON_PLAY_PART, 20324);
         }
 
-        if (!m_vecItems->GetPath().IsEmpty() && !item->GetPath().Left(19).Equals("newsmartplaylist://") && !item->GetPath().Left(9).Equals("newtag://")
+        if (!m_vecItems->GetPath().IsEmpty() && !item.GetPath().Left(19).Equals("newsmartplaylist://") && !item.GetPath().Left(9).Equals("newtag://")
             && !m_vecItems->IsSourcesPath())
         {
           buttons.Add(CONTEXT_BUTTON_QUEUE_ITEM, 13347);      // Add to Playlist
         }
 
         // allow a folder to be ad-hoc queued and played by the default player
-        if (item->m_bIsFolder || (item->IsPlayList() &&
+        if (item.m_bIsFolder || (item.IsPlayList() &&
            !g_advancedSettings.m_playlistAsFolders))
         {
           buttons.Add(CONTEXT_BUTTON_PLAY_ITEM, 208);
         }
       }
 
-      if (!m_vecItems->IsPlugin() && (item->IsPlugin() || item->IsScript()))
+      if (!m_vecItems->IsPlugin() && (item.IsPlugin() || item.IsScript()))
         buttons.Add(CONTEXT_BUTTON_INFO,24003); // Add-on info
 
-      if (!item->m_bIsFolder && !(item->IsPlayList() && !g_advancedSettings.m_playlistAsFolders))
+      if (!item.m_bIsFolder && !(item.IsPlayList() && !g_advancedSettings.m_playlistAsFolders))
       { // get players
         VECPLAYERCORES vecCores;
-        if (item->IsVideoDb())
+        if (item.IsVideoDb())
         {
-          CFileItem item2(item->GetVideoInfoTag()->m_strFileNameAndPath, false);
+          CFileItem item2(item.GetVideoInfoTag()->m_strFileNameAndPath, false);
           CPlayerCoreFactory::GetPlayers(item2, vecCores);
         }
         else
-          CPlayerCoreFactory::GetPlayers(*item, vecCores);
+          CPlayerCoreFactory::GetPlayers(item, vecCores);
         if (vecCores.size() > 1)
           buttons.Add(CONTEXT_BUTTON_PLAY_WITH, 15213);
       }
-      if (item->IsSmartPlayList())
+      if (item.IsSmartPlayList())
       {
         buttons.Add(CONTEXT_BUTTON_PLAY_PARTYMODE, 15216); // Play in Partymode
       }
@@ -1249,21 +1261,21 @@ void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &but
       // if autoresume is enabled then add restart video button
       // check to see if the Resume Video button is applicable
       // only if the video is NOT a DVD (in that case the resume button will be added by CGUIDialogContextMenu::GetContextButtons)
-      if (!item->IsDVD() && HasResumeItemOffset(item.get()))
+      if (!item.IsDVD() && HasResumeItemOffset(&item))
       {
-        buttons.Add(CONTEXT_BUTTON_RESUME_ITEM, GetResumeString(*(item.get())));     // Resume Video
+        buttons.Add(CONTEXT_BUTTON_RESUME_ITEM, GetResumeString(item));     // Resume Video
       }
       //if the item isn't a folder or script, is a member of a list rather than a single item
       //and we're not on the last element of the list, 
       //then add add either 'play from here' or 'play only this' depending on default behaviour
-      if (!(item->m_bIsFolder || item->IsScript()) && m_vecItems->Size() > 1 && itemNumber < m_vecItems->Size()-1)
+      if (!(item.m_bIsFolder || item.IsScript()) && m_vecItems->Size() > 1 && itemNumber < m_vecItems->Size()-1)
       {
         if (!g_guiSettings.GetBool("videoplayer.autoplaynextitem"))
           buttons.Add(CONTEXT_BUTTON_PLAY_AND_QUEUE, 13412);
         else
           buttons.Add(CONTEXT_BUTTON_PLAY_ONLY_THIS, 13434);
       }
-      if (item->IsSmartPlayList() || m_vecItems->IsSmartPlayList())
+      if (item.IsSmartPlayList() || m_vecItems->IsSmartPlayList())
         buttons.Add(CONTEXT_BUTTON_EDIT_SMART_PLAYLIST, 586);
     }
   }
@@ -1584,12 +1596,13 @@ bool CGUIWindowVideoBase::OnPlayAndQueueMedia(const CFileItemPtr &item)
 
 void CGUIWindowVideoBase::PlayMovie(const CFileItem *item)
 {
-  CFileItemPtr movieItem(new CFileItem(*item));
 
 #ifdef HAS_DS_PLAYER
-  if(AutoLoadBD(movieItem))
+  if(LaunchBD((CFileItemPtr&)item))
 	  return;
 #endif
+
+  CFileItemPtr movieItem(new CFileItem(*item));
 
   if(!ShowPlaySelection(movieItem))
     return;
@@ -1772,7 +1785,7 @@ void CGUIWindowVideoBase::PlayItem(int iItem)
   const CFileItemPtr pItem = m_vecItems->Get(iItem);
 
 #ifdef HAS_DS_PLAYER
-  if(AutoLoadBD(pItem))
+  if(LaunchBD(pItem))
 	  return;
 #endif
   // if its a folder, build a temp playlist
@@ -2208,26 +2221,40 @@ void CGUIWindowVideoBase::OnInitWindow()
 }
 
 #ifdef HAS_DS_PLAYER
-bool CGUIWindowVideoBase::AutoLoadBD(const CFileItemPtr &item)
+bool CGUIWindowVideoBase::IsLaunchBD()
 {
 	bool dsplayer = g_guiSettings.GetBool("dsplayer.defaultvideoplayer");
 	PLAYERCOREID defaultPlayer = dsplayer ? EPC_DSPLAYER : CPlayerCoreFactory::GetPlayerCore("videodefaultplayer");
+	return (g_application.m_eForcedNextPlayer == EPC_DSPLAYER ||(defaultPlayer == EPC_DSPLAYER && g_application.m_eForcedNextPlayer == EPC_NONE)) && g_guiSettings.GetBool("dsplayer.bdautoloadindex");
+}
 
-	if((g_application.m_eForcedNextPlayer == EPC_DSPLAYER ||(defaultPlayer == EPC_DSPLAYER && g_application.m_eForcedNextPlayer == EPC_NONE)) && g_guiSettings.GetBool("dsplayer.bdautoloadindex") )
+const CStdString CGUIWindowVideoBase::GetBDPath(const CFileItemPtr &item)
+{
+	CStdString strPath;
+	if (item->IsVideoDb() && item->HasVideoInfoTag())
+		strPath = item->GetVideoInfoTag()->m_strFileNameAndPath;
+	else if(item->IsBDFile())
+		strPath = item->GetPath();
+	else
+		strPath = item->GetPath() + "BDMV\\index.bdmv";
+
+	if(URIUtils::GetFileName(strPath).Equals("index.bdmv") && XFILE::CFile::Exists(strPath, false))
+		return strPath;
+
+	return "";
+}
+bool CGUIWindowVideoBase::LaunchBD(const CFileItemPtr &item)
+{
+	if(IsLaunchBD() )
 	{
-		CStdString strPath;
-		if (item->IsVideoDb() && item->HasVideoInfoTag())
-			strPath = item->GetVideoInfoTag()->m_strFileNameAndPath;
-		else if(item->IsBDFile())
-			strPath = item->GetPath();
-		else
-			strPath = item->GetPath() + "BDMV\\index.bdmv";
-
-		CStdString strFileName = URIUtils::GetFileName(strPath);
-		if(strFileName.Equals("index.bdmv") && XFILE::CFile::Exists(strPath))
+		CStdString strPath = GetBDPath(item);
+		if(!strPath.IsEmpty())
 		{
-			item->SetPath(strPath);
-			return item->m_lStartOffset == STARTOFFSET_RESUME || ShowResumeMenu(*item) ? CGUIMediaWindow::OnPlayMedia(item) : true;
+			CFileItemPtr movieItem(new CFileItem(*item));
+			movieItem->SetPath(strPath);
+			movieItem->m_bIsFolder = false;
+
+			return item->m_lStartOffset == STARTOFFSET_RESUME || ShowResumeMenu(*movieItem) ? CGUIMediaWindow::OnPlayMedia(movieItem) : true;
 		} 
 	}
 	return false;

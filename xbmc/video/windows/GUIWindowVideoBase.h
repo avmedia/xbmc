@@ -146,6 +146,8 @@ protected:
   CVideoThumbLoader m_thumbLoader;
   bool m_stackingAvailable;
 #ifdef HAS_DS_PLAYER
-  bool AutoLoadBD(const CFileItemPtr &item);
+  bool IsLaunchBD();
+  bool LaunchBD(const CFileItemPtr &item);
+  const CStdString GetBDPath(const CFileItemPtr &item);
 #endif
 };

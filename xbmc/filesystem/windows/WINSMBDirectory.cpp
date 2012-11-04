@@ -30,7 +30,9 @@
 #include "utils/CharsetConverter.h"
 #include "PasswordManager.h"
 #include "Util.h"
-
+#ifdef HAS_DS_PLAYER
+#include "../File.h"
+#endif
 #ifndef INVALID_FILE_ATTRIBUTES
 #define INVALID_FILE_ATTRIBUTES ((DWORD) -1)
 #endif
@@ -146,7 +148,12 @@ bool CWINSMBDirectory::GetDirectory(const CStdString& strPath1, CFileItemList &i
             pItem->m_bIsFolder = true;
             FileTimeToLocalFileTime(&wfd.ftLastWriteTime, &localTime);
             pItem->m_dateTime=localTime;
-
+#ifdef HAS_DS_PLAYER
+			if(XFILE::CFile::Exists(path + "BDMV\\index.bdmv", false))
+			{
+				pItem->m_itemType = CFileItem::ITEM_TYPE_BD;
+			}
+#endif
             if (wfd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
               pItem->SetProperty("file:hidden", true);
 

@@ -1613,7 +1613,7 @@ bool ExtractInterlaced(const AM_MEDIA_TYPE* pmt)
 
 void CEVRAllocatorPresenter::GetMixerThread()
 {
-  HANDLE        hEvts[]    = { m_hEvtQuit};
+  HANDLE        hEvts[]    = { m_hEvtQuit, m_hEvtFlush};
   bool        bQuit    = false;
     TIMECAPS      tc;
   DWORD        dwResolution;
@@ -1638,6 +1638,9 @@ void CEVRAllocatorPresenter::GetMixerThread()
     case WAIT_OBJECT_0 :
       bQuit = true;
       break;
+	case WAIT_OBJECT_0 + 1 :
+		ResetEvent(m_hEvtFlush);
+		break;
     case WAIT_TIMEOUT :
       {
         bool bDoneSomething = false;

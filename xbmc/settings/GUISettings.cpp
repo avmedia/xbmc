@@ -835,7 +835,6 @@ void CGUISettings::Initialize()
   AddString(dsp, "dsplayer.audiorenderer", 55003, "Default", SPIN_CONTROL_TEXT);
   AddSeparator(dsp, "dsplayer.sep1");
 
-  AddBool(dsp, "dsplayer.useinternalfilters", 55020, false);
   AddBool(dsp, "dsplayer.autofiltersettings", 55021, false);
   AddBool(dsp, "dsplayer.bdautoloadindex", 55030, true);
   AddBool(dsp, "dsplayer.showbdtitlechoice", 55032, true);

@@ -11450,10 +11450,6 @@ msgctxt "#55018"
 msgid "There is no shader loaded"
 msgstr ""
 
-msgctxt "#55020"
-msgid "Force internal filters"
-msgstr ""
-
 msgctxt "#55021"
 msgid "Use system filters (DirectShow merits)"
 msgstr ""

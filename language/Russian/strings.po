@@ -10997,10 +10997,6 @@ msgctxt "#55018"
 msgid "There is no shader loaded"
 msgstr "Шейдеры не загружены"
 
-msgctxt "#55020"
-msgid "Force internal filters"
-msgstr "Всегда использовать встроенные фильтры"
-
 msgctxt "#55021"
 msgid "Use system filters (DirectShow merits)"
 msgstr "Использовать системные фильтры (приоритеты DirectShow)"

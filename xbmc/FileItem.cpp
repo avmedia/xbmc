@@ -75,14 +75,8 @@ CFileItem::CFileItem(const CSong& song)
   m_pvrTimerInfoTag = NULL;
   m_pictureInfoTag = NULL;
   Reset();
-  SetLabel(song.strTitle);
-  m_strPath = song.strFileName;
-  GetMusicInfoTag()->SetSong(song);
-  m_lStartOffset = song.iStartOffset;
-  m_lStartPartNumber = 1;
-  SetProperty("item_start", song.iStartOffset);
-  m_lEndOffset = song.iEndOffset;
-  SetArt("thumb", song.strThumb);
+
+  SetFromSong(song);
 }
 
 CFileItem::CFileItem(const CStdString &path, const CAlbum& album)
@@ -95,14 +89,10 @@ CFileItem::CFileItem(const CStdString &path, const CAlbum& album)
   m_pvrTimerInfoTag = NULL;
   m_pictureInfoTag = NULL;
   Reset();
-  SetLabel(album.strAlbum);
+
   m_strPath = path;
-  m_bIsFolder = true;
-  m_strLabel2 = StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator);
   URIUtils::AddSlashAtEnd(m_strPath);
-  GetMusicInfoTag()->SetAlbum(album);
-  m_bIsAlbum = true;
-  CMusicDatabase::SetPropertiesFromAlbum(*this,album);
+  SetFromAlbum(album);
 }
 
 CFileItem::CFileItem(const CMusicInfoTag& music)
@@ -132,27 +122,8 @@ CFileItem::CFileItem(const CVideoInfoTag& movie)
   m_pvrTimerInfoTag = NULL;
   m_pictureInfoTag = NULL;
   Reset();
-  SetLabel(movie.m_strTitle);
-  if (movie.m_strFileNameAndPath.IsEmpty())
-  {
-    m_strPath = movie.m_strPath;
-    URIUtils::AddSlashAtEnd(m_strPath);
-    m_bIsFolder = true;
-  }
-  else
-  {
-    m_strPath = movie.m_strFileNameAndPath;
-    m_bIsFolder = false;
-  }
-#ifdef HAS_DS_PLAYER
-  if(IsBDFile())
-  {
-	  m_itemType = CFileItem::ITEM_TYPE_BD;
-  }
-#endif
-  *GetVideoInfoTag() = movie;
-  if (movie.m_iSeason == 0) SetProperty("isspecial", "true");
-  FillInDefaultIcon();
+
+  SetFromVideoInfoTag(movie);
 }
 
 CFileItem::CFileItem(const CEpgInfoTag& tag)
@@ -1254,6 +1225,10 @@ void CFileItem::FillInDefaultIcon()
         // Live TV Channel
         SetIconImage("DefaultVideo.png");
       }
+      else if ( URIUtils::IsArchive(m_strPath) )
+      { // archive
+        SetIconImage("DefaultFile.png");
+      }
       else if ( IsAudio() )
       {
         // audio
@@ -1491,6 +1466,54 @@ void CFileItem::UpdateInfo(const CFileItem &item, bool replaceLabels /*=true*/)
   if (!item.GetIconImage().IsEmpty())
     SetIconImage(item.GetIconImage());
   AppendProperties(item);
+}
+
+void CFileItem::SetFromVideoInfoTag(const CVideoInfoTag &video)
+{
+  SetLabel(video.m_strTitle);
+  if (video.m_strFileNameAndPath.IsEmpty())
+  {
+    m_strPath = video.m_strPath;
+    URIUtils::AddSlashAtEnd(m_strPath);
+    m_bIsFolder = true;
+  }
+  else
+  {
+    m_strPath = video.m_strFileNameAndPath;
+    m_bIsFolder = false;
+  }
+#ifdef HAS_DS_PLAYER
+  if(IsBDFile())
+  {
+	  m_itemType = CFileItem::ITEM_TYPE_BD;
+  }
+#endif
+  *GetVideoInfoTag() = video;
+  if (video.m_iSeason == 0)
+    SetProperty("isspecial", "true");
+  FillInDefaultIcon();
+}
+
+void CFileItem::SetFromAlbum(const CAlbum &album)
+{
+  SetLabel(album.strAlbum);
+  m_bIsFolder = true;
+  m_strLabel2 = StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator);
+  GetMusicInfoTag()->SetAlbum(album);
+  m_bIsAlbum = true;
+  CMusicDatabase::SetPropertiesFromAlbum(*this,album);
+}
+
+void CFileItem::SetFromSong(const CSong &song)
+{
+  SetLabel(song.strTitle);
+  m_strPath = song.strFileName;
+  GetMusicInfoTag()->SetSong(song);
+  m_lStartOffset = song.iStartOffset;
+  m_lStartPartNumber = 1;
+  SetProperty("item_start", song.iStartOffset);
+  m_lEndOffset = song.iEndOffset;
+  SetArt("thumb", song.strThumb);
 }
 
 /////////////////////////////////////////////////////////////////////////////////

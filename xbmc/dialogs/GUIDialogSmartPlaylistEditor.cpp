@@ -271,7 +271,7 @@ void CGUIDialogSmartPlaylistEditor::UpdateButtons()
     if (m_playlist.m_ruleCombination.m_rules[i].m_field == FieldNone)
       item->SetLabel(g_localizeStrings.Get(21423));
     else
-      item->SetLabel(m_playlist.m_ruleCombination.m_rules[i].GetLocalizedRule(m_playlist.GetType()));
+      item->SetLabel(m_playlist.m_ruleCombination.m_rules[i].GetLocalizedRule());
     m_ruleLabels->Add(item);
   }
   CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), CONTROL_RULE_LIST, 0, 0, m_ruleLabels);
@@ -407,8 +407,8 @@ void CGUIDialogSmartPlaylistEditor::OnInitWindow()
 void CGUIDialogSmartPlaylistEditor::OnDeinitWindow(int nextWindowID)
 {
   CGUIDialog::OnDeinitWindow(nextWindowID);
-  CGUIMessage msg(GUI_MSG_LABEL_RESET, GetID(), CONTROL_RULE_LIST);
-  OnMessage(msg);
+  SendMessage(GUI_MSG_LABEL_RESET, CONTROL_RULE_LIST);
+  SendMessage(GUI_MSG_LABEL_RESET, CONTROL_TYPE);
   m_ruleLabels->Clear();
 }
 

@@ -27,8 +27,11 @@
 #include "guilib/LocalizeStrings.h"
 #include "music/MusicDatabase.h"
 #include "playlists/SmartPlayList.h"
+#include "utils/log.h"
 #include "utils/MathUtils.h"
 #include "video/VideoDatabase.h"
+
+#define TIMEOUT_DELAY             500
 
 // list of controls
 #define CONTROL_HEADING             2
@@ -127,11 +130,14 @@ CGUIDialogMediaFilter::CGUIDialogMediaFilter()
     : CGUIDialogSettings(WINDOW_DIALOG_MEDIA_FILTER, "DialogMediaFilter.xml"),
       m_dbUrl(NULL),
       m_filter(NULL)
-{ }
+{
+  m_delayTimer = new CTimer(this);
+}
 
 CGUIDialogMediaFilter::~CGUIDialogMediaFilter()
 {
   Reset();
+  delete m_delayTimer;
 }
 
 bool CGUIDialogMediaFilter::OnMessage(CGUIMessage& message)
@@ -146,6 +152,8 @@ bool CGUIDialogMediaFilter::OnMessage(CGUIMessage& message)
       {
         m_filter->Reset();
         m_filter->SetType(m_mediaType);
+        if (m_delayTimer && m_delayTimer->IsRunning())
+          m_delayTimer->Stop();
 
         for (map<uint32_t, Filter>::iterator filter = m_filters.begin(); filter != m_filters.end(); filter++)
         {
@@ -179,10 +187,16 @@ bool CGUIDialogMediaFilter::OnMessage(CGUIMessage& message)
           UpdateSetting(filter->first);
         }
 
-        CGUIMessage message(GUI_MSG_NOTIFY_ALL, GetID(), 0, GUI_MSG_FILTER_ITEMS, 10); // 10 for advanced
-        g_windowManager.SendMessage(message);
+        TriggerFilter();
         return true;
       }
+      break;
+    }
+
+    case GUI_MSG_REFRESH_LIST:
+    {
+      TriggerFilter();
+      UpdateControls();
       break;
     }
 
@@ -284,7 +298,7 @@ void CGUIDialogMediaFilter::CreateSettings()
       {
         CStdString *values = new CStdString();
         if (filter.rule != NULL && filter.rule->m_parameter.size() > 0)
-          *values = filter.rule->GetLocalizedParameter(m_mediaType);
+          *values = filter.rule->GetParameter();
         filter.data = values;
 
         AddButton(filter.field, filter.label);
@@ -377,6 +391,12 @@ void CGUIDialogMediaFilter::SetupPage()
   UpdateControls();
 }
 
+void CGUIDialogMediaFilter::OnTimeout()
+{
+  CGUIMessage msg(GUI_MSG_REFRESH_LIST, GetID(), 0);
+  g_windowManager.SendThreadMessage(msg, WINDOW_DIALOG_MEDIA_FILTER);
+}
+
 void CGUIDialogMediaFilter::OnSettingChanged(SettingInfo &setting)
 {
   map<uint32_t, Filter>::iterator it = m_filters.find(setting.id);
@@ -384,6 +404,7 @@ void CGUIDialogMediaFilter::OnSettingChanged(SettingInfo &setting)
     return;
 
   bool changed = true;
+  bool delay = false;
   bool remove = false;
   Filter& filter = it->second;
 
@@ -399,6 +420,9 @@ void CGUIDialogMediaFilter::OnSettingChanged(SettingInfo &setting)
           filter.rule = AddRule(filter.field, filter.ruleOperator);
         filter.rule->m_parameter.clear();
         filter.rule->m_parameter.push_back(*str);
+        // trigger the live filtering with a delay in case the user
+        // types several characters in a short time
+        delay = true;
       }
       else
         remove = true;
@@ -437,7 +461,7 @@ void CGUIDialogMediaFilter::OnSettingChanged(SettingInfo &setting)
         for (int index = 0; index < items.Size(); index++)
           filter.rule->m_parameter.push_back(items[index]->GetLabel());
 
-        *(CStdString *)filter.data = filter.rule->GetLocalizedParameter(m_mediaType);
+        *(CStdString *)filter.data = filter.rule->GetParameter();
       }
       else
       {
@@ -484,6 +508,10 @@ void CGUIDialogMediaFilter::OnSettingChanged(SettingInfo &setting)
         *((float **)filter.data)[0] = setting.min;
         *((float **)filter.data)[1] = setting.max;
       }
+
+      // trigger the live filtering with a delay in case the user
+      // moves the slider several steps in a short time
+      delay = true;
       break;
     }
 
@@ -501,15 +529,26 @@ void CGUIDialogMediaFilter::OnSettingChanged(SettingInfo &setting)
 
   if (changed)
   {
-    CGUIMessage message(GUI_MSG_NOTIFY_ALL, GetID(), 0, GUI_MSG_FILTER_ITEMS, 10); // 10 for advanced
-    g_windowManager.SendMessage(message);
-
-    UpdateControls();
+    if (!delay)
+    {
+      CGUIMessage msg(GUI_MSG_REFRESH_LIST, GetID(), 0);
+      OnMessage(msg);
+    }
+    else if (m_delayTimer)
+    {
+      if (m_delayTimer->IsRunning())
+        m_delayTimer->Restart();
+      else
+        m_delayTimer->Start(TIMEOUT_DELAY, false);
+    }
   }
 }
 
 void CGUIDialogMediaFilter::Reset()
 {
+  if (m_delayTimer && m_delayTimer->IsRunning())
+    m_delayTimer->Stop();
+
   delete m_dbUrl;
   m_dbUrl = NULL;
 
@@ -548,7 +587,10 @@ void CGUIDialogMediaFilter::Reset()
 bool CGUIDialogMediaFilter::SetPath(const std::string &path)
 {
   if (path.empty() || m_filter == NULL)
+  {
+    CLog::Log(LOGWARNING, "CGUIDialogMediaFilter::SetPath(%s): invalid path or filter", path.c_str());
     return false;
+  }
 
   delete m_dbUrl;
   bool video = false;
@@ -560,12 +602,18 @@ bool CGUIDialogMediaFilter::SetPath(const std::string &path)
   else if (path.find("musicdb://") == 0)
     m_dbUrl = new CMusicDbUrl();
   else
+  {
+    CLog::Log(LOGWARNING, "CGUIDialogMediaFilter::SetPath(%s): invalid path (neither videodb:// nor musicdb://)", path.c_str());
     return false;
+  }
 
   if (!m_dbUrl->FromString(path) ||
      (video && m_dbUrl->GetType() != "movies" && m_dbUrl->GetType() != "tvshows" && m_dbUrl->GetType() != "episodes" && m_dbUrl->GetType() != "musicvideos") ||
      (!video && m_dbUrl->GetType() != "artists" && m_dbUrl->GetType() != "albums" && m_dbUrl->GetType() != "songs"))
+  {
+    CLog::Log(LOGWARNING, "CGUIDialogMediaFilter::SetPath(%s): invalid media type", path.c_str());
     return false;
+  }
 
   // remove "filter" option
   if (m_dbUrl->HasOption("filter"))
@@ -604,6 +652,15 @@ void CGUIDialogMediaFilter::UpdateControls()
       SET_CONTROL_LABEL(itFilter->second.controlIndex, label);
     }
   }
+}
+
+void CGUIDialogMediaFilter::TriggerFilter() const
+{
+  if (m_filter == NULL)
+    return;
+
+  CGUIMessage message(GUI_MSG_NOTIFY_ALL, GetID(), 0, GUI_MSG_FILTER_ITEMS, 10); // 10 for advanced
+  g_windowManager.SendThreadMessage(message);
 }
 
 void CGUIDialogMediaFilter::OnBrowse(const Filter &filter, CFileItemList &items, bool countOnly /* = false */)

@@ -195,7 +195,6 @@ void CAdvancedSettings::Initialize()
   m_bFTPThumbs = false;
 
   m_musicThumbs = "folder.jpg|Folder.jpg|folder.JPG|Folder.JPG|cover.jpg|Cover.jpg|cover.jpeg|thumb.jpg|Thumb.jpg|thumb.JPG|Thumb.JPG";
-  m_dvdThumbs = "folder.jpg|Folder.jpg|folder.JPG|Folder.JPG";
   m_fanartImages = "fanart.jpg|fanart.png";
 
   m_bMusicLibraryHideAllItems = false;
@@ -317,7 +316,7 @@ void CAdvancedSettings::Initialize()
   m_databaseMusic.Reset();
   m_databaseVideo.Reset();
 
-  m_logLevelHint = m_logLevel = LOG_LEVEL_NONE;
+  m_logLevelHint = m_logLevel = LOG_LEVEL_NORMAL;
 }
 
 bool CAdvancedSettings::Load()
@@ -915,8 +914,8 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
 
   XMLUtils::GetInt(pRootElement, "remotedelay", m_remoteDelay, 1, 20);
   XMLUtils::GetFloat(pRootElement, "controllerdeadzone", m_controllerDeadzone, 0.0f, 1.0f);
-  XMLUtils::GetInt(pRootElement, "fanartres", m_fanartRes, 0, 1080);
-  XMLUtils::GetInt(pRootElement, "imageres", m_imageRes, 0, 1080);
+  XMLUtils::GetUInt(pRootElement, "fanartres", m_fanartRes, 0, 1080);
+  XMLUtils::GetUInt(pRootElement, "imageres", m_imageRes, 0, 1080);
   XMLUtils::GetBoolean(pRootElement, "useddsfanart", m_useDDSFanart);
 
   XMLUtils::GetBoolean(pRootElement, "playlistasfolders", m_playlistAsFolders);
@@ -926,11 +925,6 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
   TiXmlElement* pThumbs = pRootElement->FirstChildElement("musicthumbs");
   if (pThumbs)
     GetCustomExtensions(pThumbs,m_musicThumbs);
-
-  // dvd thumbs
-  pThumbs = pRootElement->FirstChildElement("dvdthumbs");
-  if (pThumbs)
-    GetCustomExtensions(pThumbs,m_dvdThumbs);
 
   // movie fanarts
   TiXmlElement* pFanart = pRootElement->FirstChildElement("fanart");
@@ -1066,52 +1060,58 @@ void CAdvancedSettings::Clear()
 
 void CAdvancedSettings::GetCustomTVRegexps(TiXmlElement *pRootElement, SETTINGS_TVSHOWLIST& settings)
 {
-  int iAction = 0; // overwrite
-  // for backward compatibility
-  const char* szAppend = pRootElement->Attribute("append");
-  if ((szAppend && stricmp(szAppend, "yes") == 0))
-    iAction = 1;
-  // action takes precedence if both attributes exist
-  const char* szAction = pRootElement->Attribute("action");
-  if (szAction)
+  TiXmlElement *pElement = pRootElement;
+  while (pElement)
   {
-    iAction = 0; // overwrite
-    if (stricmp(szAction, "append") == 0)
-      iAction = 1; // append
-    else if (stricmp(szAction, "prepend") == 0)
-      iAction = 2; // prepend
-  }
-  if (iAction == 0)
-    settings.clear();
-  TiXmlNode* pRegExp = pRootElement->FirstChild("regexp");
-  int i = 0;
-  while (pRegExp)
-  {
-    if (pRegExp->FirstChild())
+    int iAction = 0; // overwrite
+    // for backward compatibility
+    const char* szAppend = pElement->Attribute("append");
+    if ((szAppend && stricmp(szAppend, "yes") == 0))
+      iAction = 1;
+    // action takes precedence if both attributes exist
+    const char* szAction = pElement->Attribute("action");
+    if (szAction)
     {
-      bool bByDate = false;
-      int iDefaultSeason = 1;
-      if (pRegExp->ToElement())
-      {
-        CStdString byDate = pRegExp->ToElement()->Attribute("bydate");
-        if(byDate && stricmp(byDate, "true") == 0)
-        {
-          bByDate = true;
-        }
-        CStdString defaultSeason = pRegExp->ToElement()->Attribute("defaultseason");
-        if(!defaultSeason.empty())
-        {
-          iDefaultSeason = atoi(defaultSeason.c_str());
-        }
-      }
-      CStdString regExp = pRegExp->FirstChild()->Value();
-      regExp.MakeLower();
-      if (iAction == 2)
-        settings.insert(settings.begin() + i++, 1, TVShowRegexp(bByDate,regExp,iDefaultSeason));
-      else
-        settings.push_back(TVShowRegexp(bByDate,regExp,iDefaultSeason));
+      iAction = 0; // overwrite
+      if (stricmp(szAction, "append") == 0)
+        iAction = 1; // append
+      else if (stricmp(szAction, "prepend") == 0)
+        iAction = 2; // prepend
     }
-    pRegExp = pRegExp->NextSibling("regexp");
+    if (iAction == 0)
+      settings.clear();
+    TiXmlNode* pRegExp = pElement->FirstChild("regexp");
+    int i = 0;
+    while (pRegExp)
+    {
+      if (pRegExp->FirstChild())
+      {
+        bool bByDate = false;
+        int iDefaultSeason = 1;
+        if (pRegExp->ToElement())
+        {
+          CStdString byDate = pRegExp->ToElement()->Attribute("bydate");
+          if(byDate && stricmp(byDate, "true") == 0)
+          {
+            bByDate = true;
+          }
+          CStdString defaultSeason = pRegExp->ToElement()->Attribute("defaultseason");
+          if(!defaultSeason.empty())
+          {
+            iDefaultSeason = atoi(defaultSeason.c_str());
+          }
+        }
+        CStdString regExp = pRegExp->FirstChild()->Value();
+        regExp.MakeLower();
+        if (iAction == 2)
+          settings.insert(settings.begin() + i++, 1, TVShowRegexp(bByDate,regExp,iDefaultSeason));
+        else
+          settings.push_back(TVShowRegexp(bByDate,regExp,iDefaultSeason));
+      }
+      pRegExp = pRegExp->NextSibling("regexp");
+    }
+
+    pElement = pElement->NextSiblingElement(pRootElement->Value());
   }
 }
 

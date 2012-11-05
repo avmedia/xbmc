@@ -165,14 +165,26 @@ static void SetupRarOptions(CFileItem& item, const CStdString& path)
 vector<string> CVideoThumbLoader::GetArtTypes(const string &type)
 {
   vector<string> ret;
-  if (type != "episode")
+  if (type == "episode")
+    ret.push_back("thumb");
+  else if (type == "tvshow" || type == "season")
   {
-    ret.push_back("fanart");
-    ret.push_back("poster");
-  }
-  if (type == "tvshow" || type == "season" || type.empty())
     ret.push_back("banner");
-  ret.push_back("thumb");
+    ret.push_back("poster");
+    ret.push_back("fanart");
+  }
+  else if (type == "movie" || type == "musicvideo" || type == "set")
+  {
+    ret.push_back("poster");
+    ret.push_back("fanart");
+  }
+  else if (type.empty()) // unknown - just throw everything in
+  {
+    ret.push_back("poster");
+    ret.push_back("banner");
+    ret.push_back("thumb");
+    ret.push_back("fanart");
+  }
   return ret;
 }
 
@@ -218,6 +230,8 @@ bool CVideoThumbLoader::LoadItem(CFileItem* pItem)
   if (artwork.empty())
   {
     vector<string> artTypes = GetArtTypes(pItem->HasVideoInfoTag() ? pItem->GetVideoInfoTag()->m_type : "");
+    if (find(artTypes.begin(), artTypes.end(), "thumb") == artTypes.end())
+      artTypes.push_back("thumb"); // always look for "thumb" art for files
     for (vector<string>::const_iterator i = artTypes.begin(); i != artTypes.end(); ++i)
     {
       std::string type = *i;
@@ -320,11 +334,13 @@ bool CVideoThumbLoader::FillLibraryArt(CFileItem &item)
         map<string, string> showArt, cacheArt;
         if (m_database->GetArtForItem(tag.m_iIdShow, "tvshow", showArt))
         {
-          map<string, string>::iterator i = showArt.find("fanart");
-          if (i != showArt.end())
-            cacheArt.insert(make_pair("fanart", i->second));
-          if ((i = showArt.find("thumb")) != showArt.end())
-            cacheArt.insert(make_pair("tvshowthumb", i->second));
+          for (CGUIListItem::ArtMap::iterator i = showArt.begin(); i != showArt.end(); ++i)
+          {
+            if (i->first == "fanart")
+              cacheArt.insert(*i);
+            else
+              cacheArt.insert(make_pair("tvshow." + i->first, i->second));
+          }
           item.AppendArt(cacheArt);
         }
         m_showArt.insert(make_pair(tag.m_iIdShow, cacheArt));
@@ -392,7 +408,16 @@ void CVideoThumbLoader::OnJobComplete(unsigned int jobID, bool success, CJob* jo
     CVideoInfoTag* info = loader->m_item.GetVideoInfoTag();
 
     if (loader->m_thumb && info->m_iDbId > 0 && !info->m_type.empty())
-      m_database->SetArtForItem(info->m_iDbId, info->m_type, "thumb", loader->m_item.GetArt("thumb"));
+    {
+      // This runs in a different thread than the CVideoThumbLoader object.
+      CVideoDatabase db;
+      if (db.Open())
+      {
+        db.SetArtForItem(info->m_iDbId, info->m_type, "thumb", loader->m_item.GetArt("thumb"));
+        db.Close();
+      }
+
+    }
 
     if (m_pStreamDetailsObs)
       m_pStreamDetailsObs->OnStreamDetails(info->m_streamDetails, info->m_strFileNameAndPath, info->m_iFileId);

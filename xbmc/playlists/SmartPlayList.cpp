@@ -64,7 +64,7 @@ static const translateField fields[] = {
   { "label",             FieldMusicLabel,              SortByNone,                     CSmartPlaylistRule::TEXT_FIELD,       21899 },
   { "title",             FieldTitle,                   SortByTitle,                    CSmartPlaylistRule::TEXT_FIELD,       556 },
   { "sorttitle",         FieldSortTitle,               SortBySortTitle,                CSmartPlaylistRule::TEXT_FIELD,       556 },
-  { "year",              FieldYear,                    SortByYear,                     CSmartPlaylistRule::BROWSEABLE_FIELD, 562 },
+  { "year",              FieldYear,                    SortByYear,                     CSmartPlaylistRule::BROWSEABLE_NUMERIC_FIELD, 562 },
   { "time",              FieldTime,                    SortByTime,                     CSmartPlaylistRule::SECONDS_FIELD,    180 },
   { "playcount",         FieldPlaycount,               SortByPlaycount,                CSmartPlaylistRule::NUMERIC_FIELD,    567 },
   { "lastplayed",        FieldLastPlayed,              SortByLastPlayed,               CSmartPlaylistRule::DATE_FIELD,       568 },
@@ -617,16 +617,27 @@ CStdString CSmartPlaylistRule::GetLocalizedOperator(SEARCH_OPERATOR oper)
   return g_localizeStrings.Get(16018);
 }
 
-CStdString CSmartPlaylistRule::GetLocalizedRule(const CStdString &type) const
+CStdString CSmartPlaylistRule::GetLocalizedRule() const
 {
   CStdString rule;
-  rule.Format("%s %s %s", GetLocalizedField(m_field).c_str(), GetLocalizedOperator(m_operator).c_str(), GetLocalizedParameter(type).c_str());
+  rule.Format("%s %s %s", GetLocalizedField(m_field).c_str(), GetLocalizedOperator(m_operator).c_str(), GetParameter().c_str());
   return rule;
 }
 
-CStdString CSmartPlaylistRule::GetLocalizedParameter(const CStdString &type) const
+CStdString CSmartPlaylistRule::GetParameter() const
 {
   return StringUtils::JoinString(m_parameter, " / ");
+}
+
+void CSmartPlaylistRule::SetParameter(const CStdString &value)
+{
+  m_parameter.clear();
+  StringUtils::SplitString(value, " / ", m_parameter);
+}
+
+void CSmartPlaylistRule::SetParameter(const std::vector<CStdString> &values)
+{
+  m_parameter.assign(values.begin(), values.end());
 }
 
 CStdString CSmartPlaylistRule::GetVideoResolutionQuery(const CStdString &parameter) const

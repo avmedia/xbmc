@@ -40,7 +40,10 @@ public:
   virtual CFileItemPtr GetCurrentListItem(int offset = 0) { return m_movieItem; }
   const CFileItemList& CurrentDirectory() const { return *m_castList; };
   virtual bool HasListItems() const { return true; };
+
+  static std::string ChooseArtType(const CFileItem &item, std::map<std::string, std::string> &currentArt);
 protected:
+  virtual void OnInitWindow();
   void Update();
   void SetLabel(int iControl, const CStdString& strLabel);
 

@@ -369,11 +369,12 @@ int CPVRDatabase::Get(CPVRChannelGroupInternal &results)
         channel->m_strStreamURL            = m_pDS->fv("sStreamURL").get_asString();
         channel->m_iClientEncryptionSystem = m_pDS->fv("iEncryptionSystem").get_asInt();
         channel->m_iEpgId                  = m_pDS->fv("idEpg").get_asInt();
+        channel->UpdateEncryptionName();
 
 #if PVRDB_DEBUGGING
         CLog::Log(LOGDEBUG, "PVR - %s - channel '%s' loaded from the database", __FUNCTION__, channel->m_strChannelName.c_str());
 #endif
-        PVRChannelGroupMember newMember = { channel, m_pDS->fv("iChannelNumber").get_asInt() };
+        PVRChannelGroupMember newMember = { channel, (unsigned int)m_pDS->fv("iChannelNumber").get_asInt() };
         results.m_members.push_back(newMember);
 
         m_pDS->next();
@@ -717,7 +718,7 @@ int CPVRDatabase::Get(CPVRChannelGroup &group)
 #if PVRDB_DEBUGGING
           CLog::Log(LOGDEBUG, "PVR - %s - channel '%s' loaded from the database", __FUNCTION__, channel->m_strChannelName.c_str());
 #endif
-          PVRChannelGroupMember newMember = { channel, iChannelNumber };
+          PVRChannelGroupMember newMember = { channel, (unsigned int)iChannelNumber };
           group.m_members.push_back(newMember);
           iReturn++;
         }
@@ -762,7 +763,10 @@ bool CPVRDatabase::PersistChannels(CPVRChannelGroup &group)
       bReturn &= Persist(*member.channel, m_sqlite || !member.channel->IsNew());
     }
   }
-  return CommitInsertQueries();
+
+  bReturn &= CommitInsertQueries();
+
+  return bReturn;
 }
 
 bool CPVRDatabase::PersistGroupMembers(CPVRChannelGroup &group)

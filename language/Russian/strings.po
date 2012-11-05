@@ -1,5 +1,5 @@
 # XBMC Media Center language file
-# XBMC-core v12.0-ALPHA6
+# XBMC-core v12.0-ALPHA7
 # Translators:
 #   <linniksa@gmail.com>, 2012.
 # Pavel Maryanov <acid@jack.kiev.ua>, 2012.
@@ -3455,6 +3455,14 @@ msgctxt "#2050"
 msgid "Runtime"
 msgstr "Длительность"
 
+msgctxt "#2080"
+msgid "Empty list"
+msgstr ""
+
+msgctxt "#2081"
+msgid "Went back to parent list because the active list has been emptied"
+msgstr ""
+
 msgctxt "#2100"
 msgid "Script failed! : %s"
 msgstr "Ошибка скрипта: %s"
@@ -3929,8 +3937,8 @@ msgid "Settings & file manager"
 msgstr "Настройки и менеджер файлов"
 
 msgctxt "#12376"
-msgid "Set as default for all movies"
-msgstr "Установить для всех фильмов"
+msgid "Set as default for all videos"
+msgstr ""
 
 msgctxt "#12377"
 msgid "This will reset any previously saved values"

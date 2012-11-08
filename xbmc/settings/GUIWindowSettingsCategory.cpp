@@ -2202,7 +2202,6 @@ CGUIControl* CGUIWindowSettingsCategory::AddSetting(CSetting *pSetting, float wi
   {
     pControl = new CGUIEditControl(*m_pOriginalEdit);
     if (!pControl) return NULL;
-    ((CGUIEditControl *)pControl)->SettingsCategorySetTextAlign(XBFONT_CENTER_Y);
     ((CGUIEditControl *)pControl)->SetLabel(g_localizeStrings.Get(pSetting->GetLabel()));
     pControl->SetWidth(width);
     pSettingControl = new CEditSettingControl((CGUIEditControl *)pControl, iControlID, pSetting);
@@ -2211,7 +2210,6 @@ CGUIControl* CGUIWindowSettingsCategory::AddSetting(CSetting *pSetting, float wi
   {
     pControl = new CGUIButtonControl(*m_pOriginalButton);
     if (!pControl) return NULL;
-    ((CGUIButtonControl *)pControl)->SettingsCategorySetTextAlign(XBFONT_CENTER_Y);
     ((CGUIButtonControl *)pControl)->SetLabel(g_localizeStrings.Get(pSetting->GetLabel()));
     pControl->SetWidth(width);
     pSettingControl = new CButtonSettingControl((CGUIButtonControl *)pControl, iControlID, pSetting);

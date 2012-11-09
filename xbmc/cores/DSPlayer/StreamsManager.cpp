@@ -1004,7 +1004,7 @@ void CSubtitleManager::Initialize()
   style.outlineWidthX = style.outlineWidthY = g_guiSettings.GetInt("subtitles.outline.width");
   
   CStdStringW fontName;
-  g_charsetConverter.utf8ToW(g_guiSettings.GetString("subtitles.ds.font"), fontName);
+  g_charsetConverter.utf8ToW(g_guiSettings.GetString("subtitles.dsfont"), fontName);
   style.fontName = (wchar_t *) CoTaskMemAlloc(fontName.length() * sizeof(wchar_t) + 2);
   if (style.fontName)
     wcscpy_s(style.fontName, fontName.length() + 1, fontName.c_str());

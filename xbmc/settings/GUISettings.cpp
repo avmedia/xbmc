@@ -803,7 +803,7 @@ void CGUISettings::Initialize()
 #endif
   AddString(sub, "subtitles.charset", 735, "DEFAULT", SPIN_CONTROL_TEXT);
 #ifdef HAS_DS_PLAYER
-  AddString(sub, "subtitles.ds.font", 55056, "Arial", BUTTON_CONTROL_STANDARD);
+  AddString(sub, "subtitles.dsfont", 55056, "Arial", BUTTON_CONTROL_STANDARD);
 #endif
   AddBool(sub,"subtitles.overrideassfonts", 21368, false);
   AddSeparator(sub, "subtitles.sep1");

@@ -507,16 +507,14 @@ void CGUIWindowSettingsCategory::CreateSettings()
       continue;
     }
 #ifdef HAS_DS_PLAYER
-	else if (strSetting.Equals("subtitles.ds.font"))
+	else if (strSetting.Equals("subtitles.dsfont"))
 	{
-		//This is the way blinkseb used for setting subtitle font. It's still good but need to find a new way to set the label of the control
-		//CSettingString *pSettingString = (CSettingString*)pSetting;
-		//CGUIButtonControl *pControl = (CGUIButtonControl *)GetControl(GetSetting(strSetting)->GetID());
-		//CStdString label; label.Format(g_localizeStrings.Get(55056), pSettingString->GetData());
-		//pControl->SetLabel(label); pControl->SettingsCategorySetTextAlign(XBFONT_LEFT);
-		AddSetting(pSetting, group->GetWidth(), iControlID);
-		CBaseSettingControl *control = GetSetting(pSetting->GetSetting());
-		control->SetDelayed();
+ 		AddSetting(pSetting, group->GetWidth(), iControlID);
+		CBaseSettingControl *pSettingControl = GetSetting(pSetting->GetSetting());
+		CGUIButtonControl *pButtonControl = (CGUIButtonControl *)GetControl(pSettingControl->GetID());
+		CStdString label; label.Format(g_localizeStrings.Get(pSetting->GetLabel()), ((CSettingString*)pSetting)->GetData());
+		pButtonControl->SetLabel(label); 
+ 		pSettingControl->SetDelayed();
 		continue;
 	}
 #endif
@@ -1128,7 +1126,7 @@ void CGUIWindowSettingsCategory::OnClick(CBaseSettingControl *pSettingControl)
     }
   }
 #ifdef HAS_DS_PLAYER
-  else if (strSetting.Equals("subtitles.ds.font"))
+  else if (strSetting.Equals("subtitles.dsfont"))
   {
 	  CSettingString *pSettingString = (CSettingString *)pSettingControl->GetSetting();
 	  CGUIButtonControl *pControl = (CGUIButtonControl *)GetControl(pSettingControl->GetID());

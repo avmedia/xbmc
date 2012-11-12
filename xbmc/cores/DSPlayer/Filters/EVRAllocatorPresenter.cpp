@@ -1177,56 +1177,41 @@ bool CEVRAllocatorPresenter::GetImageFromMixer()
       break;
     }
 
-    memset (&Buffer, 0, sizeof(Buffer));
-    Buffer.pSample  = pSample;
-    pSample->GetUINT32 (GUID_SURFACE_INDEX, &dwSurface);
+	memset (&Buffer, 0, sizeof(Buffer));
+	Buffer.pSample  = pSample;
+	pSample->GetUINT32 (GUID_SURFACE_INDEX, &dwSurface);
 
-    {
-      llClockBefore = CTimeUtils::GetPerfCounter();
-      hr = m_pMixer->ProcessOutput (0 , 1, &Buffer, &dwStatus);
-      llClockAfter = CTimeUtils::GetPerfCounter();
-    }
+	{
+		llClockBefore = CTimeUtils::GetPerfCounter();
+		hr = m_pMixer->ProcessOutput (0 , 1, &Buffer, &dwStatus);
+		llClockAfter = CTimeUtils::GetPerfCounter();
+	}
+	if (FAILED(hr))
+	{
+		if (hr == MF_E_TRANSFORM_NEED_MORE_INPUT) 
+		{
+			MoveToFreeList (pSample, false);
+			break;
+		}
+	}
+	else
+	{
+		if (m_pSink) 
+		{
+			//CAutoLock autolock(this); We shouldn't need to lock here, m_pSink is thread safe
+			llMixerLatency = llClockAfter - llClockBefore;
+			m_pSink->Notify (EC_PROCESSING_LATENCY, (LONG_PTR)&llMixerLatency, 0);
+		}
 
-    if (hr == MF_E_TRANSFORM_NEED_MORE_INPUT) 
-    {
-      MoveToFreeList (pSample, false);
-      break;
-    }
+		pSample->GetSampleTime (&nsSampleTime);
 
-    if (m_pSink) 
-    {
-      //CAutoLock autolock(this); We shouldn't need to lock here, m_pSink is thread safe
-      llMixerLatency = llClockAfter - llClockBefore;
-      m_pSink->Notify (EC_PROCESSING_LATENCY, (LONG_PTR)&llMixerLatency, 0);
-    }
+		TRACE_EVR ("EVR: Get from Mixer : %d  (%I64d) (%I64d)\n", dwSurface, nsSampleTime, m_rtTimePerFrame != 0 ? nsSampleTime/m_rtTimePerFrame : 0);
 
-    pSample->GetSampleTime (&nsSampleTime);
-    REFERENCE_TIME        nsDuration;
-    pSample->GetSampleDuration (&nsDuration);
-    //Dont give a fuck about the tearing test
-    /*if (AfxGetMyApp()->m_fTearingTest)
-    {
-      RECT    rcTearing;
-      
-      rcTearing.left    = m_nTearingPos;
-      rcTearing.top    = 0;
-      rcTearing.right    = rcTearing.left + 4;
-      rcTearing.bottom  = m_NativeVideoSize.cy;
-      m_pD3DDev->ColorFill (m_pVideoSurface[dwSurface], &rcTearing, D3DCOLOR_ARGB (255,255,0,0));
-
-      rcTearing.left  = (rcTearing.right + 15) % m_NativeVideoSize.cx;
-      rcTearing.right  = rcTearing.left + 4;
-      m_pD3DDev->ColorFill (m_pVideoSurface[dwSurface], &rcTearing, D3DCOLOR_ARGB (255,255,0,0));
-      m_nTearingPos = (m_nTearingPos + 7) % m_NativeVideoSize.cx;
-    }  */
-
-    int64_t TimePerFrame = m_rtTimePerFrame;
-    TRACE_EVR ("EVR: Get from Mixer : %d  (%I64d) (%I64d)\n", dwSurface, nsSampleTime, TimePerFrame!=0?nsSampleTime/TimePerFrame:0);
-
-    MoveToScheduledList (pSample, false);
-    bDoneSomething = true;
-    if (m_rtTimePerFrame == 0)
-      break;
+		MoveToScheduledList (pSample, false);
+		bDoneSomething = true;
+		if (m_rtTimePerFrame == 0)
+			break;
+	}
   }
 
   return bDoneSomething;
@@ -1613,12 +1598,11 @@ bool ExtractInterlaced(const AM_MEDIA_TYPE* pmt)
 
 void CEVRAllocatorPresenter::GetMixerThread()
 {
-  HANDLE        hEvts[]    = { m_hEvtQuit, m_hEvtFlush};
-  bool        bQuit    = false;
-    TIMECAPS      tc;
-  DWORD        dwResolution;
-  DWORD        dwUser = 0;
-  DWORD        dwTaskIndex  = 0;
+  bool     bQuit = false;
+  TIMECAPS tc;
+  DWORD    dwResolution;
+  DWORD    dwUser = 0;
+  DWORD    dwTaskIndex = 0;
 
   // Tell Vista Multimedia Class Scheduler we are a playback thretad (increase priority)
 //  if (pfAvSetMmThreadCharacteristicsW)  
@@ -1632,15 +1616,13 @@ void CEVRAllocatorPresenter::GetMixerThread()
 
   while (!bQuit)
   {
-    DWORD dwObject = WaitForMultipleObjects (countof(hEvts), hEvts, FALSE, 1);
+    DWORD dwObject = WaitForSingleObject(m_hEvtQuit, 1);
+
     switch (dwObject)
     {
     case WAIT_OBJECT_0 :
       bQuit = true;
       break;
-	case WAIT_OBJECT_0 + 1 :
-		ResetEvent(m_hEvtFlush);
-		break;
     case WAIT_TIMEOUT :
       {
         bool bDoneSomething = false;
@@ -2002,6 +1984,7 @@ void CEVRAllocatorPresenter::RenderThread()
 
       if (m_LastSetOutputRange != -1 && m_LastSetOutputRange != ((CEVRRendererSettings *)g_dsSettings.pRendererSettings)->outputRange || m_bPendingRenegotiate)
       {
+		CAutoLock AutoLock(&m_ImageProcessingLock);
         FlushSamples();
         RenegotiateMediaType();
         m_bPendingRenegotiate = false;

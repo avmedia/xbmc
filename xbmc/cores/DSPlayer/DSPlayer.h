@@ -208,7 +208,6 @@ protected:
   CGraphManagementThread m_pGraphThread;
   CDVDClock m_pClock;
   CPlayerOptions m_PlayerOptions;
-  CURL m_Filename;
   CEvent m_hReadyEvent;
   bool m_bEof;
 };

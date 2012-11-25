@@ -185,9 +185,15 @@ bool CDSPlayer::OpenFile(const CFileItem& file,const CPlayerOptions &options)
 
 		PlayerState = DSPLAYER_LOADING;
 		currentFileItem = file;
-		m_Filename = file.GetAsUrl();
 		m_PlayerOptions = options;
 		m_pGraphThread.SetCurrentRate(1);
+
+		if (currentFileItem.IsInternetStream())
+		{
+			CURL url(currentFileItem.GetPath());
+			url.SetProtocolOptions("");
+			currentFileItem.SetPath(url.Get());
+		}
 
 		m_hReadyEvent.Reset();
 		Create();

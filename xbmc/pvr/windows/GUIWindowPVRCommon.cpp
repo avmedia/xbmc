@@ -190,6 +190,7 @@ bool CGUIWindowPVRCommon::OnMessageFocus(CGUIMessage &message)
 void CGUIWindowPVRCommon::OnWindowUnload(void)
 {
   m_iSelected = m_parent->m_viewControl.GetSelectedItem();
+  m_history = m_parent->m_history;
 }
 
 bool CGUIWindowPVRCommon::OnAction(const CAction &action)
@@ -341,13 +342,13 @@ bool CGUIWindowPVRCommon::OnContextButtonMenuHooks(CFileItem *item, CONTEXT_BUTT
     bReturn = true;
 
     if (item->IsEPG() && item->GetEPGInfoTag()->HasPVRChannel())
-      g_PVRClients->ProcessMenuHooks(item->GetEPGInfoTag()->ChannelTag()->ClientID());
+      g_PVRClients->ProcessMenuHooks(item->GetEPGInfoTag()->ChannelTag()->ClientID(), PVR_MENUHOOK_EPG);
     else if (item->IsPVRChannel())
-      g_PVRClients->ProcessMenuHooks(item->GetPVRChannelInfoTag()->ClientID());
+      g_PVRClients->ProcessMenuHooks(item->GetPVRChannelInfoTag()->ClientID(), PVR_MENUHOOK_CHANNEL);
     else if (item->IsPVRRecording())
-      g_PVRClients->ProcessMenuHooks(item->GetPVRRecordingInfoTag()->m_iClientId);
+      g_PVRClients->ProcessMenuHooks(item->GetPVRRecordingInfoTag()->m_iClientId, PVR_MENUHOOK_RECORDING);
     else if (item->IsPVRTimer())
-      g_PVRClients->ProcessMenuHooks(item->GetPVRTimerInfoTag()->m_iClientId);
+      g_PVRClients->ProcessMenuHooks(item->GetPVRTimerInfoTag()->m_iClientId, PVR_MENUHOOK_TIMER);
   }
 
   return bReturn;
@@ -868,4 +869,17 @@ bool CGUIWindowPVRCommon::OnContextButtonFind(CFileItem *item, CONTEXT_BUTTON bu
   }
 
   return bReturn;
+}
+
+void CGUIWindowPVRCommon::ShowBusyItem(void)
+{
+  // FIXME: display a temporary entry so that the list can keep its focus
+  // busy_items has to be static, because m_viewControl holds the pointer to it
+  static CFileItemList busy_items;
+  if (busy_items.IsEmpty())
+  {
+    CFileItemPtr pItem(new CFileItem(g_localizeStrings.Get(1040)));
+    busy_items.AddFront(pItem, 0);
+  }
+  m_parent->m_viewControl.SetItems(busy_items);
 }

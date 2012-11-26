@@ -45,6 +45,12 @@ void CMusicThumbLoader::Initialize()
   m_albumArt.clear();
 }
 
+void CMusicThumbLoader::Deinitialize()
+{
+  m_database->Close();
+  m_albumArt.clear();
+}
+
 void CMusicThumbLoader::OnLoaderStart()
 {
   Initialize();
@@ -52,8 +58,7 @@ void CMusicThumbLoader::OnLoaderStart()
 
 void CMusicThumbLoader::OnLoaderFinish()
 {
-  m_database->Close();
-  m_albumArt.clear();
+  Deinitialize();
 }
 
 bool CMusicThumbLoader::LoadItem(CFileItem* pItem)
@@ -80,26 +85,46 @@ bool CMusicThumbLoader::LoadItem(CFileItem* pItem)
       {
         string fanart = m_database->GetArtForItem(idArtist, "artist", "fanart");
         if (!fanart.empty())
-          pItem->SetArt("fanart", fanart);
+        {
+          pItem->SetArt("artist.fanart", fanart);
+          pItem->SetArtFallback("fanart", "artist.fanart");
+        }
       }
       m_database->Close();
     }
   }
 
   if (!pItem->HasArt("thumb"))
-    FillThumb(*pItem);
+  {
+    // Look for embedded art
+    if (pItem->HasMusicInfoTag() && !pItem->GetMusicInfoTag()->GetCoverArtInfo().empty())
+    {
+      // The item has got embedded art but user thumbs overrule, so check for those first
+      if (!FillThumb(*pItem, false)) // Check for user thumbs but ignore folder thumbs
+      {
+        // No user thumb, use embedded art
+        CStdString thumb = CTextureCache::GetWrappedImageURL(pItem->GetPath(), "music");
+        pItem->SetArt("thumb", thumb);
+      }
+    }
+    else
+    {
+      // Check for user thumbs
+      FillThumb(*pItem, true);
+    }
+  }
 
   return true;
 }
 
-bool CMusicThumbLoader::FillThumb(CFileItem &item)
+bool CMusicThumbLoader::FillThumb(CFileItem &item, bool folderThumbs /* = true */)
 {
   if (item.HasArt("thumb"))
     return true;
   CStdString thumb = GetCachedImage(item, "thumb");
   if (thumb.IsEmpty())
   {
-    thumb = item.GetUserMusicThumb();
+    thumb = item.GetUserMusicThumb(false, folderThumbs);
     if (!thumb.IsEmpty())
       SetCachedImage(item, "thumb", thumb);
   }
@@ -119,18 +144,26 @@ bool CMusicThumbLoader::FillLibraryArt(CFileItem &item)
     else if (tag.GetType() == "song")
     { // no art for the song, try the album
       ArtCache::const_iterator i = m_albumArt.find(tag.GetAlbumId());
-      if (i != m_albumArt.end())
-        item.SetArt(i->second);
-      else
+      if (i == m_albumArt.end())
       {
-        if (m_database->GetArtForItem(tag.GetAlbumId(), "album", artwork))
-          item.SetArt(artwork);
-        m_albumArt.insert(make_pair(tag.GetAlbumId(), artwork));
+        m_database->GetArtForItem(tag.GetAlbumId(), "album", artwork);
+        i = m_albumArt.insert(make_pair(tag.GetAlbumId(), artwork)).first;
+      }
+      if (i != m_albumArt.end())
+      {
+        item.AppendArt(i->second, "album");
+        for (map<string, string>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+          item.SetArtFallback(j->first, "album." + j->first);
       }
     }
     if (tag.GetType() == "song" || tag.GetType() == "album")
     { // fanart from the artist
-      item.SetArt("fanart", m_database->GetArtistArtForItem(tag.GetDatabaseId(), tag.GetType(), "fanart"));
+      string fanart = m_database->GetArtistArtForItem(tag.GetDatabaseId(), tag.GetType(), "fanart");
+      if (!fanart.empty())
+      {
+        item.SetArt("artist.fanart", fanart);
+        item.SetArtFallback("fanart", "artist.fanart");
+      }
     }
     m_database->Close();
   }

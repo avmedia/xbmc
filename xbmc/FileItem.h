@@ -29,7 +29,7 @@
 #include "utils/ISerializable.h"
 #include "utils/ISortable.h"
 #include "XBDateTime.h"
-#include "SortFileItem.h"
+#include "utils/SortUtils.h"
 #include "utils/LabelFormatter.h"
 #include "GUIPassword.h"
 #include "threads/CriticalSection.h"
@@ -310,7 +310,7 @@ public:
   CStdString GetBaseMoviePath(bool useFolderNames) const;
 
   // Gets the user thumb, if it exists
-  CStdString GetUserMusicThumb(bool alwaysCheckRemote = false) const;
+  CStdString GetUserMusicThumb(bool alwaysCheckRemote = false, bool fallbackToFolder = false) const;
 
   /*! \brief Get the path where we expect local metadata to reside.
    For a folder, this is just the existing path (eg tvshow folder)

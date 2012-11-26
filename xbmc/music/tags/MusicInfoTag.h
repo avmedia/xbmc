@@ -22,6 +22,7 @@
 
 class CSong;
 class CAlbum;
+class CArtist;
 
 #include <vector>
 #include <string>
@@ -82,7 +83,7 @@ public:
   int GetTrackAndDiskNumber() const;
   int GetDuration() const;  // may be set even if Loaded() returns false
   int GetYear() const;
-  long GetDatabaseId() const;
+  int GetDatabaseId() const;
   const std::string &GetType() const;
 
   void GetReleaseDate(SYSTEMTIME& dateTime) const;
@@ -124,6 +125,7 @@ public:
   void SetTrackAndDiskNumber(int iTrackAndDisc);
   void SetDuration(int iSec);
   void SetLoaded(bool bOnOff = true);
+  void SetArtist(const CArtist& artist);
   void SetAlbum(const CAlbum& album);
   void SetSong(const CSong& song);
   void SetMusicBrainzTrackID(const CStdString& strTrackID);
@@ -192,7 +194,7 @@ protected:
   bool m_bCompilation;
   int m_iDuration;
   int m_iTrack;     // consists of the disk number in the high 16 bits, the track number in the low 16bits
-  long m_iDbId;
+  int m_iDbId;
   std::string m_type; ///< item type "song", "album", "artist"
   bool m_bLoaded;
   char m_rating;

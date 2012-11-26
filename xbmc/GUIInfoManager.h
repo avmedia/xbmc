@@ -106,6 +106,8 @@ namespace INFO
 #define PLAYER_ITEM_ART              49
 #define PLAYER_CAN_PAUSE             50
 #define PLAYER_CAN_SEEK              51
+#define PLAYER_START_TIME            52
+#define PLAYER_TITLE                 53
 
 #define WEATHER_CONDITIONS          100
 #define WEATHER_TEMPERATURE         101
@@ -502,7 +504,7 @@ namespace INFO
 
 #define VERSION_MAJOR 12
 #define VERSION_MINOR 0
-#define VERSION_TAG "-ALPHA7"
+#define VERSION_TAG "-BETA1"
 
 #define LISTITEM_START              35000
 #define LISTITEM_THUMB              (LISTITEM_START)
@@ -634,6 +636,7 @@ namespace INFO
 // forward
 class CInfoLabel;
 class CGUIWindow;
+namespace EPG { class CEpgInfoTag; }
 
 // Info Flags
 // Stored in the top 8 bits of GUIInfo::m_data1
@@ -863,6 +866,13 @@ protected:
   int AddListItemProp(const CStdString &str, int offset=0);
 
   CStdString GetAudioScrobblerLabel(int item);
+
+  /*!
+   * @brief Get the EPG tag that is currently active
+   * @param tag The active tag
+   * @return True if an EPG tag is active and 'tag' was updated, false otherwise
+   */
+  bool GetEpgInfoTag(EPG::CEpgInfoTag& tag) const;
 
   // Conditional string parameters are stored here
   CStdStringArray m_stringParameters;

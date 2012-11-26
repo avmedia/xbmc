@@ -36,7 +36,8 @@ namespace XBMCAddon
 
     Monitor::~Monitor()
     { 
-      deallocating(); 
+      deallocating();
+      DelayedCallGuard dg(languageHook);
       // we're shutting down so unregister me.
       if (languageHook)
       {

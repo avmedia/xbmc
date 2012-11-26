@@ -214,9 +214,7 @@ bool CMythDirectory::GetGuideForChannel(const CStdString& base, CFileItemList &i
       CDateTime start(program[i].starttime);
       CDateTime end(program[i].endtime);
       CDateTimeSpan runtime = end - start;
-      tag->m_strRuntime       = StringUtils::SecondsToTimeString(runtime.GetSeconds() +
-                                                                 runtime.GetMinutes() * 60 +
-                                                                 runtime.GetHours() * 3600);
+      tag->m_duration         = runtime.GetSeconds() + runtime.GetMinutes() * 60 + runtime.GetHours() * 3600;
       tag->m_iSeason          = 0; // So XBMC treats the content as an episode and displays tag information.
       tag->m_iEpisode         = 0;
 
@@ -329,9 +327,9 @@ bool CMythDirectory::GetRecordings(const CStdString& base, CFileItemList &items,
   if (type != TV_SHOWS)
   {
     if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
-      items.AddSortMethod(SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE, 551 /* Name */, LABEL_MASKS("%K", "%J"));
+      items.AddSortMethod(SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE, 556, LABEL_MASKS("%K", "%J"));
     else
-      items.AddSortMethod(SORT_METHOD_VIDEO_SORT_TITLE, 551 /* Name */, LABEL_MASKS("%K", "%J"));
+      items.AddSortMethod(SORT_METHOD_VIDEO_SORT_TITLE, 556, LABEL_MASKS("%K", "%J"));
   }
   items.AddSortMethod(SORT_METHOD_DATE, 552 /* Date */, LABEL_MASKS("%K", "%J"));
 

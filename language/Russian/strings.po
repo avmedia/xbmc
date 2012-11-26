@@ -1225,7 +1225,7 @@ msgstr "Аналоговый"
 
 msgctxt "#339"
 msgid "Optical/Coax"
-msgstr "Цифровой"
+msgstr "Оптический/коаксиальный"
 
 msgctxt "#340"
 msgid "Various artists"
@@ -1413,7 +1413,7 @@ msgstr "немного"
 #. Weather token
 msgctxt "#382"
 msgid "Scattered"
-msgstr "местами"
+msgstr "одиночные"
 
 #. Weather token
 msgctxt "#383"
@@ -1438,7 +1438,7 @@ msgstr "ясно"
 #. Weather token
 msgctxt "#387"
 msgid "Clouds"
-msgstr "облачно"
+msgstr "облака"
 
 #. Weather token
 msgctxt "#388"
@@ -1987,7 +1987,7 @@ msgstr "Список"
 
 msgctxt "#536"
 msgid "Icons"
-msgstr "значки"
+msgstr "Значки"
 
 msgctxt "#537"
 msgid "Big list"
@@ -1995,23 +1995,23 @@ msgstr "Широкий список"
 
 msgctxt "#538"
 msgid "Big icons"
-msgstr "крупные значки"
+msgstr "Крупные значки"
 
 msgctxt "#539"
 msgid "Wide"
-msgstr "широкий"
+msgstr "Баннеры"
 
 msgctxt "#540"
 msgid "Big wide"
-msgstr "широкий крупн."
+msgstr "Широкий крупн."
 
 msgctxt "#541"
 msgid "Album icons"
-msgstr "значки альбомов"
+msgstr "Значки альбомов"
 
 msgctxt "#542"
 msgid "DVD icons"
-msgstr "значки DVD"
+msgstr "Значки DVD"
 
 msgctxt "#543"
 msgid "DVD"
@@ -2371,11 +2371,11 @@ msgstr "Удалить из медиатеки"
 
 msgctxt "#647"
 msgid "Export video library"
-msgstr "Экспортировать видеотеку"
+msgstr "Экспортировать медиатеку видео"
 
 msgctxt "#648"
 msgid "Import video library"
-msgstr "Импортировать видеотеку"
+msgstr "Импортировать медиатеку видео"
 
 msgctxt "#649"
 msgid "Importing"
@@ -2387,7 +2387,7 @@ msgstr "Экспорт…"
 
 msgctxt "#651"
 msgid "Browse for library"
-msgstr "Укажите медиатеку"
+msgstr "Выберите медиатеку"
 
 msgctxt "#652"
 msgid "Years"
@@ -3190,7 +3190,7 @@ msgstr "и"
 #. Weather token
 msgctxt "#1398"
 msgid "Freezing"
-msgstr "заморозки"
+msgstr "холодн."
 
 #. Weather token
 msgctxt "#1399"
@@ -3365,7 +3365,7 @@ msgstr "песок"
 #. Weather token
 msgctxt "#1433"
 msgid "Spray"
-msgstr "брызки"
+msgstr "моросящ. дождь"
 
 #. Weather token
 msgctxt "#1434"
@@ -3390,7 +3390,7 @@ msgstr "град"
 #. Weather token
 msgctxt "#1438"
 msgid "Small"
-msgstr "мелк."
+msgstr "Небольшие"
 
 #. Weather token
 msgctxt "#1439"
@@ -3400,12 +3400,12 @@ msgstr "и"
 #. Weather token
 msgctxt "#1440"
 msgid "Sleet"
-msgstr "мокрый снег"
+msgstr "дождь со снегом"
 
 #. Weather token
 msgctxt "#1441"
 msgid "with"
-msgstr "с"
+msgstr "и"
 
 #. Weather token
 msgctxt "#1442"
@@ -3430,7 +3430,7 @@ msgstr "облако"
 #. Weather token
 msgctxt "#1446"
 msgid "Unknown"
-msgstr "неизвестно"
+msgstr "Неизвестно"
 
 #. Weather token
 msgctxt "#1447"
@@ -3440,12 +3440,12 @@ msgstr "шквалы"
 #. Weather token
 msgctxt "#1448"
 msgid "Precipitation"
-msgstr "роса"
+msgstr "Осадки"
 
 #. Weather token
 msgctxt "#1449"
 msgid "Partial"
-msgstr "частичн."
+msgstr "местами"
 
 msgctxt "#1450"
 msgid "Put display to sleep when idle"
@@ -3457,11 +3457,11 @@ msgstr "Длительность"
 
 msgctxt "#2080"
 msgid "Empty list"
-msgstr ""
+msgstr "Пустой список"
 
 msgctxt "#2081"
 msgid "Went back to parent list because the active list has been emptied"
-msgstr ""
+msgstr "Открыт родительский список, поскольку активный список пуст"
 
 msgctxt "#2100"
 msgid "Script failed! : %s"
@@ -3878,7 +3878,7 @@ msgstr "Заблокировано"
 #: xbmc/utils/EdenVideoArtUpdater.cpp
 msgctxt "#12349"
 msgid "Updating video library art"
-msgstr "Обновление картинок медиатеки видео"
+msgstr "Обновление картинок медеатеки видео"
 
 #: xbmc/utils/EdenVideoArtUpdater.cpp
 msgctxt "#12350"
@@ -3888,12 +3888,12 @@ msgstr "Обработка %s"
 #: xbmc/video/windows/GUIWindowVideoBase.cpp
 msgctxt "#12351"
 msgid "The art cache in your video library needs updating."
-msgstr "Кэш картинок медиатеки видео требует обновления."
+msgstr "Кэш картинок медиатеки видео нуждается в обновлении."
 
 #: xbmc/video/windows/GUIWindowVideoBase.cpp
 msgctxt "#12352"
 msgid "No downloading is needed."
-msgstr "Загрузка не требуется."
+msgstr "Загрузка файлов не требуется."
 
 msgctxt "#12353"
 msgid "Reactivate lock"
@@ -3938,7 +3938,7 @@ msgstr "Настройки и менеджер файлов"
 
 msgctxt "#12376"
 msgid "Set as default for all videos"
-msgstr ""
+msgstr "Установить по умолчанию для всех видеофайлов"
 
 msgctxt "#12377"
 msgid "This will reset any previously saved values"
@@ -4887,7 +4887,7 @@ msgstr "Автоматически проигрывать следующий в�
 #: xbmc/video/windows/GUIWindowVideoBase.cpp
 msgctxt "#13434"
 msgid "Play only this"
-msgstr "Проиграть только этот файл"
+msgstr "Проигрывать только этот файл"
 
 msgctxt "#13500"
 msgid "A/V sync method"
@@ -6247,7 +6247,7 @@ msgctxt "#19045"
 msgid ""
 "No PVR clients have been started yet. Wait for the PVR clients to start up "
 "or check the log for details."
-msgstr "Ни один клиент PVR не запущен. Дождитесь запуска клиентов PVR   или см. журнал."
+msgstr "Нет активных клиентов PVR. Дождитесь запуска клиентов PVR или см. журнал."
 
 msgctxt "#19046"
 msgid "New channel"
@@ -8221,11 +8221,11 @@ msgstr "Изменить инфоресурс"
 
 msgctxt "#20196"
 msgid "Export music library"
-msgstr "Экспортировать аудиотеку"
+msgstr "Экспортировать медиатеку музыки"
 
 msgctxt "#20197"
 msgid "Import music library"
-msgstr "Импортировать аудиотеку"
+msgstr "Импортировать медиатеку музыки"
 
 msgctxt "#20198"
 msgid "No artist found!"
@@ -8701,11 +8701,11 @@ msgstr "Трейлер"
 
 msgctxt "#20411"
 msgid "Flatten"
-msgstr "Без категорий"
+msgstr "Скрыть категории"
 
 msgctxt "#20412"
 msgid "Flatten TV shows"
-msgstr "Не объединять серии сериалов в сезоны"
+msgstr "Скрывать списки сезонов сериалов"
 
 msgctxt "#20413"
 msgid "Get fanart"
@@ -8791,10 +8791,6 @@ msgctxt "#20434"
 msgid "Sets"
 msgstr "Киноциклы"
 
-msgctxt "#20435"
-msgid "Set movieset thumb"
-msgstr "Выбрать эскиз киноцикла"
-
 msgctxt "#20436"
 msgid "Export actor thumbs?"
 msgstr "Экспортировать эскизы актеров?"
@@ -8874,10 +8870,6 @@ msgstr "Слушатель"
 msgctxt "#20455"
 msgid "Listeners"
 msgstr "Слушателей"
-
-msgctxt "#20456"
-msgid "Set movieset fanart"
-msgstr "Выбрать фанарт киноцикла"
 
 msgctxt "#20457"
 msgid "Movie set"
@@ -9862,7 +9854,7 @@ msgstr "Запуск…"
 #: xbmc/settings/GUISettings.cpp
 msgctxt "#23055"
 msgid "Scale Teletext to 4:3"
-msgstr "Вписать телетекст в 4:3"
+msgstr "Масштабировать телетекст до 4:3"
 
 msgctxt "#23100"
 msgid "External Player Active"
@@ -10915,12 +10907,12 @@ msgstr "ТВ"
 #: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 msgctxt "#36038"
 msgid "Amplifier / AVR device"
-msgstr "Усилитель / A-В ресивер"
+msgstr "Усилитель/АВ-ресивер"
 
 #: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 msgctxt "#36039"
 msgid "TV and AVR device (explicit)"
-msgstr "ТВ и А-В ресивер (явно)"
+msgstr "ТВ и АВ-ресивер (явно)"
 
 msgctxt "#36040"
 msgid ""

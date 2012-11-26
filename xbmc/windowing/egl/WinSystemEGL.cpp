@@ -266,6 +266,11 @@ bool CWinSystemEGL::DestroyWindow()
   if (m_surface != EGL_NO_SURFACE)
     m_egl->DestroySurface(m_surface, m_display);
 
+  int quirks;
+  m_egl->GetQuirks(&quirks);
+  if (quirks & EGL_QUIRK_DESTROY_NATIVE_WINDOW_WITH_SURFACE)
+    m_egl->DestroyNativeWindow();
+
   m_surface = EGL_NO_SURFACE;
   m_bWindowCreated = false;
   return true;
@@ -378,7 +383,8 @@ bool CWinSystemEGL::PresentRenderImpl(const CDirtyRegionList &dirty)
 
 void CWinSystemEGL::SetVSyncImpl(bool enable)
 {
-  if (!m_egl->SetVSync(m_display, enable))
+  m_iVSyncMode = enable;
+  if (!m_egl->SetVSync(m_display, m_iVSyncMode))
     CLog::Log(LOGERROR, "%s,Could not set egl vsync", __FUNCTION__);
 }
 

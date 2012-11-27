@@ -20,6 +20,7 @@
 
 #include "MusicInfoTag.h"
 #include "music/Album.h"
+#include "music/Artist.h"
 #include "utils/StringUtils.h"
 #include "settings/AdvancedSettings.h"
 #include "utils/Variant.h"
@@ -123,11 +124,6 @@ bool CMusicInfoTag::operator !=(const CMusicInfoTag& tag) const
   if (this == &tag) return false;
   if (m_strURL != tag.m_strURL) return true;
   if (m_strTitle != tag.m_strTitle) return true;
-  for (unsigned int index = 0; index < m_artist.size(); index++)
-  {
-    if (tag.m_artist.at(index).compare(m_artist.at(index)) != 0)
-      return true;
-  }
   if (m_bCompilation != tag.m_bCompilation) return true;
   if (m_artist != tag.m_artist) return true;
   if (m_albumArtist != tag.m_albumArtist) return true;
@@ -202,7 +198,7 @@ int CMusicInfoTag::GetYear() const
   return m_dwReleaseDate.wYear;
 }
 
-long CMusicInfoTag::GetDatabaseId() const
+int CMusicInfoTag::GetDatabaseId() const
 {
   return m_iDbId;
 }
@@ -509,6 +505,16 @@ void CMusicInfoTag::SetReplayGainAlbumPeak(float albumPeak)
   m_iHasGainInfo |= REPLAY_GAIN_HAS_ALBUM_PEAK;
 }
 
+void CMusicInfoTag::SetArtist(const CArtist& artist)
+{
+  SetArtist(artist.strArtist);
+  SetAlbumArtist(artist.strArtist);
+  SetGenre(artist.genre);
+  m_iDbId = artist.idArtist;
+  m_type = "artist";
+  m_bLoaded = true;
+}
+
 void CMusicInfoTag::SetAlbum(const CAlbum& album)
 {
   SetArtist(album.artist);
@@ -565,6 +571,7 @@ void CMusicInfoTag::Serialize(CVariant& value) const
     value["artist"] = m_artist[0];
   else
     value["artist"] = m_artist;
+  value["displayartist"] = StringUtils::Join(m_artist, g_advancedSettings.m_musicItemSeparator);
   value["album"] = m_strAlbum;
   value["albumartist"] = m_albumArtist;
   value["genre"] = m_genre;
@@ -628,6 +635,11 @@ void CMusicInfoTag::Archive(CArchive& ar)
     ar << m_rating;
     ar << m_iTimesPlayed;
     ar << m_iAlbumId;
+    ar << m_iDbId;
+    ar << m_type;
+    ar << m_strLyrics;
+    ar << m_bCompilation;
+    ar << m_listeners;
   }
   else
   {
@@ -651,7 +663,12 @@ void CMusicInfoTag::Archive(CArchive& ar)
     ar >> m_rating;
     ar >> m_iTimesPlayed;
     ar >> m_iAlbumId;
- }
+    ar >> m_iDbId;
+    ar >> m_type;
+    ar >> m_strLyrics;
+    ar >> m_bCompilation;
+    ar >> m_listeners;
+  }
 }
 
 void CMusicInfoTag::Clear()

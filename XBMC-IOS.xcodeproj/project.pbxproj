@@ -41,6 +41,7 @@
 		7C4458C8161E206100A905F6 /* Screenshot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4458C6161E206100A905F6 /* Screenshot.cpp */; };
 		7C6EB570155E3E680080368A /* ImageFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C6EB56E155E3E680080368A /* ImageFile.cpp */; };
 		7C6EB71A155F3B330080368A /* HTTPImageHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C6EB718155F3B330080368A /* HTTPImageHandler.cpp */; };
+		7C7CEB5F165629F90059C9EB /* AELimiter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7CEB5D165629F90059C9EB /* AELimiter.cpp */; };
 		7C89628013B7031E003631FE /* GUIWindowScreensaverDim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C89627E13B7031E003631FE /* GUIWindowScreensaverDim.cpp */; };
 		7C99B7BE1340730000FC2B16 /* GUIDialogPlayEject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C99B7BC1340730000FC2B16 /* GUIDialogPlayEject.cpp */; };
 		7CC30E04162925E6003E7579 /* MusicThumbLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC30E02162925E6003E7579 /* MusicThumbLoader.cpp */; };
@@ -110,6 +111,16 @@
 		DF2E329415509B2C000F5772 /* XbmcContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF2E329215509B2C000F5772 /* XbmcContext.cpp */; };
 		DF33C29415509BF50046CDCB /* ilog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF33C29115509BF50046CDCB /* ilog.cpp */; };
 		DF3488F813FD961A0026A711 /* GUIAction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF3488F613FD961A0026A711 /* GUIAction.cpp */; };
+		DF402A7C164462C3001C56B8 /* AddonModuleXbmc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF1ACFF615FCE57C00E10810 /* AddonModuleXbmc.cpp */; };
+		DF402A7D164462C3001C56B8 /* AddonModuleXbmcaddon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF1ACFFA15FCE57C00E10810 /* AddonModuleXbmcaddon.cpp */; };
+		DF402A7E164462C3001C56B8 /* AddonModuleXbmcgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF1ACFFE15FCE57C00E10810 /* AddonModuleXbmcgui.cpp */; };
+		DF402A7F164462C3001C56B8 /* AddonModuleXbmcplugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF1AD00215FCE57C00E10810 /* AddonModuleXbmcplugin.cpp */; };
+		DF402A80164462C3001C56B8 /* AddonModuleXbmcvfs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF1AD00615FCE57C00E10810 /* AddonModuleXbmcvfs.cpp */; };
+		DF402A81164462C3001C56B8 /* CallbackHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F502C05B160F416F00C96C76 /* CallbackHandler.cpp */; };
+		DF402A82164462C3001C56B8 /* LanguageHook.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F502C05D160F416F00C96C76 /* LanguageHook.cpp */; };
+		DF402A83164462C3001C56B8 /* swig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F502C076160F417B00C96C76 /* swig.cpp */; };
+		DF402A84164462C3001C56B8 /* XBPython.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F502C078160F417B00C96C76 /* XBPython.cpp */; };
+		DF402A85164462C3001C56B8 /* XBPyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F502C07A160F417B00C96C76 /* XBPyThread.cpp */; };
 		DF448572140065E10069344B /* PipesManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF44856F140065E10069344B /* PipesManager.cpp */; };
 		DF4485751400662D0069344B /* AirTunesServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF4485731400662D0069344B /* AirTunesServer.cpp */; };
 		DF527757151BAF8200B5B63B /* WebSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF52774E151BAF8200B5B63B /* WebSocket.cpp */; };
@@ -157,6 +168,7 @@
 		DFAB04B013F8383300B70BFB /* InertialScrollingHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFAB04AE13F8383300B70BFB /* InertialScrollingHandler.cpp */; };
 		DFAB4BE615FCCA5000E1BAF6 /* TagLibVFSStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFAB4BE215FCCA5000E1BAF6 /* TagLibVFSStream.cpp */; };
 		DFAB4BE715FCCA5000E1BAF6 /* TagLoaderTagLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFAB4BE415FCCA5000E1BAF6 /* TagLoaderTagLib.cpp */; };
+		DFB02DFB16629DF200F37752 /* PyContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFB02DF916629DF200F37752 /* PyContext.cpp */; };
 		DFB25CB1163D3A04006C4A48 /* Addon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF1AD10415FCE71000E10810 /* Addon.cpp */; };
 		DFB25CB2163D3A04006C4A48 /* AddonCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF1AD10815FCE71000E10810 /* AddonCallback.cpp */; };
 		DFB25CB3163D3A04006C4A48 /* AddonClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF1AD10C15FCE71000E10810 /* AddonClass.cpp */; };
@@ -238,7 +250,6 @@
 		DFFD59401506B5B10088DE4B /* IOSEAGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = DFFD593F1506B5B10088DE4B /* IOSEAGLView.mm */; };
 		DFFEFBEE15160739001294DC /* IOSScreenManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = DFFEFBED15160739001294DC /* IOSScreenManager.mm */; };
 		DFFEFC0415160808001294DC /* IOSExternalTouchController.mm in Sources */ = {isa = PBXBuildFile; fileRef = DFFEFC0315160808001294DC /* IOSExternalTouchController.mm */; };
-		F502C080160F419400C96C76 /* python_binding.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F502C07E160F419400C96C76 /* python_binding.a */; };
 		F56B143412CAF279009B4C96 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F56B143312CAF279009B4C96 /* CoreVideo.framework */; };
 		F56B14A512CAF523009B4C96 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F56B14A412CAF523009B4C96 /* AudioToolbox.framework */; };
 		F56B15D512CD67A9009B4C96 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F56B15D412CD67A9009B4C96 /* CoreGraphics.framework */; };
@@ -1019,6 +1030,7 @@
 		F5ED8D961551FB1000842059 /* BlurayDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5ED8D941551FB1000842059 /* BlurayDirectory.cpp */; };
 		F5ED90B8155398BB00842059 /* POUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5ED90B6155398BB00842059 /* POUtils.cpp */; };
 		F5ED90BB155398CB00842059 /* XBMCTinyXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5ED90B9155398CB00842059 /* XBMCTinyXML.cpp */; };
+		F5EDC4A61651A74300B852D8 /* GroupUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5EDC4A41651A74300B852D8 /* GroupUtils.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1092,6 +1104,8 @@
 		7C6EB56F155E3E680080368A /* ImageFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageFile.h; sourceTree = "<group>"; };
 		7C6EB718155F3B330080368A /* HTTPImageHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HTTPImageHandler.cpp; sourceTree = "<group>"; };
 		7C6EB719155F3B330080368A /* HTTPImageHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTTPImageHandler.h; sourceTree = "<group>"; };
+		7C7CEB5D165629F90059C9EB /* AELimiter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AELimiter.cpp; sourceTree = "<group>"; };
+		7C7CEB5E165629F90059C9EB /* AELimiter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AELimiter.h; sourceTree = "<group>"; };
 		7C89627E13B7031E003631FE /* GUIWindowScreensaverDim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIWindowScreensaverDim.cpp; sourceTree = "<group>"; };
 		7C89627F13B7031E003631FE /* GUIWindowScreensaverDim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIWindowScreensaverDim.h; sourceTree = "<group>"; };
 		7C99B7BC1340730000FC2B16 /* GUIDialogPlayEject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogPlayEject.cpp; sourceTree = "<group>"; };
@@ -1394,6 +1408,8 @@
 		DFAB4BE315FCCA5000E1BAF6 /* TagLibVFSStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagLibVFSStream.h; sourceTree = "<group>"; };
 		DFAB4BE415FCCA5000E1BAF6 /* TagLoaderTagLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TagLoaderTagLib.cpp; sourceTree = "<group>"; };
 		DFAB4BE515FCCA5000E1BAF6 /* TagLoaderTagLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagLoaderTagLib.h; sourceTree = "<group>"; };
+		DFB02DF916629DF200F37752 /* PyContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PyContext.cpp; path = python/PyContext.cpp; sourceTree = "<group>"; };
+		DFB02DFA16629DF200F37752 /* PyContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PyContext.h; path = python/PyContext.h; sourceTree = "<group>"; };
 		DFB6620515376791006B8FF1 /* AEAudioFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AEAudioFormat.h; sourceTree = "<group>"; };
 		DFB6620615376791006B8FF1 /* AEFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AEFactory.cpp; sourceTree = "<group>"; };
 		DFB6620715376791006B8FF1 /* AEFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AEFactory.h; sourceTree = "<group>"; };
@@ -1527,7 +1543,6 @@
 		F502C079160F417B00C96C76 /* XBPython.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XBPython.h; path = python/XBPython.h; sourceTree = "<group>"; };
 		F502C07A160F417B00C96C76 /* XBPyThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XBPyThread.cpp; path = python/XBPyThread.cpp; sourceTree = "<group>"; };
 		F502C07B160F417B00C96C76 /* XBPyThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XBPyThread.h; path = python/XBPyThread.h; sourceTree = "<group>"; };
-		F502C07E160F419400C96C76 /* python_binding.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = python_binding.a; path = xbmc/interfaces/python/python_binding.a; sourceTree = "<group>"; };
 		F558F60613AFDC1700631E12 /* Condition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Condition.h; sourceTree = "<group>"; };
 		F558F61013AFDC3000631E12 /* ThreadLocal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadLocal.h; sourceTree = "<group>"; };
 		F56B143312CAF279009B4C96 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
@@ -3228,6 +3243,8 @@
 		F5ED90B7155398BB00842059 /* POUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = POUtils.h; sourceTree = "<group>"; };
 		F5ED90B9155398CB00842059 /* XBMCTinyXML.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XBMCTinyXML.cpp; sourceTree = "<group>"; };
 		F5ED90BA155398CB00842059 /* XBMCTinyXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBMCTinyXML.h; sourceTree = "<group>"; };
+		F5EDC4A41651A74300B852D8 /* GroupUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GroupUtils.cpp; sourceTree = "<group>"; };
+		F5EDC4A51651A74300B852D8 /* GroupUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GroupUtils.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -3256,7 +3273,6 @@
 				F56C8C12131F4811000AD0F6 /* librtv.a in Frameworks */,
 				F56C8C14131F4811000AD0F6 /* libxdaap.a in Frameworks */,
 				18404DD31396C3D200863BBA /* SlingboxLib.a in Frameworks */,
-				F502C080160F419400C96C76 /* python_binding.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3432,11 +3448,13 @@
 		DF1ACFF415FCE56C00E10810 /* python */ = {
 			isa = PBXGroup;
 			children = (
+				DF1ACFF515FCE57C00E10810 /* generated */,
 				F502C05B160F416F00C96C76 /* CallbackHandler.cpp */,
 				F502C05C160F416F00C96C76 /* CallbackHandler.h */,
 				F502C05D160F416F00C96C76 /* LanguageHook.cpp */,
 				F502C05E160F416F00C96C76 /* LanguageHook.h */,
-				DF1ACFF515FCE57C00E10810 /* generated */,
+				DFB02DF916629DF200F37752 /* PyContext.cpp */,
+				DFB02DFA16629DF200F37752 /* PyContext.h */,
 				F502C076160F417B00C96C76 /* swig.cpp */,
 				F502C077160F417B00C96C76 /* swig.h */,
 				F502C078160F417B00C96C76 /* XBPython.cpp */,
@@ -3642,6 +3660,8 @@
 				DFB6624B15376791006B8FF1 /* AEConvert.h */,
 				7C0B98F7154B7FF30065A238 /* AEDeviceInfo.cpp */,
 				7C0B98F8154B7FF30065A238 /* AEDeviceInfo.h */,
+				7C7CEB5D165629F90059C9EB /* AELimiter.cpp */,
+				7C7CEB5E165629F90059C9EB /* AELimiter.h */,
 				DFB6624C15376791006B8FF1 /* AEPackIEC61937.cpp */,
 				DFB6624D15376791006B8FF1 /* AEPackIEC61937.h */,
 				DFB6624E15376791006B8FF1 /* AERemap.cpp */,
@@ -6103,6 +6123,8 @@
 				F56C86FB131F42EB000AD0F6 /* GlobalsHandling.h */,
 				F56C86FC131F42EB000AD0F6 /* GLUtils.cpp */,
 				F56C86FD131F42EB000AD0F6 /* GLUtils.h */,
+				F5EDC4A41651A74300B852D8 /* GroupUtils.cpp */,
+				F5EDC4A51651A74300B852D8 /* GroupUtils.h */,
 				F56C872A131F42EC000AD0F6 /* HTMLTable.cpp */,
 				F56C872B131F42EC000AD0F6 /* HTMLTable.h */,
 				F56C872C131F42EC000AD0F6 /* HTMLUtil.cpp */,
@@ -6383,7 +6405,6 @@
 				F56C8C0D131F4811000AD0F6 /* libsquish.a */,
 				F56C8C10131F4811000AD0F6 /* libxdaap.a */,
 				18404DD21396C3D200863BBA /* SlingboxLib.a */,
-				F502C07E160F419400C96C76 /* python_binding.a */,
 			);
 			name = "Internal Libs";
 			sourceTree = "<group>";
@@ -6621,7 +6642,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$ACTION\" = build ] ; then\nmake -C ${SRCROOT}/xbmc/interfaces/python\nfi";
+			shellScript = "PATH=$PATH:/Users/Shared/xbmc-depends/toolchain/bin\n\nif [ \"$ACTION\" = build ] ; then\nmake -f ${SRCROOT}/codegenerator.mk\nfi";
 		};
 		F589B48B128A696700D8079E /* copy root files */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -7646,6 +7667,19 @@
 				DFB25CC8163D3A04006C4A48 /* WindowDialog.cpp in Sources */,
 				DFB25CC9163D3A04006C4A48 /* WindowDialogMixin.cpp in Sources */,
 				DFB25CCA163D3A04006C4A48 /* WindowXML.cpp in Sources */,
+				DF402A7C164462C3001C56B8 /* AddonModuleXbmc.cpp in Sources */,
+				DF402A7D164462C3001C56B8 /* AddonModuleXbmcaddon.cpp in Sources */,
+				DF402A7E164462C3001C56B8 /* AddonModuleXbmcgui.cpp in Sources */,
+				DF402A7F164462C3001C56B8 /* AddonModuleXbmcplugin.cpp in Sources */,
+				DF402A80164462C3001C56B8 /* AddonModuleXbmcvfs.cpp in Sources */,
+				DF402A81164462C3001C56B8 /* CallbackHandler.cpp in Sources */,
+				DF402A82164462C3001C56B8 /* LanguageHook.cpp in Sources */,
+				DF402A83164462C3001C56B8 /* swig.cpp in Sources */,
+				DF402A84164462C3001C56B8 /* XBPython.cpp in Sources */,
+				DF402A85164462C3001C56B8 /* XBPyThread.cpp in Sources */,
+				F5EDC4A61651A74300B852D8 /* GroupUtils.cpp in Sources */,
+				7C7CEB5F165629F90059C9EB /* AELimiter.cpp in Sources */,
+				DFB02DFB16629DF200F37752 /* PyContext.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

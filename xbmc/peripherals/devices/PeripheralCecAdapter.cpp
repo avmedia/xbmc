@@ -1275,10 +1275,6 @@ void CPeripheralCecAdapter::SetConfigurationFromLibCEC(const CEC::libcec_configu
   }
   bChanged |= SetSetting("physical_address", strPhysicalAddress);
 
-  // set the tv vendor override
-  m_configuration.tvVendor = config.tvVendor;
-  bChanged |= SetSetting("tv_vendor", (int)config.tvVendor);
-
   // set the devices to wake when starting
   m_configuration.wakeDevices = config.wakeDevices;
   bChanged |= WriteLogicalAddresses(config.wakeDevices, "wake_devices", "wake_devices_advanced");
@@ -1598,8 +1594,6 @@ bool CPeripheralCecAdapterUpdateThread::SetInitialConfiguration(void)
 
   m_adapter->m_bIsReady = true;
 
-  // try to send an OSD string to the TV
-  m_adapter->m_cecAdapter->SetOSDString(CECDEVICE_TV, CEC_DISPLAY_CONTROL_DISPLAY_FOR_DEFAULT_TIME, g_localizeStrings.Get(36016).c_str());
   // and let the gui know that we're done
   CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, g_localizeStrings.Get(36000), strNotification);
 

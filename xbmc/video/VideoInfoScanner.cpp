@@ -122,7 +122,7 @@ namespace VIDEO
       if (!bCancelled)
       {
         if (m_bClean)
-          CleanDatabase(m_handle,&m_pathsToClean);
+          CleanDatabase(m_handle,&m_pathsToClean, false);
         else
         {
           if (m_handle)
@@ -189,14 +189,14 @@ namespace VIDEO
     if (m_bCanInterrupt)
       m_database.Interupt();
 
-    StopThread();
+    StopThread(false);
   }
 
-  void CVideoInfoScanner::CleanDatabase(CGUIDialogProgressBarHandle* handle /*= NULL */, const set<int>* paths /*= NULL */)
+  void CVideoInfoScanner::CleanDatabase(CGUIDialogProgressBarHandle* handle /*= NULL */, const set<int>* paths /*= NULL */, bool showProgress /*= true */)
   {
     m_bRunning = true;
     m_database.Open();
-    m_database.CleanDatabase(handle, paths);
+    m_database.CleanDatabase(handle, paths, showProgress);
     m_database.Close();
     m_bRunning = false;
   }
@@ -249,8 +249,8 @@ namespace VIDEO
     {
       if (m_handle)
       {
-        int str = content == CONTENT_MOVIES ? 20374:20408;
-        m_handle->SetTitle(g_localizeStrings.Get(str));
+        int str = content == CONTENT_MOVIES ? 20317:20318;
+        m_handle->SetTitle(StringUtils::Format(g_localizeStrings.Get(str), info->Name().c_str()));
       }
 
       CStdString fastHash = GetFastHash(strDirectory);
@@ -294,7 +294,7 @@ namespace VIDEO
     else if (content == CONTENT_TVSHOWS)
     {
       if (m_handle)
-        m_handle->SetTitle(g_localizeStrings.Get(20409));
+        m_handle->SetTitle(StringUtils::Format(g_localizeStrings.Get(20319), info->Name().c_str()));
 
       if (foundDirectly && !settings.parent_name_root)
       {
@@ -1239,7 +1239,7 @@ namespace VIDEO
     for (CGUIListItem::ArtMap::const_iterator i = art.begin(); i != art.end(); ++i)
       CTextureCache::Get().BackgroundCacheImage(i->second);
 
-    pItem->SetArt(art, false); // don't set fallbacks
+    pItem->SetArt(art);
 
     // parent folder to apply the thumb to and to search for local actor thumbs
     CStdString parentDir = GetParentDir(*pItem);
@@ -1675,7 +1675,7 @@ namespace VIDEO
     CFileItemList items;
     CDirectory::GetDirectory(show.m_strPath, items, ".png|.jpg|.tbn", DIR_FLAG_NO_FILE_DIRS | DIR_FLAG_NO_FILE_INFO);
     CRegExp reg;
-    if (items.Size() && reg.RegComp("season-([0-9]+)(-[a-z]+)?\\.(tbn|jpg|png)"))
+    if (items.Size() && reg.RegComp("season([0-9]+)(-[a-z]+)?\\.(tbn|jpg|png)"))
     {
       for (int i = 0; i < items.Size(); i++)
       {
@@ -1863,7 +1863,7 @@ namespace VIDEO
     MOVIELIST movielist;
     CVideoInfoDownloader imdb(scraper);
     int returncode = imdb.FindMovie(videoName, movielist, progress);
-    if (returncode < 0 || (returncode == 0 && !DownloadFailed(progress)))
+    if (returncode < 0 || (returncode == 0 && (m_bStop || !DownloadFailed(progress))))
     { // scraper reported an error, or we had an error and user wants to cancel the scan
       m_bStop = true;
       return -1; // cancelled

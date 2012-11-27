@@ -32,6 +32,8 @@
 #include "utils/URIUtils.h"
 
 #define PROPERTY_PATH_DB            "path.db"
+#define PROPERTY_SORT_ORDER         "sort.order"
+#define PROPERTY_SORT_ASCENDING     "sort.ascending"
 
 namespace XFILE
 {
@@ -109,10 +111,14 @@ namespace XFILE
           if (!playlist.SaveAsJson(xsp, !filter))
             return false;
         }
-        videoUrl.AddOption(option, xsp);
+
+        if (!xsp.empty())
+          videoUrl.AddOption(option, xsp);
+        else
+          videoUrl.RemoveOption(option);
         
         CDatabase::Filter dbfilter;
-        success = db.GetSortedVideos(mediaType, videoUrl.ToString(), sorting, items, dbfilter, true);
+        success = db.GetSortedVideos(mediaType, videoUrl.ToString(), sorting, items, dbfilter);
         db.Close();
 
         // if we retrieve a list of episodes and we didn't receive
@@ -138,7 +144,11 @@ namespace XFILE
           if (!playlist.SaveAsJson(xsp, !filter))
             return false;
         }
-        musicUrl.AddOption(option, xsp);
+
+        if (!xsp.empty())
+          musicUrl.AddOption(option, xsp);
+        else
+          musicUrl.RemoveOption(option);
 
         CDatabase::Filter dbfilter;
         success = db.GetAlbumsByWhere(musicUrl.ToString(), dbfilter, items, sorting);
@@ -163,7 +173,11 @@ namespace XFILE
           if (!playlist.SaveAsJson(xsp, !filter))
             return false;
         }
-        musicUrl.AddOption(option, xsp);
+
+        if (!xsp.empty())
+          musicUrl.AddOption(option, xsp);
+        else
+          musicUrl.RemoveOption(option);
 
         CDatabase::Filter dbfilter;
         success = db.GetArtistsNav(musicUrl.ToString(), items, !g_guiSettings.GetBool("musiclibrary.showcompilationartists"), -1, -1, -1, dbfilter, sorting);
@@ -193,7 +207,11 @@ namespace XFILE
           if (!songPlaylist.SaveAsJson(xsp, !filter))
             return false;
         }
-        musicUrl.AddOption(option, xsp);
+
+        if (!xsp.empty())
+          musicUrl.AddOption(option, xsp);
+        else
+          musicUrl.RemoveOption(option);
 
         CDatabase::Filter dbfilter;
         success = db.GetSongsByWhere(musicUrl.ToString(), dbfilter, items, sorting);
@@ -222,7 +240,11 @@ namespace XFILE
           if (!mvidPlaylist.SaveAsJson(xsp, !filter))
             return false;
         }
-        videoUrl.AddOption(option, xsp);
+
+        if (!xsp.empty())
+          videoUrl.AddOption(option, xsp);
+        else
+          videoUrl.RemoveOption(option);
         
         CFileItemList items2;
         success2 = db.GetSortedVideos(MediaTypeMusicVideo, videoUrl.ToString(), sorting, items2);
@@ -240,6 +262,8 @@ namespace XFILE
       }
     }
     items.SetLabel(playlist.GetName());
+    items.SetProperty(PROPERTY_SORT_ORDER, (int)playlist.GetOrder());
+    items.SetProperty(PROPERTY_SORT_ASCENDING, playlist.GetOrderDirection() == SortOrderAscending);
 
     // go through and set the playlist order
     for (int i = 0; i < items.Size(); i++)

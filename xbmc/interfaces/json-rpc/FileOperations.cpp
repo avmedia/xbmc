@@ -128,7 +128,8 @@ JSONRPC_STATUS CFileOperations::GetDirectory(const CStdString &method, ITranspor
       if ((media == "video" && items[i]->HasVideoInfoTag()) ||
           (media == "music" && items[i]->HasMusicInfoTag()) ||
           (media == "picture" && items[i]->HasPictureInfoTag()) ||
-           media == "files")
+           media == "files" ||
+           URIUtils::IsUPnP(items.GetPath()))
       {
         if (items[i]->m_bIsFolder)
           filteredDirectories.Add(items[i]);
@@ -138,7 +139,7 @@ JSONRPC_STATUS CFileOperations::GetDirectory(const CStdString &method, ITranspor
       else
       {
         CFileItem fileItem;
-        if (FillFileItem(items[i], fileItem, media))
+        if (FillFileItem(items[i], fileItem, media, parameterObject))
         {
           if (items[i]->m_bIsFolder)
             filteredDirectories.Add(CFileItemPtr(new CFileItem(fileItem)));
@@ -212,7 +213,8 @@ JSONRPC_STATUS CFileOperations::GetFileDetails(const CStdString &method, ITransp
     return InvalidParams;
 
   CFileItemPtr item = items.Get(file);
-  FillFileItem(item, *item.get(), parameterObject["media"].asString());
+  if (!URIUtils::IsUPnP(file))
+    FillFileItem(item, *item.get(), parameterObject["media"].asString(), parameterObject);
 
   // Check if the "properties" list exists
   // and make sure it contains the "file"
@@ -261,7 +263,7 @@ JSONRPC_STATUS CFileOperations::Download(const CStdString &method, ITransportLay
   return transport->Download(parameterObject["path"].asString().c_str(), result) ? OK : InvalidParams;
 }
 
-bool CFileOperations::FillFileItem(const CFileItemPtr &originalItem, CFileItem &item, CStdString media /* = "" */)
+bool CFileOperations::FillFileItem(const CFileItemPtr &originalItem, CFileItem &item, CStdString media /* = "" */, const CVariant &parameterObject /* = CVariant(CVariant::VariantTypeArray) */)
 {
   if (originalItem.get() == NULL)
     return false;
@@ -276,7 +278,7 @@ bool CFileOperations::FillFileItem(const CFileItemPtr &originalItem, CFileItem &
     if (media.Equals("video"))
       status = CVideoLibrary::FillFileItem(strFilename, item);
     else if (media.Equals("music"))
-      status = CAudioLibrary::FillFileItem(strFilename, item);
+      status = CAudioLibrary::FillFileItem(strFilename, item, parameterObject);
 
     if (status && item.GetLabel().empty())
     {
@@ -362,7 +364,7 @@ bool CFileOperations::FillFileItemList(const CVariant &parameterObject, CFileIte
           else
           {
             CFileItem fileItem;
-            if (FillFileItem(items[i], fileItem, media))
+            if (FillFileItem(items[i], fileItem, media, parameterObject))
               list.Add(CFileItemPtr(new CFileItem(fileItem)));
             else if (media == "files")
               list.Add(items[i]);

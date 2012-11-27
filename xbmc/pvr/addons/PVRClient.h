@@ -146,7 +146,7 @@ namespace PVR
     /*!
      * @return True if this add-on has menu hooks, false otherwise.
      */
-    bool HaveMenuHooks(void) const;
+    bool HaveMenuHooks(PVR_MENUHOOK_CAT cat) const;
 
     /*!
      * @return The menu hooks for this add-on.
@@ -397,6 +397,23 @@ namespace PVR
      */
     bool CanSeekStream(void) const;
 
+    /*!
+     * Notify the pvr addon/demuxer that XBMC wishes to seek the stream by time
+     * @param time The absolute time since stream start
+     * @param backwards True to seek to keyframe BEFORE time, else AFTER
+     * @param startpts can be updated to point to where display should start
+     * @return True if the seek operation was possible
+     * @remarks Optional, and only used if addon has its own demuxer. Return False if this add-on won't provide this function.
+     */
+    bool SeekTime(int time, bool backwards, double *startpts);
+
+    /*!
+     * Notify the pvr addon/demuxer that XBMC wishes to change playback speed
+     * @param speed The requested playback speed
+     * @remarks Optional, and only used if addon has its own demuxer.
+     */
+    void SetSpeed(int speed);
+
     //@}
     /** @name PVR recording stream methods */
     //@{
@@ -493,6 +510,12 @@ namespace PVR
      * @return True when compatible, false otherwise
      */
     static bool IsCompatibleAPIVersion(const ADDON::AddonVersion &minVersion, const ADDON::AddonVersion &version);
+
+    /*!
+     * @brief Request the API version from the add-on, and check if it's compatible
+     * @return True when compatible, false otherwise.
+     */
+    bool CheckAPIVersion(void);
 
     /*!
      * @brief Reset the signal quality data to the initial values.

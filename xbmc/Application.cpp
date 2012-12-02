@@ -2546,23 +2546,7 @@ bool CApplication::OnKey(const CKey& key)
   if (!key.IsAnalogButton())
     CLog::Log(LOGDEBUG, "%s: %s pressed, action is %s", __FUNCTION__, g_Keyboard.GetKeyName((int) key.GetButtonCode()).c_str(), action.GetName().c_str());
 
-  bool bResult = false;
-
-  // play sound before the action unless the button is held,
-  // where we execute after the action as held actions aren't fired every time.
-  if(action.GetHoldTime())
-  {
-    bResult = OnAction(action);
-    if(bResult)
-      g_audioManager.PlayActionSound(action);
-  }
-  else
-  {
-    g_audioManager.PlayActionSound(action);
-    bResult = OnAction(action);
-  }
-
-  return bResult;
+  return ExecuteInputAction(action);
 }
 
 // OnAppCommand is called in response to a XBMC_APPCOMMAND event.
@@ -3030,10 +3014,9 @@ bool CApplication::ProcessGamepad(float frameTime)
     if (CButtonTranslator::GetInstance().TranslateJoystickString(iWin, g_Joystick.GetJoystick().c_str(), bid, JACTIVE_BUTTON, actionID, actionName, fullrange))
     {
       CAction action(actionID, 1.0f, 0.0f, actionName);
-      g_audioManager.PlayActionSound(action);
       g_Joystick.Reset();
       g_Mouse.SetActive(false);
-      return OnAction(action);
+      return ExecuteInputAction(action);
     }
     else
     {
@@ -3059,10 +3042,9 @@ bool CApplication::ProcessGamepad(float frameTime)
       }
 
       CAction action(actionID, fullrange ? (g_Joystick.GetAmount() + 1.0f)/2.0f : fabs(g_Joystick.GetAmount()), 0.0f, actionName);
-      g_audioManager.PlayActionSound(action);
       g_Joystick.Reset();
       g_Mouse.SetActive(false);
-      return OnAction(action);
+      return ExecuteInputAction(action);
     }
     else
     {
@@ -3091,10 +3073,9 @@ bool CApplication::ProcessGamepad(float frameTime)
     if (bid && CButtonTranslator::GetInstance().TranslateJoystickString(iWin, g_Joystick.GetJoystick().c_str(), bid, JACTIVE_HAT, actionID, actionName, fullrange))
     {
       CAction action(actionID, 1.0f, 0.0f, actionName);
-      g_audioManager.PlayActionSound(action);
       g_Joystick.Reset();
       g_Mouse.SetActive(false);
-      return OnAction(action);
+      return ExecuteInputAction(action);
     }
   }
 #endif
@@ -3141,12 +3122,8 @@ bool CApplication::ProcessMouse()
     return true;
 
   // Retrieve the corresponding action
-  int iWin;
+  int iWin = GetActiveWindowID();
   CKey key(mousecommand | KEY_MOUSE, (unsigned int) 0);
-  if (g_windowManager.HasModalDialog())
-    iWin = g_windowManager.GetTopMostModalDialogID() & WINDOW_ID_MASK;
-  else
-    iWin = g_windowManager.GetActiveWindow() & WINDOW_ID_MASK;
   CAction mouseaction = CButtonTranslator::GetInstance().GetAction(iWin, key);
 
   // If we couldn't find an action return false to indicate we have not
@@ -3296,33 +3273,32 @@ bool CApplication::ProcessJoystickEvent(const std::string& joystickName, int wKe
 
    // Translate using regular joystick translator.
    if (CButtonTranslator::GetInstance().TranslateJoystickString(iWin, joystickName.c_str(), wKeyID, isAxis ? JACTIVE_AXIS : JACTIVE_BUTTON, actionID, actionName, fullRange))
-   {
-     CAction action(actionID, fAmount, 0.0f, actionName, holdTime);
-     bool bResult = false;
-
-     // play sound before the action unless the button is held,
-     // where we execute after the action as held actions aren't fired every time.
-     if(action.GetHoldTime())
-     {
-       bResult = OnAction(action);
-       if(bResult)
-         g_audioManager.PlayActionSound(action);
-     }
-     else
-     {
-       g_audioManager.PlayActionSound(action);
-       bResult = OnAction(action);
-     }
-
-     return bResult;
-   }
+     return ExecuteInputAction( CAction(actionID, fAmount, 0.0f, actionName, holdTime) );
    else
-   {
      CLog::Log(LOGDEBUG, "ERROR mapping joystick action. Joystick: %s %i",joystickName.c_str(), wKeyID);
-   }
 #endif
 
    return false;
+}
+
+bool CApplication::ExecuteInputAction(CAction action)
+{
+  bool bResult = false;
+
+  // play sound before the action unless the button is held,
+  // where we execute after the action as held actions aren't fired every time.
+  if(action.GetHoldTime())
+  {
+    bResult = OnAction(action);
+    if(bResult)
+      g_audioManager.PlayActionSound(action);
+  }
+  else
+  {
+    g_audioManager.PlayActionSound(action);
+    bResult = OnAction(action);
+  }
+  return bResult;
 }
 
 int CApplication::GetActiveWindowID(void)
@@ -3334,9 +3310,16 @@ int CApplication::GetActiveWindowID(void)
   if (g_windowManager.HasModalDialog())
     iWin = g_windowManager.GetTopMostModalDialogID() & WINDOW_ID_MASK;
 
-  // If the window is FullScreenVideo check if we're in a DVD menu
-  if (iWin == WINDOW_FULLSCREEN_VIDEO && g_application.m_pPlayer && g_application.m_pPlayer->IsInMenu())
-    iWin = WINDOW_VIDEO_MENU;
+  // If the window is FullScreenVideo check for special cases
+  if (iWin == WINDOW_FULLSCREEN_VIDEO)
+  {
+    // check if we're in a DVD menu
+    if(g_application.m_pPlayer && g_application.m_pPlayer->IsInMenu())
+      iWin = WINDOW_VIDEO_MENU;
+    // check for LiveTV and switch to it's virtual window
+    else if (g_PVRManager.IsStarted() && g_application.CurrentFileItem().HasPVRChannelInfoTag())
+      iWin = WINDOW_FULLSCREEN_LIVETV;
+  }
 
   // Return the window id
   return iWin;
@@ -4570,6 +4553,7 @@ bool CApplication::ToggleDPMS(bool manual)
 
 bool CApplication::WakeUpScreenSaverAndDPMS(bool bPowerOffKeyPressed /* = false */)
 {
+  bool result;
 
 #ifdef HAS_LCD
     // turn on lcd backlight
@@ -4586,10 +4570,19 @@ bool CApplication::WakeUpScreenSaverAndDPMS(bool bPowerOffKeyPressed /* = false 
     // (DPMS came first), activate screensaver now.
     ToggleDPMS(false);
     ResetScreenSaverTimer();
-    return !m_bScreenSave || WakeUpScreenSaver(bPowerOffKeyPressed);
+    result = !m_bScreenSave || WakeUpScreenSaver(bPowerOffKeyPressed);
   }
   else
-    return WakeUpScreenSaver(bPowerOffKeyPressed);
+    result = WakeUpScreenSaver(bPowerOffKeyPressed);
+
+  if(result)
+  {
+    // allow listeners to ignore the deactivation if it preceeds a powerdown/suspend etc
+    CVariant data(bPowerOffKeyPressed);
+    CAnnouncementManager::Announce(GUI, "xbmc", "OnScreensaverDeactivated", data);
+  }
+
+  return result;
 }
 
 bool CApplication::WakeUpScreenSaver(bool bPowerOffKeyPressed /* = false */)
@@ -4623,10 +4616,6 @@ bool CApplication::WakeUpScreenSaver(bool bPowerOffKeyPressed /* = false */)
     m_bScreenSave = false;
     m_iScreenSaveLock = 0;
     ResetScreenSaverTimer();
-
-    // allow listeners to ignore the deactivation if it preceeds a powerdown/suspend etc
-    CVariant data(bPowerOffKeyPressed);
-    CAnnouncementManager::Announce(GUI, "xbmc", "OnScreensaverDeactivated", data);
 
     if (m_screenSaver->ID() == "visualization")
     {

@@ -166,11 +166,11 @@ bool CVideoDatabase::CreateTables()
 
     CLog::Log(LOGINFO, "create path table");
     m_pDS->exec("CREATE TABLE path ( idPath integer primary key, strPath text, strContent text, strScraper text, strHash text, scanRecursive integer, useFolderNames bool, strSettings text, noUpdate bool, exclude bool, dateAdded text)");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_path ON path ( strPath(255) )");
+    m_pDS->exec("CREATE INDEX ix_path ON path ( strPath(255) )");
 
     CLog::Log(LOGINFO, "create files table");
     m_pDS->exec("CREATE TABLE files ( idFile integer primary key, idPath integer, strFilename text, playCount integer, lastPlayed text, dateAdded text)");
-    m_pDS->exec("CREATE UNIQUE INDEX ix_files ON files ( idPath, strFilename(255) )");
+    m_pDS->exec("CREATE INDEX ix_files ON files ( idPath, strFilename(255) )");
 
     CLog::Log(LOGINFO, "create tvshow table");
     columns = "CREATE TABLE tvshow ( idShow integer primary key";
@@ -4351,8 +4351,15 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
         m_pDS->exec(PrepareSQL("update %s set c%02d=%d where id%s=%d", (i->first=="mvideo")?"musicvideo":i->first.c_str(), i->second, j->second, i->first.c_str(), j->first));
     }
   }
+  if (iVersion < 75)
+  { // make indices on path, file non-unique (mysql has a prefix index, and prefixes aren't necessarily unique)
+    m_pDS->dropIndex("path", "ix_path");
+    m_pDS->dropIndex("files", "ix_files");
+    m_pDS->exec("CREATE INDEX ix_path ON path ( strPath(255) )");
+    m_pDS->exec("CREATE INDEX ix_files ON files ( idPath, strFilename(255) )");
+  }
 #ifdef HAS_DS_PLAYER
-  if(iVersion < 75)
+  if(iVersion < 76)
   {
 	  m_pDS->exec("ALTER TABLE bookmark ADD edition text");
 	  m_pDS->exec("ALTER TABLE bookmark ADD editionNumber integer");
@@ -4361,6 +4368,11 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
   // always recreate the view after any table change
   CreateViews();
   return true;
+}
+
+int CVideoDatabase::GetMinVersion() const
+{
+  return 76;
 }
 
 bool CVideoDatabase::LookupByFolders(const CStdString &path, bool shows)
@@ -5580,7 +5592,7 @@ bool CVideoDatabase::GetStackedTvShowList(int idShow, CStdString& strIn) const
   return false;
 }
 
-bool CVideoDatabase::GetSeasonsNav(const CStdString& strBaseDir, CFileItemList& items, int idActor, int idDirector, int idGenre, int idYear, int idShow)
+bool CVideoDatabase::GetSeasonsNav(const CStdString& strBaseDir, CFileItemList& items, int idActor, int idDirector, int idGenre, int idYear, int idShow, bool getLinkedMovies /* = true */)
 {
   try
   {
@@ -5750,10 +5762,17 @@ bool CVideoDatabase::GetSeasonsNav(const CStdString& strBaseDir, CFileItemList& 
     }
 
     // now add any linked movies
-    Filter movieFilter;
-    movieFilter.join  = PrepareSQL("join movielinktvshow on movielinktvshow.idMovie=movieview.idMovie");
-    movieFilter.where = PrepareSQL("movielinktvshow.idShow %s", strIn.c_str());
-    GetMoviesByWhere("videodb://1/2/", movieFilter, items);
+    if (getLinkedMovies)
+    {
+      Filter movieFilter;
+      movieFilter.join  = PrepareSQL("join movielinktvshow on movielinktvshow.idMovie=movieview.idMovie");
+      movieFilter.where = PrepareSQL("movielinktvshow.idShow %s", strIn.c_str());
+      CFileItemList movieItems;
+      GetMoviesByWhere("videodb://1/2/", movieFilter, movieItems);
+
+      if (movieItems.Size() > 0)
+        items.Append(movieItems);
+    }
 
     return true;
   }

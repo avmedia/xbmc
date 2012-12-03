@@ -68,7 +68,6 @@ int32_t CDSGraph::m_threadID = 0;
 CDSGraph::CDSGraph(CDVDClock* pClock, IPlayerCallback& callback)
     : m_pGraphBuilder(NULL), 
 	m_iCurrentFrameRefreshCycle(0),
-    m_userId(0xACDCACDC), 
 	m_callback(callback),
     m_canSeek(-1), 
 	m_currentVolume(0)
@@ -169,15 +168,34 @@ void CDSGraph::CloseFile()
     CChaptersManager::Destroy();
     g_dsSettings.pixelShaderList->DisableAll();
 
-    UnloadGraph();
-
     m_VideoInfo.Clear();
     m_State.Clear();
     
-    m_userId = 0xACDCACDC;
 
     SAFE_DELETE(m_pGraphBuilder);
-    g_dsGraph->pFilterGraph = NULL;
+
+	// Stop sending event messages
+	if (m_pMediaEvent)
+	{
+		m_pMediaEvent->SetNotifyWindow((OAHWND)NULL, NULL, NULL);
+	}
+
+	pFilterGraph.Release();
+	CGraphFilters::Get()->DVD.Clear();
+	m_pMediaControl.Release();
+	m_pMediaEvent.Release();
+	m_pMediaSeeking.Release();
+	m_pVideoWindow.Release();
+	m_pBasicAudio.Release();
+
+	/* delete filters */
+
+	CLog::Log(LOGDEBUG, "%s Deleting filters ...", __FUNCTION__);
+
+	CGraphFilters::Destroy();
+
+	CLog::Log(LOGDEBUG, "%s ... done!", __FUNCTION__);
+
   } 
   else 
   {
@@ -571,51 +589,6 @@ void CDSGraph::Pause()
   }
 
   UpdateState();
-}
-
-HRESULT CDSGraph::UnloadGraph()
-{
-  HRESULT hr = S_OK;
-
-  BeginEnumFilters(pFilterGraph, pEM, pBF)
-  {
-    CStdString filterName;
-    g_charsetConverter.wToUTF8(GetFilterName(pBF), filterName);
-
-    try
-    {
-      hr = RemoveFilter(pFilterGraph, pBF);
-    }
-    catch (...)
-    {
-      hr = E_FAIL;
-    }
-
-    if (SUCCEEDED(hr))
-      CLog::Log(LOGNOTICE, "%s Successfully removed \"%s\" from the graph", __FUNCTION__, filterName.c_str());
-    else 
-      CLog::Log(LOGERROR, "%s Failed to remove \"%s\" from the graph", __FUNCTION__, filterName.c_str());
-
-    pEM->Reset();
-  }
-  EndEnumFilters
-
-  CGraphFilters::Get()->DVD.Clear();
-  m_pMediaControl.Release();
-  m_pMediaEvent.Release();
-  m_pMediaSeeking.Release();
-  m_pVideoWindow.Release();
-  m_pBasicAudio.Release();
-
-  /* delete filters */
-
-  CLog::Log(LOGDEBUG, "%s Deleting filters ...", __FUNCTION__);
-
-  CGraphFilters::Destroy();
-
-  CLog::Log(LOGDEBUG, "%s ... done!", __FUNCTION__);
-
-  return hr;
 }
 
 bool CDSGraph::IsPaused() const

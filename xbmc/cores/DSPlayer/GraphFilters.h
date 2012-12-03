@@ -28,6 +28,7 @@
 #include "DSUtil/SmartPtr.h"
 #include "streams.h"
 #include "utils/CharsetConverter.h"
+#include "system.h"
 
 /// Informations about a filter
 struct SFilterInfos
@@ -36,7 +37,12 @@ struct SFilterInfos
   {
     Clear();
   }
-  
+
+  ~SFilterInfos()
+  {
+	  SAFE_DELETE(pData);
+  }
+
   void Clear()
   {
     pBF = NULL;

@@ -178,12 +178,6 @@ public:
 
   Com::SmartPtr<IFilterGraph2> pFilterGraph;
 
-protected:
-
-  /** Unload the graph and release all the filters
-   * @return A HRESULT code
-   */
-  HRESULT UnloadGraph();
 private:
   //Direct Show Filters
   CFGManager*                           m_pGraphBuilder;
@@ -201,7 +195,6 @@ private:
   int8_t m_canSeek; //<-1: not queried; 0: false; 1: true
   long m_currentVolume;
 
-  DWORD_PTR m_userId;
   CCriticalSection m_ObjectLock;
 
   CStdString m_pStrCurrentFrameRate;

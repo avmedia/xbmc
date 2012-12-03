@@ -32,57 +32,6 @@ CGraphFilters::CGraphFilters():
 
 CGraphFilters::~CGraphFilters()
 {
-  if (Source.pBF)
-  {
-    delete Source.pData;
-    if (Source.isinternal)
-      Source.pBF.Release();
-    else
-      Source.pBF.FullRelease();
-  }
-
-  if (Splitter.pBF)
-  {
-    delete Splitter.pData;
-    if (Splitter.isinternal)
-      Splitter.pBF.Release();
-    else
-      Splitter.pBF.FullRelease();
-  }
-
-  if (AudioRenderer.pBF)
-    AudioRenderer.pBF.FullRelease();
-
-  VideoRenderer.pQualProp = NULL;
-
-  if (VideoRenderer.pBF)
-    VideoRenderer.pBF.FullRelease();
-
-  if (Audio.pBF)
-  {
-    delete Audio.pData;
-    if (Audio.isinternal)
-      Audio.pBF.Release();
-    else
-      Audio.pBF.FullRelease();
-  }
-  
-  if (Video.pBF)
-  {
-    delete Video.pData;
-    if (Video.isinternal)
-      Video.pBF.Release();
-    else
-      Video.pBF.FullRelease();
-  }
-  
-  while (! Extras.empty())
-  {
-    if (Extras.back().pBF)
-      Extras.back().pBF.FullRelease();
-
-    Extras.pop_back();
-  }
 }
 
 CGraphFilters* CGraphFilters::Get()

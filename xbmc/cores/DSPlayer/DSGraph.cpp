@@ -180,6 +180,28 @@ void CDSGraph::CloseFile()
     m_VideoInfo.Clear();
     m_State.Clear();
     
+	BeginEnumFilters(pFilterGraph, pEM, pBF)
+	{
+		CStdString filterName;
+		g_charsetConverter.wToUTF8(GetFilterName(pBF), filterName);
+
+		try
+		{
+			hr = RemoveFilter(pFilterGraph, pBF);
+		}
+		catch (...)
+		{
+			hr = E_FAIL;
+		}
+
+		if (SUCCEEDED(hr))
+			CLog::Log(LOGNOTICE, "%s Successfully removed \"%s\" from the graph", __FUNCTION__, filterName.c_str());
+		else 
+			CLog::Log(LOGERROR, "%s Failed to remove \"%s\" from the graph", __FUNCTION__, filterName.c_str());
+
+		pEM->Reset();
+	}
+	EndEnumFilters
 
     SAFE_DELETE(m_pGraphBuilder);
 

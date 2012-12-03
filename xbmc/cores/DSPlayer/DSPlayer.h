@@ -99,6 +99,7 @@ public:
   virtual void Seek(bool bPlus, bool bLargeStep);
   virtual void SeekPercentage(float iPercent);
   virtual float GetPercentage()                                 { return g_dsGraph->GetPercentage(); }
+  virtual float GetCachePercentage()							{ return g_dsGraph->GetCachePercentage(); }
   virtual void SetVolume(long nVolume)                          { g_dsGraph->SetVolume(nVolume); }
   virtual void GetAudioInfo(CStdString& strAudioInfo);
   virtual void GetVideoInfo(CStdString& strVideoInfo);

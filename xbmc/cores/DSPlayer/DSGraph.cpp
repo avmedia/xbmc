@@ -106,12 +106,13 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
   if (FAILED(hr))
     return hr;
 
-  m_pMediaSeeking = pFilterGraph;
-  m_pMediaControl = pFilterGraph;
-  m_pMediaEvent   = pFilterGraph;
-  m_pBasicAudio	  = pFilterGraph;
-  m_pBasicVideo   = pFilterGraph;
-  m_pVideoWindow  = pFilterGraph;
+  m_pMediaSeeking	= pFilterGraph;
+  m_pMediaControl	= pFilterGraph;
+  m_pMediaEvent		= pFilterGraph;
+  m_pBasicAudio		= pFilterGraph;
+  m_pBasicVideo		= pFilterGraph;
+  m_pVideoWindow	= pFilterGraph;
+  m_pAMOpenProgress = pFilterGraph;
 
   // Be sure we are using TIME_FORMAT_MEDIA_TIME
   hr = m_pMediaSeeking->SetTimeFormat(&TIME_FORMAT_MEDIA_TIME);
@@ -139,7 +140,12 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
 		  CGraphFilters::Get()->AudioRenderer.SetFilterInfo(pBF);
 	  }
 
-	  if(!CGraphFilters::Get()->AudioRenderer.osdname.IsEmpty() && !CGraphFilters::Get()->VideoRenderer.osdname.IsEmpty())
+	  if(!m_pAMOpenProgress)
+	  {
+		  m_pAMOpenProgress = pBF;
+	  }
+
+	  if(!CGraphFilters::Get()->AudioRenderer.osdname.IsEmpty() && !CGraphFilters::Get()->VideoRenderer.osdname.IsEmpty() && m_pAMOpenProgress)
 		  break;
   }
   EndEnumFilters
@@ -156,7 +162,10 @@ void CDSGraph::CloseFile()
 
   if (m_pGraphBuilder)
   {
-    if (CStreamsManager::Get())
+    if(m_pAMOpenProgress)
+	  m_pAMOpenProgress->AbortOperation();
+
+	if (CStreamsManager::Get())
       CStreamsManager::Get()->WaitUntilReady();
 
     Stop(true);
@@ -187,6 +196,7 @@ void CDSGraph::CloseFile()
 	m_pMediaSeeking.Release();
 	m_pVideoWindow.Release();
 	m_pBasicAudio.Release();
+	m_pAMOpenProgress.Release();
 
 	/* delete filters */
 
@@ -240,6 +250,13 @@ void CDSGraph::UpdateTime()
   {
     CStreamsManager::Get()->UpdateDVDStream();
     return;
+  }
+
+  if (m_pAMOpenProgress) {
+	  int64_t t = 0, c = 0;
+	  if (SUCCEEDED(m_pAMOpenProgress->QueryProgress(&t, &c)) && t > 0 && c < t) {
+		  m_State.cache_offset = (double)c / t;
+	  }
   }
 
   CChaptersManager::Get()->UpdateChapters(m_State.time);
@@ -351,6 +368,9 @@ HRESULT CDSGraph::HandleGraphEvent()
 		m_State.eof = true;
         g_application.m_pPlayer->CloseFile();
         break;
+	  case EC_BUFFERING_DATA:
+		  CLog::Log(LOGDEBUG,"%s EC_BUFFERING_DATA", __FUNCTION__);
+		  break;
       case EC_USERABORT:
         CLog::Log(LOGDEBUG,"%s EC_USERABORT", __FUNCTION__);
         g_application.m_pPlayer->CloseFile();
@@ -720,6 +740,11 @@ float CDSGraph::GetPercentage()
 		return (GetTime() * 100.0f / (float) iTotalTime);
 	}
 	return 0.0f;
+}
+
+float CDSGraph::GetCachePercentage()
+{
+	return (m_State.cache_offset * 100) - GetPercentage(); 
 }
 
 CStdString CDSGraph::GetGeneralInfo()

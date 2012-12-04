@@ -68,7 +68,6 @@ int32_t CDSGraph::m_threadID = 0;
 CDSGraph::CDSGraph(CDVDClock* pClock, IPlayerCallback& callback)
     : m_pGraphBuilder(NULL), 
 	m_iCurrentFrameRefreshCycle(0),
-    m_userId(0xACDCACDC), 
 	m_callback(callback),
     m_canSeek(-1), 
 	m_currentVolume(0)
@@ -107,12 +106,13 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
   if (FAILED(hr))
     return hr;
 
-  m_pMediaSeeking = pFilterGraph;
-  m_pMediaControl = pFilterGraph;
-  m_pMediaEvent   = pFilterGraph;
-  m_pBasicAudio	  = pFilterGraph;
-  m_pBasicVideo   = pFilterGraph;
-  m_pVideoWindow  = pFilterGraph;
+  m_pMediaSeeking	= pFilterGraph;
+  m_pMediaControl	= pFilterGraph;
+  m_pMediaEvent		= pFilterGraph;
+  m_pBasicAudio		= pFilterGraph;
+  m_pBasicVideo		= pFilterGraph;
+  m_pVideoWindow	= pFilterGraph;
+  m_pAMOpenProgress = pFilterGraph;
 
   // Be sure we are using TIME_FORMAT_MEDIA_TIME
   hr = m_pMediaSeeking->SetTimeFormat(&TIME_FORMAT_MEDIA_TIME);
@@ -140,7 +140,12 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
 		  CGraphFilters::Get()->AudioRenderer.SetFilterInfo(pBF);
 	  }
 
-	  if(!CGraphFilters::Get()->AudioRenderer.osdname.IsEmpty() && !CGraphFilters::Get()->VideoRenderer.osdname.IsEmpty())
+	  if(!m_pAMOpenProgress)
+	  {
+		  m_pAMOpenProgress = pBF;
+	  }
+
+	  if(!CGraphFilters::Get()->AudioRenderer.osdname.IsEmpty() && !CGraphFilters::Get()->VideoRenderer.osdname.IsEmpty() && m_pAMOpenProgress)
 		  break;
   }
   EndEnumFilters
@@ -157,7 +162,10 @@ void CDSGraph::CloseFile()
 
   if (m_pGraphBuilder)
   {
-    if (CStreamsManager::Get())
+    if(m_pAMOpenProgress)
+	  m_pAMOpenProgress->AbortOperation();
+
+	if (CStreamsManager::Get())
       CStreamsManager::Get()->WaitUntilReady();
 
     Stop(true);
@@ -169,15 +177,57 @@ void CDSGraph::CloseFile()
     CChaptersManager::Destroy();
     g_dsSettings.pixelShaderList->DisableAll();
 
-    UnloadGraph();
-
     m_VideoInfo.Clear();
     m_State.Clear();
     
-    m_userId = 0xACDCACDC;
+	BeginEnumFilters(pFilterGraph, pEM, pBF)
+	{
+		CStdString filterName;
+		g_charsetConverter.wToUTF8(GetFilterName(pBF), filterName);
+
+		try
+		{
+			hr = RemoveFilter(pFilterGraph, pBF);
+		}
+		catch (...)
+		{
+			hr = E_FAIL;
+		}
+
+		if (SUCCEEDED(hr))
+			CLog::Log(LOGNOTICE, "%s Successfully removed \"%s\" from the graph", __FUNCTION__, filterName.c_str());
+		else 
+			CLog::Log(LOGERROR, "%s Failed to remove \"%s\" from the graph", __FUNCTION__, filterName.c_str());
+
+		pEM->Reset();
+	}
+	EndEnumFilters
 
     SAFE_DELETE(m_pGraphBuilder);
-    g_dsGraph->pFilterGraph = NULL;
+
+	// Stop sending event messages
+	if (m_pMediaEvent)
+	{
+		m_pMediaEvent->SetNotifyWindow((OAHWND)NULL, NULL, NULL);
+	}
+
+	pFilterGraph.Release();
+	CGraphFilters::Get()->DVD.Clear();
+	m_pMediaControl.Release();
+	m_pMediaEvent.Release();
+	m_pMediaSeeking.Release();
+	m_pVideoWindow.Release();
+	m_pBasicAudio.Release();
+	m_pAMOpenProgress.Release();
+
+	/* delete filters */
+
+	CLog::Log(LOGDEBUG, "%s Deleting filters ...", __FUNCTION__);
+
+	CGraphFilters::Destroy();
+
+	CLog::Log(LOGDEBUG, "%s ... done!", __FUNCTION__);
+
   } 
   else 
   {
@@ -222,6 +272,13 @@ void CDSGraph::UpdateTime()
   {
     CStreamsManager::Get()->UpdateDVDStream();
     return;
+  }
+
+  if (m_pAMOpenProgress) {
+	  int64_t t = 0, c = 0;
+	  if (SUCCEEDED(m_pAMOpenProgress->QueryProgress(&t, &c)) && t > 0 && c < t) {
+		  m_State.cache_offset = (double)c / t;
+	  }
   }
 
   CChaptersManager::Get()->UpdateChapters(m_State.time);
@@ -333,6 +390,9 @@ HRESULT CDSGraph::HandleGraphEvent()
 		m_State.eof = true;
         g_application.m_pPlayer->CloseFile();
         break;
+	  case EC_BUFFERING_DATA:
+		  CLog::Log(LOGDEBUG,"%s EC_BUFFERING_DATA", __FUNCTION__);
+		  break;
       case EC_USERABORT:
         CLog::Log(LOGDEBUG,"%s EC_USERABORT", __FUNCTION__);
         g_application.m_pPlayer->CloseFile();
@@ -573,51 +633,6 @@ void CDSGraph::Pause()
   UpdateState();
 }
 
-HRESULT CDSGraph::UnloadGraph()
-{
-  HRESULT hr = S_OK;
-
-  BeginEnumFilters(pFilterGraph, pEM, pBF)
-  {
-    CStdString filterName;
-    g_charsetConverter.wToUTF8(GetFilterName(pBF), filterName);
-
-    try
-    {
-      hr = RemoveFilter(pFilterGraph, pBF);
-    }
-    catch (...)
-    {
-      hr = E_FAIL;
-    }
-
-    if (SUCCEEDED(hr))
-      CLog::Log(LOGNOTICE, "%s Successfully removed \"%s\" from the graph", __FUNCTION__, filterName.c_str());
-    else 
-      CLog::Log(LOGERROR, "%s Failed to remove \"%s\" from the graph", __FUNCTION__, filterName.c_str());
-
-    pEM->Reset();
-  }
-  EndEnumFilters
-
-  CGraphFilters::Get()->DVD.Clear();
-  m_pMediaControl.Release();
-  m_pMediaEvent.Release();
-  m_pMediaSeeking.Release();
-  m_pVideoWindow.Release();
-  m_pBasicAudio.Release();
-
-  /* delete filters */
-
-  CLog::Log(LOGDEBUG, "%s Deleting filters ...", __FUNCTION__);
-
-  CGraphFilters::Destroy();
-
-  CLog::Log(LOGDEBUG, "%s ... done!", __FUNCTION__);
-
-  return hr;
-}
-
 bool CDSGraph::IsPaused() const
 {
   return CDSPlayer::PlayerState == DSPLAYER_PAUSED;
@@ -747,6 +762,11 @@ float CDSGraph::GetPercentage()
 		return (GetTime() * 100.0f / (float) iTotalTime);
 	}
 	return 0.0f;
+}
+
+float CDSGraph::GetCachePercentage()
+{
+	return (m_State.cache_offset * 100) - GetPercentage(); 
 }
 
 CStdString CDSGraph::GetGeneralInfo()

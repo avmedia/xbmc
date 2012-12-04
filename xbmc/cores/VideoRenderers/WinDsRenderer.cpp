@@ -189,7 +189,11 @@ bool CWinDsRenderer::Supports(ESCALINGMETHOD method)
 bool CWinDsRenderer::Supports( ERENDERFEATURE method )
 {
   if ( method == RENDERFEATURE_CONTRAST
-    || method == RENDERFEATURE_BRIGHTNESS)
+    || method == RENDERFEATURE_BRIGHTNESS
+	|| method == RENDERFEATURE_ZOOM
+	|| method == RENDERFEATURE_VERTICAL_SHIFT
+	|| method == RENDERFEATURE_PIXEL_RATIO
+	|| method == RENDERFEATURE_POSTPROCESS)
     return true;
 
   return false;

@@ -75,8 +75,7 @@ CDSPlayer::~CDSPlayer()
   StopThread(false);
   m_pGraphThread.StopThread(false);
 
-  delete g_dsGraph;
-  g_dsGraph = NULL;
+  SAFE_DELETE(g_dsGraph);
 
   // Save Shader settings
   g_dsSettings.pixelShaderList->SaveXML();
@@ -185,9 +184,15 @@ bool CDSPlayer::OpenFile(const CFileItem& file,const CPlayerOptions &options)
 
 		PlayerState = DSPLAYER_LOADING;
 		currentFileItem = file;
-		m_Filename = file.GetAsUrl();
 		m_PlayerOptions = options;
 		m_pGraphThread.SetCurrentRate(1);
+
+		if (currentFileItem.IsInternetStream())
+		{
+			CURL url(currentFileItem.GetPath());
+			url.SetProtocolOptions("");
+			currentFileItem.SetPath(url.Get());
+		}
 
 		m_hReadyEvent.Reset();
 		Create();
@@ -232,26 +237,6 @@ bool CDSPlayer::CloseFile()
 {
   if (PlayerState == DSPLAYER_CLOSED || PlayerState == DSPLAYER_CLOSING)
     return true;
-
-//   if (PlayerState == DSPLAYER_ERROR)
-//   {
-// 	 
-// 	 // Something to show?
-//     if (errorWindow)
-//     {
-//       errorWindow->DoModal();
-//       errorWindow = NULL;
-//     } else {
-//       CGUIDialogOK *dialog = (CGUIDialogOK *)g_windowManager.GetWindow(WINDOW_DIALOG_OK);
-//       if (dialog)
-//       {
-//         dialog->SetHeading("Error");
-//         dialog->SetLine(0, "An error occured when trying to render the file.");
-//         dialog->SetLine(1, "Please look at the debug log for more informations.");
-//         dialog->DoModal();
-//       }
-//     }
-//   }
 
   PlayerState = DSPLAYER_CLOSING;
 

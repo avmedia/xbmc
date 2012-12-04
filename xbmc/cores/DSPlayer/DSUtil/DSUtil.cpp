@@ -751,28 +751,6 @@ bool IsSplitter(IBaseFilter* pBF, bool fCountConnectedOnly)
 {
   int nIn, nOut, nInC, nOutC;
   CountPins(pBF, nIn, nOut, nInC, nOutC);
-  if (nOut == 1)
-  {
-    Com::SmartPtr<IPin> pOut = GetFirstPin(pBF,PINDIR_OUTPUT);
-    if (pOut)
-    {
-      HRESULT hr = S_OK;
-      IEnumMediaTypes *pEnum = NULL;
-      AM_MEDIA_TYPE *pmt = NULL;
-      hr = pOut->EnumMediaTypes(&pEnum);
-      bool isnotnull = false;
-      while (hr = pEnum->Next(1, &pmt, NULL), hr == S_OK)
-      {
-        if (pmt->majortype != GUID_NULL)
-          isnotnull = true;
-        _DeleteMediaType(pmt);
-      }
-      SAFE_RELEASE(pEnum);
-      return isnotnull;
-    }
-    
-  }
-
   return(fCountConnectedOnly ? nOutC > 1 : nOut > 1);
 }
 

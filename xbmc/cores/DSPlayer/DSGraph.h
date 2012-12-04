@@ -155,6 +155,8 @@ public:
   /// @return Current position in percent
   virtual float GetPercentage();
 
+  virtual float GetCachePercentage();
+
   /** Create the graph and open the file
    * @param[in] file File to play
    * @param[in] options Playing options
@@ -178,12 +180,6 @@ public:
 
   Com::SmartPtr<IFilterGraph2> pFilterGraph;
 
-protected:
-
-  /** Unload the graph and release all the filters
-   * @return A HRESULT code
-   */
-  HRESULT UnloadGraph();
 private:
   //Direct Show Filters
   CFGManager*                           m_pGraphBuilder;
@@ -191,6 +187,7 @@ private:
   Com::SmartQIPtr<IMediaEventEx>        m_pMediaEvent;
   Com::SmartQIPtr<IMediaSeeking>        m_pMediaSeeking;
   Com::SmartQIPtr<IBasicAudio>          m_pBasicAudio;
+  Com::SmartQIPtr<IAMOpenProgress>		m_pAMOpenProgress;
   //dvd stuff
   Com::SmartQIPtr<IVideoWindow>         m_pVideoWindow;
   Com::SmartQIPtr<IBasicVideo>          m_pBasicVideo;
@@ -201,7 +198,6 @@ private:
   int8_t m_canSeek; //<-1: not queried; 0: false; 1: true
   long m_currentVolume;
 
-  DWORD_PTR m_userId;
   CCriticalSection m_ObjectLock;
 
   CStdString m_pStrCurrentFrameRate;
@@ -222,11 +218,13 @@ private:
       time = 0;
       time_total = 0;
       player_state = "";
+	  cache_offset  = 0.0;
       current_filter_state = State_Stopped;
     }
 	bool eof;
     uint64_t time;              // current playback time in millisec
     uint64_t time_total;        // total playback time in millisec
+	double  cache_offset;       // percentage of file ahead of current position
     FILTER_STATE current_filter_state;
 
     std::string player_state;  // full player state

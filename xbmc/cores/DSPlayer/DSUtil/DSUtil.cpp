@@ -688,41 +688,25 @@ bool IsAudioWaveRenderer(IBaseFilter* pBF)
 
 HRESULT RemoveUnconnectedFilters(IFilterGraph2 *pGraph)
 {
-  if (!pGraph)
-    return E_POINTER;
+	if (!pGraph)
+		return E_POINTER;
 
-  HRESULT hr = S_OK;
+	// Go through the list of filters in the graph.
+	BeginEnumFilters(pGraph, pEF, pBF)
+	{
+		Com::SmartPtr<IPin>pPin;
+		// Find a connected pin on this filter.
+		if (SUCCEEDED(FindMatchingPin(pBF, MatchPinConnection(TRUE), &pPin)))
+		{
+			// If it's connected, don't remove the filter.
+			continue;
+		}
+		RemoveFilter(pGraph, pBF);
+		pEF->Reset(); 
+	}
+	EndEnumFilters
 
-  IEnumFilters *pEnum = NULL;
-  IBaseFilter *pFilter = NULL;
-  IPin *pPin = NULL;
-
-  CHECK_HR(hr = pGraph->EnumFilters(&pEnum));
-
-  // Go through the list of filters in the graph.
-  while (S_OK == pEnum->Next(1, &pFilter, NULL))
-  {
-    // Find a connected pin on this filter.
-    HRESULT hr2 = FindMatchingPin(pFilter, MatchPinConnection(TRUE), &pPin);
-    if (SUCCEEDED(hr2))
-    {
-        // If it's connected, don't remove the filter.
-        SAFE_RELEASE(pPin);
-        continue;
-    }
-    assert(pPin == NULL);
-    CHECK_HR(hr = RemoveFilter(pGraph, pFilter));
-
-    // The previous call made the enumerator stale. 
-    pEnum->Reset(); 
-    SAFE_RELEASE(pFilter);
-  }
-
-done:
-  SAFE_RELEASE(pEnum);
-  SAFE_RELEASE(pFilter);
-  SAFE_RELEASE(pPin);
-  return hr;
+	return S_OK;
 }
 
 int CountPins(IBaseFilter* pBF, int& nIn, int& nOut, int& nInC, int& nOutC)

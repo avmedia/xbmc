@@ -41,8 +41,6 @@ struct SFilterInfos
   ~SFilterInfos()
   {
 	  SAFE_DELETE(pData);
-	  if(!isinternal)
-		  pBF.FullRelease();
   }
 
   void Clear()

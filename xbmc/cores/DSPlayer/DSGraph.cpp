@@ -171,7 +171,6 @@ void CDSGraph::CloseFile()
     Stop(true);
 
     CSingleLock lock(m_ObjectLock);
-    hr = m_pGraphBuilder->RemoveFromROT();
 
     CStreamsManager::Destroy();
     CChaptersManager::Destroy();
@@ -179,31 +178,6 @@ void CDSGraph::CloseFile()
 
     m_VideoInfo.Clear();
     m_State.Clear();
-    
-	BeginEnumFilters(pFilterGraph, pEM, pBF)
-	{
-		CStdString filterName;
-		g_charsetConverter.wToUTF8(GetFilterName(pBF), filterName);
-
-		try
-		{
-			hr = RemoveFilter(pFilterGraph, pBF);
-		}
-		catch (...)
-		{
-			hr = E_FAIL;
-		}
-
-		if (SUCCEEDED(hr))
-			CLog::Log(LOGNOTICE, "%s Successfully removed \"%s\" from the graph", __FUNCTION__, filterName.c_str());
-		else 
-			CLog::Log(LOGERROR, "%s Failed to remove \"%s\" from the graph", __FUNCTION__, filterName.c_str());
-
-		pEM->Reset();
-	}
-	EndEnumFilters
-
-    SAFE_DELETE(m_pGraphBuilder);
 
 	// Stop sending event messages
 	if (m_pMediaEvent)
@@ -211,8 +185,13 @@ void CDSGraph::CloseFile()
 		m_pMediaEvent->SetNotifyWindow((OAHWND)NULL, NULL, NULL);
 	}
 
-	pFilterGraph.Release();
+	/* delete filters */
+	CLog::Log(LOGDEBUG, "%s Deleting filters ...", __FUNCTION__);
+	CGraphFilters::Destroy();
+	CLog::Log(LOGDEBUG, "%s ... done!", __FUNCTION__);
+
 	CGraphFilters::Get()->DVD.Clear();
+	pFilterGraph.Release();
 	m_pMediaControl.Release();
 	m_pMediaEvent.Release();
 	m_pMediaSeeking.Release();
@@ -220,13 +199,8 @@ void CDSGraph::CloseFile()
 	m_pBasicAudio.Release();
 	m_pAMOpenProgress.Release();
 
-	/* delete filters */
-
-	CLog::Log(LOGDEBUG, "%s Deleting filters ...", __FUNCTION__);
-
-	CGraphFilters::Destroy();
-
-	CLog::Log(LOGDEBUG, "%s ... done!", __FUNCTION__);
+	hr = m_pGraphBuilder->RemoveFromROT();
+	SAFE_DELETE(m_pGraphBuilder);
 
   } 
   else 

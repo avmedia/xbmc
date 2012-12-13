@@ -3,10 +3,10 @@
     <!-- DVD RULES -->
     <!-- Iso still return a crash on this filter. -->
     <rule filetypes="iso">
-      <source filter="lavfsplitter" />
-      <splitter filter="lavfsplitter" />
+      <source filter="avsource" />
+      <splitter filter="avsource" />
       <video filter="ffdvideodec" />
-      <audio filter="lavaudiodec" />
+      <audio filter="ffdaudiodec" />
     </rule>
     <!-- If you want to play a dvd select the file /dvdfolder/VIDEO_TS/VIDEO_TS.ifo -->
     <rule filetypes="ifo">

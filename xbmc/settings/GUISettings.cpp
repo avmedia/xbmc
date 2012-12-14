@@ -329,7 +329,6 @@ void CGUISettings::Initialize()
 
   CSettingsCategory* scr = AddCategory(SETTINGS_MUSIC, "scrobbler", 15221);
   AddBool(scr, "scrobbler.lastfmsubmit", 15201, false);
-  AddBool(scr, "scrobbler.lastfmsubmitradio", 15250, false);
   AddString(scr,"scrobbler.lastfmusername", 15202, "", EDIT_CONTROL_INPUT, false, 15202);
   AddString(scr,"scrobbler.lastfmpass", 15203, "", EDIT_CONTROL_MD5_INPUT, false, 15203);
   AddSeparator(scr, "scrobbler.sep1");
@@ -546,8 +545,6 @@ void CGUISettings::Initialize()
 #endif
 #if defined(HAS_SDL_JOYSTICK)
   AddBool(in, "input.enablejoystick", 35100, true);
-  AddBool(in, "input.disablejoystickwithimon", 35101, true);
-  GetSetting("input.disablejoystickwithimon")->SetVisible(false);
 #endif
 
   CSettingsCategory* net = AddCategory(SETTINGS_SYSTEM, "network", 798);
@@ -609,7 +606,9 @@ void CGUISettings::Initialize()
   else
   {
     shutdown.insert(make_pair(13009,POWERSTATE_QUIT));
+#if !defined(TARGET_DARWIN_IOS)
     shutdown.insert(make_pair(13014,POWERSTATE_MINIMIZE));
+#endif
     AddInt(pwm, "powermanagement.shutdownstate", 13008, POWERSTATE_QUIT, shutdown, SPIN_CONTROL_TEXT);
   }
 

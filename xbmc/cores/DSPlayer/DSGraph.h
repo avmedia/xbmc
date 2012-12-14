@@ -169,7 +169,7 @@ public:
   /** Sets the volume (amplitude) of the audio signal 
    * @param[in] nVolume The volume level in 1/100ths dB Valid values range from -10,000 (silence) to 0 (full volume) 0 = 0 dB -10000 = -100 dB
    */
-  void SetVolume(long nVolume);
+  void SetVolume(float nVolume);
 
   /// @return General informations about filters
   CStdString GetGeneralInfo();
@@ -196,7 +196,7 @@ private:
   std::vector<DvdTitle*>                m_pDvdTitles;
   static int32_t m_threadID;
   int8_t m_canSeek; //<-1: not queried; 0: false; 1: true
-  long m_currentVolume;
+  float m_currentVolume;
 
   CCriticalSection m_ObjectLock;
 

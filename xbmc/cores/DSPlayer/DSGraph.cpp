@@ -70,7 +70,7 @@ CDSGraph::CDSGraph(CDVDClock* pClock, IPlayerCallback& callback)
 	m_iCurrentFrameRefreshCycle(0),
 	m_callback(callback),
     m_canSeek(-1), 
-	m_currentVolume(0)
+	m_currentVolume(0.0f)
 {
   m_threadID = 0;
 }
@@ -484,13 +484,13 @@ HRESULT CDSGraph::HandleGraphEvent()
 }
 
 //USER ACTIONS
-void CDSGraph::SetVolume(long nVolume)
+void CDSGraph::SetVolume(float nVolume)
 {
   CSingleLock lock(m_ObjectLock);
 
   if (m_pBasicAudio && (nVolume != m_currentVolume))
   {
-    m_pBasicAudio->put_Volume((nVolume == VOLUME_MINIMUM) ? -10000 : nVolume);
+    m_pBasicAudio->put_Volume((nVolume == VOLUME_MINIMUM) ? -10000 : (nVolume - 1)*6000);
     m_currentVolume = nVolume;
   }
 }

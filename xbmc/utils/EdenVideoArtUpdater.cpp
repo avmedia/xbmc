@@ -201,12 +201,14 @@ void CEdenVideoArtUpdater::Process()
     {
       handle->SetProgress(j, items2.Size());
       CFileItemPtr episode = items2[j];
-      string cachedThumb = GetCachedVideoThumb(*episode);
+      string cachedThumb = GetCachedEpisodeThumb(*episode);
+      if (!CFile::Exists(cachedThumb))
+        cachedThumb = GetCachedVideoThumb(*episode);
       episode->SetPath(episode->GetVideoInfoTag()->m_strFileNameAndPath);
       episode->GetVideoInfoTag()->m_strPictureURL.Parse();
 
       map<string, string> artwork;
-      if (!db.GetArtForItem(item->GetVideoInfoTag()->m_iDbId, item->GetVideoInfoTag()->m_type, artwork)
+      if (!db.GetArtForItem(episode->GetVideoInfoTag()->m_iDbId, episode->GetVideoInfoTag()->m_type, artwork)
           || (artwork.size() == 1 && artwork.find("thumb") != artwork.end()))
       {
         CStdString art = CVideoInfoScanner::GetImage(episode.get(), true, episode->GetVideoInfoTag()->m_basePath != episode->GetPath(), "thumb");
@@ -324,7 +326,9 @@ CStdString CEdenVideoArtUpdater::GetCachedActorThumb(const CFileItem &item)
 CStdString CEdenVideoArtUpdater::GetCachedSeasonThumb(int season, const CStdString &path)
 {
   CStdString label;
-  if (season == 0)
+  if (season == -1)
+    label = g_localizeStrings.Get(20366);
+  else if (season == 0)
     label = g_localizeStrings.Get(20381);
   else
     label.Format(g_localizeStrings.Get(20358), season);

@@ -596,27 +596,6 @@ CDateTime CEpg::GetLastDate(void) const
 
 //@}
 
-/** @name Protected methods */
-//@{
-
-bool CEpg::UpdateMetadata(const CEpg &epg, bool bUpdateDb /* = false */)
-{
-  bool bReturn = true;
-  CSingleLock lock(m_critSection);
-
-  m_strName        = epg.m_strName;
-  m_strScraperName = epg.m_strScraperName;
-  if (epg.m_pvrChannel)
-    SetChannel(epg.m_pvrChannel);
-
-  if (bUpdateDb)
-    bReturn = Persist();
-
-  return bReturn;
-}
-
-//@}
-
 /** @name Private methods */
 //@{
 
@@ -803,22 +782,7 @@ bool CEpg::IsRemovableTag(const CEpgInfoTag &tag) const
 
 bool CEpg::LoadFromClients(time_t start, time_t end)
 {
-  bool bReturn(false);
-  CPVRChannelPtr channel = Channel();
-  if (channel)
-  {
-    CEpg tmpEpg(channel);
-    if (tmpEpg.UpdateFromScraper(start, end))
-      bReturn = UpdateEntries(tmpEpg, !g_guiSettings.GetBool("epg.ignoredbforclient"));
-  }
-  else
-  {
-    CEpg tmpEpg(m_iEpgID, m_strName, m_strScraperName);
-    if (tmpEpg.UpdateFromScraper(start, end))
-      bReturn = UpdateEntries(tmpEpg, !g_guiSettings.GetBool("epg.ignoredbforclient"));
-  }
-
-  return bReturn;
+  return UpdateFromScraper(start, end);
 }
 
 CEpgInfoTagPtr CEpg::GetNextEvent(const CEpgInfoTag& tag) const
@@ -849,7 +813,7 @@ CEpgInfoTagPtr CEpg::GetPreviousEvent(const CEpgInfoTag& tag) const
 CPVRChannelPtr CEpg::Channel(void) const
 {
   CSingleLock lock(m_critSection);
-  return m_pvrChannel;
+  return m_pvrChannel ? m_pvrChannel : g_PVRChannelGroups->GetChannelByEpgId(m_iEpgID);
 }
 
 int CEpg::ChannelID(void) const
@@ -874,6 +838,7 @@ void CEpg::SetChannel(PVR::CPVRChannelPtr channel)
     m_pvrChannel = channel;
     for (map<CDateTime, CEpgInfoTagPtr>::iterator it = m_tags.begin(); it != m_tags.end(); it++)
       it->second->SetPVRChannel(m_pvrChannel);
+    channel->SetEpgID(m_iEpgID);
   }
 }
 

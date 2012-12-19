@@ -782,7 +782,22 @@ bool CEpg::IsRemovableTag(const CEpgInfoTag &tag) const
 
 bool CEpg::LoadFromClients(time_t start, time_t end)
 {
-  return UpdateFromScraper(start, end);
+  bool bReturn(false);
+  CPVRChannelPtr channel = Channel();
+  if (channel)
+  {
+    CEpg tmpEpg(channel);
+    if (tmpEpg.UpdateFromScraper(start, end))
+      bReturn = UpdateEntries(tmpEpg, !g_guiSettings.GetBool("epg.ignoredbforclient"));
+  }
+  else
+  {
+    CEpg tmpEpg(m_iEpgID, m_strName, m_strScraperName);
+    if (tmpEpg.UpdateFromScraper(start, end))
+      bReturn = UpdateEntries(tmpEpg, !g_guiSettings.GetBool("epg.ignoredbforclient"));
+  }
+
+  return bReturn;
 }
 
 CEpgInfoTagPtr CEpg::GetNextEvent(const CEpgInfoTag& tag) const
@@ -813,7 +828,7 @@ CEpgInfoTagPtr CEpg::GetPreviousEvent(const CEpgInfoTag& tag) const
 CPVRChannelPtr CEpg::Channel(void) const
 {
   CSingleLock lock(m_critSection);
-  return m_pvrChannel ? m_pvrChannel : g_PVRChannelGroups->GetChannelByEpgId(m_iEpgID);
+  return m_pvrChannel;
 }
 
 int CEpg::ChannelID(void) const
@@ -834,11 +849,13 @@ void CEpg::SetChannel(PVR::CPVRChannelPtr channel)
   if (m_pvrChannel != channel)
   {
     if (channel)
+    {
       SetName(channel->ChannelName());
+      channel->SetEpgID(m_iEpgID);
+    }
     m_pvrChannel = channel;
     for (map<CDateTime, CEpgInfoTagPtr>::iterator it = m_tags.begin(); it != m_tags.end(); it++)
       it->second->SetPVRChannel(m_pvrChannel);
-    channel->SetEpgID(m_iEpgID);
   }
 }
 

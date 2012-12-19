@@ -2085,6 +2085,8 @@ void CApplication::UnloadSkin(bool forReload /* = false */)
   g_charsetConverter.reset();
 
   g_infoManager.Clear();
+
+  g_SkinInfo.reset();
 }
 
 bool CApplication::LoadUserWindows()
@@ -3479,7 +3481,11 @@ bool CApplication::Cleanup()
 
 #ifdef _LINUX
     CXHandle::DumpObjectTracker();
+
+#ifdef HAS_DVD_DRIVE
+    CLibcdio::ReleaseInstance();
 #endif
+#endif 
 #if defined(TARGET_ANDROID)
     // enable for all platforms once it's safe
     g_sectionLoader.UnloadAll();
@@ -3550,6 +3556,7 @@ void CApplication::Stop(int exitCode)
   CWebServer::UnregisterRequestHandler(&m_httpVfsHandler);
 #ifdef HAS_JSONRPC
   CWebServer::UnregisterRequestHandler(&m_httpJsonRpcHandler);
+  CJSONRPC::Cleanup();
 #endif
 #ifdef HAS_WEB_INTERFACE
   CWebServer::UnregisterRequestHandler(&m_httpWebinterfaceAddonsHandler);
@@ -3628,6 +3635,7 @@ void CApplication::Stop(int exitCode)
 
     // shutdown the AudioEngine
     CAEFactory::Shutdown();
+    CAEFactory::UnLoadEngine();
 
     CLog::Log(LOGNOTICE, "stopped");
   }

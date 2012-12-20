@@ -510,11 +510,9 @@ void CGUIWindowSettingsCategory::CreateSettings()
 	else if (strSetting.Equals("subtitles.dsfont"))
 	{
  		AddSetting(pSetting, group->GetWidth(), iControlID);
-		CBaseSettingControl *pSettingControl = GetSetting(pSetting->GetSetting());
-		CGUIButtonControl *pButtonControl = (CGUIButtonControl *)GetControl(pSettingControl->GetID());
+		CGUIButtonControl *pButtonControl = (CGUIButtonControl *)GetControl(GetSetting(strSetting)->GetID());
 		CStdString label; label.Format(g_localizeStrings.Get(pSetting->GetLabel()), ((CSettingString*)pSetting)->GetData());
 		pButtonControl->SetLabel(label); 
- 		pSettingControl->SetDelayed();
 		continue;
 	}
 #endif
@@ -1164,11 +1162,13 @@ void CGUIWindowSettingsCategory::OnClick(BaseSettingControlPtr pSettingControl)
 	  dialog->SetHeading(55057);
 	  dialog->DoModal();
 
-	  CStdString label;
-	  label.Format(g_localizeStrings.Get(55056), dialog->GetSelectedLabelText());
-	  pSettingString->SetData(dialog->GetSelectedLabelText());
-	  pControl->SetLabel(label);
-
+	  if(dialog->GetSelectedLabel() > 0)
+	  {
+		  CStdString label;
+		  label.Format(g_localizeStrings.Get(55056), dialog->GetSelectedLabelText());
+		  pSettingString->SetData(dialog->GetSelectedLabelText());
+		  pControl->SetLabel(label);
+	  }
   }
 #endif
   else if (strSetting.Equals("lookandfeel.rssedit"))

@@ -35,7 +35,7 @@
 #include "utils/charsetconverter.h"
 #include "utils/XMLUtils.h"
 #include "filesystem/File.h"
-
+#include "settings/Settings.h"
 #include "Dmodshow.h"
 #include "Dmoreg.h"
 #include "../../filesystem/SpecialProtocol.h "
@@ -313,8 +313,11 @@ CFGFilterFile::CFGFilterFile(const CLSID& clsid, CStdString path, CStdStringW na
 }
 
 CFGFilterFile::CFGFilterFile( TiXmlElement *pFilter )
-  : CFGFilter(CFGFilter::FILE), m_isDMO(false), m_catDMO(GUID_NULL),
-  m_hInst(NULL)
+  : CFGFilter(CFGFilter::FILE)
+  ,m_isDMO(false)
+  ,m_catDMO(GUID_NULL)
+  ,m_hInst(NULL)
+  ,m_path("")
 {
   bool m_filterFound = true;
 
@@ -338,28 +341,26 @@ CFGFilterFile::CFGFilterFile( TiXmlElement *pFilter )
     m_catDMO = dmoclsid;
   }
 
-  m_path = "";
   if (!XMLUtils::GetString(pFilter, "path", m_path) || m_path.empty())
   {
     m_filterFound = false;
   } else {
     if (!XFILE::CFile::Exists(m_path))
     {
-      // The file doesn't exist, maybe it's a relative path ?
-      m_path.Format("special://xbmc/system/players/dsplayer/%s", m_path.c_str()); //TODO: And what if we use a xml in UserData?!
-      if (! XFILE::CFile::Exists(m_path))
-      {
-        m_filterFound = false;
-      } else
-        m_path = _P(m_path);
+        CStdString path(m_path);
+		m_path = g_settings.GetUserDataItem("dsplayer/" + path);
+		if (!XFILE::CFile::Exists(m_path))
+		{
+			m_path.Format("special://xbmc/system/players/dsplayer/%s", path.c_str()); 
+			if (!XFILE::CFile::Exists(m_path))
+			{
+				m_filterFound = false;
+			}
+		}
     }
   }
 
-  if (! m_filterFound)
-  {
-    // Look in the registry
-    m_path = GetFilterPath(clsid);
-  }
+  m_path = m_filterFound ?  _P(m_path) : GetFilterPath(clsid);
 
   // Call super constructor
   m_clsid = clsid;

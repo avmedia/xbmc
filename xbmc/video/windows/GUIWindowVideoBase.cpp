@@ -2286,7 +2286,7 @@ const CStdString CGUIWindowVideoBase::GetBDPath(const CFileItemPtr &item)
 		strPath = item->GetVideoInfoTag()->m_strFileNameAndPath;
 	else if(item->IsBDFile())
 		strPath = item->GetPath();
-	else
+	else if(!item->IsInternetStream())
 		strPath = item->GetPath() + "BDMV\\index.bdmv";
 
 	if(URIUtils::GetFileName(strPath).Equals("index.bdmv") && XFILE::CFile::Exists(strPath, false))

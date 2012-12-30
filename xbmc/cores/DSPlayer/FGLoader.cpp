@@ -438,6 +438,7 @@ HRESULT CFGLoader::LoadFilterRules(const CFileItem& _pFileItem)
 
   // Init Streams manager, and load streams
   START_PERFORMANCE_COUNTER
+  CStreamsManager::Create();
   CStreamsManager::Get()->InitManager();
   CStreamsManager::Get()->LoadStreams();
   END_PERFORMANCE_COUNTER("Loading streams informations");

@@ -141,6 +141,8 @@ public:
   friend class CSubtitleManager;
   /// Retrieve singleton instance
   static CStreamsManager *Get();
+  /// Create singleton instance
+  static bool Create();
   /// Destroy singleton instance
   static void Destroy();
 

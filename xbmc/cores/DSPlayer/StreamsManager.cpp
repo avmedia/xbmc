@@ -66,14 +66,7 @@ CStreamsManager *CStreamsManager::m_pSingleton = NULL;
 
 CStreamsManager *CStreamsManager::Get()
 {
-  if (m_pSingleton)
-    return m_pSingleton;
-
-  if (CDSPlayer::PlayerState == DSPLAYER_CLOSING
-    || CDSPlayer::PlayerState == DSPLAYER_CLOSED)
-    return NULL;
-
-  return (m_pSingleton = new CStreamsManager());
+  return m_pSingleton;
 }
 
 CStreamsManager::CStreamsManager(void)
@@ -618,10 +611,20 @@ bool CStreamsManager::InitManager()
   return true;
 }
 
+bool CStreamsManager::Create()
+{
+	if (CDSPlayer::PlayerState == DSPLAYER_CLOSING || CDSPlayer::PlayerState == DSPLAYER_CLOSED)
+		return false;
+
+	if ((m_pSingleton = new CStreamsManager()))
+		return true;
+
+	return false;
+}
+
 void CStreamsManager::Destroy()
 {
-  delete m_pSingleton;
-  m_pSingleton = NULL;
+	SAFE_DELETE(m_pSingleton);
 }
 
 void CStreamsManager::WaitUntilReady()

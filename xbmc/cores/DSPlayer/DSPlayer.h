@@ -199,6 +199,7 @@ public:
   static CGUIDialogBoxBase* errorWindow;
 
   CCriticalSection m_StateSection;
+  CCriticalSection m_CleanSection;
 
    void ShowEditionDlg(bool playStart);
 protected:

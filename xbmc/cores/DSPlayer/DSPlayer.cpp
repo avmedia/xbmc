@@ -68,6 +68,8 @@ CDSPlayer::CDSPlayer(IPlayerCallback& callback)
 
 CDSPlayer::~CDSPlayer()
 {
+  CSingleLock lock(m_CleanSection);
+
   if (PlayerState != DSPLAYER_CLOSED)
     CloseFile();
 
@@ -201,10 +203,13 @@ bool CDSPlayer::OpenFile(const CFileItem& file,const CPlayerOptions &options)
 		if(!m_hReadyEvent.WaitMSec(100))
 		{
 			CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
-			dialog->Show();
-			while(!m_hReadyEvent.WaitMSec(1))
-				g_windowManager.Process(true);
-			dialog->Close();
+			if(dialog)
+			{
+				dialog->Show();
+				while(!m_hReadyEvent.WaitMSec(1))
+					g_windowManager.ProcessRenderLoop(false);
+				dialog->Close();
+			}
 		}
 
 		if (PlayerState != DSPLAYER_ERROR)
@@ -235,6 +240,8 @@ bool CDSPlayer::OpenFile(const CFileItem& file,const CPlayerOptions &options)
 
 bool CDSPlayer::CloseFile()
 {
+	CSingleLock lock(m_CleanSection);
+
   if (PlayerState == DSPLAYER_CLOSED || PlayerState == DSPLAYER_CLOSING)
     return true;
 
@@ -292,6 +299,7 @@ void CDSPlayer::GetGeneralInfo(CStdString& strGeneralInfo)
 //CThread
 void CDSPlayer::OnStartup()
 {
+	CSingleLock lock(m_CleanSection);
 	try
 	{
 		HRESULT hr = E_FAIL;
@@ -332,7 +340,13 @@ void CDSPlayer::OnExit()
 	m_hReadyEvent.Set();
 
 	if(m_PlayerOptions.identify == false)
-	{		if (!m_bEof || PlayerState == DSPLAYER_ERROR)			m_callback.OnPlayBackStopped();		else			m_callback.OnPlayBackEnded();	}
+	{
+		if (!m_bEof || PlayerState == DSPLAYER_ERROR)
+			m_callback.OnPlayBackStopped();
+		else
+			m_callback.OnPlayBackEnded();
+	}
+
 	m_bStop = true;
 	CoUninitialize();
 }

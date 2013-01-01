@@ -1,13 +1,9 @@
 # XBMC Media Center language file
-# XBMC-core v12.0-RC1
-# Translators:
-#   <linniksa@gmail.com>, 2012.
-# Pavel Maryanov <acid@jack.kiev.ua>, 2012.
-# Roman Miroshnychenko <romanvm@yandex.ru>, 2012.
+# XBMC-core v12.0
 msgid ""
 msgstr ""
-"Project-Id-Version: Unofficial XBMC Russian translation project\n"
-"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
+"Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: XBMC Translation Team\n"
@@ -210,115 +206,93 @@ msgctxt "#62"
 msgid "Dec"
 msgstr "дек."
 
-#. Weather token
 msgctxt "#71"
 msgid "N"
 msgstr "С"
 
-#. Weather token
 msgctxt "#72"
 msgid "NNE"
 msgstr "ССВ"
 
-#. Weather token
 msgctxt "#73"
 msgid "NE"
 msgstr "СВ"
 
-#. Weather token
 msgctxt "#74"
 msgid "ENE"
 msgstr "ВСВ"
 
-#. Weather token
 msgctxt "#75"
 msgid "E"
 msgstr "В"
 
-#. Weather token
 msgctxt "#76"
 msgid "ESE"
 msgstr "ВЮВ"
 
-#. Weather token
 msgctxt "#77"
 msgid "SE"
 msgstr "ЮВ"
 
-#. Weather token
 msgctxt "#78"
 msgid "SSE"
 msgstr "ЮЮВ"
 
-#. Weather token
 msgctxt "#79"
 msgid "S"
 msgstr "Ю"
 
-#. Weather token
 msgctxt "#80"
 msgid "SSW"
 msgstr "ЮЮЗ"
 
-#. Weather token
 msgctxt "#81"
 msgid "SW"
 msgstr "ЮЗ"
 
-#. Weather token
 msgctxt "#82"
 msgid "WSW"
 msgstr "ЗЮЗ"
 
-#. Weather token
 msgctxt "#83"
 msgid "W"
 msgstr "З"
 
-#. Weather token
 msgctxt "#84"
 msgid "WNW"
 msgstr "ЗСЗ"
 
-#. Weather token
 msgctxt "#85"
 msgid "NW"
 msgstr "СЗ"
 
-#. Weather token
 msgctxt "#86"
 msgid "NNW"
 msgstr "ССЗ"
 
-#. Weather token
 msgctxt "#87"
 msgid "VAR"
 msgstr "ПЕРЕМ."
 
-#. Weather token
 msgctxt "#88"
 msgid "South"
-msgstr "Южный"
+msgstr "южный"
 
-#. Weather token
 msgctxt "#89"
 msgid "North"
-msgstr "Северный"
+msgstr "северный"
 
-#. Weather token
 msgctxt "#90"
 msgid "West"
-msgstr "Западный"
+msgstr "западный"
 
-#. Weather token
 msgctxt "#91"
 msgid "East"
-msgstr "Восточный"
+msgstr "восточный"
 
-#. Weather token
 msgctxt "#92"
 msgid "Variable"
-msgstr "Переменный"
+msgstr "переменный"
 
 msgctxt "#98"
 msgid "View: Auto"
@@ -596,10 +570,9 @@ msgctxt "#166"
 msgid "Skin"
 msgstr "Обложка"
 
-#: xbmc/windows/GUIWindowFileManager.cpp
 msgctxt "#167"
 msgid "Cancel file operations"
-msgstr "Отмена операции с файлами"
+msgstr "Отменить операции с файлами"
 
 msgctxt "#169"
 msgid "Resolution"
@@ -866,9 +839,7 @@ msgid "Full screen"
 msgstr "Полный экран"
 
 msgctxt "#245"
-msgid ""
-"Sizing: (%i,%i)->(%i,%i) (Zoom x%2.2f) AR:%2.2f:1 (Pixels: %2.2f:1) (VShift:"
-" %2.2f)"
+msgid "Sizing: (%i,%i)->(%i,%i) (Zoom x%2.2f) AR:%2.2f:1 (Pixels: %2.2f:1) (VShift: %2.2f)"
 msgstr "Размер: (%i,%i)->(%i,%i) (Увеличение x%2.2f) Соотношение:%2.2f:1 (Пикселей: %2.2f:1) (Верт. смещение: %2.2f)"
 
 msgctxt "#247"
@@ -1255,17 +1226,14 @@ msgctxt "#346"
 msgid "Boost volume level on downmix"
 msgstr "Повышать громкость при смешивании"
 
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#347"
 msgid "- DTS-HD capable receiver"
 msgstr "- Выводить звук в формате DTS-HD"
 
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#348"
 msgid "- Multichannel LPCM capable receiver"
 msgstr "- Выводить звук в многоканальном формате LPCM"
 
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#349"
 msgid "- TrueHD capable receiver"
 msgstr "- Выводить звук в формате TrueHD"
@@ -1350,132 +1318,106 @@ msgctxt "#369"
 msgid "Title"
 msgstr "Название"
 
-#. Weather token
 msgctxt "#370"
 msgid "Thunderstorms"
 msgstr "грозы"
 
-#. Weather token
 msgctxt "#371"
 msgid "Partly"
 msgstr "местами"
 
-#. Weather token
 msgctxt "#372"
 msgid "Mostly"
 msgstr "преимущ."
 
-#. Weather token
 msgctxt "#373"
 msgid "Sunny"
 msgstr "солнечно"
 
-#. Weather token
 msgctxt "#374"
 msgid "Cloudy"
 msgstr "облачно"
 
-#. Weather token
 msgctxt "#375"
 msgid "Snow"
 msgstr "снег"
 
-#. Weather token
 msgctxt "#376"
 msgid "Rain"
 msgstr "дождь"
 
-#. Weather token
 msgctxt "#377"
 msgid "Light"
 msgstr "небольш."
 
-#. Weather token
 msgctxt "#378"
 msgid "AM"
 msgstr "Утром"
 
-#. Weather token
 msgctxt "#379"
 msgid "PM"
 msgstr "Днем"
 
-#. Weather token
 msgctxt "#380"
 msgid "Showers"
 msgstr "ливни"
 
-#. Weather token
 msgctxt "#381"
 msgid "Few"
 msgstr "немного"
 
-#. Weather token
 msgctxt "#382"
 msgid "Scattered"
 msgstr "одиночные"
 
-#. Weather token
 msgctxt "#383"
 msgid "Wind"
 msgstr "ветер"
 
-#. Weather token
 msgctxt "#384"
 msgid "Strong"
 msgstr "сильный"
 
-#. Weather token
 msgctxt "#385"
 msgid "Fair"
 msgstr "безоблачно"
 
-#. Weather token
 msgctxt "#386"
 msgid "Clear"
 msgstr "ясно"
 
-#. Weather token
 msgctxt "#387"
 msgid "Clouds"
 msgstr "облака"
 
-#. Weather token
 msgctxt "#388"
 msgid "Early"
 msgstr "ранние"
 
-#. Weather token
 msgctxt "#389"
 msgid "Shower"
 msgstr "ливень"
 
-#. Weather token
 msgctxt "#390"
 msgid "Flurries"
 msgstr "снегопад"
 
-#. Weather token
 msgctxt "#391"
 msgid "Low"
 msgstr "Мин."
 
-#. Weather token
 msgctxt "#392"
 msgid "Medium"
 msgstr "Средн."
 
-#. Weather token
 msgctxt "#393"
 msgid "High"
 msgstr "Макс."
 
-#. Weather token
 msgctxt "#394"
 msgid "Fog"
 msgstr "туман"
 
-#. Weather token
 msgctxt "#395"
 msgid "Haze"
 msgstr "дымка"
@@ -1620,7 +1562,6 @@ msgctxt "#433"
 msgid "Really remove '%s'?"
 msgstr "Действительно удалить[CR]\"%s\"?"
 
-#. From <wind dir.> at <speed> <unit>
 msgctxt "#434"
 msgid "From %s at %i %s"
 msgstr "%s, %i %s"
@@ -2371,11 +2312,11 @@ msgstr "Удалить из медиатеки"
 
 msgctxt "#647"
 msgid "Export video library"
-msgstr "Экспортировать медиатеку видео"
+msgstr "Экспорт медиатеки видео…"
 
 msgctxt "#648"
 msgid "Import video library"
-msgstr "Импортировать медиатеку видео"
+msgstr "Импорт медиатеки видео…"
 
 msgctxt "#649"
 msgid "Importing"
@@ -2785,12 +2726,10 @@ msgctxt "#799"
 msgid "Library Update"
 msgstr "Обновление медиатеки"
 
-#: xbmc/music/windows/GUIWindowMusicBase.cpp
 msgctxt "#800"
 msgid "Music library needs to rescan art from tags"
 msgstr "Требуется сканирование картинок из тэгов музыкальных файлов"
 
-#: xbmc/music/windows/GUIWindowMusicBase.cpp
 msgctxt "#801"
 msgid "Would you like to scan now?"
 msgstr "Сканировать сейчас?"
@@ -3163,8 +3102,6 @@ msgctxt "#1273"
 msgid "AirPlay"
 msgstr "AirPlay"
 
-#. Filter movies/tvshows/music/episodes/artists/musicvideos/albums/songs
-#: xbmc/dialogs/GUIDialogMediaFilter.cpp
 msgctxt "#1275"
 msgid "Filter %s"
 msgstr "Фильтр %s"
@@ -3177,272 +3114,218 @@ msgctxt "#1301"
 msgid "Custom passthrough device"
 msgstr "Другое устройство прямого вывода звука"
 
-#. Weather token
 msgctxt "#1396"
 msgid "Drifting"
 msgstr "гололед"
 
-#. Weather token
 msgctxt "#1397"
 msgid "and"
 msgstr "и"
 
-#. Weather token
 msgctxt "#1398"
 msgid "Freezing"
 msgstr "холодн."
 
-#. Weather token
 msgctxt "#1399"
 msgid "Late"
 msgstr "поздний"
 
-#. Weather token
 msgctxt "#1400"
 msgid "Isolated"
 msgstr "местами"
 
-#. Weather token
 msgctxt "#1401"
 msgid "Thundershowers"
 msgstr "ливень с грозами"
 
-#. Weather token
 msgctxt "#1402"
 msgid "Thunder"
 msgstr "гроза"
 
-#. Weather token
 msgctxt "#1403"
 msgid "Sun"
 msgstr "солнце"
 
-#. Weather token
 msgctxt "#1404"
 msgid "Heavy"
 msgstr "сильный"
 
-#. Weather token
 msgctxt "#1405"
 msgid "in"
 msgstr "в"
 
-#. Weather token
 msgctxt "#1406"
 msgid "the"
 msgstr " "
 
-#. Weather token
 msgctxt "#1407"
 msgid "Vicinity"
 msgstr "окрестностях"
 
-#. Weather token
 msgctxt "#1408"
 msgid "Ice"
 msgstr "лед"
 
-#. Weather token
 msgctxt "#1409"
 msgid "Crystals"
 msgstr "кристаллы"
 
-#. Weather token
 msgctxt "#1410"
 msgid "Calm"
 msgstr "спокойно"
 
-#. Weather token
 msgctxt "#1411"
 msgid "with"
 msgstr "с"
 
-#. Weather token
 msgctxt "#1412"
 msgid "windy"
 msgstr "ветрено"
 
-#. Weather token
 msgctxt "#1413"
 msgid "Patches"
 msgstr "местами"
 
-#. Weather token
 msgctxt "#1414"
 msgid "Thunderstorm"
 msgstr "гроза"
 
-#. Weather token
 msgctxt "#1415"
 msgid "Drizzle"
 msgstr "изморось"
 
-#. Weather token
 msgctxt "#1416"
 msgid "Foggy"
 msgstr "туманно"
 
-#. Weather token
 msgctxt "#1417"
 msgid "Grains"
 msgstr "град"
 
-#. Weather token
 msgctxt "#1418"
 msgid "Thunderstorms"
 msgstr "грозы"
 
-#. Weather token
 msgctxt "#1419"
 msgid "Shallow"
-msgstr "мелкий"
+msgstr "низк."
 
-#. Weather token
 msgctxt "#1420"
 msgid "Moderate"
 msgstr "умеренн."
 
-#. Weather token
 msgctxt "#1421"
 msgid "Very High"
 msgstr "очень высокий"
 
-#. Weather token
 msgctxt "#1422"
 msgid "Windy"
 msgstr "ветрено"
 
-#. Weather token
 msgctxt "#1423"
 msgid "Mist"
 msgstr "туман"
 
-#. Weather token
 msgctxt "#1424"
 msgid "Overcast"
 msgstr "пасмурно"
 
-#. Weather token
 msgctxt "#1425"
 msgid "Pellets"
 msgstr "град"
 
-#. Weather token
 msgctxt "#1426"
 msgid "Hail"
 msgstr "град"
 
-#. Weather token
 msgctxt "#1427"
 msgid "Smoke"
-msgstr "Дым"
+msgstr "дым"
 
-#. Weather token
 msgctxt "#1428"
 msgid "Volcanic"
 msgstr "вулканический"
 
-#. Weather token
 msgctxt "#1429"
 msgid "Ash"
 msgstr "пепел"
 
-#. Weather token
 msgctxt "#1430"
 msgid "Widespread"
-msgstr "распространенн."
+msgstr " повсеместн."
 
-#. Weather token
 msgctxt "#1431"
 msgid "Dust"
 msgstr "пыль"
 
-#. Weather token
 msgctxt "#1432"
 msgid "Sand"
 msgstr "песок"
 
-#. Weather token
 msgctxt "#1433"
 msgid "Spray"
 msgstr "моросящ. дождь"
 
-#. Weather token
 msgctxt "#1434"
 msgid "Whirls"
 msgstr "вихри"
 
-#. Weather token
 msgctxt "#1435"
 msgid "Sandstorm"
 msgstr "песчаная буря"
 
-#. Weather token
 msgctxt "#1436"
 msgid "Blowing"
-msgstr "дует"
+msgstr "летящ."
 
-#. Weather token
 msgctxt "#1437"
 msgid "Pellet"
 msgstr "град"
 
-#. Weather token
 msgctxt "#1438"
 msgid "Small"
 msgstr "Небольшие"
 
-#. Weather token
 msgctxt "#1439"
 msgid "and"
 msgstr "и"
 
-#. Weather token
 msgctxt "#1440"
 msgid "Sleet"
 msgstr "дождь со снегом"
 
-#. Weather token
 msgctxt "#1441"
 msgid "with"
 msgstr "и"
 
-#. Weather token
 msgctxt "#1442"
 msgid "Chance"
 msgstr "возможн."
 
-#. Weather token
 msgctxt "#1443"
 msgid "of"
 msgstr " "
 
-#. Weather token
 msgctxt "#1444"
 msgid "Funnel"
-msgstr "дымка"
+msgstr "вихревое"
 
-#. Weather token
 msgctxt "#1445"
 msgid "Cloud"
 msgstr "облако"
 
-#. Weather token
 msgctxt "#1446"
 msgid "Unknown"
 msgstr "Неизвестно"
 
-#. Weather token
 msgctxt "#1447"
 msgid "Squals"
 msgstr "шквалы"
 
-#. Weather token
 msgctxt "#1448"
 msgid "Precipitation"
 msgstr "Осадки"
 
-#. Weather token
 msgctxt "#1449"
 msgid "Partial"
 msgstr "местами"
@@ -3875,22 +3758,18 @@ msgctxt "#12348"
 msgid "Item locked"
 msgstr "Заблокировано"
 
-#: xbmc/utils/EdenVideoArtUpdater.cpp
 msgctxt "#12349"
 msgid "Updating video library art"
 msgstr "Обновление картинок медеатеки видео"
 
-#: xbmc/utils/EdenVideoArtUpdater.cpp
 msgctxt "#12350"
 msgid "Processing %s"
 msgstr "Обработка %s"
 
-#: xbmc/video/windows/GUIWindowVideoBase.cpp
 msgctxt "#12351"
 msgid "The art cache in your video library needs updating."
 msgstr "Кэш картинок медиатеки видео нуждается в обновлении."
 
-#: xbmc/video/windows/GUIWindowVideoBase.cpp
 msgctxt "#12352"
 msgid "No downloading is needed."
 msgstr "Загрузка файлов не требуется."
@@ -3899,7 +3778,6 @@ msgctxt "#12353"
 msgid "Reactivate lock"
 msgstr "Переустановить защиту"
 
-#: xbmc/video/windows/GUIWindowVideoBase.cpp
 msgctxt "#12354"
 msgid "Would you like to update it now?"
 msgstr "Обновить сейчас?"
@@ -4296,12 +4174,10 @@ msgctxt "#13212"
 msgid "Cancelled with %im%is left"
 msgstr "Отменено: осталось %i мин. %i с."
 
-#. minutes (left from countdown)
 msgctxt "#13213"
 msgid "%2.0fm"
 msgstr "%2.0f мин."
 
-#. seconds (left from countdown)
 msgctxt "#13214"
 msgid "%2.0fs"
 msgstr "%2.0f с."
@@ -4699,15 +4575,11 @@ msgid "Preset"
 msgstr "Предустановка"
 
 msgctxt "#13389"
-msgid ""
-"There are no presets available\n"
-"for this visualization"
+msgid "There are no presets available\nfor this visualization"
 msgstr "Нет предустановок\nдля этой визуализации"
 
 msgctxt "#13390"
-msgid ""
-"There are no settings available\n"
-"for this visualization"
+msgid "There are no settings available\nfor this visualization"
 msgstr "Нет настроек\nдля этой визуализации"
 
 msgctxt "#13391"
@@ -4878,13 +4750,10 @@ msgctxt "#13432"
 msgid "Allow hardware acceleration (VideoToolbox)"
 msgstr "Включить аппаратное ускорение (VideoToolbox)"
 
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#13433"
 msgid "Play the next video automatically"
 msgstr "Автоматически проигрывать следующий видеофайл"
 
-#. If autoplay next video is set true
-#: xbmc/video/windows/GUIWindowVideoBase.cpp
 msgctxt "#13434"
 msgid "Play only this"
 msgstr "Проигрывать только этот файл"
@@ -4933,27 +4802,22 @@ msgctxt "#13510"
 msgid "Sync playback to display"
 msgstr "Синхронизировать видео с частотой дисплея"
 
-#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
 msgctxt "#13511"
 msgid "Choose art"
 msgstr "Картинки"
 
-#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
 msgctxt "#13512"
 msgid "Current art"
 msgstr "Текущая картинка"
 
-#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
 msgctxt "#13513"
 msgid "Remote art"
 msgstr "Удаленная картинка"
 
-#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
 msgctxt "#13514"
 msgid "Local art"
 msgstr "Локальная картинка"
 
-#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
 msgctxt "#13515"
 msgid "No art"
 msgstr "Без картинки"
@@ -5370,7 +5234,6 @@ msgctxt "#14099"
 msgid "Eject disc when CD ripping is complete"
 msgstr "Извлекать CD по окончании оцифровки"
 
-#: xbmc/music/windows/GUIWindowMusicSongs.cpp
 msgctxt "#14100"
 msgid "Stop ripping CD"
 msgstr "Остановить оцифровку CD"
@@ -6244,9 +6107,7 @@ msgid "Please check your configuration or check the log for details."
 msgstr "Проверьте настройки или см. журнал."
 
 msgctxt "#19045"
-msgid ""
-"No PVR clients have been started yet. Wait for the PVR clients to start up "
-"or check the log for details."
+msgid "No PVR clients have been started yet. Wait for the PVR clients to start up or check the log for details."
 msgstr "Нет активных клиентов PVR. Дождитесь запуска клиентов PVR или см. журнал."
 
 msgctxt "#19046"
@@ -6457,10 +6318,6 @@ msgctxt "#19102"
 msgid "Please switch to another channel."
 msgstr "Переключитесь на другой канал."
 
-msgctxt "#19103"
-msgid "Scan for missing icons"
-msgstr "Искать недостающие значки"
-
 msgctxt "#19104"
 msgid "Enter the name of the folder for the recording"
 msgstr "Введите имя папки для записи"
@@ -6478,8 +6335,7 @@ msgid "Couldn't save timer. Check the log for details."
 msgstr "Не удалось сохранить таймер. См. журнал."
 
 msgctxt "#19110"
-msgid ""
-"An unexpected error occurred. Try again later or check the log for details."
+msgid "An unexpected error occurred. Try again later or check the log for details."
 msgstr "Неизвестная ошибка. Повторите попытку или см. журнал."
 
 msgctxt "#19111"
@@ -6519,8 +6375,7 @@ msgid "Avoid repeats"
 msgstr "Избегать повторений"
 
 msgctxt "#19122"
-msgid ""
-"This timer is still recording. Are you sure you want to delete this timer?"
+msgid "This timer is still recording. Are you sure you want to delete this timer?"
 msgstr "Производится запись по этому таймеру. Действительно удалить его?"
 
 msgctxt "#19123"
@@ -6616,8 +6471,7 @@ msgid "Groups"
 msgstr "Группы"
 
 msgctxt "#19147"
-msgid ""
-"The PVR backend does not support this action. Check the log for details."
+msgid "The PVR backend does not support this action. Check the log for details."
 msgstr "Сервер PVR не поддерживает это действие. См. журнал."
 
 msgctxt "#19148"
@@ -6672,10 +6526,6 @@ msgctxt "#19160"
 msgid "to"
 msgstr "по"
 
-msgctxt "#19161"
-msgid "On"
-msgstr "в"
-
 msgctxt "#19162"
 msgid "Recording active"
 msgstr "Запись активна"
@@ -6714,7 +6564,7 @@ msgstr "Открывать каналы в окне"
 
 msgctxt "#19172"
 msgid "Instant recording duration"
-msgstr "Длительность мгновенной записи"
+msgstr "Длительность быстрой записи"
 
 msgctxt "#19173"
 msgid "Default recording priority"
@@ -6802,11 +6652,11 @@ msgstr "Продолжить?"
 
 msgctxt "#19195"
 msgid "Client actions"
-msgstr "Операции на клиентах"
+msgstr "Операции клиентов"
 
 msgctxt "#19196"
 msgid "PVR client specific actions"
-msgstr "Операции на клиентах PVR"
+msgstr "Операции клиентов PVR"
 
 msgctxt "#19197"
 msgid "Recording started on: %s"
@@ -6913,9 +6763,7 @@ msgid "EPG"
 msgstr "EPG"
 
 msgctxt "#19223"
-msgid ""
-"No PVR add-on could be enabled. Check your settings or the log for more "
-"info."
+msgid "No PVR add-on could be enabled. Check your settings or the log for more info."
 msgstr "Не удалось включить дополнения PVR. См. журнал."
 
 msgctxt "#19224"
@@ -7060,7 +6908,7 @@ msgstr "Разблокировать канал"
 
 msgctxt "#19259"
 msgid "Parental control"
-msgstr "Родительский контроль"
+msgstr "Родительский[CR]контроль"
 
 msgctxt "#19260"
 msgid "Unlock duration"
@@ -7122,22 +6970,18 @@ msgctxt "#19274"
 msgid "Please visit xbmc.org/pvr to learn more."
 msgstr "Посетите xbmc.org/pvr для получения подробностей."
 
-#: xbmc/pvr/timers/PVRTimerInfoTag.cpp
 msgctxt "#19275"
 msgid "Conflict warning"
 msgstr "Предупреждение о конфликте"
 
-#: xbmc/pvr/timers/PVRTimerInfoTag.cpp
 msgctxt "#19276"
 msgid "Conflict error"
 msgstr "Ошибка из-за конфликта"
 
-#: xbmc/pvr/timers/PVRTimerInfoTag.cpp
 msgctxt "#19277"
 msgid "Recording conflict"
-msgstr "Конфликт записи"
+msgstr "Конфликт при записи"
 
-#: xbmc/pvr/timers/PVRTimerInfoTag.cpp
 msgctxt "#19278"
 msgid "Recording error"
 msgstr "Ошибка записи"
@@ -8194,7 +8038,6 @@ msgctxt "#20187"
 msgid "UPnP"
 msgstr "UPnP"
 
-#: xbmc/network/upnp/UPnPServer.cpp
 msgctxt "#20188"
 msgid "Announce library updates via UPnP"
 msgstr "Объявлять об обновлении медиатеки по UPnP"
@@ -8229,11 +8072,11 @@ msgstr "Изменить инфоресурс"
 
 msgctxt "#20196"
 msgid "Export music library"
-msgstr "Экспортировать медиатеку музыки"
+msgstr "Экспорт медиатеки музыки…"
 
 msgctxt "#20197"
 msgid "Import music library"
-msgstr "Импортировать медиатеку музыки"
+msgstr "Импорт медиатеки музыки…"
 
 msgctxt "#20198"
 msgid "No artist found!"
@@ -8785,7 +8628,7 @@ msgstr "Слайд-шоу фанартов"
 
 msgctxt "#20426"
 msgid "Export to a single file or separate"
-msgstr "Экспортировать в одну папку или разделять"
+msgstr "Экспортировать в одну папку или разделять?"
 
 msgctxt "#20427"
 msgid "files per entry?"
@@ -9367,25 +9210,17 @@ msgctxt "#21465"
 msgid "Above video"
 msgstr "Над видео"
 
-msgctxt "#21466"
-msgid "between"
-msgstr "между"
-
 msgctxt "#21467"
 msgid "%.1f to %.1f"
-msgstr "%.1f — %.1f"
+msgstr "%.1f—%.1f"
 
-#. Filter (media data) from int value to int value
-#: xbmc/dialogs/GUIDialogMediaFilter.cpp
 msgctxt "#21468"
 msgid "%d to %d"
-msgstr "%d — %d"
+msgstr "%d—%d"
 
-#. Filter (media data) from string value to string value
-#: xbmc/dialogs/GUIDialogMediaFilter.cpp
 msgctxt "#21469"
 msgid "%s to %s"
-msgstr "%s — %s"
+msgstr "%s—%s"
 
 msgctxt "#21800"
 msgid "File name"
@@ -9809,7 +9644,7 @@ msgstr "Экспорт в формате CSV"
 
 msgctxt "#22036"
 msgid "Import karaoke titles..."
-msgstr "Импортировать текст караоке…"
+msgstr "Импорт текста караоке…"
 
 msgctxt "#22037"
 msgid "Show song selector automatically"
@@ -9817,7 +9652,7 @@ msgstr "Показывать выбор песни автоматически"
 
 msgctxt "#22038"
 msgid "Export karaoke titles..."
-msgstr "Экспортировать текст караоке…"
+msgstr "Экспорт текста караоке…"
 
 msgctxt "#22039"
 msgid "Enter song number"
@@ -9883,7 +9718,6 @@ msgctxt "#23054"
 msgid "Running"
 msgstr "Запуск…"
 
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#23055"
 msgid "Scale Teletext to 4:3"
 msgstr "Масштабировать телетекст до 4:3"
@@ -9996,7 +9830,6 @@ msgctxt "#24028"
 msgid "Weather.com (standard)"
 msgstr "Weather.com (стандартно)"
 
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#24029"
 msgid "Service for weather information"
 msgstr "Служба прогноза погоды"
@@ -10213,12 +10046,10 @@ msgctxt "#24101"
 msgid "Would you like to download this Add-on?"
 msgstr "Загрузить это дополнение?"
 
-#: xbmc/Application.cpp
 msgctxt "#24102"
 msgid "Unable to load skin"
 msgstr "Не удается загрузить обложку"
 
-#: xbmc/Application.cpp
 msgctxt "#24103"
 msgid "Skin is missing some files"
 msgstr "В обложке отсутствуют некоторые файлы"
@@ -10639,25 +10470,18 @@ msgctxt "#34110"
 msgid "7.1"
 msgstr "7.1"
 
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#34120"
 msgid "Play GUI sounds"
 msgstr "Звуки интерфейса"
 
-#. play GUI sounds
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#34121"
 msgid "Only when playback stopped"
 msgstr "Только при остановленном проигрывании"
 
-#. play GUI sounds
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#34122"
 msgid "Always"
 msgstr "Всегда"
 
-#. play GUI sounds
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#34123"
 msgid "Never"
 msgstr "Никогда"
@@ -10731,9 +10555,7 @@ msgid "Generic disk"
 msgstr "Типовой диск"
 
 msgctxt "#35004"
-msgid ""
-"There are no settings available\n"
-"for this peripheral."
+msgid "There are no settings available\nfor this peripheral."
 msgstr "Для этой периферии\nнет настроек."
 
 msgctxt "#35005"
@@ -10756,7 +10578,6 @@ msgctxt "#35009"
 msgid "Do not use the custom keymap for this device"
 msgstr "Не использовать пользовательскую раскладку для этого устройства"
 
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#35100"
 msgid "Enable joystick and gamepad support"
 msgstr "Включить поддержку джойстика и геймпада"
@@ -10785,7 +10606,6 @@ msgctxt "#35504"
 msgid "Product ID"
 msgstr "ID продукта"
 
-#: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 msgctxt "#36000"
 msgid "Pulse-Eight CEC adapter"
 msgstr "Адаптер Pulse-Eight CEC"
@@ -10834,24 +10654,16 @@ msgctxt "#36012"
 msgid "Could not initialise the CEC adapter. Please check your settings."
 msgstr "Не удалось инициализировать адаптер CEC. Проверьте настройки."
 
-msgctxt "#36013"
-msgid ""
-"Unsupported libCEC interface version. %d is greater than the version XBMC "
-"supports (%d)"
-msgstr "Неподдерживаемая версия интерфейса libCEC. %d выше, чем версия, поддерживаемая XBMC (%d)"
-
 msgctxt "#36015"
 msgid "HDMI port number"
 msgstr "Номер порта HDMI"
 
-#. max. 13 characters
 msgctxt "#36016"
 msgid "Connected"
 msgstr "Подключено"
 
 msgctxt "#36017"
-msgid ""
-"Could not initialise the CEC adapter: libCEC was not found on your system."
+msgid "Could not initialise the CEC adapter: libCEC was not found on your system."
 msgstr "Не удалось инициализировать адаптер CEC: libCEC не найден."
 
 msgctxt "#36018"
@@ -10918,29 +10730,22 @@ msgctxt "#36033"
 msgid "Pause playback when switching to another source"
 msgstr "Приостанавливать проигрывание при переключении источников"
 
-#. adjust refreshrate
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#36035"
 msgid "Always"
 msgstr "Всегда"
 
-#. adjust refreshrate
-#: xbmc/settings/GUISettings.cpp
 msgctxt "#36036"
 msgid "On start/stop"
 msgstr "При запуске/остановке"
 
-#: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 msgctxt "#36037"
 msgid "TV"
 msgstr "ТВ"
 
-#: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 msgctxt "#36038"
 msgid "Amplifier / AVR device"
 msgstr "Усилитель/АВ-ресивер"
 
-#: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 msgctxt "#36039"
 msgid "TV and AVR device (explicit)"
 msgstr "ТВ и АВ-ресивер (явно)"

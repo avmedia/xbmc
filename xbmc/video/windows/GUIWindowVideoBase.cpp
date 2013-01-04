@@ -1095,7 +1095,11 @@ bool CGUIWindowVideoBase::ShowResumeMenu(CFileItem &item)
 bool CGUIWindowVideoBase::ShowPlaySelection(CFileItemPtr& item)
 {
   /* if asked to resume somewhere, we should not show anything */
-  if (item->m_lStartOffset)
+  if (item->m_lStartOffset
+#ifdef HAS_DS_PLAYER
+	  || (GetDefaultPlayer(item) != EPC_DVDPLAYER && g_application.m_eForcedNextPlayer != EPC_DVDPLAYER)
+#endif
+	  )
     return true;
 
   if (item->IsBDFile())
@@ -1188,7 +1192,7 @@ bool CGUIWindowVideoBase::OnResumeItem(int iItem)
 
   if (item->m_bIsFolder
 #ifdef HAS_DS_PLAYER
-	  || (IsLaunchBD() && !GetBDPath(item).IsEmpty())
+	  || (IsLaunchBD(item) && !GetBDPath(item).IsEmpty())
 #endif
 	  )
   {
@@ -2272,15 +2276,35 @@ void CGUIWindowVideoBase::OnInitWindow()
 }
 
 #ifdef HAS_DS_PLAYER
-bool CGUIWindowVideoBase::IsLaunchBD()
+int CGUIWindowVideoBase::GetDefaultPlayer(const CFileItemPtr &item)
 {
-	bool dsplayer = g_guiSettings.GetBool("dsplayer.defaultvideoplayer");
-	PLAYERCOREID defaultPlayer = dsplayer ? EPC_DSPLAYER : CPlayerCoreFactory::GetPlayerCore("videodefaultplayer");
-	return (g_application.m_eForcedNextPlayer == EPC_DSPLAYER ||(defaultPlayer == EPC_DSPLAYER && g_application.m_eForcedNextPlayer == EPC_NONE)) && g_guiSettings.GetBool("dsplayer.bdautoloadindex");
+	VECPLAYERCORES vecCores;
+	if (item->IsVideoDb())
+	{
+		CFileItem item2(*item->GetVideoInfoTag());
+		CPlayerCoreFactory::GetPlayers(item2, vecCores);
+	}
+	else
+		CPlayerCoreFactory::GetPlayers(*item, vecCores);
+
+	if (vecCores.size())
+		return vecCores[0];
+
+	return PCID_NONE;
+}
+
+bool CGUIWindowVideoBase::IsLaunchBD(const CFileItemPtr &item)
+{
+	return (g_application.m_eForcedNextPlayer == EPC_DSPLAYER ||(GetDefaultPlayer(item) == EPC_DSPLAYER && g_application.m_eForcedNextPlayer == EPC_NONE)) && g_guiSettings.GetBool("dsplayer.bdautoloadindex");
 }
 
 const CStdString CGUIWindowVideoBase::GetBDPath(const CFileItemPtr &item)
 {
+	CStdString ext = URIUtils::GetExtension(item->GetPath());
+	ext.ToLower();
+	if (ext == ".iso" ||  ext == ".img")
+		return item->GetPath();
+
 	CStdString strPath;
 	if (item->IsVideoDb() && item->HasVideoInfoTag())
 		strPath = item->GetVideoInfoTag()->m_strFileNameAndPath;
@@ -2296,7 +2320,7 @@ const CStdString CGUIWindowVideoBase::GetBDPath(const CFileItemPtr &item)
 }
 bool CGUIWindowVideoBase::LaunchBD(const CFileItemPtr &item)
 {
-	if(IsLaunchBD() )
+	if(IsLaunchBD(item) )
 	{
 		CStdString strPath = GetBDPath(item);
 		if(!strPath.IsEmpty())

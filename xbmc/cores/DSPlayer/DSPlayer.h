@@ -38,6 +38,7 @@
 #include "utils/TimeUtils.h"
 #include "Event.h"
 #include "dialogs/GUIDialogBoxBase.h"
+#include "settings/Settings.h"
 
 #ifdef HAS_VIDEO_PLAYBACK
 #include "cores/VideoRenderers/RenderManager.h"
@@ -100,6 +101,8 @@ public:
   virtual void SeekPercentage(float iPercent);
   virtual float GetPercentage()                                 { return g_dsGraph->GetPercentage(); }
   virtual float GetCachePercentage()							{ return g_dsGraph->GetCachePercentage(); }
+  virtual bool ControlsVolume()									{ return true;}
+  virtual void SetMute(bool bOnOff)								{ if(bOnOff) g_dsGraph->SetVolume(VOLUME_MINIMUM);}
   virtual void SetVolume(float nVolume)                         { g_dsGraph->SetVolume(nVolume); }
   virtual void GetAudioInfo(CStdString& strAudioInfo);
   virtual void GetVideoInfo(CStdString& strVideoInfo);

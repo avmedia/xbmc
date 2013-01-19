@@ -36,6 +36,7 @@
 #include "osx/XBMCHelper.h"
 #include "utils/SystemInfo.h"
 #include "osx/CocoaInterface.h"
+#include "osx/DarwinUtils.h"
 #undef BOOL
 
 #import <SDL/SDL_video.h>
@@ -1358,8 +1359,9 @@ bool CWinSystemOSX::IsObscured(void)
         // if the windowBounds completely encloses our bounds, we are obscured.
         if (!obscureLogged)
         {
-          const char* cstr = CFStringGetCStringPtr(ownerName, CFStringGetSystemEncoding());
-          CLog::Log(LOGDEBUG, "WinSystemOSX: Fullscreen window %s obscures XBMC!", cstr);
+          std::string appName;
+          if (DarwinCFStringRefToString(ownerName, appName))
+            CLog::Log(LOGDEBUG, "WinSystemOSX: Fullscreen window %s obscures XBMC!", appName.c_str());
           obscureLogged = true;
         }
         m_obscured = true;
@@ -1476,13 +1478,17 @@ void CWinSystemOSX::EnableSystemScreenSaver(bool bEnable)
 
   if (!bEnable)
   {
-    CFStringRef reasonForActivity= CFSTR("XBMC requested disable system screen saver");
-    IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep,
-      kIOPMAssertionLevelOn, reasonForActivity, &assertionID);
+    if (assertionID == 0)
+    {
+      CFStringRef reasonForActivity= CFSTR("XBMC requested disable system screen saver");
+      IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep,
+        kIOPMAssertionLevelOn, reasonForActivity, &assertionID);
+    }
   }
   else if (assertionID != 0)
   {
     IOPMAssertionRelease(assertionID);
+    assertionID = 0;
   }
 
   m_use_system_screensaver = bEnable;

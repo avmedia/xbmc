@@ -227,7 +227,9 @@ public:
   virtual float GetPercentage();
   virtual float GetCachePercentage();
 
+  virtual void  SetMute(bool bOnOff);
   virtual void  SetVolume(float fVolume);
+  virtual bool  ControlsVolume() {return true;}
   virtual void  SetDynamicRangeCompression(long drc)              {}
   virtual void  GetAudioInfo(CStdString &strAudioInfo);
   virtual void  GetVideoInfo(CStdString &strVideoInfo);
@@ -484,6 +486,7 @@ private:
   CEvent                  m_ready;
 
   float                   m_current_volume;
+  bool                    m_current_mute;
   bool                    m_change_volume;
   CDVDOverlayContainer    m_overlayContainer;
   ECacheState             m_caching;

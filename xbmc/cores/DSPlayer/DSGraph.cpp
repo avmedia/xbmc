@@ -137,6 +137,8 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
 	  if (IsVideoRenderer(pBF)) {
 		  CGraphFilters::Get()->VideoRenderer.SetFilterInfo(pBF);
 	  } else if(IsAudioWaveRenderer(pBF)) {
+		  if(!CGraphFilters::Get()->AudioRenderer.pBF) 
+			  CGraphFilters::Get()->AudioRenderer.pBF = pBF;
 		  CGraphFilters::Get()->AudioRenderer.SetFilterInfo(pBF);
 	  }
 
@@ -745,23 +747,18 @@ float CDSGraph::GetCachePercentage()
 
 CStdString CDSGraph::GetGeneralInfo()
 {
-  CStdString generalInfo = "";
+  CStdString generalInfo, info;
 
-  if (! CGraphFilters::Get()->Source.osdname.empty() )
-    generalInfo = "Source Filter: " + CGraphFilters::Get()->Source.osdname;
-
-  if (! CGraphFilters::Get()->Splitter.osdname.empty())
+  BeginEnumFilters(g_dsGraph->pFilterGraph, pEF, pBF)
   {
-    if (generalInfo.empty())
-      generalInfo = "Splitter: " + CGraphFilters::Get()->Splitter.osdname;
-    else
-      generalInfo += " | Splitter: " + CGraphFilters::Get()->Splitter.osdname;
-  }
+	  if (pBF == CGraphFilters::Get()->AudioRenderer.pBF || pBF == CGraphFilters::Get()->VideoRenderer.pBF )
+		  continue;
 
-  if (generalInfo.empty())
-    generalInfo = "Video renderer: " + CGraphFilters::Get()->VideoRenderer.osdname;
-  else
-    generalInfo += " | Video renderer: " + CGraphFilters::Get()->VideoRenderer.osdname;
+	  g_charsetConverter.wToUTF8(GetFilterName(pBF), info);
+	  if( !info.empty() )
+		  generalInfo.empty() ? generalInfo += "Filters: " + info : generalInfo += " | " + info;
+  }
+  EndEnumFilters
 
   return generalInfo;
 }
@@ -774,8 +771,7 @@ CStdString CDSGraph::GetAudioInfo()
   if (! c)
     return "File closed";
 
-  audioInfo.Format("Audio Decoder: %s (%s, %d Hz, %d Channels) | Renderer: %s",
-    CGraphFilters::Get()->Audio.osdname,
+  audioInfo.Format("Audio: (%s, %d Hz, %d Channels) | Renderer: %s",
     c->GetAudioCodecDisplayName(),
     c->GetSampleRate(),
     c->GetChannels(),
@@ -792,11 +788,11 @@ CStdString CDSGraph::GetVideoInfo()
   if (! c)
     return "File closed";
 
-  videoInfo.Format("Video Decoder: %s (%s, %dx%d)",
-    CGraphFilters::Get()->Video.osdname,
+  videoInfo.Format("Video: (%s, %dx%d) | Renderer: %s",
     c->GetVideoCodecDisplayName(),
     c->GetPictureWidth(),
-    c->GetPictureHeight());
+    c->GetPictureHeight(),
+	 CGraphFilters::Get()->VideoRenderer.osdname);
 
   if (!m_pStrCurrentFrameRate.empty())
     videoInfo += m_pStrCurrentFrameRate.c_str();

@@ -8345,7 +8345,9 @@ void CVideoDatabase::ExportToXML(const CStdString &path, bool singleFiles /* = f
             }
           }
         }
-
+      }
+      if (singleFiles)
+      {
         xmlDoc.Clear();
         TiXmlDeclaration decl("1.0", "UTF-8", "yes");
         xmlDoc.InsertEndChild(decl);
@@ -8441,7 +8443,9 @@ void CVideoDatabase::ExportToXML(const CStdString &path, bool singleFiles /* = f
             }
           }
         }
-
+      }
+      if (singleFiles)
+      {
         xmlDoc.Clear();
         TiXmlDeclaration decl("1.0", "UTF-8", "yes");
         xmlDoc.InsertEndChild(decl);
@@ -8550,7 +8554,9 @@ void CVideoDatabase::ExportToXML(const CStdString &path, bool singleFiles /* = f
             }
           }
         }
-
+      }
+      if (singleFiles)
+      {
         xmlDoc.Clear();
         TiXmlDeclaration decl("1.0", "UTF-8", "yes");
         xmlDoc.InsertEndChild(decl);
@@ -8651,7 +8657,9 @@ void CVideoDatabase::ExportToXML(const CStdString &path, bool singleFiles /* = f
               }
             }
           }
-
+        }
+        if (singleFiles)
+        {
           xmlDoc.Clear();
           TiXmlDeclaration decl("1.0", "UTF-8", "yes");
           xmlDoc.InsertEndChild(decl);

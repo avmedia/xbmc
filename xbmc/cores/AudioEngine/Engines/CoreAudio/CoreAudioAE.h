@@ -33,6 +33,7 @@
 
 #if defined(TARGET_DARWIN_IOS)
 #include "CoreAudioAEHALIOS.h"
+#define AudioDeviceID unsigned
 #else
 #include "CoreAudioAEHALOSX.h"
 #endif
@@ -174,4 +175,5 @@ private:
   bool              m_isSuspended;
   bool              m_softSuspend;
   unsigned int      m_softSuspendTimer;
+  AudioDeviceID     m_currentAudioDevice;
 };

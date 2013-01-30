@@ -4,6 +4,10 @@
  *
  */
 
+#ifndef HAS_DS_PLAYER
+#error DSPlayer's header file included without HAS_DS_PLAYER defined
+#endif
+
 #include "fgmanager.h"
 #include "StreamsManager.h"
 

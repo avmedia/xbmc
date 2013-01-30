@@ -4,6 +4,8 @@
  *
  */
 
+#ifdef HAS_DS_PLAYER
+
 #include "FGManager2.h"
 #include "DSPlayer.h"
 #include "FGLoader.h"
@@ -69,10 +71,10 @@ HRESULT CFGManager2::RenderFileXbmc(const CFileItem& pFileItem)
 	END_PERFORMANCE_COUNTER("Loading video renderer");
 
 	START_PERFORMANCE_COUNTER
-		if(FAILED(hr = ConnectFilter(pBF, NULL)))
-			return hr;
+		hr = ConnectFilter(pBF, NULL);
 	END_PERFORMANCE_COUNTER("Render filters");
-
+	if(FAILED(hr))
+		return hr;
 	RemoveUnconnectedFilters(g_dsGraph->pFilterGraph);
 
 #ifdef _DSPLAYER_DEBUG
@@ -134,3 +136,5 @@ HRESULT CFGManager2::RenderFileXbmc(const CFileItem& pFileItem)
 
 	return S_OK;  
 }
+
+#endif

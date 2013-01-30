@@ -5,6 +5,9 @@
  *  Copyright (C) 2005-2010 Team XBMC
  *  http://www.xbmc.org
  *
+ *	Copyright (C) 2010-2013 Eduard Kytmanov
+ *	http://www.avmedia.su
+ *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)

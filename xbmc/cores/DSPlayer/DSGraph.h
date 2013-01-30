@@ -66,36 +66,6 @@ public:
   CDSGraph(CDVDClock* pClock, IPlayerCallback& callback);
   virtual ~CDSGraph();
 
-  static void PostMessage(CDSMsg *msg, bool wait = true)
-  {
-    if (! m_threadID)
-    {
-      msg->Release();
-      return;
-    }
-
-    if (wait)
-      msg->Acquire();
-
-    CLog::Log(LOGDEBUG, "%s Message posted : %d on thread 0x%X", __FUNCTION__, msg->GetMessageType(), m_threadID);
-    PostThreadMessage(m_threadID, WM_GRAPHMESSAGE, msg->GetMessageType(), (LPARAM) msg);
-    
-    if (wait)
-    {
-      msg->Wait();
-      msg->Release();
-    }
-  }
-  static void StopThread()
-  {
-    if (m_threadID == 0)
-      return;
-
-    PostThreadMessage(m_threadID, WM_QUIT, 0, 0);
-    m_threadID = 0;
-  }
-  void ProcessThreadMessages();
-
   /** Determine if the graph can seek
    * @return True is the graph can seek, false else
    * @remarks If True, it means that the graph can seek forward, backward and absolute
@@ -194,7 +164,6 @@ private:
   Com::SmartPtr<IDvdState>              m_pDvdState;
   DVD_STATUS	                          m_pDvdStatus;
   std::vector<DvdTitle*>                m_pDvdTitles;
-  static int32_t m_threadID;
   int8_t m_canSeek; //<-1: not queried; 0: false; 1: true
   float m_currentVolume;
 

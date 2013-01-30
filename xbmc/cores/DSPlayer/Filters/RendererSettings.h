@@ -76,6 +76,8 @@ public:
     flushGPUWait = false; //Wait for flushes
 
     d3dFullscreen = true;
+
+	bAllowFullscreen = true;
   }
 
 public:
@@ -91,7 +93,7 @@ public:
   bool flushGPUWait;
   AP_SURFACE_USAGE apSurfaceUsage;
   bool d3dFullscreen;
-
+  bool bAllowFullscreen;
   SSubSettings subtitlesSettings;
 };
 

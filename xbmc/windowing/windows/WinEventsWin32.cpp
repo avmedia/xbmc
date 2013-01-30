@@ -44,7 +44,7 @@
 #include "network/ZeroconfBrowser.h"
 
 #ifdef HAS_DS_PLAYER
-#include "DSGraph.h"
+#include "DSPlayer.h"
 #endif
 
 #ifdef _WIN32
@@ -601,7 +601,7 @@ LRESULT CALLBACK CWinEventsWin32::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 		{
 			if ( g_application.m_pPlayer && g_application.m_pPlayer->IsInMenu())
 			{
-				CDSGraph::PostMessage( new CDSMsgInt(CDSMsg::PLAYER_DVD_MOUSE_MOVE, lParam), false);
+				CDSPlayer::PostMessage( new CDSMsgInt(CDSMsg::PLAYER_DVD_MOUSE_MOVE, lParam), false);
 				return(0);
 			}
 		}
@@ -618,7 +618,7 @@ LRESULT CALLBACK CWinEventsWin32::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 		{
 			if ( g_application.m_pPlayer && g_application.m_pPlayer->IsInMenu())
 			{
-				CDSGraph::PostMessage( new CDSMsgInt(CDSMsg::PLAYER_DVD_MOUSE_CLICK, lParam), false);
+				CDSPlayer::PostMessage( new CDSMsgInt(CDSMsg::PLAYER_DVD_MOUSE_CLICK, lParam), false);
 				return(0);
 			}
 		}

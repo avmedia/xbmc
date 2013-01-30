@@ -2990,7 +2990,8 @@
     <ClCompile Include="..\..\xbmc\interfaces\python\PyContext.cpp">
       <Filter>interfaces\python</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.cpp">      <Filter>cores\DSPlayer</Filter>
+    <ClCompile Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.cpp">
+      <Filter>cores\DSPlayer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\DSPlayer\DSGraph.cpp">
       <Filter>cores\DSPlayer</Filter>
@@ -3090,6 +3091,10 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\VideoRenderers\WinDsRenderer.cpp">
       <Filter>cores\VideoRenderers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\video\FFmpegVideoDecoder.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\DSPlayer\DSInputStreamPVRManager.cpp">
+      <Filter>cores\DSPlayer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -6050,6 +6055,11 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\VideoRenderers\WinDsRenderer.h">
       <Filter>cores\VideoRenderers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\music\karaoke\karaokevideobackground.h" />
+    <ClInclude Include="..\..\xbmc\video\FFmpegVideoDecoder.h" />
+    <ClInclude Include="..\..\xbmc\cores\DSPlayer\DSInputStreamPVRManager.h">
+      <Filter>cores\DSPlayer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

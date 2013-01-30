@@ -34,6 +34,7 @@
 #include "windowing/WindowingFactory.h"
 #include "Application.h"
 #include <algorithm>
+#include "DSPlayer.h"
 
 // ISubPicAllocatorPresenter
 
@@ -665,7 +666,7 @@ STDMETHODIMP CVMR9AllocatorPresenter::PresentImage(DWORD_PTR dwUserID, VMR9Prese
         m_NativeVideoSize = NativeVideoSize;
         m_AspectRatio = AspectRatio;
         //TODO Verify if its really needed
-        CDSGraph::PostMessage(new CDSMsg(CDSMsg::GENERAL_SET_WINDOW_POS), false);
+        CDSPlayer::PostMessage(new CDSMsg(CDSMsg::GENERAL_SET_WINDOW_POS), false);
       }
     }
     // If framerate not set by Video Decoder choose 23.97...
@@ -675,7 +676,8 @@ STDMETHODIMP CVMR9AllocatorPresenter::PresentImage(DWORD_PTR dwUserID, VMR9Prese
     if (!g_renderManager.IsConfigured())
     {
       g_renderManager.Configure(m_NativeVideoSize.cx, m_NativeVideoSize.cy, m_AspectRatio.cx, m_AspectRatio.cy, m_fps,
-        CONF_FLAGS_FULLSCREEN, RENDER_FMT_NONE, 0, 0);
+        g_dsSettings.pRendererSettings->bAllowFullscreen ? CONF_FLAGS_FULLSCREEN : 0, 
+		RENDER_FMT_NONE, 0, 0);
       CLog::Log(LOGDEBUG, "%s Render manager configured (FPS: %f)", __FUNCTION__, m_fps);
     }
   }
@@ -694,7 +696,7 @@ STDMETHODIMP CVMR9AllocatorPresenter::PresentImage(DWORD_PTR dwUserID, VMR9Prese
   if(VideoSize != GetVideoSize())
   {
     m_AspectRatio.SetSize(arx, ary);
-    CDSGraph::PostMessage(new CDSMsg(CDSMsg::GENERAL_SET_WINDOW_POS), false);
+    CDSPlayer::PostMessage(new CDSMsg(CDSMsg::GENERAL_SET_WINDOW_POS), false);
   }
 
   if (! m_bPendingResetDevice)

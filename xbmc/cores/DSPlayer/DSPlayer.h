@@ -40,6 +40,9 @@
 #include "dialogs/GUIDialogBoxBase.h"
 #include "settings/Settings.h"
 
+#include "filesystem/PVRFile.h"
+#include "pvr/PVRManager.h"
+
 #ifdef HAS_VIDEO_PLAYBACK
 #include "cores/VideoRenderers/RenderManager.h"
 #endif
@@ -60,6 +63,8 @@ enum DSPLAYER_STATE
   DSPLAYER_ERROR
 };
 
+
+class CDSInputStreamPVRManager;
 class CDSPlayer;
 class CGraphManagementThread : public CThread
 {
@@ -190,9 +195,11 @@ public:
   virtual __int64 GetTotalTime() { CSingleLock lock(m_StateSection); return llrint(DS_TIME_TO_MSEC(g_dsGraph->GetTotalTime())); }
   virtual void ToFFRW(int iSpeed);
   virtual bool OnAction(const CAction &action);
+
+  virtual bool SwitchChannel(const PVR::CPVRChannel &channel);
+  virtual bool CachePVRStream(void) const;
   
   //CDSPlayer
-  virtual HRESULT HandleGraphEvent() { return g_dsGraph->HandleGraphEvent(); }
   virtual void Stop();
   CDVDClock&  GetClock() { return m_pClock; }
   IPlayerCallback& GetPlayerCallback() { return m_callback; }
@@ -204,15 +211,64 @@ public:
   CCriticalSection m_StateSection;
   CCriticalSection m_CleanSection;
 
-   void ShowEditionDlg(bool playStart);
-protected:
-  virtual void OnStartup();
-  virtual void OnExit();
-  virtual void Process();
+  void ShowEditionDlg(bool playStart);
+  bool OpenFileInternal(const CFileItem& file);
 
-  CGraphManagementThread m_pGraphThread;
-  CDVDClock m_pClock;
-  CPlayerOptions m_PlayerOptions;
-  CEvent m_hReadyEvent;
-  bool m_bEof;
+  static void PostMessage(CDSMsg *msg, bool wait = true)
+  {
+	  if (! m_threadID)
+	  {
+		  msg->Release();
+		  return;
+	  }
+
+	  if (wait)
+		  msg->Acquire();
+
+	  CLog::Log(LOGDEBUG, "%s Message posted : %d on thread 0x%X", __FUNCTION__, msg->GetMessageType(), m_threadID);
+	  PostThreadMessage(m_threadID, WM_GRAPHMESSAGE, msg->GetMessageType(), (LPARAM) msg);
+
+	  if (wait)
+	  {
+		  msg->Wait();
+		  msg->Release();
+	  }
+  }
+
+  static bool IsCurrentThread() {return CThread::IsCurrentThread(m_threadID); } 
+
+  protected:
+
+	  void StopThread(bool bWait = true)
+	  {
+		  if (m_threadID)
+		  {
+			  PostThreadMessage(m_threadID, WM_QUIT, 0, 0);
+			  m_threadID = 0;
+		  }
+		  CThread::StopThread(bWait);
+	  }
+
+	  void HandleMessages();
+
+	  bool ShowPVRChannelInfo();
+
+	  CGraphManagementThread m_pGraphThread;
+	  CDVDClock m_pClock;
+	  CPlayerOptions m_PlayerOptions;
+	  CEvent m_hReadyEvent;
+	  static ThreadIdentifier m_threadID;
+	  bool m_bEof;
+
+	  
+	  bool SelectChannel(bool bNext);
+	  bool SwitchChannel(unsigned int iChannelNumber);
+
+
+	  // CThread
+	  virtual void OnStartup();
+	  virtual void OnExit();
+	  virtual void Process();
+
 };
+

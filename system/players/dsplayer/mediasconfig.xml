@@ -105,9 +105,12 @@
       <audio filter="realaudiodec" />
     </rule>
     
-    <!-- New rule for preferred streaming source filter -->   
-    <rule url="true" filetypes=".*">
-      <source filter="internal_ffmpegsource" />
+    <rule protocols="http">
+      <source filter="urlfilesource" />
+      <splitter filter="avsplitter" />
+      <video filter="cyberlinkvideodec" />
+      <audio filter="ffdaudiodec" />
     </rule>
+    
   </rules>
 </mediasconfig>

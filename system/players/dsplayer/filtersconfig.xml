@@ -147,6 +147,11 @@
       <issplitter>false</issplitter>
       <osdname>File Source (Async.)</osdname>
     </filter>
+    <filter name="urlfilesource" type="source">
+      <guid>{E436EBB6-524F-11CE-9F53-0020AF0BA770}</guid>
+      <issplitter>false</issplitter>
+      <osdname>File Source (URL)</osdname>
+    </filter>
     <filter name="lavfsplitter" type="source">
       <path>LAVSplitter.ax</path>
       <guid>{B98D13E7-55DB-4385-A33D-09FD1BA26338}</guid>

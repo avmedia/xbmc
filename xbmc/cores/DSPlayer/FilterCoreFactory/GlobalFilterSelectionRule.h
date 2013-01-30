@@ -60,13 +60,14 @@ public:
     CURL url(pFileItem.GetPath());
     CRegExp regExp;
 
-    if (m_fileTypes.empty() && m_fileName.empty())
+    if (m_fileTypes.empty() && m_fileName.empty() && m_Protocols.empty())
       return false;
 
     if (!checkUrl && m_url > 0) return false;
     if (checkUrl && pFileItem.IsInternetStream() && m_url < 1) return false;
     if (CompileRegExp(m_fileTypes, regExp) && !MatchesRegExp(url.GetFileType(), regExp)) return false;
     if (CompileRegExp(m_fileName, regExp) && !MatchesRegExp(pFileItem.GetPath(), regExp)) return false;
+	if (CompileRegExp(m_Protocols, regExp) && !MatchesRegExp(url.GetProtocol(), regExp)) return false;
 
     return true;
   }
@@ -111,6 +112,7 @@ private:
   CStdString m_name;
   CStdString m_fileName;
   CStdString m_fileTypes;
+  CStdString m_Protocols;
   CFilterSelectionRule * m_pSource;
   CFilterSelectionRule * m_pSplitter;
   CFilterSelectionRule * m_pVideo;
@@ -146,6 +148,7 @@ private:
     m_url       = GetTristate(pRule->Attribute("url"));
     m_fileTypes = pRule->Attribute("filetypes");
     m_fileName  = pRule->Attribute("filename");
+	m_Protocols = pRule->Attribute("protocols");
 
     // Source rules
     m_pSource = new CFilterSelectionRule(pRule->FirstChildElement("source"), "source");

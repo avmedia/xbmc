@@ -373,7 +373,7 @@ void CDSPlayer::Process()
 	{
 		CLog::Log(LOGERROR, "%s - Failed creating DS Graph", __FUNCTION__);
 		PlayerState = DSPLAYER_ERROR;
-		return;
+		goto done;
 	}
 
 	m_pGraphThread.SetCurrentRate(1);
@@ -396,6 +396,7 @@ void CDSPlayer::Process()
 	while (!m_bStop && PlayerState != DSPLAYER_CLOSED && PlayerState != DSPLAYER_LOADING)
 		HandleMessages();
 
+done:
 	/* Resume AE processing of XBMC native audio */
 	if (!CAEFactory::Resume())
 	{

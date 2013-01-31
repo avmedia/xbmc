@@ -824,6 +824,26 @@ const char *CAESinkDirectSound::WASAPIErrToStr(HRESULT err)
   }
   return NULL;
 }
+#ifdef HAS_DS_PLAYER
+bool CAESinkDirectSound::SoftSuspend()
+{
+	/* Sink has been asked to suspend output - we release audio   */
+	/* device as we are in exclusive mode and thus allow external */
+	/* audio sources to play. This requires us to reinitialize    */
+	/* on resume.                                                 */
 
+	Deinitialize();
 
+	return true;
+}
+
+bool CAESinkDirectSound::SoftResume()
+{
+	/* Sink asked to resume output. To release audio device in    */
+	/* exclusive mode we release the device context and therefore */
+	/* must reinitialize. Return false to force re-init by engine */
+
+	return false;
+}
+#endif
 

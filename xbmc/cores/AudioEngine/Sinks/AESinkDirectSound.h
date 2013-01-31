@@ -42,6 +42,10 @@ public:
   virtual double       GetDelay           ();
   virtual double       GetCacheTime       ();
   virtual double       GetCacheTotal      ();
+#ifdef HAS_DS_PLAYER
+  virtual bool         SoftSuspend        ();
+  virtual bool         SoftResume         ();
+#endif
   virtual unsigned int AddPackets         (uint8_t *data, unsigned int frames, bool hasAudio);
   static  void         EnumerateDevicesEx (AEDeviceInfoList &deviceInfoList);
 private:

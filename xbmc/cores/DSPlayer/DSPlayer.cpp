@@ -354,6 +354,13 @@ void CDSPlayer::Process()
 	HRESULT hr = E_FAIL;
 	CLog::Log(LOGNOTICE, "%s - Creating DS Graph",  __FUNCTION__);
 
+	/* Suspend AE temporarily so exclusive or hog-mode sinks */
+	/* don't block DSPlayer access to audio device  */
+	if (!CAEFactory::Suspend())
+	{
+		CLog::Log(LOGNOTICE, __FUNCTION__, "Failed to suspend AudioEngine before launching DSPlayer");
+	}
+
 	START_PERFORMANCE_COUNTER
 		hr = g_dsGraph->SetFile(currentFileItem, m_PlayerOptions);
 	END_PERFORMANCE_COUNTER("Loading file");
@@ -385,13 +392,6 @@ void CDSPlayer::Process()
 	}
 
 	g_dsSettings.pRendererSettings->bAllowFullscreen = m_PlayerOptions.fullscreen;
-
-	/* Suspend AE temporarily so exclusive or hog-mode sinks */
-	/* don't block DSPlayer access to audio device  */
-	if (!CAEFactory::Suspend())
-	{
-		CLog::Log(LOGNOTICE, __FUNCTION__, "Failed to suspend AudioEngine before launching DSPlayer");
-	}
 
 	while (!m_bStop && PlayerState != DSPLAYER_CLOSED && PlayerState != DSPLAYER_LOADING)
 		HandleMessages();

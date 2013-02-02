@@ -197,6 +197,11 @@ bool CDSPlayer::OpenFileInternal(const CFileItem& file)
 		if(PlayerState != DSPLAYER_CLOSED)
 			CloseFile();
 
+		if(!WaitForThreadExit(100) || !m_pGraphThread.WaitForThreadExit(100))
+		{
+			return false;
+		}
+
 		PlayerState = DSPLAYER_LOADING;
 		currentFileItem = file;
 
@@ -280,8 +285,8 @@ bool CDSPlayer::CloseFile()
   g_dsGraph->CloseFile();
 
   // Stop threads
-  StopThread();
-  m_pGraphThread.StopThread();
+  StopThread(false);
+  m_pGraphThread.StopThread(false);
 
   PlayerState = DSPLAYER_CLOSED;
 

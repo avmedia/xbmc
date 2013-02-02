@@ -196,6 +196,10 @@ endif
 VIS_DIRS=xbmc/visualizations/OpenGLSpectrum \
          xbmc/visualizations/WaveForm
 
+ifneq (@DISABLE_FISHBMC@,1)
+  VIS_DIRS+= xbmc/visualizations/fishBMC
+endif
+
 ifneq (@DISABLE_PROJECTM@,1)
   VIS_DIRS+= xbmc/visualizations/XBMCProjectM
 endif

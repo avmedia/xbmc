@@ -72,6 +72,13 @@ CDSPlayer::CDSPlayer(IPlayerCallback& callback)
     m_pGraphThread(this),
 	m_bEof(false)
 {
+	/* Suspend AE temporarily so exclusive or hog-mode sinks */
+	/* don't block DSPlayer access to audio device  */
+	if (!CAEFactory::Suspend())
+	{
+		CLog::Log(LOGNOTICE, __FUNCTION__, "Failed to suspend AudioEngine before launching DSPlayer");
+	}
+
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
 	m_pClock.GetClock(); // Reset the clock
@@ -83,6 +90,12 @@ CDSPlayer::CDSPlayer(IPlayerCallback& callback)
 
 CDSPlayer::~CDSPlayer()
 {
+	/* Resume AE processing of XBMC native audio */
+	if (!CAEFactory::Resume())
+	{
+		CLog::Log(LOGFATAL, __FUNCTION__, "Failed to restart AudioEngine after return from DSPlayer");
+	}	
+
 	if (PlayerState != DSPLAYER_CLOSED)
 		CloseFile();
 
@@ -284,11 +297,11 @@ bool CDSPlayer::CloseFile()
 
   g_dsGraph->CloseFile();
 
-  // Stop threads
-  StopThread(false);
-  m_pGraphThread.StopThread(false);
-
   PlayerState = DSPLAYER_CLOSED;
+
+  // Stop threads
+  m_pGraphThread.StopThread(false);
+  StopThread(false);
 
   CLog::Log(LOGDEBUG, "%s File closed", __FUNCTION__);
   return true;
@@ -340,7 +353,8 @@ void CDSPlayer::OnExit()
 	// In case of, set the ready event
 	// Prevent a dead loop
 	m_hReadyEvent.Set();
-
+	m_bStop = true;
+	m_threadID = 0;
 	if(m_PlayerOptions.identify == false)
 	{
 		if (!m_bEof || PlayerState == DSPLAYER_ERROR)
@@ -349,8 +363,6 @@ void CDSPlayer::OnExit()
 			m_callback.OnPlayBackEnded();
 	}
 
-	m_threadID = 0;
-	m_bStop = true;
 	m_PlayerOptions.identify = false;
 }
 
@@ -358,13 +370,6 @@ void CDSPlayer::Process()
 {
 	HRESULT hr = E_FAIL;
 	CLog::Log(LOGNOTICE, "%s - Creating DS Graph",  __FUNCTION__);
-
-	/* Suspend AE temporarily so exclusive or hog-mode sinks */
-	/* don't block DSPlayer access to audio device  */
-	if (!CAEFactory::Suspend())
-	{
-		CLog::Log(LOGNOTICE, __FUNCTION__, "Failed to suspend AudioEngine before launching DSPlayer");
-	}
 
 	START_PERFORMANCE_COUNTER
 		hr = g_dsGraph->SetFile(currentFileItem, m_PlayerOptions);
@@ -378,7 +383,7 @@ void CDSPlayer::Process()
 	{
 		CLog::Log(LOGERROR, "%s - Failed creating DS Graph", __FUNCTION__);
 		PlayerState = DSPLAYER_ERROR;
-		goto done;
+		return;
 	}
 
 	m_pGraphThread.SetCurrentRate(1);
@@ -400,13 +405,6 @@ void CDSPlayer::Process()
 
 	while (!m_bStop && PlayerState != DSPLAYER_CLOSED && PlayerState != DSPLAYER_LOADING)
 		HandleMessages();
-
-done:
-	/* Resume AE processing of XBMC native audio */
-	if (!CAEFactory::Resume())
-	{
-		CLog::Log(LOGFATAL, __FUNCTION__, "Failed to restart AudioEngine after return from DSPlayer");
-	}	
 }
 
 void CDSPlayer::HandleMessages()

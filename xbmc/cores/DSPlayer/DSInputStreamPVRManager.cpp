@@ -33,6 +33,7 @@ CDSInputStreamPVRManager* g_pPVRStream = NULL;
 
 CDSInputStreamPVRManager::CDSInputStreamPVRManager(CDSPlayer *pPlayer)
 	: m_pPlayer(pPlayer)
+	, m_pFile(NULL)
 	, m_pLiveTV(NULL)
 	, m_pRecordable(NULL)
 {
@@ -41,19 +42,36 @@ CDSInputStreamPVRManager::CDSInputStreamPVRManager(CDSPlayer *pPlayer)
 
 CDSInputStreamPVRManager::~CDSInputStreamPVRManager(void)
 {
+	Close();
+}
+
+void CDSInputStreamPVRManager::Close()
+{
+	if(m_pFile)
+	{
+		m_pFile->Close();
+		SAFE_DELETE(m_pFile);
+	}
+
+	m_pLiveTV = NULL;
+	m_pRecordable = NULL;
 }
 
 bool CDSInputStreamPVRManager::Open(const CFileItem& file)
 {
-	m_pFile.reset(new CPVRFile);
+	Close();
+
+	m_pFile = new CPVRFile;
+
 	CURL url(file.GetPath());
 	if (!m_pFile->Open(url))
 	{
+		SAFE_DELETE(m_pFile);
 		return false;
 	}
 
-	m_pLiveTV     = ((CPVRFile*)m_pFile.get())->GetLiveTV();
-	m_pRecordable = ((CPVRFile*)m_pFile.get())->GetRecordable();
+	m_pLiveTV     = ((CPVRFile*)m_pFile)->GetLiveTV();
+	m_pRecordable = ((CPVRFile*)m_pFile)->GetRecordable();
 
 	std::string transFile = XFILE::CPVRFile::TranslatePVRFilename(file.GetPath());
 	CFileItem fileItem = file;

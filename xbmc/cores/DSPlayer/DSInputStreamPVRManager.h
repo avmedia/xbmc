@@ -33,18 +33,18 @@ using namespace PVR;
 class CDSInputStreamPVRManager
 {
 	 CDSPlayer					*m_pPlayer;
-	 std::auto_ptr<IFile>		m_pFile;
+	 IFile						*m_pFile;
 	 ILiveTVInterface			*m_pLiveTV;
 	 IRecordable				*m_pRecordable;
 
 	 bool			SupportsChannelSwitch(void) const;
-	
+	 void			Close();
+
 public:
 	CDSInputStreamPVRManager(CDSPlayer *pPlayer);
 	~CDSInputStreamPVRManager(void);
 
 	bool			Open(const CFileItem& file);
-
 
 	bool            SelectChannelByNumber(unsigned int iChannel);
 	bool            SelectChannel(const PVR::CPVRChannel &channel);

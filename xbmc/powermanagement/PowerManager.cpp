@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -32,10 +32,6 @@
 #include "guilib/LocalizeStrings.h"
 #include "guilib/GraphicContext.h"
 #include "dialogs/GUIDialogKaiToast.h"
-
-#ifdef HAS_LCD
-#include "utils/LCDFactory.h"
-#endif
 
 #if defined(TARGET_DARWIN)
 #include "osx/CocoaPowerSyscall.h"
@@ -193,10 +189,6 @@ void CPowerManager::OnSleep()
   CAnnouncementManager::Announce(System, "xbmc", "OnSleep");
   CLog::Log(LOGNOTICE, "%s: Running sleep jobs", __FUNCTION__);
 
-#ifdef HAS_LCD
-  g_lcd->SetBackLight(0);
-#endif
-
   // stop lirc
 #if defined(HAS_LIRC) || defined(HAS_IRSERVERSUITE)
   CLog::Log(LOGNOTICE, "%s: Stopping lirc", __FUNCTION__);
@@ -237,14 +229,6 @@ void CPowerManager::OnWake()
 #if defined(HAS_LIRC) || defined(HAS_IRSERVERSUITE)
   CLog::Log(LOGNOTICE, "%s: Restarting lirc", __FUNCTION__);
   CBuiltins::Execute("LIRC.Start");
-#endif
-
-  // restart and undim lcd
-#ifdef HAS_LCD
-  CLog::Log(LOGNOTICE, "%s: Restarting lcd", __FUNCTION__);
-  g_lcd->SetBackLight(1);
-  g_lcd->Stop();
-  g_lcd->Initialize();
 #endif
 
   CAEFactory::Resume();

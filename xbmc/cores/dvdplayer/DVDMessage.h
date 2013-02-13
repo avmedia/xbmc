@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -72,6 +72,8 @@ public:
     PLAYER_CHANNEL_SELECT_NUMBER,   // switches to the channel with the provided channel number
     PLAYER_CHANNEL_SELECT,          // switches to the provided channel
     PLAYER_STARTED,                 // sent whenever a sub player has finished it's first frame after open
+
+    PLAYER_DISPLAYTIME,             // display time struct from av players
 
     // demuxer related messages
 

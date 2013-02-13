@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -21,47 +21,63 @@
 #include "XBMCController.h"
 #include "IOSKeyboard.h"
 #include "IOSKeyboardView.h"
+#include "XBMCDebugHelpers.h"
 
+#import "AutoPool.h"
+
+KeyboardView *g_pIosKeyboard = nil;
 
 bool CIOSKeyboard::ShowAndGetInput(char_callback_t pCallback, const std::string &initialString, std::string &typedString, const std::string &heading, bool bHiddenInput)
 {
-  bool confirmed = false;
-  CGRect keyboardFrame;
+  // we are in xbmc main thread or python module thread.
 
-  // assume we are only drawn on the mainscreen ever!
-  UIScreen *pCurrentScreen = [UIScreen mainScreen];
-  CGFloat scale = [g_xbmcController getScreenScale:pCurrentScreen];
-  int frameHeight = 30;
-  keyboardFrame.size.width = pCurrentScreen.bounds.size.height - frameHeight;
-  keyboardFrame.size.height = frameHeight;
-  keyboardFrame.origin.x = frameHeight / 2;
-  keyboardFrame.origin.y = (pCurrentScreen.bounds.size.width/2) - frameHeight*scale + 10;
-  //create the keyboardview
-  m_pIosKeyboard = [[KeyboardView alloc] initWithFrame:keyboardFrame];
-  KeyboardView *keyboard = (KeyboardView*)m_pIosKeyboard;
+  CCocoaAutoPool pool;
+  
+  @synchronized([KeyboardView class])
+  {
+    // in case twice open keyboard.
+    if (g_pIosKeyboard)
+      return false;
+    
+    // assume we are only drawn on the mainscreen ever!
+    UIScreen *pCurrentScreen = [UIScreen mainScreen];
+    CGRect keyboardFrame = CGRectMake(0, 0, pCurrentScreen.bounds.size.height, pCurrentScreen.bounds.size.width);
+//    LOG(@"kb: kb frame: %@", NSStringFromCGRect(keyboardFrame));
+    
+    //create the keyboardview
+    g_pIosKeyboard = [[KeyboardView alloc] initWithFrame:keyboardFrame];
+    if (!g_pIosKeyboard)
+      return false;
+  }
+
   m_pCharCallback = pCallback;
 
   // init keyboard stuff
-  [keyboard setText:[NSString stringWithUTF8String:initialString.c_str()]];
-  [keyboard SetHiddenInput:bHiddenInput];
-  [keyboard SetHeading:[NSString stringWithUTF8String:heading.c_str()]];
-  [keyboard RegisterKeyboard:this]; // for calling back
-  [keyboard activate];//blocks and loops our application loop (like a modal dialog)
-  // user is done - get resulted text and confirmation
-  typedString = [[keyboard GetText] UTF8String];
-  confirmed = [keyboard GetResult];
-  [keyboard release]; // bye bye native keyboard
-  m_pIosKeyboard = NULL;
+  [g_pIosKeyboard setDefault:[NSString stringWithUTF8String:initialString.c_str()]];
+  [g_pIosKeyboard setHidden:bHiddenInput];
+  [g_pIosKeyboard setHeading:[NSString stringWithUTF8String:heading.c_str()]];
+  [g_pIosKeyboard registerKeyboard:this]; // for calling back
+  bool confirmed = false;
+  if (!m_bCanceled)
+  {
+    [g_pIosKeyboard setCancelFlag:&m_bCanceled];
+    [g_pIosKeyboard activate]; // blocks and loops our application loop (like a modal dialog)
+    // user is done - get resulted text and confirmation
+    confirmed = g_pIosKeyboard.isConfirmed;
+    if (confirmed)
+      typedString = [g_pIosKeyboard.text UTF8String];
+  }
+  [g_pIosKeyboard release]; // bye bye native keyboard
+  @synchronized([KeyboardView class])
+  {
+    g_pIosKeyboard = nil;
+  }
   return confirmed;
 }
 
 void CIOSKeyboard::Cancel()
 {
-  if (m_pIosKeyboard)
-  {
-    KeyboardView *keyboard = (KeyboardView*)m_pIosKeyboard;
-    [keyboard keyboardDidHide:nil];
-  }
+  m_bCanceled = true;
 }
 
 //wrap our callback between objc and c++

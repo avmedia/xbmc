@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2010-2012 Team XBMC
+ *      Copyright (C) 2010-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -40,6 +40,6 @@ class CAESinkFactory
 public:
   static void     ParseDevice(std::string &device, std::string &driver);
   static IAESink *Create(std::string &device, AEAudioFormat &desiredFormat, bool rawPassthrough);
-  static void     EnumerateEx(AESinkInfoList &list);
+  static void     EnumerateEx(AESinkInfoList &list, bool force = false); /* The force flag can be used to indicate the rescan devices */
 };
 

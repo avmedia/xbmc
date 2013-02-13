@@ -280,7 +280,9 @@
     <Filter Include="interfaces\python\test">
       <UniqueIdentifier>{0a84b5ee-2ad4-4ae2-9a8d-fc585c6d8aae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="cores\DSPlayer">
+    <Filter Include="view">
+      <UniqueIdentifier>{90f512bb-8cda-4f04-b938-4f48d29bc82a}</UniqueIdentifier>
+    </Filter>    <Filter Include="cores\DSPlayer">
       <UniqueIdentifier>{8b65ff5a-9862-42bc-bf92-b5cf22b9c12a}</UniqueIdentifier>
     </Filter>
     <Filter Include="cores\DSPlayer\FilterCoreFactory">
@@ -756,7 +758,30 @@
     <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeActor.cpp">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeDirector.cpp">
+    <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeDirector.cpp">    <ClCompile Include="..\..\xbmc\video\FFmpegVideoDecoder.cpp">
+      <Filter>video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\view\GUIViewControl.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\view\GUIViewState.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\view\ViewDatabase.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\guilib\imagefactory.cpp">
+      <Filter>guilib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\guilib\cximage.cpp">
+      <Filter>guilib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\filesystem\DAVFile.cpp">
+      <Filter>filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\filesystem\DAVCommon.cpp">
+      <Filter>filesystem</Filter>
+    </ClCompile>
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeEpisodes.cpp">
@@ -1598,9 +1623,6 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\LabelFormatter.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\utils\LCD.cpp">
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\log.cpp">
@@ -2529,7 +2551,6 @@
     <ClCompile Include="..\..\xbmc\utils\Screenshot.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\ViewDatabase.cpp" />
     <ClCompile Include="..\..\xbmc\ApplicationMessenger.cpp" />
     <ClCompile Include="..\..\xbmc\Autorun.cpp" />
     <ClCompile Include="..\..\xbmc\AutoSwitch.cpp" />
@@ -2555,8 +2576,6 @@
     <ClCompile Include="..\..\xbmc\XBApplicationEx.cpp" />
     <ClCompile Include="..\..\xbmc\XBDateTime.cpp" />
     <ClCompile Include="..\..\xbmc\GUILargeTextureManager.cpp" />
-    <ClCompile Include="..\..\xbmc\GUIViewControl.cpp" />
-    <ClCompile Include="..\..\xbmc\GUIViewState.cpp" />
     <ClCompile Include="..\..\xbmc\ThumbLoader.cpp" />
     <ClCompile Include="..\..\xbmc\BackgroundInfoLoader.cpp" />
     <ClCompile Include="..\..\xbmc\pictures\PictureThumbLoader.cpp">
@@ -2829,6 +2848,9 @@
       <Filter>network\upnp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\network\upnp\UPnPInternal.cpp">
+      <Filter>network\upnp</Filter>
+    </ClCompile>
+     <ClCompile Include="..\..\xbmc\network\upnp\UPnPPlayer.cpp">
       <Filter>network\upnp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\network\upnp\UPnPRenderer.cpp">
@@ -4612,9 +4634,6 @@
     <ClInclude Include="..\..\xbmc\utils\LabelFormatter.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\utils\LCD.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\utils\log.h">
       <Filter>utils</Filter>
     </ClInclude>
@@ -5613,7 +5632,6 @@
     <ClInclude Include="..\..\xbmc\video\VideoDatabase.h">
       <Filter>video</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\ViewDatabase.h" />
     <ClInclude Include="..\..\xbmc\ApplicationMessenger.h" />
     <ClInclude Include="..\..\xbmc\Autorun.h" />
     <ClInclude Include="..\..\xbmc\AutoSwitch.h" />
@@ -5643,9 +5661,6 @@
     <ClInclude Include="..\..\xbmc\XBApplicationEx.h" />
     <ClInclude Include="..\..\xbmc\XBDateTime.h" />
     <ClInclude Include="..\..\xbmc\GUILargeTextureManager.h" />
-    <ClInclude Include="..\..\xbmc\GUIViewControl.h" />
-    <ClInclude Include="..\..\xbmc\GUIViewState.h" />
-    <ClInclude Include="..\..\xbmc\ViewState.h" />
     <ClInclude Include="..\..\xbmc\ThumbLoader.h" />
     <ClInclude Include="..\..\xbmc\pictures\PictureThumbLoader.h">
       <Filter>pictures</Filter>
@@ -5739,6 +5754,9 @@
       <Filter>network\upnp</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\network\upnp\UPnPInternal.h">
+      <Filter>network\upnp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\network\upnp\UPnPPlayer.h">
       <Filter>network\upnp</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\network\upnp\UPnPRenderer.h">
@@ -5911,6 +5929,39 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\interfaces\python\PyContext.h">
       <Filter>interfaces\python</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\guilib\iimage.h">
+      <Filter>guilib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\guilib\imagefactory.h">
+      <Filter>guilib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\guilib\cximage.h">
+      <Filter>guilib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\music\karaoke\karaokevideobackground.h">
+      <Filter>music\karaoke</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\video\FFmpegVideoDecoder.h">
+      <Filter>video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\view\GUIViewControl.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\view\GUIViewState.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\view\ViewDatabase.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\view\ViewState.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\filesystem\DAVFile.h">
+      <Filter>filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\filesystem\DAVCommon.h">
+      <Filter>filesystem</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.h">
       <Filter>cores\DSPlayer</Filter>

@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #include "FileItem.h"
 #include "GUIDialogPVRGuideInfo.h"
 #include "guilib/GUIWindowManager.h"
-#include "ViewState.h"
+#include "view/ViewState.h"
 #include "epg/Epg.h"
 
 #include "pvr/PVRManager.h"

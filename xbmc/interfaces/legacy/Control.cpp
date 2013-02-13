@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -536,13 +536,13 @@ namespace XBMCAddon
 
     float ControlSlider::getPercent() throw (UnimplementedException)
     {
-      return (pGUIControl) ? (float)((CGUISliderControl*)pGUIControl)->GetPercentage() : 0.0f;
+      return (pGUIControl) ? ((CGUISliderControl*)pGUIControl)->GetPercentage() : 0.0f;
     }
 
     void ControlSlider::setPercent(float pct) throw (UnimplementedException)
     {
       if (pGUIControl)
-        ((CGUISliderControl*)pGUIControl)->SetPercentage((int)pct);
+        ((CGUISliderControl*)pGUIControl)->SetPercentage(pct);
     }
 
     CGUIControl* ControlSlider::Create () throw (WindowException)
@@ -779,8 +779,8 @@ namespace XBMCAddon
         if (pTuple.GetNumValuesSet() != 2)
           throw WindowException("Error unpacking tuple found in list");
 
-        const String& cAttr = pTuple.first();
-        const String& cEvent = pTuple.second();
+        const String& cEvent = pTuple.first();
+        const String& cAttr = pTuple.second();
 
         TiXmlElement pNode("animation");
         CStdStringArray attrs;

@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -86,7 +86,8 @@ namespace VIDEO
       {
         CGUIDialogExtendedProgressBar* dialog =
           (CGUIDialogExtendedProgressBar*)g_windowManager.GetWindow(WINDOW_DIALOG_EXT_PROGRESS);
-        m_handle = dialog->GetHandle(g_localizeStrings.Get(314));
+        if (dialog)
+           m_handle = dialog->GetHandle(g_localizeStrings.Get(314));
       }
 
       m_bCanInterrupt = true;

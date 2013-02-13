@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2010-2012 Team XBMC
+ *      Copyright (C) 2010-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -49,8 +49,10 @@ public:
   virtual double       GetCacheTotal   ();
   virtual unsigned int AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio);
   virtual void         Drain           ();
+  virtual bool         SoftSuspend();
+  virtual bool         SoftResume();
 
-  static void EnumerateDevicesEx(AEDeviceInfoList &list);
+  static void EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
 private:
   CAEChannelInfo GetChannelLayout(AEAudioFormat format);
   void           GetAESParams(const AEAudioFormat format, std::string& params);

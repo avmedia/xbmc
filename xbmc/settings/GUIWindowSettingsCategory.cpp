@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -34,10 +34,7 @@
 #include "utils/Weather.h"
 #include "music/MusicDatabase.h"
 #include "video/VideoDatabase.h"
-#include "ViewDatabase.h"
-#ifdef HAS_LCD
-#include "utils/LCDFactory.h"
-#endif
+#include "view/ViewDatabase.h"
 #include "PlayListPlayer.h"
 #include "addons/Skin.h"
 #include "guilib/GUIAudioManager.h"
@@ -955,7 +952,8 @@ void CGUIWindowSettingsCategory::UpdateSettings()
        if (pControl) pControl->SetEnabled(enabled);
     }
     else if (strSetting.Equals("network.httpproxyserver")   || strSetting.Equals("network.httpproxyport") ||
-             strSetting.Equals("network.httpproxyusername") || strSetting.Equals("network.httpproxypassword"))
+             strSetting.Equals("network.httpproxyusername") || strSetting.Equals("network.httpproxypassword") ||
+             strSetting.Equals("network.httpproxytype"))
     {
       CGUIControl *pControl = (CGUIControl *)GetControl(pSettingControl->GetID());
       if (pControl) pControl->SetEnabled(g_guiSettings.GetBool("network.usehttpproxy"));
@@ -1029,13 +1027,6 @@ void CGUIWindowSettingsCategory::UpdateSettings()
         m_strOldTrackFormatRight = g_guiSettings.GetString("musicfiles.trackformatright");
       }
     }
-#ifdef HAS_TIME_SERVER
-    else if (strSetting.Equals("locale.timeserveraddress"))
-    {
-      CGUIControl *pControl = (CGUIControl *)GetControl(pSettingControl->GetID());
-      if (pControl) pControl->SetEnabled(g_guiSettings.GetBool("locale.timeserver"));
-    }
-#endif
     else if (strSetting.Equals("audiocds.recordingpath") || strSetting.Equals("debug.screenshotpath"))
     {
       CGUIButtonControl *pControl = (CGUIButtonControl *)GetControl(pSettingControl->GetID());
@@ -1391,16 +1382,6 @@ void CGUIWindowSettingsCategory::OnSettingChanged(BaseSettingControlPtr pSetting
   {
 	  CGUISpinControlEx *pControl = (CGUISpinControlEx *)GetControl(pSettingControl->GetID());
 	  g_guiSettings.SetString("dsplayer.audiorenderer", pControl->GetCurrentLabel());
-  }
-#endif
-#ifdef HAS_LCD
-  else if (strSetting.Equals("videoscreen.haslcd"))
-  {
-    g_lcd->Stop();
-    CLCDFactory factory;
-    delete g_lcd;
-    g_lcd = factory.Create();
-    g_lcd->Initialize();
   }
 #endif
 #ifdef HAS_WEB_SERVER
@@ -1794,14 +1775,6 @@ void CGUIWindowSettingsCategory::OnSettingChanged(BaseSettingControlPtr pSetting
     g_guiSettings.SetString("locale.country", strRegion);
     g_weatherManager.Refresh(); // need to reset our weather, as temperatures need re-translating.
   }
-#ifdef HAS_TIME_SERVER
-  else if (strSetting.Equals("locale.timeserver") || strSetting.Equals("locale.timeserveraddress"))
-  {
-    g_application.StopTimeServer();
-    if (g_guiSettings.GetBool("locale.timeserver"))
-      g_application.StartTimeServer();
-  }
-#endif
   else if (strSetting.Equals("smb.winsserver") || strSetting.Equals("smb.workgroup") )
   {
     if (g_guiSettings.GetString("smb.winsserver") == "0.0.0.0")
@@ -1832,6 +1805,14 @@ void CGUIWindowSettingsCategory::OnSettingChanged(BaseSettingControlPtr pSetting
       g_application.StartUPnPRenderer();
     else
       g_application.StopUPnPRenderer();
+#endif
+  }
+  else if (strSetting.Equals("services.upnpcontroller"))
+  {
+#ifdef HAS_UPNP
+    g_application.StopUPnPClient(); /* always stop and restart */
+    if (g_guiSettings.GetBool("services.upnpcontroller"))
+      g_application.StartUPnPClient();
 #endif
   }
   else if (strSetting.Equals("services.esenabled"))

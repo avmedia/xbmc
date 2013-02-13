@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -74,7 +74,7 @@ HMODULE DllLoaderContainer::GetModuleAddress(const char* sName)
 
 LibraryLoader* DllLoaderContainer::GetModule(const char* sName)
 {
-  for (int i = 0; m_dlls[i] != NULL && i < m_iNrOfDlls; i++)
+  for (int i = 0; i < m_iNrOfDlls && m_dlls[i] != NULL; i++)
   {
     if (stricmp(m_dlls[i]->GetName(), sName) == 0) return m_dlls[i];
     if (!m_dlls[i]->IsSystemDll() && stricmp(m_dlls[i]->GetFileName(), sName) == 0) return m_dlls[i];
@@ -85,7 +85,7 @@ LibraryLoader* DllLoaderContainer::GetModule(const char* sName)
 
 LibraryLoader* DllLoaderContainer::GetModule(HMODULE hModule)
 {
-  for (int i = 0; m_dlls[i] != NULL && i < m_iNrOfDlls; i++)
+  for (int i = 0; i < m_iNrOfDlls && m_dlls[i] != NULL; i++)
   {
     if (m_dlls[i]->GetHModule() == hModule) return m_dlls[i];
   }
@@ -269,7 +269,7 @@ LibraryLoader* DllLoaderContainer::LoadDll(const char* sName, bool bLoadSymbols)
 
 bool DllLoaderContainer::IsSystemDll(const char* sName)
 {
-  for (int i = 0; m_dlls[i] != NULL && i < m_iNrOfDlls; i++)
+  for (int i = 0; i < m_iNrOfDlls && m_dlls[i] != NULL; i++)
   {
     if (m_dlls[i]->IsSystemDll() && stricmp(m_dlls[i]->GetName(), sName) == 0) return true;
   }
@@ -333,7 +333,7 @@ void DllLoaderContainer::UnRegisterDll(LibraryLoader* pDll)
 void DllLoaderContainer::UnloadPythonDlls()
 {
   // unload all dlls that python24.dll could have loaded
-  for (int i = 0; m_dlls[i] != NULL && i < m_iNrOfDlls; i++)
+  for (int i = 0; i < m_iNrOfDlls && m_dlls[i] != NULL; i++)
   {
     char* name = m_dlls[i]->GetName();
     if (strstr(name, ".pyd") != NULL)
@@ -345,7 +345,7 @@ void DllLoaderContainer::UnloadPythonDlls()
   }
 
   // last dll to unload, python24.dll
-  for (int i = 0; m_dlls[i] != NULL && i < m_iNrOfDlls; i++)
+  for (int i = 0; i < m_iNrOfDlls && m_dlls[i] != NULL; i++)
   {
     char* name = m_dlls[i]->GetName();
 

@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -38,9 +38,19 @@ namespace XFILE
   class CCurlFile : public IFile
   {
     public:
+      typedef enum
+      {
+        PROXY_HTTP = 0,
+        PROXY_SOCKS4,
+        PROXY_SOCKS4A,
+        PROXY_SOCKS5,
+        PROXY_SOCKS5_REMOTE,
+      } ProxyType;
+    
       CCurlFile();
       virtual ~CCurlFile();
       virtual bool Open(const CURL& url);
+      virtual bool OpenForWrite(const CURL& url, bool bOverWrite = false);
       virtual bool Exists(const CURL& url);
       virtual int64_t  Seek(int64_t iFilePosition, int iWhence=SEEK_SET);
       virtual int64_t GetPosition();
@@ -49,6 +59,7 @@ namespace XFILE
       virtual void Close();
       virtual bool ReadString(char *szLine, int iLineLength)     { return m_state->ReadString(szLine, iLineLength); }
       virtual unsigned int Read(void* lpBuf, int64_t uiBufSize)  { return m_state->Read(lpBuf, uiBufSize); }
+      virtual int Write(const void* lpBuf, int64_t uiBufSize);
       virtual CStdString GetMimeType()                           { return m_state->m_httpheader.GetMimeType(); }
       virtual int IoControl(EIoControl request, void* param);
 
@@ -62,6 +73,7 @@ namespace XFILE
       void SetUserAgent(CStdString sUserAgent)                   { m_userAgent = sUserAgent; }
       void SetProxy(CStdString &proxy)                           { m_proxy = proxy; }
       void SetProxyUserPass(CStdString &proxyuserpass)           { m_proxyuserpass = proxyuserpass; }
+      void SetProxyType(ProxyType proxytype)                     { m_proxytype = proxytype; }
       void SetCustomRequest(CStdString &request)                 { m_customrequest = request; }
       void UseOldHttpVersion(bool bUse)                          { m_useOldHttpVersion = bUse; }
       void SetContentEncoding(CStdString encoding)               { m_contentencoding = encoding; }
@@ -101,11 +113,15 @@ namespace XFILE
           int64_t         m_fileSize;
           int64_t         m_filePos;
           bool            m_bFirstLoop;
+          bool            m_isPaused;
+
+          char*           m_readBuffer;
 
           /* returned http header */
           CHttpHeader m_httpheader;
           bool        m_headerdone;
 
+          size_t ReadCallback(char *buffer, size_t size, size_t nitems);
           size_t WriteCallback(char *buffer, size_t size, size_t nitems);
           size_t HeaderCallback(void *ptr, size_t size, size_t nmemb);
 
@@ -113,6 +129,7 @@ namespace XFILE
           unsigned int Read(void* lpBuf, int64_t uiBufSize);
           bool         ReadString(char *szLine, int iLineLength);
           bool         FillBuffer(unsigned int want);
+          void         SetReadBuffer(const void* lpBuf, int64_t uiBufSize);
 
           long         Connect(unsigned int size);
           void         Disconnect();
@@ -128,11 +145,13 @@ namespace XFILE
     protected:
       CReadState*     m_state;
       unsigned int    m_bufferSize;
+      int64_t         m_writeOffset;
 
       CStdString      m_url;
       CStdString      m_userAgent;
       CStdString      m_proxy;
       CStdString      m_proxyuserpass;
+      ProxyType       m_proxytype;
       CStdString      m_customrequest;
       CStdString      m_contentencoding;
       CStdString      m_ftpauth;
@@ -148,6 +167,8 @@ namespace XFILE
       int             m_connecttimeout;
       int             m_lowspeedtime;
       bool            m_opened;
+      bool            m_forWrite;
+      bool            m_inError;
       bool            m_useOldHttpVersion;
       bool            m_seekable;
       bool            m_multisession;

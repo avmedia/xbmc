@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2010-2012 Team XBMC
+ *      Copyright (C) 2010-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ public:
   virtual double       GetCacheTotal   () { return 0.0; } /* FIXME */
   virtual unsigned int AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio);
   virtual void         Drain           ();
-  static  void         EnumerateDevicesEx(AEDeviceInfoList &list);
+  static  void         EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
 private:
   int m_fd;
   std::string      m_device;

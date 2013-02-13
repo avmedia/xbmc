@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -42,10 +42,11 @@ enum EPLAYERCORES
 #if defined(HAS_OMXPLAYER)
   EPC_OMXPLAYER,
 #endif
+  EPC_EXTPLAYER,
+  EPC_UPNPPLAYER,
 #ifdef HAS_DS_PLAYER
   EPC_DSPLAYER,
 #endif
-  EPC_EXTPLAYER
 };
 
 typedef unsigned int PLAYERCOREID;
@@ -81,12 +82,17 @@ public:
   static void GetPlayers( VECPLAYERCORES &vecCores, bool audio, bool video ); //All audio players and/or video players
   static void GetPlayers( VECPLAYERCORES &vecCores );                         //All players
 
+  static void GetRemotePlayers( VECPLAYERCORES &vecCores );                   //All remote players we can attach to
+
   static PLAYERCOREID GetDefaultPlayer( const CFileItem& item );
 
   static PLAYERCOREID SelectPlayerDialog(VECPLAYERCORES &vecCores, float posX = 0, float posY = 0);
   static PLAYERCOREID SelectPlayerDialog(float posX, float posY);
 
   static bool LoadConfiguration(TiXmlElement* pConfig, bool clear);
+
+  static void OnPlayerDiscovered(const CStdString& id, const CStdString& name, EPLAYERCORES core);
+  static void OnPlayerRemoved(const CStdString& id);
 
 private:
   static std::vector<CPlayerCoreConfig *> s_vecCoreConfigs;

@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -34,6 +34,9 @@
 #ifdef HAS_DS_PLAYER
 #include "DSPlayer.h"
 #endif
+#ifdef HAS_UPNP
+#include "network/upnp/UPnPPlayer.h"
+#endif
 #include "utils/log.h"
 
 class CPlayerCoreConfig
@@ -41,9 +44,10 @@ class CPlayerCoreConfig
 friend class CPlayerCoreFactory;
 
 public:
-  CPlayerCoreConfig(CStdString name, const EPLAYERCORES eCore, const TiXmlElement* pConfig)
+  CPlayerCoreConfig(CStdString name, const EPLAYERCORES eCore, const TiXmlElement* pConfig, const CStdString& id = "")
   {
     m_name = name;
+    m_id = id;
     m_eCore = eCore;
     m_bPlaysAudio = false;
     m_bPlaysVideo = false;
@@ -71,6 +75,16 @@ public:
   const CStdString& GetName() const
   {
     return m_name;
+  }
+
+  const CStdString& GetId() const
+  {
+    return m_id;
+  }
+
+  const EPLAYERCORES& GetType() const
+  {
+    return m_eCore;
   }
 
   IPlayer* CreatePlayer(IPlayerCallback& callback) const
@@ -103,6 +117,9 @@ public:
 #ifdef HAS_DS_PLAYER
 	  case EPC_DSPLAYER: pPlayer = new CDSPlayer(callback); break;
 #endif
+#if defined(HAS_UPNP)
+      case EPC_UPNPPLAYER: pPlayer = new UPNP::CUPnPPlayer(callback, m_id.c_str()); break;
+#endif
       default: return NULL;
     }
 
@@ -119,6 +136,7 @@ public:
 
 private:
   CStdString m_name;
+  CStdString m_id;
   bool m_bPlaysAudio;
   bool m_bPlaysVideo;
   EPLAYERCORES m_eCore;

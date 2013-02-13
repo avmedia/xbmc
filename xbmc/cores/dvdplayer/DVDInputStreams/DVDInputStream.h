@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 #include "filesystem/IFileTypes.h"
 
 #include "FileItem.h"
+#include "guilib/Geometry.h"
 
 enum DVDStreamType
 {
@@ -46,8 +47,6 @@ enum DVDStreamType
 
 #define DVDSTREAM_BLOCK_SIZE_FILE (2048 * 16)
 #define DVDSTREAM_BLOCK_SIZE_DVD  2048
-
-class CPoint;
 
 namespace PVR
 {
@@ -119,6 +118,7 @@ public:
     virtual bool OnMouseMove(const CPoint &point) = 0;
     virtual bool OnMouseClick(const CPoint &point) = 0;
     virtual bool IsInMenu() = 0;
+    virtual void SkipStill() = 0;
     virtual double GetTimeStampCorrection() = 0;
   };
 

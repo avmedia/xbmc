@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -298,10 +298,15 @@ void CGUIDialogSmartPlaylistRule::OnBrowse()
   }
   else if (m_rule.m_field == FieldTag)
   {
-    if (m_type == "movies")
-      videodatabase.GetTagsNav(basePath + "9/", items, VIDEODB_CONTENT_MOVIES);
-    else
+    VIDEODB_CONTENT_TYPE type = VIDEODB_CONTENT_MOVIES;
+    if (m_type == "tvshows")
+      type = VIDEODB_CONTENT_TVSHOWS;
+    else if (m_type == "musicvideos")
+      type = VIDEODB_CONTENT_MUSICVIDEOS;
+    else if (m_type != "movies")
       return;
+
+    videodatabase.GetTagsNav(basePath + "9/", items, type);
     iLabel = 20459;
   }
   else
@@ -372,12 +377,13 @@ void CGUIDialogSmartPlaylistRule::UpdateButtons()
   SendMessage(GUI_MSG_LABEL_RESET, CONTROL_OPERATOR);
 
   CONTROL_ENABLE(CONTROL_VALUE);
-  CONTROL_DISABLE(CONTROL_BROWSE);
+  if (CSmartPlaylistRule::IsFieldBrowseable(m_rule.m_field))
+    CONTROL_ENABLE(CONTROL_BROWSE);
+  else
+    CONTROL_DISABLE(CONTROL_BROWSE);
+
   switch (CSmartPlaylistRule::GetFieldType(m_rule.m_field))
   {
-  case CSmartPlaylistRule::BROWSEABLE_FIELD:
-    CONTROL_ENABLE(CONTROL_BROWSE);
-    // fall through...
   case CSmartPlaylistRule::TEXT_FIELD:
     // text fields - add the usual comparisons
     AddOperatorLabel(CSmartPlaylistRule::OPERATOR_EQUALS);
@@ -388,9 +394,6 @@ void CGUIDialogSmartPlaylistRule::UpdateButtons()
     AddOperatorLabel(CSmartPlaylistRule::OPERATOR_ENDS_WITH);
     break;
 
-  case CSmartPlaylistRule::BROWSEABLE_NUMERIC_FIELD:
-      CONTROL_ENABLE(CONTROL_BROWSE);
-      // fall through...
   case CSmartPlaylistRule::NUMERIC_FIELD:
   case CSmartPlaylistRule::SECONDS_FIELD:
     // numerical fields - less than greater than
@@ -438,8 +441,6 @@ void CGUIDialogSmartPlaylistRule::UpdateButtons()
   CSmartPlaylistRule::FIELD_TYPE fieldType = CSmartPlaylistRule::GetFieldType(m_rule.m_field);
   switch (fieldType)
   {
-  case CSmartPlaylistRule::BROWSEABLE_FIELD:
-  case CSmartPlaylistRule::BROWSEABLE_NUMERIC_FIELD:
   case CSmartPlaylistRule::TEXT_FIELD:
   case CSmartPlaylistRule::PLAYLIST_FIELD:
   case CSmartPlaylistRule::TEXTIN_FIELD:

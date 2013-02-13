@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 #include "../IDVDPlayer.h"
 #include "../DVDCodecs/Overlay/DVDOverlaySpu.h"
 #include <string>
+#include "guilib/Geometry.h"
 
 #include "DllDvdNav.h"
 
@@ -40,7 +41,6 @@
 class CDVDDemuxSPU;
 class CSPUInfo;
 class CDVDOverlayPicture;
-class CPoint;
 
 struct dvdnav_s;
 

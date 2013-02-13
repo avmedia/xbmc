@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,6 +20,7 @@
  */
 
 #include <memory>
+#include <vector>
 
 #include "network/Zeroconf.h"
 #include "threads/CriticalSection.h"
@@ -42,7 +43,7 @@ protected:
                         const std::string& fcr_type,
                         const std::string& fcr_name,
                         unsigned int f_port,
-                        std::map<std::string, std::string> txt);
+                        const std::vector<std::pair<std::string, std::string> >& txt);
 
   bool doRemoveService(const std::string& fcr_ident);
 

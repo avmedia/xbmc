@@ -494,7 +494,9 @@
     <ClCompile Include="..\..\xbmc\filesystem\CurlFile.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\DAAPDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\DAAPFile.cpp" />
+    <ClCompile Include="..\..\xbmc\filesystem\DAVCommon.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\DAVDirectory.cpp" />
+    <ClCompile Include="..\..\xbmc\filesystem\DAVFile.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\Directory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\DirectoryCache.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\DirectoryFactory.cpp" />
@@ -619,6 +621,7 @@
     <ClCompile Include="..\..\xbmc\GUIInfoManager.cpp" />
     <ClCompile Include="..\..\xbmc\GUILargeTextureManager.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\AnimatedGif.cpp" />
+    <ClCompile Include="..\..\xbmc\guilib\cximage.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\D3DResource.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\DDSImage.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\DirectXGraphics.cpp" />
@@ -704,6 +707,7 @@
     <ClCompile Include="..\..\xbmc\guilib\GUIWindow.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\GUIWindowManager.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\GUIWrappingListContainer.cpp" />
+    <ClCompile Include="..\..\xbmc\guilib\imagefactory.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\IWindowManagerCallback.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\JpegIO.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\Key.cpp" />
@@ -729,8 +733,6 @@
     <ClCompile Include="..\..\xbmc\guilib\XBTF.cpp" />
     <ClCompile Include="..\..\xbmc\guilib\XBTFReader.cpp" />
     <ClCompile Include="..\..\xbmc\GUIPassword.cpp" />
-    <ClCompile Include="..\..\xbmc\GUIViewControl.cpp" />
-    <ClCompile Include="..\..\xbmc\GUIViewState.cpp" />
     <ClCompile Include="..\..\xbmc\input\ButtonTranslator.cpp" />
     <ClCompile Include="..\..\xbmc\input\InertialScrollingHandler.cpp" />
     <ClCompile Include="..\..\xbmc\input\KeyboardLayoutConfiguration.cpp" />
@@ -877,6 +879,7 @@
     <ClCompile Include="..\..\xbmc\network\UdpClient.cpp" />
     <ClCompile Include="..\..\xbmc\network\upnp\UPnP.cpp" />
     <ClCompile Include="..\..\xbmc\network\upnp\UPnPInternal.cpp" />
+    <ClCompile Include="..\..\xbmc\network\upnp\UPnPPlayer.cpp" />
     <ClCompile Include="..\..\xbmc\network\upnp\UPnPRenderer.cpp" />
     <ClCompile Include="..\..\xbmc\network\upnp\UPnPServer.cpp" />
     <ClCompile Include="..\..\xbmc\network\WebServer.cpp" />
@@ -1117,12 +1120,17 @@
     <ClInclude Include="..\..\xbmc\DbUrl.h" />
     <ClInclude Include="..\..\xbmc\dialogs\GUIDialogMediaFilter.h" />
     <ClInclude Include="..\..\xbmc\filesystem\HTTPFile.h" />
+    <ClInclude Include="..\..\xbmc\filesystem\DAVCommon.h" />
+    <ClInclude Include="..\..\xbmc\filesystem\DAVFile.h" />
     <ClInclude Include="..\..\xbmc\filesystem\ImageFile.h" />
     <ClInclude Include="..\..\xbmc\filesystem\VideoDatabaseDirectory\DirectoryNodeTags.h" />
     <ClInclude Include="..\..\xbmc\filesystem\windows\WINFileSMB.h" />
     <ClInclude Include="..\..\xbmc\filesystem\windows\WINSMBDirectory.h" />
+    <ClInclude Include="..\..\xbmc\guilib\cximage.h" />
     <ClInclude Include="..\..\xbmc\guilib\GUIKeyboard.h" />
     <ClInclude Include="..\..\xbmc\guilib\GUIKeyboardFactory.h" />
+    <ClInclude Include="..\..\xbmc\guilib\iimage.h" />
+    <ClInclude Include="..\..\xbmc\guilib\imagefactory.h" />
     <ClInclude Include="..\..\xbmc\input\windows\WINJoystick.h" />
     <ClInclude Include="..\..\xbmc\interfaces\json-rpc\PVROperations.h" />
     <ClInclude Include="..\..\xbmc\interfaces\legacy\Addon.h" />
@@ -1180,6 +1188,7 @@
     <ClInclude Include="..\..\xbmc\network\DllLibShairplay.h" />
     <ClInclude Include="..\..\xbmc\network\upnp\UPnP.h" />
     <ClInclude Include="..\..\xbmc\network\upnp\UPnPInternal.h" />
+    <ClInclude Include="..\..\xbmc\network\upnp\UPnPPlayer.h" />
     <ClInclude Include="..\..\xbmc\network\upnp\UPnPRenderer.h" />
     <ClInclude Include="..\..\xbmc\network\upnp\UPnPServer.h" />
     <ClInclude Include="..\..\xbmc\network\websocket\WebSocket.h" />
@@ -1360,7 +1369,6 @@
     <ClCompile Include="..\..\xbmc\utils\JSONVariantWriter.cpp" />
     <ClCompile Include="..\..\xbmc\utils\LabelFormatter.cpp" />
     <ClCompile Include="..\..\xbmc\utils\LangCodeExpander.cpp" />
-    <ClCompile Include="..\..\xbmc\utils\LCD.cpp" />
     <ClCompile Include="..\..\xbmc\utils\log.cpp" />
     <ClCompile Include="..\..\xbmc\utils\md5.cpp" />
     <ClCompile Include="..\..\xbmc\utils\Observer.cpp" />
@@ -1729,7 +1737,9 @@
     <ClCompile Include="..\..\xbmc\video\windows\GUIWindowVideoBase.cpp" />
     <ClCompile Include="..\..\xbmc\video\windows\GUIWindowVideoNav.cpp" />
     <ClCompile Include="..\..\xbmc\video\windows\GUIWindowVideoPlaylist.cpp" />
-    <ClCompile Include="..\..\xbmc\ViewDatabase.cpp" />
+    <ClCompile Include="..\..\xbmc\view\GUIViewControl.cpp" />
+    <ClCompile Include="..\..\xbmc\view\GUIViewState.cpp" />
+    <ClCompile Include="..\..\xbmc\view\ViewDatabase.cpp" />
     <ClCompile Include="..\..\xbmc\win32\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug (DirectX)|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Testsuite|Win32'">Create</PrecompiledHeader>
@@ -2226,8 +2236,6 @@
     <ClInclude Include="..\..\xbmc\guilib\XBTFReader.h" />
     <ClInclude Include="..\..\xbmc\GUIPassword.h" />
     <ClInclude Include="..\..\xbmc\GUIUserMessages.h" />
-    <ClInclude Include="..\..\xbmc\GUIViewControl.h" />
-    <ClInclude Include="..\..\xbmc\GUIViewState.h" />
     <ClInclude Include="..\..\xbmc\input\ButtonTranslator.h" />
     <ClInclude Include="..\..\xbmc\input\InertialScrollingHandler.h" />
     <ClInclude Include="..\..\xbmc\input\KeyboardLayoutConfiguration.h" />
@@ -2511,7 +2519,6 @@
     <ClInclude Include="..\..\xbmc\utils\JSONVariantWriter.h" />
     <ClInclude Include="..\..\xbmc\utils\LabelFormatter.h" />
     <ClInclude Include="..\..\xbmc\utils\LangCodeExpander.h" />
-    <ClInclude Include="..\..\xbmc\utils\LCD.h" />
     <ClInclude Include="..\..\xbmc\utils\log.h" />
     <ClInclude Include="..\..\xbmc\utils\MathUtils.h" />
     <ClInclude Include="..\..\xbmc\utils\md5.h" />
@@ -2575,8 +2582,10 @@
     <ClInclude Include="..\..\xbmc\video\windows\GUIWindowVideoBase.h" />
     <ClInclude Include="..\..\xbmc\video\windows\GUIWindowVideoNav.h" />
     <ClInclude Include="..\..\xbmc\video\windows\GUIWindowVideoPlaylist.h" />
-    <ClInclude Include="..\..\xbmc\ViewDatabase.h" />
-    <ClInclude Include="..\..\xbmc\ViewState.h" />
+    <ClInclude Include="..\..\xbmc\view\GUIViewControl.h" />
+    <ClInclude Include="..\..\xbmc\view\GUIViewState.h" />
+    <ClInclude Include="..\..\xbmc\view\ViewDatabase.h" />
+    <ClInclude Include="..\..\xbmc\view\ViewState.h" />
     <ClInclude Include="..\..\xbmc\win32\pch.h" />
     <ClInclude Include="..\..\xbmc\win32\PlatformDefs.h" />
     <ClInclude Include="..\..\xbmc\XBDateTime.h" />

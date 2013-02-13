@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 #include "DatabaseManager.h"
 #include "utils/log.h"
 #include "addons/AddonDatabase.h"
-#include "ViewDatabase.h"
+#include "view/ViewDatabase.h"
 #include "TextureDatabase.h"
 #include "music/MusicDatabase.h"
 #include "video/VideoDatabase.h"

@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -44,7 +44,6 @@
 #include "addons/AddonManager.h"
 #include "addons/PluginSource.h"
 #include "music/LastFmManager.h"
-#include "utils/LCD.h"
 #include "utils/log.h"
 #include "storage/MediaManager.h"
 #include "utils/RssReader.h"
@@ -207,10 +206,6 @@ const BUILT_IN commands[] = {
   { "LIRC.Stop",                  false,  "Removes XBMC as LIRC client" },
   { "LIRC.Start",                 false,  "Adds XBMC as LIRC client" },
   { "LIRC.Send",                  true,   "Sends a command to LIRC" },
-#endif
-#ifdef HAS_LCD
-  { "LCD.Suspend",                false,  "Suspends LCDproc" },
-  { "LCD.Resume",                 false,  "Resumes LCDproc" },
 #endif
   { "VideoLibrary.Search",        false,  "Brings up a search dialog which will search the library" },
   { "ToggleDebug",                false,  "Enables/disables debug mode" },
@@ -889,10 +884,10 @@ int CBuiltins::Execute(const CStdString& execString)
   else if (execute.Equals("setvolume"))
   {
     int oldVolume = g_application.GetVolume();
-    int volume = atoi(parameter.c_str());
+    float volume = (float)strtod(parameter.c_str(), NULL);
 
-    g_application.SetVolume((float)volume);
-    if(oldVolume != volume)
+    g_application.SetVolume(volume);
+    if(oldVolume != (int)volume)
     {
       if(params.size() > 1 && params[1].Equals("showVolumeBar"))    
       {
@@ -1585,16 +1580,6 @@ int CBuiltins::Execute(const CStdString& execString)
         command += ' ';
     }
     g_RemoteControl.AddSendCommand(command);
-  }
-#endif
-#ifdef HAS_LCD
-  else if (execute.Equals("lcd.suspend"))
-  {
-    g_lcd->Suspend();
-  }
-  else if (execute.Equals("lcd.resume"))
-  {
-    g_lcd->Resume();
   }
 #endif
   else if (execute.Equals("weather.locationset"))

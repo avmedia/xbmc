@@ -1,5 +1,5 @@
  /*
- *      Copyright (C) 2010-2012 Team XBMC
+ *      Copyright (C) 2010-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -236,7 +236,7 @@ void  CAESinkAUDIOTRACK::SetVolume(float scale)
   m_volume_changed = true;
 }
 
-void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list)
+void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 {
   m_info.m_channels.Reset();
   m_info.m_dataFormats.clear();

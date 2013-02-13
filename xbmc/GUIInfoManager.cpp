@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -32,9 +32,6 @@
 #include "addons/Visualisation.h"
 #include "input/ButtonTranslator.h"
 #include "utils/AlarmClock.h"
-#ifdef HAS_LCD
-#include "utils/LCD.h"
-#endif
 #include "LangInfo.h"
 #include "utils/SystemInfo.h"
 #include "guilib/GUITextBox.h"
@@ -282,22 +279,6 @@ const infomap system_param[] =   {{ "hasalarm",         SYSTEM_HAS_ALARM },
                                   { "setting",          SYSTEM_SETTING },
                                   { "hasaddon",         SYSTEM_HAS_ADDON },
                                   { "coreusage",        SYSTEM_GET_CORE_USAGE }};
-
-const infomap lcd_labels[] =     {{ "playicon",         LCD_PLAY_ICON },
-                                  { "progressbar",      LCD_PROGRESS_BAR },
-                                  { "cputemperature",   LCD_CPU_TEMPERATURE },
-                                  { "gputemperature",   LCD_GPU_TEMPERATURE },
-                                  { "hddtemperature",   LCD_HDD_TEMPERATURE },
-                                  { "fanspeed",         LCD_FAN_SPEED },
-                                  { "date",             LCD_DATE },
-                                  { "time21",           LCD_TIME_21 },
-                                  { "time22",           LCD_TIME_22 },
-                                  { "timewide21",       LCD_TIME_W21 },
-                                  { "timewide22",       LCD_TIME_W22 },
-                                  { "time41",           LCD_TIME_41 },
-                                  { "time42",           LCD_TIME_42 },
-                                  { "time43",           LCD_TIME_43 },
-                                  { "time44",           LCD_TIME_44 }};
 
 const infomap network_labels[] = {{ "isdhcp",            NETWORK_IS_DHCP },
                                   { "ipaddress",         NETWORK_IP_ADDRESS }, //labels from here
@@ -809,14 +790,6 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
           return weather[i].val;
       }
     }
-    else if (cat.name == "lcd")
-    {
-      for (size_t i = 0; i < sizeof(lcd_labels) / sizeof(infomap); i++)
-      {
-        if (prop.name == lcd_labels[i].str)
-          return lcd_labels[i].val;
-      }
-    }
     else if (cat.name == "network")
     {
       for (size_t i = 0; i < sizeof(network_labels) / sizeof(infomap); i++)
@@ -1321,9 +1294,6 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
   case SYSTEM_DATE:
     strLabel = GetDate();
     break;
-  case LCD_DATE:
-    strLabel = GetDate(true);
-    break;
   case SYSTEM_FPS:
     strLabel.Format("%02.2f", m_fps);
     break;
@@ -1385,10 +1355,35 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
     break;
   case PLAYER_TITLE:
     {
-      if (g_application.IsPlayingVideo())
-        strLabel = GetLabel(VIDEOPLAYER_TITLE);
+      if(m_currentFile)
+      {
+        if (m_currentFile->HasPVRChannelInfoTag())
+        {
+          CEpgInfoTag tag;
+          return m_currentFile->GetPVRChannelInfoTag()->GetEPGNow(tag) ?
+                   tag.Title() :
+                   g_guiSettings.GetBool("epg.hidenoinfoavailable") ?
+                     StringUtils::EmptyString :
+                     g_localizeStrings.Get(19055); // no information available
+        }
+        if (m_currentFile->HasPVRRecordingInfoTag() && !m_currentFile->GetPVRRecordingInfoTag()->m_strTitle.IsEmpty())
+          return m_currentFile->GetPVRRecordingInfoTag()->m_strTitle;
+        if (m_currentFile->HasVideoInfoTag() && !m_currentFile->GetVideoInfoTag()->m_strTitle.IsEmpty())
+          return m_currentFile->GetVideoInfoTag()->m_strTitle;
+        if (m_currentFile->HasMusicInfoTag() && !m_currentFile->GetMusicInfoTag()->GetTitle().IsEmpty())
+          return m_currentFile->GetMusicInfoTag()->GetTitle();
+        // don't have the title, so use dvdplayer, label, or drop down to title from path
+        if (g_application.m_pPlayer && !g_application.m_pPlayer->GetPlayingTitle().IsEmpty())
+          return g_application.m_pPlayer->GetPlayingTitle();
+        if (!m_currentFile->GetLabel().IsEmpty())
+          return m_currentFile->GetLabel();
+        return CUtil::GetTitleFromPath(m_currentFile->GetPath());
+      }
       else
-        strLabel = GetLabel(MUSICPLAYER_TITLE);
+      {
+        if (g_application.m_pPlayer && !g_application.m_pPlayer->GetPlayingTitle().IsEmpty())
+          return g_application.m_pPlayer->GetPlayingTitle();
+      }
     }
     break;
   case MUSICPLAYER_TITLE:
@@ -1509,9 +1504,6 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
   case SYSTEM_CPU_TEMPERATURE:
   case SYSTEM_GPU_TEMPERATURE:
   case SYSTEM_FAN_SPEED:
-  case LCD_CPU_TEMPERATURE:
-  case LCD_GPU_TEMPERATURE:
-  case LCD_FAN_SPEED:
   case SYSTEM_CPU_USAGE:
     return GetSystemHeatInfo(info);
     break;
@@ -1721,31 +1713,6 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
         strLabel = friendlyName;
     }
     break;
-  case LCD_PLAY_ICON:
-    {
-      int iPlaySpeed = g_application.GetPlaySpeed();
-      if (g_application.IsPaused())
-        strLabel.Format("\7");
-      else if (iPlaySpeed < 1)
-        strLabel.Format("\3:%ix", iPlaySpeed);
-      else if (iPlaySpeed > 1)
-        strLabel.Format("\4:%ix", iPlaySpeed);
-      else
-        strLabel.Format("\5");
-    }
-    break;
-
-  case LCD_TIME_21:
-  case LCD_TIME_22:
-  case LCD_TIME_W21:
-  case LCD_TIME_W22:
-  case LCD_TIME_41:
-  case LCD_TIME_42:
-  case LCD_TIME_43:
-  case LCD_TIME_44:
-    //alternatively, set strLabel
-    return GetLcdTime( info );
-    break;
 
   case SKIN_THEME:
     strLabel = g_guiSettings.GetString("lookandfeel.skintheme");
@@ -1757,11 +1724,6 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
     if (g_SkinInfo)
       strLabel = g_SkinInfo->GetCurrentAspect();
     break;
-#ifdef HAS_LCD
-  case LCD_PROGRESS_BAR:
-    if (g_lcd && g_lcd->IsConnected()) strLabel = g_lcd->GetProgressBar(g_application.GetTime(), g_application.GetTotalTime());
-    break;
-#endif
   case NETWORK_IP_ADDRESS:
     {
       CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
@@ -3205,77 +3167,6 @@ CStdString CGUIInfoManager::GetTime(TIME_FORMAT format) const
   return LocalizeTime(time, format);
 }
 
-CStdString CGUIInfoManager::GetLcdTime( int _eInfo ) const
-{
-  CDateTime time=CDateTime::GetCurrentDateTime();
-  CStdString strLcdTime;
-
-#ifdef HAS_LCD
-
-  UINT       nCharset;
-  UINT       nLine;
-  CStdString strTimeMarker;
-
-  nCharset = 0;
-  nLine = 0;
-
-  switch ( _eInfo )
-  {
-    case LCD_TIME_21:
-      nCharset = 1; // CUSTOM_CHARSET_SMALLCHAR;
-      nLine = 0;
-      strTimeMarker = ".";
-    break;
-    case LCD_TIME_22:
-      nCharset = 1; // CUSTOM_CHARSET_SMALLCHAR;
-      nLine = 1;
-      strTimeMarker = ".";
-    break;
-
-    case LCD_TIME_W21:
-      nCharset = 2; // CUSTOM_CHARSET_MEDIUMCHAR;
-      nLine = 0;
-      strTimeMarker = ".";
-    break;
-    case LCD_TIME_W22:
-      nCharset = 2; // CUSTOM_CHARSET_MEDIUMCHAR;
-      nLine = 1;
-      strTimeMarker = ".";
-    break;
-
-    case LCD_TIME_41:
-      nCharset = 3; // CUSTOM_CHARSET_BIGCHAR;
-      nLine = 0;
-      strTimeMarker = " ";
-    break;
-    case LCD_TIME_42:
-      nCharset = 3; // CUSTOM_CHARSET_BIGCHAR;
-      nLine = 1;
-      strTimeMarker = "o";
-    break;
-    case LCD_TIME_43:
-      nCharset = 3; // CUSTOM_CHARSET_BIGCHAR;
-      nLine = 2;
-      strTimeMarker = "o";
-    break;
-    case LCD_TIME_44:
-      nCharset = 3; // CUSTOM_CHARSET_BIGCHAR;
-      nLine = 3;
-      strTimeMarker = " ";
-    break;
-  }
-
-  strLcdTime += g_lcd->GetBigDigit( nCharset, time.GetHour()  , nLine, 2, 2, true );
-  strLcdTime += strTimeMarker;
-  strLcdTime += g_lcd->GetBigDigit( nCharset, time.GetMinute(), nLine, 2, 2, false );
-  strLcdTime += strTimeMarker;
-  strLcdTime += g_lcd->GetBigDigit( nCharset, time.GetSecond(), nLine, 2, 2, false );
-
-#endif
-
-  return strLcdTime;
-}
-
 CStdString CGUIInfoManager::LocalizeTime(const CDateTime &time, TIME_FORMAT format) const
 {
   const CStdString timeFormat = g_langInfo.GetTimeFormat();
@@ -3455,7 +3346,7 @@ CStdString CGUIInfoManager::GetPlaylistLabel(int item) const
 
 CStdString CGUIInfoManager::GetMusicLabel(int item)
 {
-  if (!g_application.IsPlayingAudio() || !m_currentFile->HasMusicInfoTag()) return "";
+  if (!g_application.IsPlaying() || !m_currentFile->HasMusicInfoTag()) return "";
   switch (item)
   {
   case MUSICPLAYER_PLAYLISTLEN:
@@ -3607,30 +3498,13 @@ CStdString CGUIInfoManager::GetMusicTagLabel(int info, const CFileItem *item)
 
 CStdString CGUIInfoManager::GetVideoLabel(int item)
 {
-  if (!g_application.IsPlayingVideo())
+  if (!g_application.IsPlaying())
     return "";
 
   if (item == VIDEOPLAYER_TITLE)
   {
-    if (m_currentFile->HasPVRChannelInfoTag())
-    {
-      CEpgInfoTag tag;
-      return m_currentFile->GetPVRChannelInfoTag()->GetEPGNow(tag) ?
-          tag.Title() :
-          g_guiSettings.GetBool("epg.hidenoinfoavailable") ?
-              StringUtils::EmptyString :
-              g_localizeStrings.Get(19055); // no information available
-    }
-    if (m_currentFile->HasPVRRecordingInfoTag() && !m_currentFile->GetPVRRecordingInfoTag()->m_strTitle.IsEmpty())
-      return m_currentFile->GetPVRRecordingInfoTag()->m_strTitle;
-    if (m_currentFile->HasVideoInfoTag() && !m_currentFile->GetVideoInfoTag()->m_strTitle.IsEmpty())
-      return m_currentFile->GetVideoInfoTag()->m_strTitle;
-    // don't have the title, so use dvdplayer, label, or drop down to title from path
-    if (!g_application.m_pPlayer->GetPlayingTitle().IsEmpty())
-      return g_application.m_pPlayer->GetPlayingTitle();
-    if (!m_currentFile->GetLabel().IsEmpty())
-      return m_currentFile->GetLabel();
-    return CUtil::GetTitleFromPath(m_currentFile->GetPath());
+    if(g_application.IsPlayingVideo())
+       return GetLabel(PLAYER_TITLE);
   }
   else if (item == VIDEOPLAYER_PLAYLISTLEN)
   {
@@ -3860,7 +3734,7 @@ CStdString CGUIInfoManager::GetCurrentPlayTime(TIME_FORMAT format) const
 {
   if (format == TIME_FORMAT_GUESS && GetTotalPlayTime() >= 3600)
     format = TIME_FORMAT_HH_MM_SS;
-  if (g_application.IsPlayingAudio() || g_application.IsPlayingVideo())
+  if (g_application.IsPlaying())
     return StringUtils::SecondsToTimeString((int)(GetPlayTime()/1000), format);
   return "";
 }
@@ -3890,7 +3764,7 @@ CStdString CGUIInfoManager::GetCurrentPlayTimeRemaining(TIME_FORMAT format) cons
   if (format == TIME_FORMAT_GUESS && GetTotalPlayTime() >= 3600)
     format = TIME_FORMAT_HH_MM_SS;
   int timeRemaining = GetPlayTimeRemaining();
-  if (timeRemaining && (g_application.IsPlayingAudio() || g_application.IsPlayingVideo()))
+  if (timeRemaining && g_application.IsPlaying())
     return StringUtils::SecondsToTimeString(timeRemaining, format);
   return "";
 }
@@ -4031,15 +3905,12 @@ string CGUIInfoManager::GetSystemHeatInfo(int info)
   CStdString text;
   switch(info)
   {
-    case LCD_CPU_TEMPERATURE:
     case SYSTEM_CPU_TEMPERATURE:
       return m_cpuTemp.IsValid() ? m_cpuTemp.ToString() : "?";
       break;
-    case LCD_GPU_TEMPERATURE:
     case SYSTEM_GPU_TEMPERATURE:
       return m_gpuTemp.IsValid() ? m_gpuTemp.ToString() : "?";
       break;
-    case LCD_FAN_SPEED:
     case SYSTEM_FAN_SPEED:
       text.Format("%i%%", m_fanSpeed * 2);
       break;

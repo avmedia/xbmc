@@ -1,5 +1,5 @@
 /*
-*      Copyright (C) 2005-2012 Team XBMC
+*      Copyright (C) 2005-2013 Team XBMC
 *      http://www.xbmc.org
 *
 *  This Program is free software; you can redistribute it and/or modify
@@ -781,14 +781,14 @@ std::vector<CMusicArtistInfo> CScraper::FindArtist(CCurlFile &fcurl,
 // fetch list of episodes from URL (from video database)
 EPISODELIST CScraper::GetEpisodeList(XFILE::CCurlFile &fcurl, const CScraperUrl &scurl)
 {
+  EPISODELIST vcep;
+  if (scurl.m_url.empty())
+    return vcep;
+  
   CLog::Log(LOGDEBUG, "%s: Searching '%s' using %s scraper "
     "(file: '%s', content: '%s', version: '%s')", __FUNCTION__,
     scurl.m_url[0].m_url.c_str(), Name().c_str(), Path().c_str(),
     ADDON::TranslateContent(Content()).c_str(), Version().c_str());
-
-  EPISODELIST vcep;
-  if (scurl.m_url.empty())
-    return vcep;
 
   vector<CStdString> vcsIn;
   vcsIn.push_back(scurl.m_url[0].m_url);

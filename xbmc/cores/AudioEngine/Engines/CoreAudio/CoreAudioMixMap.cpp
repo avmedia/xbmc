@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2011-2012 Team XBMC
+ *      Copyright (C) 2011-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -122,7 +122,7 @@ CCoreAudioMixMap *CCoreAudioMixMap::CreateMixMap(CAUOutputDevice  *audioUnit, AE
     for (unsigned int chan=0; chan < inputFormat.mChannelsPerFrame; chan++)
     {
       AudioChannelDescription* pDesc = &pInLayout->mChannelDescriptions[chan];
-      if (pDesc->mChannelLabel == kAudioChannelLabel_LeftSurround || pDesc->mChannelLabel == kAudioChannelLabel_LeftSurround)
+      if (pDesc->mChannelLabel == kAudioChannelLabel_LeftSurround || pDesc->mChannelLabel == kAudioChannelLabel_RightSurround)
         break; // Required condition cannot be true
 
       if (pDesc->mChannelLabel == kAudioChannelLabel_LeftSurroundDirect)

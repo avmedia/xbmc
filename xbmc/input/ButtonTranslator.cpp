@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -142,6 +142,7 @@ static const ActionMapping actions[] =
         {"rewind"            , ACTION_PLAYER_REWIND},
         {"play"              , ACTION_PLAYER_PLAY},
         {"playpause"         , ACTION_PLAYER_PLAYPAUSE},
+        {"switchplayer"      , ACTION_SWITCH_PLAYER},
         {"delete"            , ACTION_DELETE_ITEM},
         {"copy"              , ACTION_COPY_ITEM},
         {"move"              , ACTION_MOVE_ITEM},
@@ -565,6 +566,11 @@ bool CButtonTranslator::LoadKeymap(const CStdString &keymapPath)
     return false;
   }
   TiXmlElement* pRoot = xmlDoc.RootElement();
+  if (!pRoot)
+  {
+    CLog::Log(LOGERROR, "Error getting keymap root: %s", keymapPath.c_str());
+    return false;
+  }
   CStdString strValue = pRoot->Value();
   if ( strValue != "keymap")
   {

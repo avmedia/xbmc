@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -169,17 +169,15 @@ public:
   void ApplyHardwareTransform();
   void RestoreHardwareTransform();
   void ClipRect(CRect &vertex, CRect &texture, CRect *diffuse = NULL);
-  inline unsigned int AddGUITransform()
+  inline void AddGUITransform()
   {
-    unsigned int size = m_groupTransform.size();
     m_groupTransform.push(m_guiTransform);
     UpdateFinalTransform(m_groupTransform.top());
-    return size;
   }
   inline TransformMatrix AddTransform(const TransformMatrix &matrix)
   {
-    ASSERT(m_groupTransform.size());
-    TransformMatrix absoluteMatrix = m_groupTransform.size() ? m_groupTransform.top() * matrix : matrix;
+    ASSERT(!m_groupTransform.empty());
+    TransformMatrix absoluteMatrix = m_groupTransform.empty() ? matrix : m_groupTransform.top() * matrix;
     m_groupTransform.push(absoluteMatrix);
     UpdateFinalTransform(absoluteMatrix);
     return absoluteMatrix;
@@ -188,20 +186,19 @@ public:
   {
     // TODO: We only need to add it to the group transform as other transforms may be added on top of this one later on
     //       Once all transforms are cached then this can be removed and UpdateFinalTransform can be called directly
-    ASSERT(m_groupTransform.size());
+    ASSERT(!m_groupTransform.empty());
     m_groupTransform.push(matrix);
     UpdateFinalTransform(m_groupTransform.top());
   }
-  inline unsigned int RemoveTransform()
+  inline void RemoveTransform()
   {
-    ASSERT(m_groupTransform.size());
-    if (m_groupTransform.size())
+    ASSERT(!m_groupTransform.empty());
+    if (!m_groupTransform.empty())
       m_groupTransform.pop();
-    if (m_groupTransform.size())
+    if (!m_groupTransform.empty())
       UpdateFinalTransform(m_groupTransform.top());
     else
       UpdateFinalTransform(TransformMatrix());
-    return m_groupTransform.size();
   }
 
   CRect generateAABB(const CRect &rect) const;

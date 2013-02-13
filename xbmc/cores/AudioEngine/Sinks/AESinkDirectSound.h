@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2010-2012 Team XBMC
+ *      Copyright (C) 2010-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -47,7 +47,8 @@ public:
   virtual bool         SoftResume         ();
 #endif
   virtual unsigned int AddPackets         (uint8_t *data, unsigned int frames, bool hasAudio);
-  static  void         EnumerateDevicesEx (AEDeviceInfoList &deviceInfoList);
+  static  std::string  GetDefaultDevice   ();
+  static  void         EnumerateDevicesEx (AEDeviceInfoList &deviceInfoList, bool force = false);
 private:
   void          AEChannelsFromSpeakerMask(DWORD speakers);
   DWORD         SpeakerMaskFromAEChannels(const CAEChannelInfo &channels);

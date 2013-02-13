@@ -1784,9 +1784,7 @@ msgctxt "#447"
 msgid "Autorun media"
 msgstr ""
 
-msgctxt "#448"
-msgid "LCD"
-msgstr ""
+#empty string with id 448
 
 #: xbmc/settings/GUISettings.cpp
 msgctxt "#449"
@@ -3033,12 +3031,19 @@ msgctxt "#852"
 msgid "Valid port range is 1024-65535"
 msgstr ""
 
-#empty strings from id 853 to 997
+#empty strings from id 853 to 996
 
+#: xbmc/windows/GUIMediaWindow.cpp
+msgctxt "#997"
+msgid "Add Pictures..."
+msgstr ""
+
+#: xbmc/windows/GUIMediaWindow.cpp
 msgctxt "#998"
 msgid "Add Music..."
 msgstr ""
 
+#: xbmc/windows/GUIMediaWindow.cpp
 msgctxt "#999"
 msgid "Add Videos..."
 msgstr ""
@@ -3255,7 +3260,42 @@ msgctxt "#1051"
 msgid "Enter web address"
 msgstr ""
 
-#empty strings from id 1052 to 1199
+#empty strings from id 1052 to 1179
+
+#: xbmc/settings/GUISettings.cpp
+msgctxt "#1180"
+msgid "Proxy type"
+msgstr ""
+
+#: xbmc/settings/GUISettings.cpp
+msgctxt "#1181"
+msgid "HTTP"
+msgstr ""
+
+#: xbmc/settings/GUISettings.cpp
+msgctxt "#1182"
+msgid "SOCKS4"
+msgstr ""
+
+#: xbmc/settings/GUISettings.cpp
+msgctxt "#1183"
+msgid "SOCKS4A"
+msgstr ""
+
+#: xbmc/settings/GUISettings.cpp
+msgctxt "#1184"
+msgid "SOCKS5"
+msgstr ""
+
+#: xbmc/settings/GUISettings.cpp
+msgctxt "#1185"
+msgid "SOCKS5 with remote dns resolving"
+msgstr ""
+
+#empty strings from id 1186 to 1189
+#strings 1186 to 1189 reserved for more proxy types
+
+#empty strings from id 1190 to 1199
 
 #: xbmc/settings/GUISettings.cpp
 msgctxt "#1200"
@@ -3747,14 +3787,7 @@ msgctxt "#2101"
 msgid "Newer version needed - See log"
 msgstr ""
 
-#empty strings from id 2102 to 4500
-
-#: xbmc/settings/GUISettings.cpp
-msgctxt "#4501"
-msgid "Enable LCD/VFD"
-msgstr ""
-
-#empty strings from id 4502 to 9999
+#empty strings from id 2102 to 9999
 
 msgctxt "#10000"
 msgid "Home"
@@ -5392,7 +5425,12 @@ msgctxt "#13515"
 msgid "No art"
 msgstr ""
 
-#empty strings from id 13516 to 13549
+#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
+msgctxt "#13516"
+msgid "Add art"
+msgstr ""
+
+#empty strings from id 13517 to 13549
 
 #: xbmc/settings/GUISettings.cpp
 msgctxt "#13550"
@@ -9034,19 +9072,13 @@ msgctxt "#20309"
 msgid "Make new folder"
 msgstr ""
 
-msgctxt "#20310"
-msgid "Dim LCD on playback"
-msgstr ""
+#empty string with id 20310
 
 msgctxt "#20311"
 msgid "Unknown or onboard (protected)"
 msgstr ""
 
-msgctxt "#20312"
-msgid "Dim LCD on paused"
-msgstr ""
-
-#empty string with id 20313
+#empty strings from id 20312 to 20313
 
 msgctxt "#20314"
 msgid "Videos - Library"
@@ -9695,7 +9727,11 @@ msgctxt "#21360"
 msgid "Share video and music libraries through UPnP"
 msgstr ""
 
-#empty strings from id 21361 to 21363
+msgctxt "#21361"
+msgid "Look for remote UPnP players"
+msgstr ""
+
+#empty strings from id 21362 to 21363
 
 msgctxt "#21364"
 msgid "Edit media share"

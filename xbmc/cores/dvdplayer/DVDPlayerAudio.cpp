@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -424,6 +424,17 @@ int CDVDPlayerAudio::DecodeFrame(DVDAudioFrame &audioframe, bool bDropPacket)
     {
       if(m_started)
         m_messageParent.Put(new CDVDMsgInt(CDVDMsg::PLAYER_STARTED, DVDPLAYER_AUDIO));
+    }
+    else if (pMsg->IsType(CDVDMsg::PLAYER_DISPLAYTIME))
+    {
+      CDVDPlayer::SPlayerState& state = ((CDVDMsgType<CDVDPlayer::SPlayerState>*)pMsg)->m_value;
+
+      if(state.time_src == CDVDPlayer::ETIMESOURCE_CLOCK)
+        state.time      = DVD_TIME_TO_MSEC(m_pClock->GetClock(state.timestamp) + state.time_offset);
+      else
+        state.timestamp = CDVDClock::GetAbsoluteClock();
+      state.player    = DVDPLAYER_AUDIO;
+      m_messageParent.Put(pMsg->Acquire());
     }
     else if (pMsg->IsType(CDVDMsg::GENERAL_EOF))
     {

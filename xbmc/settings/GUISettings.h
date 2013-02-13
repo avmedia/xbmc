@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -95,13 +95,6 @@ class TiXmlElement;
 #define VIDEO_NORMAL 0
 #define VIDEO_LETTERBOX 1
 #define VIDEO_WIDESCREEN 2
-
-// LCD settings
-#define LCD_TYPE_NONE        0
-#define LCD_TYPE_LCD_HD44780 1
-#define LCD_TYPE_LCD_KS0073  2
-#define LCD_TYPE_VFD         3
-#define LCD_TYPE_LCDPROC     4
 
 #define MODCHIP_SMARTXX   0
 #define MODCHIP_XENIUM    1

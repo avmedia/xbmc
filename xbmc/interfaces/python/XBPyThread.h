@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 
 #include "threads/Thread.h"
 #include "threads/Event.h"
+#include "threads/CriticalSection.h"
 #include "addons/IAddon.h"
 
 class XBPython;
@@ -42,6 +43,7 @@ public:
   void setAddon(ADDON::AddonPtr _addon) { addon = _addon; }
 
 protected:
+  CCriticalSection m_critSec;
   XBPython *m_pExecuter;
   CEvent stoppedEvent;
   void *m_threadState;

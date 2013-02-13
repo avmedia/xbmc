@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2011-2012 Team XBMC
+ *      Copyright (C) 2011-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -634,7 +634,7 @@ void CEGLNativeTypeRaspberryPI::GetSupportedModes(HDMI_RES_GROUP_T group, std::v
     }
   }
   if (supported_modes)
-    delete supported_modes;
+    delete [] supported_modes;
 }
 
 void CEGLNativeTypeRaspberryPI::TvServiceCallback(uint32_t reason, uint32_t param1, uint32_t param2)

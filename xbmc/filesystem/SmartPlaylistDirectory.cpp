@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -21,15 +21,15 @@
 #include <math.h>
 
 #include "SmartPlaylistDirectory.h"
-#include "utils/log.h"
-#include "playlists/SmartPlayList.h"
-#include "music/MusicDatabase.h"
-#include "video/VideoDatabase.h"
-#include "Directory.h"
-#include "File.h"
 #include "FileItem.h"
+#include "filesystem/Directory.h"
+#include "filesystem/File.h"
+#include "music/MusicDatabase.h"
+#include "playlists/SmartPlayList.h"
 #include "settings/GUISettings.h"
+#include "utils/log.h"
 #include "utils/URIUtils.h"
+#include "video/VideoDatabase.h"
 
 #define PROPERTY_PATH_DB            "path.db"
 #define PROPERTY_SORT_ORDER         "sort.order"

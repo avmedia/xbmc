@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -40,6 +40,7 @@
 #include "cores/dvdplayer/DVDCodecs/Video/CrystalHD.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "cores/AudioEngine/AEAudioFormat.h"
+#include "filesystem/CurlFile.h"
 #include "guilib/GUIFont.h" // for FONT_STYLE_* definitions
 #if defined(TARGET_DARWIN_OSX)
   #include "cores/AudioEngine/Engines/CoreAudio/CoreAudioHardware.h"
@@ -449,9 +450,6 @@ void CGUISettings::Initialize()
   // Todo: Implement test pattern for DX
   AddString(vs, "videoscreen.testpattern",226,"", BUTTON_CONTROL_STANDARD);
 #endif
-#if defined(HAS_LCD)
-  AddBool(vs, "videoscreen.haslcd", 4501, false);
-#endif
 
   CSettingsCategory* ao = AddCategory(SETTINGS_SYSTEM, "audiooutput", 772);
 
@@ -580,6 +578,13 @@ void CGUISettings::Initialize()
 #endif
   }
   AddBool(net, "network.usehttpproxy", 708, false);
+  map<int,int> proxyTypes;
+  proxyTypes.insert(make_pair(1181, XFILE::CCurlFile::PROXY_HTTP));
+  proxyTypes.insert(make_pair(1182, XFILE::CCurlFile::PROXY_SOCKS4));
+  proxyTypes.insert(make_pair(1183, XFILE::CCurlFile::PROXY_SOCKS4A));
+  proxyTypes.insert(make_pair(1184, XFILE::CCurlFile::PROXY_SOCKS5));
+  proxyTypes.insert(make_pair(1185, XFILE::CCurlFile::PROXY_SOCKS5_REMOTE));
+  AddInt(net, "network.httpproxytype", 1180, XFILE::CCurlFile::PROXY_HTTP, proxyTypes, SPIN_CONTROL_TEXT);
   AddString(net, "network.httpproxyserver", 706, "", EDIT_CONTROL_INPUT);
   AddString(net, "network.httpproxyport", 730, "8080", EDIT_CONTROL_NUMBER_INPUT, false, 707);
   AddString(net, "network.httpproxyusername", 1048, "", EDIT_CONTROL_INPUT);
@@ -852,6 +857,7 @@ void CGUISettings::Initialize()
   AddBool(srvUpnp, "services.upnpserver", 21360, false);
   AddBool(srvUpnp, "services.upnpannounce", 20188, true);
   AddBool(srvUpnp, "services.upnprenderer", 21881, false);
+  AddBool(srvUpnp, "services.upnpcontroller", 21361, false);
 
 #ifdef HAS_WEB_SERVER
   CSettingsCategory* srvWeb = AddCategory(SETTINGS_SERVICE, "webserver", 33101);
@@ -929,11 +935,6 @@ void CGUISettings::Initialize()
     AddString(loc, "locale.timezonecountry", 14079, g_timezone.GetCountryByTimezone(g_timezone.GetOSConfiguredTimezone()), SPIN_CONTROL_TEXT);
     AddString(loc, "locale.timezone", 14080, g_timezone.GetOSConfiguredTimezone(), SPIN_CONTROL_TEXT);
   }
-#endif
-#ifdef HAS_TIME_SERVER
-  AddSeparator(loc, "locale.sep2");
-  AddBool(loc, "locale.timeserver", 168, false);
-  AddString(loc, "locale.timeserveraddress", 731, "pool.ntp.org", EDIT_CONTROL_INPUT);
 #endif
   AddSeparator(loc, "locale.sep3");
   AddString(loc, "locale.audiolanguage", 285, "original", SPIN_CONTROL_TEXT);

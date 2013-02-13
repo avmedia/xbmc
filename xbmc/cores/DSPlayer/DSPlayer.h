@@ -74,7 +74,6 @@ class CGraphManagementThread : public CThread
 private:
   bool          m_bSpeedChanged;
   double        m_clockStart;
-  bool          m_bDoNotUseDSFF;
   double        m_currentRate;
   CDSPlayer*    m_pPlayer;
 public:

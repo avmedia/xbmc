@@ -796,7 +796,7 @@ bool CDSPlayer::CachePVRStream(void) const
 }
 
 CGraphManagementThread::CGraphManagementThread(CDSPlayer * pPlayer)
-  : m_pPlayer(pPlayer), m_bSpeedChanged(false), m_bDoNotUseDSFF(false),CThread("CGraphManagementThread thread")
+  : m_pPlayer(pPlayer), m_bSpeedChanged(false), CThread("CGraphManagementThread thread")
 {
 }
 
@@ -820,36 +820,12 @@ void CGraphManagementThread::Process()
 
       if (m_currentRate == 1)
         g_dsGraph->Play();
-      else if (((m_currentRate < 1) || (m_bDoNotUseDSFF && (m_currentRate > 1)))
-        && (!g_dsGraph->IsPaused()))
-        g_dsGraph->Pause(); // Pause only if not using SetRate
 
-      // Fast forward. DirectShow does all the hard work for us.
-      if (m_currentRate >= 1)
-      {
-        HRESULT hr = S_OK;
-        Com::SmartQIPtr<IMediaSeeking> pSeeking = g_dsGraph->pFilterGraph;
-        if (pSeeking)
-        {
-          if (m_currentRate == 1)
-            pSeeking->SetRate(m_currentRate);
-          else if (!m_bDoNotUseDSFF)
-          {
-            HRESULT hr = pSeeking->SetRate(m_currentRate);
-            if (FAILED(hr))
-            {
-              m_bDoNotUseDSFF = true;
-              pSeeking->SetRate(1);
-              m_bSpeedChanged = true;
-            }
-          }
-        }
-      }
     }
     if (CDSPlayer::PlayerState == DSPLAYER_CLOSED)
       break;
-    // Handle Rewind
-    if ((m_currentRate < 0) || ( m_bDoNotUseDSFF && (m_currentRate > 1)))
+    // Handle Rewind or Fast Forward
+    if (m_currentRate != 1)
     {
       double clock = m_pPlayer->GetClock().GetClock() - m_clockStart; // Time elapsed since the rate change
       // Only seek if elapsed time is greater than 250 ms

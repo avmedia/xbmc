@@ -3421,8 +3421,8 @@ CVideoInfoTag CVideoDatabase::GetDetailsForEpisode(const dbiplus::sql_record* co
   details.m_resumePoint.timeInSeconds = record->at(VIDEODB_DETAILS_EPISODE_RESUME_TIME).get_asInt();
   details.m_resumePoint.totalTimeInSeconds = record->at(VIDEODB_DETAILS_EPISODE_TOTAL_TIME).get_asInt();
 #ifdef HAS_DS_PLAYER
-  details.m_resumePoint.edition = record->at(VIDEODB_DETAILS_MOVIE_RESUME_EDITION).get_asString();
-  details.m_resumePoint.editionNumber = record->at(VIDEODB_DETAILS_MOVIE_RESUME_EDITION_NUMBER).get_asInt();
+  details.m_resumePoint.edition = record->at(VIDEODB_DETAILS_EPISODE_RESUME_EDITION).get_asString();
+  details.m_resumePoint.editionNumber = record->at(VIDEODB_DETAILS_EPISODE_RESUME_EDITION_NUMBER).get_asInt();
 #endif
   details.m_resumePoint.type = CBookmark::RESUME;
 
@@ -3473,8 +3473,8 @@ CVideoInfoTag CVideoDatabase::GetDetailsForMusicVideo(const dbiplus::sql_record*
   details.m_resumePoint.timeInSeconds = record->at(VIDEODB_DETAILS_MUSICVIDEO_RESUME_TIME).get_asInt();
   details.m_resumePoint.totalTimeInSeconds = record->at(VIDEODB_DETAILS_MUSICVIDEO_TOTAL_TIME).get_asInt();
 #ifdef HAS_DS_PLAYER
-  details.m_resumePoint.edition = record->at(VIDEODB_DETAILS_MOVIE_RESUME_EDITION).get_asString();
-  details.m_resumePoint.editionNumber = record->at(VIDEODB_DETAILS_MOVIE_RESUME_EDITION_NUMBER).get_asInt();
+  details.m_resumePoint.edition = record->at(VIDEODB_DETAILS_MUSICVIDEO_RESUME_EDITION).get_asString();
+  details.m_resumePoint.editionNumber = record->at(VIDEODB_DETAILS_MUSICVIDEO_RESUME_EDITION_NUMBER).get_asInt();
 #endif
   details.m_resumePoint.type = CBookmark::RESUME;
 

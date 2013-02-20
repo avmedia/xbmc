@@ -603,7 +603,7 @@ void CAESinkDirectSound::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList, bo
     if (SUCCEEDED(hr) && varName.blob.cbSize > 0)
     {
       WAVEFORMATEX* smpwfxex = (WAVEFORMATEX*)varName.blob.pBlobData;
-      deviceInfo.m_channels = layoutsByChCount[std::max(std::min(smpwfxex->nChannels, (WORD) 8), (WORD) 2)];
+      deviceInfo.m_channels = layoutsByChCount[std::max(std::min(smpwfxex->nChannels, (WORD) DS_SPEAKER_COUNT), (WORD) 2)];
       deviceInfo.m_dataFormats.push_back(AEDataFormat(AE_FMT_FLOAT));
       deviceInfo.m_dataFormats.push_back(AEDataFormat(AE_FMT_AC3));
       deviceInfo.m_sampleRates.push_back(std::min(smpwfxex->nSamplesPerSec, (DWORD) 192000));
@@ -897,25 +897,14 @@ failed:
   return strDevName;
 }
 
-#ifdef HAS_DS_PLAYER
 bool CAESinkDirectSound::SoftSuspend()
 {
-	/* Sink has been asked to suspend output - we release audio   */
-	/* device as we are in exclusive mode and thus allow external */
-	/* audio sources to play. This requires us to reinitialize    */
-	/* on resume.                                                 */
-
-	Deinitialize();
-
-	return true;
+  Deinitialize();
+  return true;
 }
 
 bool CAESinkDirectSound::SoftResume()
 {
-	/* Sink asked to resume output. To release audio device in    */
-	/* exclusive mode we release the device context and therefore */
-	/* must reinitialize. Return false to force re-init by engine */
-
-	return false;
+  /* Return false to force re-init by engine */
+  return false;
 }
-#endif

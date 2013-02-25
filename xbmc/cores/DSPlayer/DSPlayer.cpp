@@ -127,22 +127,15 @@ void CDSPlayer::ShowEditionDlg(bool playStart)
 	if(playStart && m_PlayerOptions.starttime > 0)
 	{
 		CDSPlayerDatabase db;
-		int iEdition = GetEdition();
-
-		if (iEdition < 0 && db.Open())
+		if (db.Open())
 		{
 			CEdition edition;
 			if (db.GetResumeEdition(currentFileItem.GetPath(), edition))
 			{
-				iEdition = edition.editionNumber;
+				CLog::Log(LOGDEBUG,"%s select bookmark, edition with idx %i selected", __FUNCTION__, edition.editionNumber);
+				SetEdition(edition.editionNumber);
+				return;
 			}
-		}
-
-		if(iEdition != -1)
-		{
-			CLog::Log(LOGDEBUG,"%s select bookmark, edition with idx %i selected", __FUNCTION__, iEdition);
-			SetEdition(iEdition);
-			return;
 		}
 	}
 

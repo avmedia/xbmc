@@ -431,6 +431,14 @@ void CGUIWindowSettingsCategory::CreateSettings()
           pControl->AddLabel(g_localizeStrings.Get(760 + i), i);
         pControl->SetValue(pSettingInt->GetData());
       }
+#ifdef HAS_DS_PLAYER
+	  else if (strSetting.Equals("subtitles.border"))
+	  {
+		  pControl->AddLabel(g_localizeStrings.Get(55051), SUBTITLE_BORDER_OUTLINE);
+		  pControl->AddLabel(g_localizeStrings.Get(55052), SUBTITLE_BORDER_OPAQUE);
+		  pControl->SetValue(pSettingInt->GetData());
+	  }
+#endif
       else if (strSetting.Equals("lookandfeel.startupwindow"))
         FillInStartupWindow(pSetting);
       else if (strSetting.Equals("subtitles.height") || strSetting.Equals("karaoke.fontheight") )
@@ -471,14 +479,6 @@ void CGUIWindowSettingsCategory::CreateSettings()
       continue;
     }
 #ifdef HAS_DS_PLAYER
-	else if (strSetting.Equals("subtitles.border"))
-	{
-		CSettingInt *pSettingInt = (CSettingInt*)pSetting;
-		CGUISpinControlEx *pControl = (CGUISpinControlEx *)GetControl(GetSetting(strSetting)->GetID());
-		pControl->AddLabel(g_localizeStrings.Get(55051), SUBTITLE_BORDER_OUTLINE);
-		pControl->AddLabel(g_localizeStrings.Get(55052), SUBTITLE_BORDER_OPAQUE);
-		pControl->SetValue(pSettingInt->GetData());
-	}
 	else if (strSetting.Equals("subtitles.style"))
 	{
 		CSettingInt *pSettingInt = (CSettingInt*)pSetting;

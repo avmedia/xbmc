@@ -152,7 +152,7 @@ void CDSPlayer::ShowEditionDlg(bool playStart)
 		dialog->SetHeading(IsMatroskaEditions() ? 55025 : 55026);
 
 		CLog::Log(LOGDEBUG,"%s Edition count - %i", __FUNCTION__, count);
-
+		int selected = GetEdition();
 		for (UINT i = 0; i < count; i++)
 		{
 			CStdString name;
@@ -162,6 +162,9 @@ void CDSPlayer::ShowEditionDlg(bool playStart)
 
 			if (duration == _I64_MIN || listAllTitles || count == 1 || duration >= DS_TIME_BASE * 60 * minLength) 
 			{
+				if(i == selected)
+					selected = editionOptions.size();
+
 				if (name.length() == 0)
 					name = "Unnamed";
 				dialog->Add(name);
@@ -174,11 +177,10 @@ void CDSPlayer::ShowEditionDlg(bool playStart)
 			dialog->Add(g_localizeStrings.Get(55027));
 		}
 
-		dialog->SetSelected(GetEdition());
-
+		dialog->SetSelected(selected);
 		dialog->DoModal();
 
-		int selected = dialog->GetSelectedLabel();
+		selected = dialog->GetSelectedLabel();
 		if (selected >= 0)
 		{
 			if (selected == editionOptions.size())

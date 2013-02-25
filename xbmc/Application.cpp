@@ -3889,8 +3889,8 @@ bool CApplication::PlayFile(const CFileItem& item, bool bRestart)
     m_currentStackPosition = 0;
     m_currentStack->Clear();
 #ifdef HAS_DS_PLAYER
-	m_progressTrackingVideoResumeBookmark.editionNumber = 0;
-	m_progressTrackingVideoResumeBookmark.edition = "";
+	m_progressTrackingVideoResumeBookmark.edition.editionNumber = 0;
+	m_progressTrackingVideoResumeBookmark.edition.editionName = "";
 #endif
     if (item.IsVideo())
       CUtil::ClearSubtitles();
@@ -4518,8 +4518,8 @@ void CApplication::StopPlaying()
 #ifdef HAS_DS_PLAYER
 		if(m_pPlayer->GetEditionsCount() > 1)
 		{
-			m_progressTrackingVideoResumeBookmark.editionNumber = m_pPlayer->GetEdition();
-			m_pPlayer->GetEditionInfo(m_progressTrackingVideoResumeBookmark.editionNumber, m_progressTrackingVideoResumeBookmark.edition, NULL);
+			m_progressTrackingVideoResumeBookmark.edition.editionNumber = m_pPlayer->GetEdition();
+			m_pPlayer->GetEditionInfo(m_progressTrackingVideoResumeBookmark.edition.editionNumber, m_progressTrackingVideoResumeBookmark.edition.editionName, NULL);
 		}
 #endif
 		m_pPlayer->CloseFile();

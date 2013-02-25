@@ -126,15 +126,15 @@ void CDSPlayer::ShowEditionDlg(bool playStart)
 
 	if(playStart && m_PlayerOptions.starttime > 0)
 	{
-		CVideoDatabase db;
+		CDSPlayerDatabase db;
 		int iEdition = GetEdition();
 
 		if (iEdition < 0 && db.Open())
 		{
-			CBookmark bookmark;
-			if (db.GetResumeBookMark(currentFileItem.GetPath(), bookmark))
+			CEdition edition;
+			if (db.GetResumeEdition(currentFileItem.GetPath(), edition))
 			{
-				iEdition = bookmark.editionNumber;
+				iEdition = edition.editionNumber;
 			}
 		}
 

@@ -3118,6 +3118,9 @@
     <ClCompile Include="..\..\xbmc\cores\DSPlayer\DSInputStreamPVRManager.cpp">
       <Filter>cores\DSPlayer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\cores\DSPlayer\DSPlayerDatabase.cpp">
+      <Filter>cores\DSPlayer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\xbmc\win32\pch.h">
@@ -6110,6 +6113,9 @@
     <ClInclude Include="..\..\xbmc\music\karaoke\karaokevideobackground.h" />
     <ClInclude Include="..\..\xbmc\video\FFmpegVideoDecoder.h" />
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\DSInputStreamPVRManager.h">
+      <Filter>cores\DSPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\cores\DSPlayer\DSPlayerDatabase.h">
       <Filter>cores\DSPlayer</Filter>
     </ClInclude>
   </ItemGroup>

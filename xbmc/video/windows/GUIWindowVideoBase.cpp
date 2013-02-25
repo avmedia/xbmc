@@ -73,6 +73,9 @@
 #include "GUIInfoManager.h"
 #include "utils/GroupUtils.h"
 #include "filesystem/File.h"
+#ifdef HAS_DS_PLAYER
+#include "DSPlayerDatabase.h"
+#endif
 
 using namespace std;
 using namespace XFILE;
@@ -857,13 +860,18 @@ void CGUIWindowVideoBase::GetResumeItemOffset(const CFileItem *item, int& starto
 
   if (!item->IsNFO() && !item->IsPlayList())
   {
+#ifdef HAS_DS_PLAYER
+	  CEdition edition;
+	  CDSPlayerDatabase dspdb;
+	  if (!dspdb.Open())
+		  CLog::Log(LOGERROR, "%s - Cannot open DSPlayer database", __FUNCTION__);
+	  else if (dspdb.GetResumeEdition(item, edition))
+		  strEdition = edition.editionName;
+#endif
     if (item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_resumePoint.IsSet())
     {
       startoffset = (int)(item->GetVideoInfoTag()->m_resumePoint.timeInSeconds*75);
       partNumber = item->GetVideoInfoTag()->m_resumePoint.partNumber;
-#ifdef HAS_DS_PLAYER
-	  strEdition = item->GetVideoInfoTag()->m_resumePoint.edition;
-#endif
     }
     else
     {
@@ -882,9 +890,6 @@ void CGUIWindowVideoBase::GetResumeItemOffset(const CFileItem *item, int& starto
       {
         startoffset = (int)(bookmark.timeInSeconds*75);
         partNumber = bookmark.partNumber;
-#ifdef HAS_DS_PLAYER
-		strEdition = bookmark.edition;
-#endif
 	  }
       db.Close();
     }
@@ -1711,7 +1716,12 @@ void CGUIWindowVideoBase::MarkWatched(const CFileItemPtr &item, bool bMark)
   }
 
   CVideoDatabase database;
+#ifdef HAS_DS_PLAYER
+  CDSPlayerDatabase dspdb;
+  if (database.Open() && dspdb.Open())
+#else
   if (database.Open())
+#endif
   {
     CFileItemList items;
     if (item->m_bIsFolder)
@@ -1737,8 +1747,13 @@ void CGUIWindowVideoBase::MarkWatched(const CFileItemPtr &item, bool bMark)
         continue;
 
       // Clear resume bookmark
-      if (bMark)
-        database.ClearBookMarksOfFile(pItem->GetPath(), CBookmark::RESUME);
+	  if (bMark)
+	  {
+#ifdef HAS_DS_PLAYER
+		  dspdb.ClearEditionOfFile(pItem->GetPath());
+#endif
+		  database.ClearBookMarksOfFile(pItem->GetPath(), CBookmark::RESUME);
+	  }
 
       database.SetPlayCount(*pItem, bMark ? 1 : 0);
     }

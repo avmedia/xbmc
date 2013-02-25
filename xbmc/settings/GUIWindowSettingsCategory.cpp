@@ -478,25 +478,6 @@ void CGUIWindowSettingsCategory::CreateSettings()
       control->SetDelayed();
       continue;
     }
-#ifdef HAS_DS_PLAYER
-	else if (strSetting.Equals("subtitles.style"))
-	{
-		CSettingInt *pSettingInt = (CSettingInt*)pSetting;
-		CGUISpinControlEx *pControl = (CGUISpinControlEx *)GetControl(GetSetting(strSetting)->GetID());
-		pControl->AddLabel(g_localizeStrings.Get(738), FONT_STYLE_NORMAL);
-		pControl->AddLabel(g_localizeStrings.Get(739), FONT_STYLE_BOLD);
-		pControl->AddLabel(g_localizeStrings.Get(740), FONT_STYLE_ITALICS);
-		pControl->AddLabel(g_localizeStrings.Get(741), FONT_STYLE_BOLD_ITALICS);
-		pControl->SetValue(pSettingInt->GetData());
-	}
-	else if (strSetting.Equals("subtitles.outline.width") || strSetting.Equals("subtitles.alpha")
-		|| strSetting.Equals("subtitles.shadow.depth"))
-	{
-		CSettingInt *pSettingInt = (CSettingInt*)pSetting;
-		CGUISpinControlEx *pControl = (CGUISpinControlEx *)GetControl(GetSetting(strSetting)->GetID());
-		pControl->SetValue(pSettingInt->GetData());
-	}
-#endif
     else if (strSetting.Equals("subtitles.font") || strSetting.Equals("karaoke.font") )
     {
       AddSetting(pSetting, group->GetWidth(), iControlID);

@@ -51,7 +51,7 @@ CDSPlayerDatabase::~CDSPlayerDatabase(void)
 
 bool CDSPlayerDatabase::Open()
 {
-	return CDatabase::Open();
+	return CDatabase::Open(g_advancedSettings.m_databaseDSPlayer);
 }
 
 int CDSPlayerDatabase::GetMinVersion() const

@@ -24,17 +24,22 @@
 
 #include <android_native_app_glue.h>
 #include <jni.h>
+#include "JNIThreading.h"
 
 #include "EventLoop.h"
 #include "XBMCApp.h"
-
+#include "JNIManager.h"
+#include <android/log.h>
 void setup_env(struct android_app* state)
 {
-  JavaVM* vm  = state->activity->vm;
-  JNIEnv* env = state->activity->env;
+  JNIEnv* env = xbmc_jnienv();
+  if (!env)
+  {
+    __android_log_print(ANDROID_LOG_VERBOSE, "XBMC","android_main: env is invalid");
+    exit(1);
+  }
   const char* temp;
 
-  vm->AttachCurrentThread(&env, NULL);
   jobject oActivity = state->activity->clazz;
   jclass cActivity = env->GetObjectClass(oActivity);
 
@@ -149,15 +154,15 @@ void setup_env(struct android_app* state)
     setenv("HOME", storagePath, 0);
   else
     setenv("HOME", getenv("XBMC_TEMP"), 0);
-
-  state->activity->vm->DetachCurrentThread();
 }
 
 extern void android_main(struct android_app* state)
 {
   // make sure that the linker doesn't strip out our glue
   app_dummy();
-
+  int val = xbmc_jni_on_load(state->activity->vm, state->activity->env);
+  __android_log_print(ANDROID_LOG_VERBOSE, "XBMC","xbmc_jni_on_load returned %i\n",val);
+  CAndroidJNIManager::GetInstance().SetActivityInstance(state->activity->clazz);
   setup_env(state);
   CEventLoop eventLoop(state);
   CXBMCApp xbmcApp(state->activity);
@@ -175,5 +180,6 @@ extern void android_main(struct android_app* state)
   // those loaded libs in the state they were in when we quit XBMC last time
   // which will lead to crashes because of global/static classes that haven't
   // been properly uninitialized
+  xbmc_jni_on_unload();
   exit(0);
 }

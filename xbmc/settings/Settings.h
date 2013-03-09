@@ -36,7 +36,7 @@
 #ifdef MID
 #define DEFAULT_VSYNC       VSYNC_DISABLED
 #else  // MID
-#if defined(TARGET_DARWIN) || defined(_WIN32)
+#if defined(TARGET_DARWIN) || defined(_WIN32) || defined(TARGET_RASPBERRY_PI)
 #define DEFAULT_VSYNC       VSYNC_ALWAYS
 #else
 #define DEFAULT_VSYNC       VSYNC_DRIVER
@@ -170,7 +170,6 @@ public:
   CViewState m_viewStateMusicNavArtists;
   CViewState m_viewStateMusicNavAlbums;
   CViewState m_viewStateMusicNavSongs;
-  CViewState m_viewStateMusicLastFM;
   CViewState m_viewStateVideoNavActors;
   CViewState m_viewStateVideoNavYears;
   CViewState m_viewStateVideoNavGenres;
@@ -239,12 +238,6 @@ public:
   CStdString m_defaultPictureSource;
   CStdString m_defaultFileSource;
   CStdString m_defaultMusicLibSource;
-
-  CStdString m_UPnPUUIDServer;
-  int        m_UPnPPortServer;
-  int        m_UPnPMaxReturnedItems;
-  CStdString m_UPnPUUIDRenderer;
-  int        m_UPnPPortRenderer;
 
   int        m_musicNeedsUpdate; ///< if a database update means an update is required (set to the version number of the db)
   int        m_videoNeedsUpdate; ///< if a database update means an update is required (set to the version number of the db)
@@ -347,9 +340,6 @@ public:
 
   CStdString GetSettingsFile() const;
 
-  bool LoadUPnPXml(const CStdString& strSettingsFile);
-  bool SaveUPnPXml(const CStdString& strSettingsFile) const;
-
   /*! \brief Load the user profile information from disk
    Loads the profiles.xml file and creates the list of profiles. If no profiles
    exist, a master user is created.  Should be called after special://masterprofile/
@@ -393,8 +383,6 @@ protected:
 
   bool LoadSettings(const CStdString& strSettingsFile);
 //  bool SaveSettings(const CStdString& strSettingsFile) const;
-
-  bool LoadPlayerCoreFactorySettings(const CStdString& fileStr, bool clear);
 
   // skin activated settings
   void LoadSkinSettings(const TiXmlElement* pElement);

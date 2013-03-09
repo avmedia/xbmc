@@ -22,7 +22,7 @@
 namespace JSONRPC
 {
   const char* const JSONRPC_SERVICE_ID          = "http://www.xbmc.org/jsonrpc/ServiceDescription.json";
-  const char* const JSONRPC_SERVICE_VERSION     = "6.0.1";
+  const char* const JSONRPC_SERVICE_VERSION     = "6.1.0";
   const char* const JSONRPC_SERVICE_DESCRIPTION = "JSON-RPC API of XBMC";
 
   const char* const JSONRPC_SERVICE_TYPES[] = {  
@@ -225,12 +225,7 @@ namespace JSONRPC
       "\"properties\": {"
         "\"index\": { \"type\": \"integer\", \"minimum\": 0, \"required\": true },"
         "\"name\": { \"type\": \"string\", \"required\": true },"
-        "\"language\": { \"type\": \"string\", \"required\": true }"
-      "}"
-    "}",
-    "\"Player.Audio.Stream.Extended\": {"
-      "\"extends\": \"Player.Audio.Stream\","
-      "\"properties\": {"
+        "\"language\": { \"type\": \"string\", \"required\": true },"
         "\"codec\": { \"type\": \"string\", \"required\": true },"
         "\"bitrate\": { \"type\": \"integer\", \"required\": true },"
         "\"channels\": { \"type\": \"integer\", \"required\": true }"
@@ -272,7 +267,7 @@ namespace JSONRPC
         "\"canrotate\": { \"type\": \"boolean\" },"
         "\"canshuffle\": { \"type\": \"boolean\" },"
         "\"canrepeat\": { \"type\": \"boolean\" },"
-        "\"currentaudiostream\": { \"$ref\": \"Player.Audio.Stream.Extended\" },"
+        "\"currentaudiostream\": { \"$ref\": \"Player.Audio.Stream\" },"
         "\"audiostreams\": { \"type\": \"array\", \"items\": { \"$ref\": \"Player.Audio.Stream\" } },"
         "\"subtitleenabled\": { \"type\": \"boolean\" },"
         "\"currentsubtitle\": { \"$ref\": \"Player.Subtitle\" },"
@@ -413,7 +408,7 @@ namespace JSONRPC
         "\"enum\": [ \"instrument\", \"style\", \"mood\", \"born\", \"formed\","
                   "\"description\", \"genre\", \"died\", \"disbanded\","
                   "\"yearsactive\", \"musicbrainzartistid\", \"fanart\","
-                  "\"thumbnail\" ]"
+                  "\"compilationartist\", \"thumbnail\" ]"
       "}"
     "}",
     "\"Audio.Fields.Album\": {"
@@ -474,6 +469,7 @@ namespace JSONRPC
         "\"died\": { \"type\": \"string\" },"
         "\"disbanded\": { \"type\": \"string\" },"
         "\"yearsactive\": { \"$ref\": \"Array.String\" },"
+        "\"compilationartist\": { \"type\": \"boolean\" },"
         "\"musicbrainzartistid\": { \"type\": \"string\" }"
       "}"
     "}",
@@ -1794,7 +1790,8 @@ namespace JSONRPC
         "{ \"name\": \"directory\", \"type\": \"string\", \"required\": true },"
         "{ \"name\": \"media\", \"$ref\": \"Files.Media\", \"default\": \"files\" },"
         "{ \"name\": \"properties\", \"$ref\": \"List.Fields.Files\" },"
-        "{ \"name\": \"sort\", \"$ref\": \"List.Sort\" }"
+        "{ \"name\": \"sort\", \"$ref\": \"List.Sort\" },"
+        "{ \"name\": \"limits\", \"$ref\": \"List.Limits\", \"description\": \"Limits are applied after getting the directory content thus retrieval is not faster when they are applied.\" }"
       "],"
       "\"returns\": {"
         "\"type\": \"object\","

@@ -43,7 +43,6 @@
 #include "addons/AddonInstaller.h"
 #include "addons/AddonManager.h"
 #include "addons/PluginSource.h"
-#include "music/LastFmManager.h"
 #include "utils/log.h"
 #include "storage/MediaManager.h"
 #include "utils/RssReader.h"
@@ -172,8 +171,6 @@ const BUILT_IN commands[] = {
   { "ExportLibrary",              true,   "Export the video/music library" },
   { "PageDown",                   true,   "Send a page down event to the pagecontrol with given id" },
   { "PageUp",                     true,   "Send a page up event to the pagecontrol with given id" },
-  { "LastFM.Love",                false,  "Add the current playing last.fm radio track to the last.fm loved tracks" },
-  { "LastFM.Ban",                 false,  "Ban the current playing last.fm radio track" },
   { "Container.Refresh",          false,  "Refresh current listing" },
   { "Container.Update",           false,  "Update current listing. Send Container.Update(path,replace) to reset the path history" },
   { "Container.NextViewMode",     false,  "Move to the next view type (and refresh the listing)" },
@@ -211,6 +208,9 @@ const BUILT_IN commands[] = {
   { "ToggleDebug",                false,  "Enables/disables debug mode" },
   { "StartPVRManager",            false,  "(Re)Starts the PVR manager" },
   { "StopPVRManager",             false,  "Stops the PVR manager" },
+#if defined(TARGET_ANDROID)
+  { "StartAndroidActivity",       true,   "Launch an Android native app with the given package name.  Optional parms (in order): intent, dataType, dataURI." },
+#endif
 };
 
 bool CBuiltins::HasCommand(const CStdString& execString)
@@ -874,7 +874,7 @@ int CBuiltins::Execute(const CStdString& execString)
   }
   else if (execute.Equals("playwith"))
   {
-    g_application.m_eForcedNextPlayer = CPlayerCoreFactory::GetPlayerCore(parameter);
+    g_application.m_eForcedNextPlayer = CPlayerCoreFactory::Get().GetPlayerCore(parameter);
     g_application.OnAction(CAction(ACTION_PLAYER_PLAY));
   }
   else if (execute.Equals("mute"))
@@ -1397,14 +1397,6 @@ int CBuiltins::Execute(const CStdString& execString)
       }
     }
   }
-  else if (execute.Equals("lastfm.love"))
-  {
-    CLastFmManager::GetInstance()->Love(parameter.Equals("false") ? false : true);
-  }
-  else if (execute.Equals("lastfm.ban"))
-  {
-    CLastFmManager::GetInstance()->Ban(parameter.Equals("false") ? false : true);
-  }
   else if (execute.Equals("control.move") && params.size() > 1)
   {
     CGUIMessage message(GUI_MSG_MOVE_OFFSET, g_windowManager.GetFocusedWindow(), atoi(params[0].c_str()), atoi(params[1].c_str()));
@@ -1623,6 +1615,10 @@ int CBuiltins::Execute(const CStdString& execString)
   else if (execute.Equals("stoppvrmanager"))
   {
     g_application.StopPVRManager();
+  }
+  else if (execute.Equals("StartAndroidActivity") && params.size() > 0)
+  {
+    CApplicationMessenger::Get().StartAndroidActivity(params);
   }
   else
     return -1;

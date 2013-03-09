@@ -25,7 +25,6 @@
 #include "dialogs/GUIDialogProgress.h"
 #include "Application.h"
 #include "Util.h"
-#include "network/libscrobbler/lastfmscrobbler.h"
 #include "utils/URIUtils.h"
 #include "utils/Weather.h"
 #include "PartyModeManager.h"
@@ -36,7 +35,6 @@
 #include "utils/SystemInfo.h"
 #include "guilib/GUITextBox.h"
 #include "pictures/GUIWindowSlideShow.h"
-#include "music/LastFmManager.h"
 #include "pictures/PictureInfoTag.h"
 #include "music/tags/MusicInfoTag.h"
 #include "guilib/GUIWindowManager.h"
@@ -298,16 +296,6 @@ const infomap musicpartymode[] = {{ "enabled",           MUSICPM_ENABLED },
                                   { "matchingsongsleft", MUSICPM_MATCHINGSONGSLEFT },
                                   { "relaxedsongspicked",MUSICPM_RELAXEDSONGSPICKED },
                                   { "randomsongspicked", MUSICPM_RANDOMSONGSPICKED }};
-
-const infomap audioscrobbler[] = {{ "enabled",           AUDIOSCROBBLER_ENABLED },
-                                  { "connectstate",      AUDIOSCROBBLER_CONN_STATE }, //labels from here
-                                  { "submitinterval",    AUDIOSCROBBLER_SUBMIT_INT },
-                                  { "filescached",       AUDIOSCROBBLER_FILES_CACHED },
-                                  { "submitstate",       AUDIOSCROBBLER_SUBMIT_STATE }};
-
-const infomap lastfm[] =         {{ "radioplaying",      LASTFM_RADIOPLAYING },
-                                  { "canlove",           LASTFM_CANLOVE},
-                                  { "canban",            LASTFM_CANBAN}};
 
 const infomap musicplayer[] =    {{ "title",            MUSICPLAYER_TITLE },
                                   { "album",            MUSICPLAYER_ALBUM },
@@ -804,22 +792,6 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
       {
         if (prop.name == musicpartymode[i].str)
           return musicpartymode[i].val;
-      }
-    }
-    else if (cat.name == "audioscrobbler")
-    {
-      for (size_t i = 0; i < sizeof(audioscrobbler) / sizeof(infomap); i++)
-      {
-        if (prop.name == audioscrobbler[i].str)
-          return audioscrobbler[i].val;
-      }
-    }
-    else if (cat.name == "lastfm")
-    {
-      for (size_t i = 0; i < sizeof(lastfm) / sizeof(infomap); i++)
-      {
-        if (prop.name == lastfm[i].str)
-          return lastfm[i].val;
       }
     }
     else if (cat.name == "system")
@@ -1456,7 +1428,11 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
   break;
   case VIDEOPLAYER_VIDEO_CODEC:
     if(g_application.IsPlaying() && g_application.m_pPlayer)
-      strLabel = g_application.m_pPlayer->GetVideoCodecName();
+    {
+      SPlayerVideoStreamInfo info;
+      g_application.m_pPlayer->GetVideoStreamInfo(info);
+      strLabel = info.videoCodecName;
+    }
     break;
   case VIDEOPLAYER_VIDEO_RESOLUTION:
     if(g_application.IsPlaying() && g_application.m_pPlayer)
@@ -1464,19 +1440,27 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
     break;
   case VIDEOPLAYER_AUDIO_CODEC:
     if(g_application.IsPlaying() && g_application.m_pPlayer)
-      strLabel = g_application.m_pPlayer->GetAudioCodecName();
+    {
+      SPlayerAudioStreamInfo info;
+      g_application.m_pPlayer->GetAudioStreamInfo(g_application.m_pPlayer->GetAudioStream(), info);
+      strLabel = info.audioCodecName;
+    }
     break;
   case VIDEOPLAYER_VIDEO_ASPECT:
     if (g_application.IsPlaying() && g_application.m_pPlayer)
     {
-      float aspect;
-      g_application.m_pPlayer->GetVideoAspectRatio(aspect);
-      strLabel = CStreamDetails::VideoAspectToAspectDescription(aspect);
+      SPlayerVideoStreamInfo info;
+      g_application.m_pPlayer->GetVideoStreamInfo(info);
+      strLabel = CStreamDetails::VideoAspectToAspectDescription(info.videoAspectRatio);
     }
     break;
   case VIDEOPLAYER_AUDIO_CHANNELS:
     if(g_application.IsPlaying() && g_application.m_pPlayer)
-      strLabel.Format("%i", g_application.m_pPlayer->GetChannels());
+    {
+      SPlayerAudioStreamInfo info;
+      g_application.m_pPlayer->GetAudioStreamInfo(g_application.m_pPlayer->GetAudioStream(), info);
+      strLabel.Format("%i", info.channels);
+    }
     break;
   case PLAYLIST_LENGTH:
   case PLAYLIST_POSITION:
@@ -1778,12 +1762,6 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
     }
     break;
 
-  case AUDIOSCROBBLER_CONN_STATE:
-  case AUDIOSCROBBLER_SUBMIT_INT:
-  case AUDIOSCROBBLER_FILES_CACHED:
-  case AUDIOSCROBBLER_SUBMIT_STATE:
-    strLabel=GetAudioScrobblerLabel(info);
-    break;
   case VISUALISATION_PRESET:
     {
       CGUIMessage msg(GUI_MSG_GET_VISUALISATION, 0, 0);
@@ -2342,18 +2320,6 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
     case MUSICPM_ENABLED:
       bReturn = g_partyModeManager.IsEnabled();
     break;
-    case AUDIOSCROBBLER_ENABLED:
-      bReturn = CLastFmManager::GetInstance()->IsLastFmEnabled();
-    break;
-    case LASTFM_RADIOPLAYING:
-      bReturn = CLastFmManager::GetInstance()->IsRadioEnabled();
-      break;
-    case LASTFM_CANLOVE:
-      bReturn = CLastFmManager::GetInstance()->CanLove();
-      break;
-    case LASTFM_CANBAN:
-      bReturn = CLastFmManager::GetInstance()->CanBan();
-      break;
     case MUSICPLAYER_HASPREVIOUS:
       {
         // requires current playlist be PLAYLIST_MUSIC
@@ -3347,6 +3313,10 @@ CStdString CGUIInfoManager::GetPlaylistLabel(int item) const
 CStdString CGUIInfoManager::GetMusicLabel(int item)
 {
   if (!g_application.IsPlaying() || !m_currentFile->HasMusicInfoTag()) return "";
+
+  SPlayerAudioStreamInfo info;
+  g_application.m_pPlayer->GetAudioStreamInfo(g_application.m_pPlayer->GetAudioStream(), info);
+
   switch (item)
   {
   case MUSICPLAYER_PLAYLISTLEN:
@@ -3366,7 +3336,7 @@ CStdString CGUIInfoManager::GetMusicLabel(int item)
       float fTimeSpan = (float)(CTimeUtils::GetFrameTime() - m_lastMusicBitrateTime);
       if (fTimeSpan >= 500.0f)
       {
-        m_MusicBitrate = g_application.m_pPlayer->GetAudioBitrate();
+        m_MusicBitrate = info.bitrate;
         m_lastMusicBitrateTime = CTimeUtils::GetFrameTime();
       }
       CStdString strBitrate = "";
@@ -3378,9 +3348,9 @@ CStdString CGUIInfoManager::GetMusicLabel(int item)
   case MUSICPLAYER_CHANNELS:
     {
       CStdString strChannels = "";
-      if (g_application.m_pPlayer->GetChannels() > 0)
+      if (info.channels > 0)
       {
-        strChannels.Format("%i", g_application.m_pPlayer->GetChannels());
+        strChannels.Format("%i", info.channels);
       }
       return strChannels;
     }
@@ -3408,7 +3378,7 @@ CStdString CGUIInfoManager::GetMusicLabel(int item)
   case MUSICPLAYER_CODEC:
     {
       CStdString strCodec;
-      strCodec.Format("%s", g_application.m_pPlayer->GetAudioCodecName().c_str());
+      strCodec.Format("%s", info.audioCodecName);
       return strCodec;
     }
     break;
@@ -3988,27 +3958,6 @@ bool CGUIInfoManager::GetDisplayAfterSeek()
     return true;
   m_seekOffset = 0;
   return false;
-}
-
-CStdString CGUIInfoManager::GetAudioScrobblerLabel(int item)
-{
-  switch (item)
-  {
-  case AUDIOSCROBBLER_CONN_STATE:
-    return CLastfmScrobbler::GetInstance()->GetConnectionState();
-    break;
-  case AUDIOSCROBBLER_SUBMIT_INT:
-    return CLastfmScrobbler::GetInstance()->GetSubmitInterval();
-    break;
-  case AUDIOSCROBBLER_FILES_CACHED:
-    return CLastfmScrobbler::GetInstance()->GetFilesCached();
-    break;
-  case AUDIOSCROBBLER_SUBMIT_STATE:
-    return CLastfmScrobbler::GetInstance()->GetSubmitState();
-    break;
-  }
-
-  return "";
 }
 
 void CGUIInfoManager::Clear()
@@ -5024,7 +4973,7 @@ void CGUIInfoManager::SetCurrentSlide(CFileItem &item)
 {
   if (m_currentSlide->GetPath() != item.GetPath())
   {
-    if (!item.HasPictureInfoTag() && !item.GetPictureInfoTag()->Loaded())
+    if (!item.GetPictureInfoTag()->Loaded()) // If picture metadata has not been loaded yet, load it now
       item.GetPictureInfoTag()->Load(item.GetPath());
     *m_currentSlide = item;
   }

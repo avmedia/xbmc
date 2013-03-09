@@ -30,9 +30,12 @@ CXImage::CXImage(const std::string& strMimeType): m_strMimeType(strMimeType), m_
 
 CXImage::~CXImage()
 {
-  m_dll.FreeMemory(m_thumbnailbuffer);
-  m_dll.ReleaseImage(&m_image);
-  m_dll.Unload();
+  if (m_dll.IsLoaded()) 
+  {
+    m_dll.FreeMemory(m_thumbnailbuffer);
+    m_dll.ReleaseImage(&m_image);
+    m_dll.Unload();
+  }
 }
 
 bool CXImage::LoadImageFromMemory(unsigned char* buffer, unsigned int bufSize, unsigned int width, unsigned int height)
@@ -64,7 +67,7 @@ bool CXImage::LoadImageFromMemory(unsigned char* buffer, unsigned int bufSize, u
 
 bool CXImage::Decode(const unsigned char *pixels, unsigned int pitch, unsigned int format)
 {
-  if (m_image.width == 0 || m_image.width == 0 || !m_dll.IsLoaded())
+  if (m_image.width == 0 || m_image.height == 0 || !m_dll.IsLoaded())
     return false;
 
   unsigned int dstPitch = pitch;

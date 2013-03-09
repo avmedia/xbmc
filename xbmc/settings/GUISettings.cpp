@@ -329,15 +329,6 @@ void CGUISettings::Initialize()
   AddString(NULL, "musicfiles.librarytrackformatright", 13387, "", EDIT_CONTROL_INPUT, false, 16016);
   AddBool(mf, "musicfiles.findremotethumbs", 14059, true);
 
-  CSettingsCategory* scr = AddCategory(SETTINGS_MUSIC, "scrobbler", 15221);
-  AddBool(scr, "scrobbler.lastfmsubmit", 15201, false);
-  AddString(scr,"scrobbler.lastfmusername", 15202, "", EDIT_CONTROL_INPUT, false, 15202);
-  AddString(scr,"scrobbler.lastfmpass", 15203, "", EDIT_CONTROL_MD5_INPUT, false, 15203);
-  AddSeparator(scr, "scrobbler.sep1");
-  AddBool(scr, "scrobbler.librefmsubmit", 15217, false);
-  AddString(scr, "scrobbler.librefmusername", 15218, "", EDIT_CONTROL_INPUT, false, 15218);
-  AddString(scr, "scrobbler.librefmpass", 15219, "", EDIT_CONTROL_MD5_INPUT, false, 15219);
-
   CSettingsCategory* acd = AddCategory(SETTINGS_MUSIC, "audiocds", 620);
   map<int,int> autocd;
   autocd.insert(make_pair(16018, AUTOCD_NONE));
@@ -433,6 +424,7 @@ void CGUISettings::Initialize()
 #else
   AddBool(vs, "videoscreen.blankdisplays", 13130, false);
 #endif
+
   AddSeparator(vs, "videoscreen.sep1");
 #endif
 
@@ -449,6 +441,12 @@ void CGUISettings::Initialize()
 #if defined(HAS_GL)
   // Todo: Implement test pattern for DX
   AddString(vs, "videoscreen.testpattern",226,"", BUTTON_CONTROL_STANDARD);
+#endif
+
+#if defined(HAS_GL) || defined(HAS_DX)
+  AddBool(vs  , "videoscreen.limitedrange", 36042, false);
+#else
+  AddBool(NULL, "videoscreen.limitedrange", 36042, false);
 #endif
 
   CSettingsCategory* ao = AddCategory(SETTINGS_SYSTEM, "audiooutput", 772);
@@ -768,7 +766,7 @@ void CGUISettings::Initialize()
   AddSeparator(vp, "videoplayer.sep1.5");
 #ifdef HAVE_LIBVDPAU
   AddBool(NULL, "videoplayer.vdpauUpscalingLevel", 13121, false);
-  AddBool(vp, "videoplayer.vdpaustudiolevel", 13122, false);
+  AddBool(NULL, "videoplayer.vdpaustudiolevel", 0, false); //depreciated
 #endif
 #endif
   AddSeparator(vp, "videoplayer.sep5");
@@ -1436,6 +1434,13 @@ void CGUISettings::LoadXML(TiXmlElement *pRootElement, bool hideSettings /* = fa
     SetInt("videoscreen.vsync", VSYNC_ALWAYS);
   }
 #endif
+
+  // map old vpdau color range, to now global setting
+  if (GetBool("videoplayer.vdpaustudiolevel"))
+  {
+    SetBool("videoscreen.limitedrange", true);
+    SetBool("videoplayer.vdpaustudiolevel", false);
+  }
  // DXMERGE: This might have been useful?
  // g_videoConfig.SetVSyncMode((VSYNC)GetInt("videoscreen.vsync"));
 

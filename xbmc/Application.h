@@ -203,7 +203,6 @@ public:
   // Checks whether the screensaver and / or DPMS should become active.
   void CheckScreenSaverAndDPMS();
   void CheckPlayingProgress();
-  void CheckAudioScrobblerStatus();
   void ActivateScreenSaver(bool forceType = false);
 
   virtual void Process();
@@ -298,6 +297,10 @@ public:
   int m_iScreenSaveLock; // spiff: are we checking for a lock? if so, ignore the screensaver state, if -1 we have failed to input locks
 
   bool m_bPlaybackStarting;
+
+  bool m_bInBackground;
+  inline bool IsInBackground() { return m_bInBackground; };
+  void SetInBackground(bool background);
 
   CKaraokeLyricsManager* m_pKaraokeMgr;
 

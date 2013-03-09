@@ -19,25 +19,14 @@
  *
  */
 
-#if defined(HAVE_LIBVDADECODER)
-
 #include "DVDVideoCodec.h"
 #include <CoreVideo/CoreVideo.h>
 
-// tracks a frame in and output queue in display order
-typedef struct frame_queue {
-  double              dts;
-  double              pts;
-  double              sort_time;
-  FourCharCode        pixel_buffer_format;
-  CVBufferRef         pixel_buffer_ref;
-  struct frame_queue  *nextframe;
-} frame_queue;
-
-class DllAvUtil;
 class DllSwScale;
-class DllAvFormat;
 class DllLibVDADecoder;
+class CBitstreamConverter;
+struct frame_queue;
+
 class CDVDVideoCodecVDA : public CDVDVideoCodec
 {
 public:
@@ -76,14 +65,9 @@ protected:
   int32_t           m_queue_depth;    // we will try to keep the queue depth around 16+1 frames
   int32_t           m_max_ref_frames;
   bool              m_use_cvBufferRef;
-  
-  bool              m_convert_bytestream;
-  bool              m_convert_3byteTo4byteNALSize;
-  DllAvUtil         *m_dllAvUtil;
-  DllAvFormat       *m_dllAvFormat;
+
+  CBitstreamConverter *m_bitstream;
 
   DllSwScale        *m_dllSwScale;
   DVDVideoPicture   m_videobuffer;
 };
-
-#endif

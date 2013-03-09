@@ -142,9 +142,6 @@
     <Filter Include="music\windows">
       <UniqueIdentifier>{6589445b-fe8f-4083-ba15-3d0d45b8cd2d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="network\libscrobbler">
-      <UniqueIdentifier>{cbd5c896-0dfc-4b84-9ef0-cdf7a49dc29a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="network\windows">
       <UniqueIdentifier>{3d43220c-4ea4-4da7-8ede-ef159da2cd25}</UniqueIdentifier>
     </Filter>
@@ -284,6 +281,12 @@
       <UniqueIdentifier>{90f512bb-8cda-4f04-b938-4f48d29bc82a}</UniqueIdentifier>
     </Filter>    <Filter Include="cores\DSPlayer">
       <UniqueIdentifier>{8b65ff5a-9862-42bc-bf92-b5cf22b9c12a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="settings\dialogs">
+      <UniqueIdentifier>{38264422-e35f-427f-8d3d-27bc075b9bdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="settings\windows">
+      <UniqueIdentifier>{1a1eb956-43d1-4709-9467-ce471d54941d}</UniqueIdentifier>
     </Filter>
     <Filter Include="cores\DSPlayer\FilterCoreFactory">
       <UniqueIdentifier>{e51e3d8c-ee41-4a89-b895-7855b6655146}</UniqueIdentifier>
@@ -938,9 +941,6 @@
     <ClCompile Include="..\..\xbmc\music\GUIViewStateMusic.cpp">
       <Filter>music</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\music\LastFmManager.cpp">
-      <Filter>music</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\music\MusicInfoLoader.cpp">
       <Filter>music</Filter>
     </ClCompile>
@@ -1410,15 +1410,6 @@
     <ClCompile Include="..\..\xbmc\network\Zeroconf.cpp">
       <Filter>network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\network\libscrobbler\lastfmscrobbler.cpp">
-      <Filter>network\libscrobbler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\network\libscrobbler\librefmscrobbler.cpp">
-      <Filter>network\libscrobbler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\network\libscrobbler\scrobbler.cpp">
-      <Filter>network\libscrobbler</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\network\windows\NetworkWin32.cpp">
       <Filter>network\windows</Filter>
     </ClCompile>
@@ -1503,43 +1494,13 @@
     <ClCompile Include="..\..\xbmc\settings\AdvancedSettings.cpp">
       <Filter>settings</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\GUIDialogContentSettings.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\GUIDialogLockSettings.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\GUIDialogProfileSettings.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\GUIDialogSettings.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\settings\GUISettings.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\GUIWindowSettings.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\GUIWindowSettingsCategory.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\GUIWindowSettingsProfile.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\GUIWindowSettingsScreenCalibration.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\GUIWindowTestPattern.cpp">
       <Filter>settings</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\settings\Profile.cpp">
       <Filter>settings</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\settings\Settings.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\SettingsControls.cpp">
       <Filter>settings</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\settings\VideoSettings.cpp">
@@ -2010,9 +1971,6 @@
     <ClCompile Include="..\..\xbmc\utils\JSONVariantWriter.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\AppParamParser.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\addons\AddonVersion.cpp">
       <Filter>addons</Filter>
     </ClCompile>
@@ -2239,12 +2197,6 @@
       <Filter>filesystem</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\filesystem\ISOFile.cpp">
-      <Filter>filesystem</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\filesystem\LastFMDirectory.cpp">
-      <Filter>filesystem</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\filesystem\LastFMFile.cpp">
       <Filter>filesystem</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\filesystem\LibraryDirectory.cpp">
@@ -3037,7 +2989,43 @@
     <ClCompile Include="..\..\xbmc\cores\DSPlayer\FGManager2.cpp">
       <Filter>cores\DSPlayer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\cores\DSPlayer\GraphFilters.cpp">
+    <ClCompile Include="..\..\xbmc\peripherals\bus\virtual\PeripheralBusCEC.cpp">
+      <Filter>peripherals\bus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\network\upnp\UPnPSettings.cpp">
+      <Filter>network\upnp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\AppParamParser.cpp" />
+    <ClCompile Include="..\..\xbmc\settings\dialogs\GUIDialogContentSettings.cpp">
+      <Filter>settings\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\dialogs\GUIDialogLockSettings.cpp">
+      <Filter>settings\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\dialogs\GUIDialogProfileSettings.cpp">
+      <Filter>settings\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\dialogs\GUIDialogSettings.cpp">
+      <Filter>settings\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\windows\GUISettingControls.cpp">
+      <Filter>settings\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\windows\GUIWindowSettings.cpp">
+      <Filter>settings\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\windows\GUIWindowSettingsCategory.cpp">
+      <Filter>settings\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\windows\GUIWindowSettingsProfile.cpp">
+      <Filter>settings\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\windows\GUIWindowSettingsScreenCalibration.cpp">
+      <Filter>settings\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\windows\GUIWindowTestPattern.cpp">
+      <Filter>settings\windows</Filter>
+    </ClCompile>    <ClCompile Include="..\..\xbmc\cores\DSPlayer\GraphFilters.cpp">
       <Filter>cores\DSPlayer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\DSPlayer\StreamsManager.cpp">
@@ -3859,9 +3847,6 @@
     <ClInclude Include="..\..\xbmc\music\GUIViewStateMusic.h">
       <Filter>music</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\music\LastFmManager.h">
-      <Filter>music</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\music\MusicInfoLoader.h">
       <Filter>music</Filter>
     </ClInclude>
@@ -4395,18 +4380,6 @@
     <ClInclude Include="..\..\xbmc\network\Zeroconf.h">
       <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\network\libscrobbler\errors.h">
-      <Filter>network\libscrobbler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\network\libscrobbler\lastfmscrobbler.h">
-      <Filter>network\libscrobbler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\network\libscrobbler\librefmscrobbler.h">
-      <Filter>network\libscrobbler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\network\libscrobbler\scrobbler.h">
-      <Filter>network\libscrobbler</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\network\windows\NetworkWin32.h">
       <Filter>network\windows</Filter>
     </ClInclude>
@@ -4500,43 +4473,13 @@
     <ClInclude Include="..\..\xbmc\settings\AdvancedSettings.h">
       <Filter>settings</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\GUIDialogContentSettings.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\GUIDialogLockSettings.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\GUIDialogProfileSettings.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\GUIDialogSettings.h">
-      <Filter>settings</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\settings\GUISettings.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\GUIWindowSettings.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\GUIWindowSettingsCategory.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\GUIWindowSettingsProfile.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\GUIWindowSettingsScreenCalibration.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\GUIWindowTestPattern.h">
       <Filter>settings</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\settings\Profile.h">
       <Filter>settings</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\settings\Settings.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\SettingsControls.h">
       <Filter>settings</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\settings\VideoSettings.h">
@@ -5050,9 +4993,6 @@
     <ClInclude Include="..\..\xbmc\utils\JSONVariantWriter.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\AppParamParser.h">
-      <Filter>settings</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\addons\AddonVersion.h">
       <Filter>addons</Filter>
     </ClInclude>
@@ -5255,12 +5195,6 @@
       <Filter>filesystem</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\filesystem\ISOFile.h">
-      <Filter>filesystem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\filesystem\LastFMDirectory.h">
-      <Filter>filesystem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\filesystem\LastFMFile.h">
       <Filter>filesystem</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\filesystem\LibraryDirectory.h">
@@ -5966,6 +5900,43 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\filesystem\DAVCommon.h">
       <Filter>filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\peripherals\bus\virtual\PeripheralBusCEC.h">
+      <Filter>peripherals\bus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\network\upnp\UPnPSettings.h">
+      <Filter>network\upnp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\AppParamParser.h" />
+    <ClInclude Include="..\..\xbmc\settings\dialogs\GUIDialogContentSettings.h">
+      <Filter>settings\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\dialogs\GUIDialogLockSettings.h">
+      <Filter>settings\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\dialogs\GUIDialogProfileSettings.h">
+      <Filter>settings\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\dialogs\GUIDialogSettings.h">
+      <Filter>settings\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\windows\GUISettingControls.h">
+      <Filter>settings\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\windows\GUIWindowSettings.h">
+      <Filter>settings\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\windows\GUIWindowSettingsCategory.h">
+      <Filter>settings\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\windows\GUIWindowSettingsProfile.h">
+      <Filter>settings\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\windows\GUIWindowSettingsScreenCalibration.h">
+      <Filter>settings\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\windows\GUIWindowTestPattern.h">
+      <Filter>settings\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.h">
       <Filter>cores\DSPlayer</Filter>

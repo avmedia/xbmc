@@ -330,6 +330,15 @@ bool CGUIWindowVideoPlaylist::OnPlayMedia(int iItem)
     CFileItemPtr pItem = m_vecItems->Get(iItem);
     CStdString strPath = pItem->GetPath();
     g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_VIDEO);
+    // need to update Playlist FileItem's startOffset and resumePoint based on GUIWindowVideoPlaylist FileItem
+    if (pItem->m_lStartOffset == STARTOFFSET_RESUME)
+    {
+      CFileItemPtr pPlaylistItem = g_playlistPlayer.GetPlaylist(PLAYLIST_VIDEO)[iItem];
+      pPlaylistItem->m_lStartOffset = pItem->m_lStartOffset;
+      if (pPlaylistItem->HasVideoInfoTag() && pItem->HasVideoInfoTag())
+        pPlaylistItem->GetVideoInfoTag()->m_resumePoint = pItem->GetVideoInfoTag()->m_resumePoint;
+    }
+    // now play item
     g_playlistPlayer.Play( iItem );
   }
   return true;
@@ -399,10 +408,10 @@ void CGUIWindowVideoPlaylist::GetContextButtons(int itemNumber, CContextButtons 
       if (item->IsVideoDb())
       {
         CFileItem item2(item->GetVideoInfoTag()->m_strFileNameAndPath, false);
-        CPlayerCoreFactory::GetPlayers(item2, vecCores);
+        CPlayerCoreFactory::Get().GetPlayers(item2, vecCores);
       }
       else
-        CPlayerCoreFactory::GetPlayers(*item, vecCores);
+        CPlayerCoreFactory::Get().GetPlayers(*item, vecCores);
       if (vecCores.size() > 1)
         buttons.Add(CONTEXT_BUTTON_PLAY_WITH, 15213); // Play With...
 
@@ -444,11 +453,11 @@ bool CGUIWindowVideoPlaylist::OnContextButton(int itemNumber, CONTEXT_BUTTON but
       if (item->IsVideoDb())
       {
         CFileItem item2(*item->GetVideoInfoTag());
-        CPlayerCoreFactory::GetPlayers(item2, vecCores);
+        CPlayerCoreFactory::Get().GetPlayers(item2, vecCores);
       }
       else
-        CPlayerCoreFactory::GetPlayers(*item, vecCores);
-      g_application.m_eForcedNextPlayer = CPlayerCoreFactory::SelectPlayerDialog(vecCores);
+        CPlayerCoreFactory::Get().GetPlayers(*item, vecCores);
+      g_application.m_eForcedNextPlayer = CPlayerCoreFactory::Get().SelectPlayerDialog(vecCores);
       if (g_application.m_eForcedNextPlayer != EPC_NONE)
         OnClick(itemNumber);
       return true;

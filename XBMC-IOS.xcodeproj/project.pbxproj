@@ -1000,10 +1000,7 @@
 		F5899DD01287212700D8079E /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5899DCC1287212700D8079E /* UIKit.framework */; };
 		F5899DD11287212700D8079E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5899DCD1287212700D8079E /* Foundation.framework */; };
 		F589AE431288E02000D8079E /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F589AE421288E02000D8079E /* libiconv.dylib */; };
-		F589AE451288E06100D8079E /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F589AE441288E06100D8079E /* libbz2.dylib */; };
 		F589AE471288E07400D8079E /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F589AE461288E07400D8079E /* libz.dylib */; };
-		F589AE491288E07D00D8079E /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F589AE481288E07D00D8079E /* libxml2.dylib */; };
-		F589AE4B1288E09200D8079E /* libncurses.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F589AE4A1288E09200D8079E /* libncurses.dylib */; };
 		F5A29EC312A7221B003A610C /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5A29EC212A7221B003A610C /* CoreMedia.framework */; };
 		F5A29F2712A72246003A610C /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5A29F2612A72246003A610C /* VideoToolbox.framework */; };
 		F5AE415B134175520004BD79 /* AudioLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AE4140134175520004BD79 /* AudioLibrary.cpp */; };
@@ -1137,6 +1134,7 @@
 		7CEE2E7E13D6B7D4000ABF2A /* TimeSmoother.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TimeSmoother.h; sourceTree = "<group>"; };
 		8253940416B25C2C00A85509 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		8253940616B25C2C00A85509 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		82F6F0EA16F269BB0081CC3C /* Buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Buffer.h; sourceTree = "<group>"; };
 		83D619BB13C0D25300418A0F /* README.ios */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.ios; sourceTree = "<group>"; };
 		8D576316048677EA00EA77CD /* XBMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XBMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C80711AB135DB85F002F601B /* InputOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputOperations.cpp; sourceTree = "<group>"; };
@@ -2823,7 +2821,6 @@
 		F56C8627131F42EA000AD0F6 /* MusicInfoLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicInfoLoader.h; sourceTree = "<group>"; };
 		F56C8628131F42EA000AD0F6 /* Song.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Song.cpp; sourceTree = "<group>"; };
 		F56C8629131F42EA000AD0F6 /* Song.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Song.h; sourceTree = "<group>"; };
-		F56C862C131F42EA000AD0F6 /* errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = errors.h; sourceTree = "<group>"; };
 		F56C8634131F42EA000AD0F6 /* NetworkLinux.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NetworkLinux.cpp; sourceTree = "<group>"; };
 		F56C8635131F42EA000AD0F6 /* NetworkLinux.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkLinux.h; sourceTree = "<group>"; };
 		F56C8637131F42EA000AD0F6 /* ZeroconfBrowserOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZeroconfBrowserOSX.cpp; sourceTree = "<group>"; };
@@ -3192,10 +3189,7 @@
 		F5899DCC1287212700D8079E /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		F5899DCD1287212700D8079E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F589AE421288E02000D8079E /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
-		F589AE441288E06100D8079E /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
 		F589AE461288E07400D8079E /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
-		F589AE481288E07D00D8079E /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
-		F589AE4A1288E09200D8079E /* libncurses.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libncurses.dylib; path = usr/lib/libncurses.dylib; sourceTree = SDKROOT; };
 		F5A29EC212A7221B003A610C /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		F5A29F2612A72246003A610C /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/PrivateFrameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		F5AE4140134175520004BD79 /* AudioLibrary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioLibrary.cpp; sourceTree = "<group>"; };
@@ -3277,10 +3271,7 @@
 				F5899DD01287212700D8079E /* UIKit.framework in Frameworks */,
 				F5899DD11287212700D8079E /* Foundation.framework in Frameworks */,
 				F589AE431288E02000D8079E /* libiconv.dylib in Frameworks */,
-				F589AE451288E06100D8079E /* libbz2.dylib in Frameworks */,
 				F589AE471288E07400D8079E /* libz.dylib in Frameworks */,
-				F589AE491288E07D00D8079E /* libxml2.dylib in Frameworks */,
-				F589AE4B1288E09200D8079E /* libncurses.dylib in Frameworks */,
 				F5A29EC312A7221B003A610C /* CoreMedia.framework in Frameworks */,
 				F5A29F2712A72246003A610C /* VideoToolbox.framework in Frameworks */,
 				3255316612B2D02400837CD2 /* CoreAudio.framework in Frameworks */,
@@ -3614,6 +3605,7 @@
 		DF33C29015509BF50046CDCB /* commons */ = {
 			isa = PBXGroup;
 			children = (
+				82F6F0EA16F269BB0081CC3C /* Buffer.h */,
 				DFC3867C158296EC008AE277 /* Exception.cpp */,
 				DFC3867D158296EC008AE277 /* Exception.h */,
 				DF33C29115509BF50046CDCB /* ilog.cpp */,
@@ -6442,10 +6434,7 @@
 		F5899DC91287212700D8079E /* System Libs and Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F589AE441288E06100D8079E /* libbz2.dylib */,
 				F589AE421288E02000D8079E /* libiconv.dylib */,
-				F589AE4A1288E09200D8079E /* libncurses.dylib */,
-				F589AE481288E07D00D8079E /* libxml2.dylib */,
 				F589AE461288E07400D8079E /* libz.dylib */,
 				F56B14A412CAF523009B4C96 /* AudioToolbox.framework */,
 				8253940416B25C2C00A85509 /* AVFoundation.framework */,
@@ -6710,7 +6699,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "PATH=$PATH:/Users/Shared/xbmc-depends/toolchain/bin\n\nif [ \"$ACTION\" = build ] ; then\nmake -f ${SRCROOT}/codegenerator.mk\nfi";
+			shellScript = "if [ -d \"/Users/Shared/xbmc-depends/buildtools-native/bin\" ]; then\nPATH=$PATH:/Users/Shared/xbmc-depends/buildtools-native/bin\nelse\nPATH=$PATH:/Users/Shared/xbmc-depends/toolchain/bin\nfi\n\nif [ \"$ACTION\" = build ] ; then\nmake -f ${SRCROOT}/codegenerator.mk\nfi";
 		};
 		F589B48B128A696700D8079E /* copy root files */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -6739,7 +6728,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "#set -x\n\nfunction check_dyloaded_depends\n{\n  b=$(find \"$EXTERNAL_LIBS\" -name $1 -print)\n  if [ -f \"$b\" ]; then\n    #echo \"Processing $b\"\n    if [ ! -f  \"$TARGET_FRAMEWORKS/$(basename $b)\" ]; then\n      echo \"    Packaging $b\"\n      cp -f \"$b\" \"$TARGET_FRAMEWORKS/\"\n      chmod u+w \"$TARGET_FRAMEWORKS/$(basename $b)\"\n    fi\n    for a in $(otool -L \"$b\"  | grep \"$EXTERNAL_LIBS\" | awk ' { print $1 } ') ; do\n      if [ -f \"$a\" ]; then\n        if [ ! -f  \"$TARGET_FRAMEWORKS/$(basename $a)\" ]; then\n          echo \"    Packaging $a\"\n          cp -f \"$a\" \"$TARGET_FRAMEWORKS/\"\n          chmod u+w \"$TARGET_FRAMEWORKS/$(basename $a)\"\n          install_name_tool -change \"$a\" \"$DYLIB_NAMEPATH/$(basename $a)\" \"$TARGET_FRAMEWORKS/$(basename $b)\"\n        fi\n      fi\n    done \n  fi\n}\n\nfunction check_xbmc_dylib_depends\n{\n  REWIND=\"1\"\n  while [ $REWIND = \"1\" ]\n  do\n    let REWIND=\"0\"\n    for b in $(find \"$1\" -type f -name \"$2\" -print) ; do\n      #echo \"Processing $b\"\n      install_name_tool -id \"$(basename $b)\" \"$b\"\n      for a in $(otool -L \"$b\"  | grep \"$EXTERNAL_LIBS\" | awk ' { print $1 } ') ; do\n        #echo \"    Packaging $a\"\n        if [ ! -f  \"$TARGET_FRAMEWORKS/$(basename $a)\" ]; then\n          echo \"    Packaging $a\"\n          cp -f \"$a\" \"$TARGET_FRAMEWORKS/\"\n          chmod u+w \"$TARGET_FRAMEWORKS/$(basename $a)\"\n          let REWIND=\"1\"\n        fi\n        install_name_tool -change \"$a\" \"$DYLIB_NAMEPATH/$(basename $a)\" \"$b\"\n      done\n    done\n  done\n}\n\nEXTERNAL_LIBS=/Users/Shared/xbmc-depends/\"$SDK_NAME\"_\"$ARCHS\"\n\nTARGET_NAME=$PRODUCT_NAME.$WRAPPER_EXTENSION\nTARGET_CONTENTS=$TARGET_BUILD_DIR/$TARGET_NAME\n\nTARGET_BINARY=$TARGET_CONTENTS/XBMC\nTARGET_FRAMEWORKS=$TARGET_CONTENTS/Frameworks\nDYLIB_NAMEPATH=@executable_path/Frameworks\nXBMC_HOME=$TARGET_CONTENTS/XBMCData/XBMCHome\n\nmkdir -p \"$TARGET_CONTENTS\"\nmkdir -p \"$TARGET_CONTENTS/XBMCData/XBMCHome\"\n# start clean so we don't keep old dylibs\nrm -rf \"$TARGET_CONTENTS/Frameworks\"\nmkdir -p \"$TARGET_CONTENTS/Frameworks\"\n\necho \"Package $TARGET_BUILD_DIR/XBMC\"\n\n# Copy all of XBMC's dylib dependencies and rename their locations to inside the Framework\necho \"Checking $TARGET_BINARY dylib dependencies\"\nfor a in $(otool -L \"$TARGET_BINARY\"  | grep \"$EXTERNAL_LIBS\" | awk ' { print $1 } ') ; do \n\techo \"    Packaging $a\"\n\tcp -f \"$a\" \"$TARGET_FRAMEWORKS/\"\n\tchmod u+w \"$TARGET_FRAMEWORKS/$(basename $a)\"\n\tinstall_name_tool -change \"$a\" \"$DYLIB_NAMEPATH/$(basename $a)\" \"$TARGET_BINARY\"\ndone\n\nif [ \"$SDK_NAME\" = \"iphoneos6.0\" ] ; then\n\techo \"Fixing $TARGET_BINARY VideoToolbox dylib name\"\n    VTB_SDK6=/System/Library/Frameworks/VideoToolbox.framework/VideoToolbox\n    VTB_SDK5=/System/Library/PrivateFrameworks/VideoToolbox.framework/VideoToolbox\n\tinstall_name_tool -change \"$VTB_SDK6\" \"$VTB_SDK5\" \"$TARGET_BINARY\"\nfi\n\necho \"Package $EXTERNAL_LIBS/lib/python2.6\"\nmkdir -p \"$TARGET_CONTENTS/Frameworks/lib\"\nPYTHONSYNC=\"rsync -aq --exclude .DS_Store --exclude *.a --exclude *.exe --exclude test --exclude tests\"\n${PYTHONSYNC} \"$EXTERNAL_LIBS/lib/python2.6\" \"$TARGET_FRAMEWORKS/lib/\"\nrm -rf \"$TARGET_FRAMEWORKS/lib/python2.6/config\"\n\necho \"Checking $TARGET_FRAMEWORKS/lib/python2.6 *.so for dylib dependencies\"\ncheck_xbmc_dylib_depends \"$TARGET_FRAMEWORKS\"/lib/python2.6 \"*.so\"\n\necho \"Checking $XBMC_HOME/system *.so for dylib dependencies\"\ncheck_xbmc_dylib_depends \"$XBMC_HOME\"/system \"*.so\"\n\necho \"Checking $XBMC_HOME/addons *.so for dylib dependencies\"\ncheck_xbmc_dylib_depends \"$XBMC_HOME\"/addons \"*.so\"\n\necho \"Checking $XBMC_HOME/addons *.pvr for dylib dependencies\"\ncheck_xbmc_dylib_depends \"$XBMC_HOME\"/addons \"*.pvr\"\n\necho \"Checking $XBMC_HOME/addons *.xbs for dylib dependencies\"\ncheck_xbmc_dylib_depends \"$XBMC_HOME\"/addons \"*.xbs\"\n\necho \"Checking xbmc/DllPaths_generated.h for dylib dependencies\"\nfor a in $(grep .dylib \"$SRCROOT\"/xbmc/DllPaths_generated.h | awk '{print $3}' | sed s/\\\"//g) ; do\n  check_dyloaded_depends $a\ndone\n\necho \"Checking $TARGET_FRAMEWORKS for missing dylib dependencies\"\nREWIND=\"1\"\nwhile [ $REWIND = \"1\" ]\ndo\n\tlet REWIND=\"0\"\n\tfor b in \"$TARGET_FRAMEWORKS/\"*dylib* ; do\n\t\t#echo \"  Processing $b\"\n\t\tfor a in $(otool -L \"$b\"  | grep \"$EXTERNAL_LIBS\" | awk ' { print $1 } ') ; do\n\t\t\t#echo \"Processing $a\"\n\t\t\tif [ ! -f  \"$TARGET_FRAMEWORKS/$(basename $a)\" ]; then\n\t\t\t\techo \"    Packaging $a\"\n\t\t\t\tcp -f \"$a\" \"$TARGET_FRAMEWORKS/\"\n\t\t\t\tchmod u+w \"$TARGET_FRAMEWORKS/$(basename $a)\"\n\t\t\t\tlet REWIND=\"1\"\n\t\t\tfi\n\t\t\tinstall_name_tool -change \"$a\" \"$DYLIB_NAMEPATH/$(basename $a)\" \"$TARGET_FRAMEWORKS/$(basename $b)\"\n\t\tdone \n\tdone\ndone\n";
+			shellScript = "#set -x\n\nfunction check_dyloaded_depends\n{\n  b=$(find \"$EXTERNAL_LIBS\" -name $1 -print)\n  if [ -f \"$b\" ]; then\n    #echo \"Processing $b\"\n    if [ ! -f  \"$TARGET_FRAMEWORKS/$(basename $b)\" ]; then\n      echo \"    Packaging $b\"\n      cp -f \"$b\" \"$TARGET_FRAMEWORKS/\"\n      chmod u+w \"$TARGET_FRAMEWORKS/$(basename $b)\"\n    fi\n    for a in $(otool -L \"$b\"  | grep \"$EXTERNAL_LIBS\" | awk ' { print $1 } ') ; do\n      if [ -f \"$a\" ]; then\n        if [ ! -f  \"$TARGET_FRAMEWORKS/$(basename $a)\" ]; then\n          echo \"    Packaging $a\"\n          cp -f \"$a\" \"$TARGET_FRAMEWORKS/\"\n          chmod u+w \"$TARGET_FRAMEWORKS/$(basename $a)\"\n          install_name_tool -change \"$a\" \"$DYLIB_NAMEPATH/$(basename $a)\" \"$TARGET_FRAMEWORKS/$(basename $b)\"\n        fi\n      fi\n    done \n  fi\n}\n\nfunction check_xbmc_dylib_depends\n{\n  REWIND=\"1\"\n  while [ $REWIND = \"1\" ]\n  do\n    let REWIND=\"0\"\n    for b in $(find \"$1\" -type f -name \"$2\" -print) ; do\n      #echo \"Processing $b\"\n      install_name_tool -id \"$(basename $b)\" \"$b\"\n      for a in $(otool -L \"$b\"  | grep \"$EXTERNAL_LIBS\" | awk ' { print $1 } ') ; do\n        #echo \"    Packaging $a\"\n        if [ ! -f  \"$TARGET_FRAMEWORKS/$(basename $a)\" ]; then\n          echo \"    Packaging $a\"\n          cp -f \"$a\" \"$TARGET_FRAMEWORKS/\"\n          chmod u+w \"$TARGET_FRAMEWORKS/$(basename $a)\"\n          let REWIND=\"1\"\n        fi\n        install_name_tool -change \"$a\" \"$DYLIB_NAMEPATH/$(basename $a)\" \"$b\"\n      done\n    done\n  done\n}\n\nEXTERNAL_LIBS=/Users/Shared/xbmc-depends/\"$SDK_NAME\"_\"$CURRENT_ARCH\"-target\n\nTARGET_NAME=$PRODUCT_NAME.$WRAPPER_EXTENSION\nTARGET_CONTENTS=$TARGET_BUILD_DIR/$TARGET_NAME\n\nTARGET_BINARY=$TARGET_CONTENTS/XBMC\nTARGET_FRAMEWORKS=$TARGET_CONTENTS/Frameworks\nDYLIB_NAMEPATH=@executable_path/Frameworks\nXBMC_HOME=$TARGET_CONTENTS/XBMCData/XBMCHome\n\nmkdir -p \"$TARGET_CONTENTS\"\nmkdir -p \"$TARGET_CONTENTS/XBMCData/XBMCHome\"\n# start clean so we don't keep old dylibs\nrm -rf \"$TARGET_CONTENTS/Frameworks\"\nmkdir -p \"$TARGET_CONTENTS/Frameworks\"\n\necho \"Package $TARGET_BUILD_DIR/XBMC\"\n\n# Copy all of XBMC's dylib dependencies and rename their locations to inside the Framework\necho \"Checking $TARGET_BINARY dylib dependencies\"\nfor a in $(otool -L \"$TARGET_BINARY\"  | grep \"$EXTERNAL_LIBS\" | awk ' { print $1 } ') ; do \n\techo \"    Packaging $a\"\n\tcp -f \"$a\" \"$TARGET_FRAMEWORKS/\"\n\tchmod u+w \"$TARGET_FRAMEWORKS/$(basename $a)\"\n\tinstall_name_tool -change \"$a\" \"$DYLIB_NAMEPATH/$(basename $a)\" \"$TARGET_BINARY\"\ndone\n\nif [ \"$SDK_NAME\" = \"iphoneos6.0\" ] ; then\n\techo \"Fixing $TARGET_BINARY VideoToolbox dylib name\"\n    VTB_SDK6=/System/Library/Frameworks/VideoToolbox.framework/VideoToolbox\n    VTB_SDK5=/System/Library/PrivateFrameworks/VideoToolbox.framework/VideoToolbox\n\tinstall_name_tool -change \"$VTB_SDK6\" \"$VTB_SDK5\" \"$TARGET_BINARY\"\nfi\n\necho \"Package $EXTERNAL_LIBS/lib/python2.6\"\nmkdir -p \"$TARGET_CONTENTS/Frameworks/lib\"\nPYTHONSYNC=\"rsync -aq --exclude .DS_Store --exclude *.a --exclude *.exe --exclude test --exclude tests\"\n${PYTHONSYNC} \"$EXTERNAL_LIBS/lib/python2.6\" \"$TARGET_FRAMEWORKS/lib/\"\nrm -rf \"$TARGET_FRAMEWORKS/lib/python2.6/config\"\n\necho \"Checking $TARGET_FRAMEWORKS/lib/python2.6 *.so for dylib dependencies\"\ncheck_xbmc_dylib_depends \"$TARGET_FRAMEWORKS\"/lib/python2.6 \"*.so\"\n\necho \"Checking $XBMC_HOME/system *.so for dylib dependencies\"\ncheck_xbmc_dylib_depends \"$XBMC_HOME\"/system \"*.so\"\n\necho \"Checking $XBMC_HOME/addons *.so for dylib dependencies\"\ncheck_xbmc_dylib_depends \"$XBMC_HOME\"/addons \"*.so\"\n\necho \"Checking $XBMC_HOME/addons *.pvr for dylib dependencies\"\ncheck_xbmc_dylib_depends \"$XBMC_HOME\"/addons \"*.pvr\"\n\necho \"Checking $XBMC_HOME/addons *.xbs for dylib dependencies\"\ncheck_xbmc_dylib_depends \"$XBMC_HOME\"/addons \"*.xbs\"\n\necho \"Checking xbmc/DllPaths_generated.h for dylib dependencies\"\nfor a in $(grep .dylib \"$SRCROOT\"/xbmc/DllPaths_generated.h | awk '{print $3}' | sed s/\\\"//g) ; do\n  check_dyloaded_depends $a\ndone\n\necho \"Checking $TARGET_FRAMEWORKS for missing dylib dependencies\"\nREWIND=\"1\"\nwhile [ $REWIND = \"1\" ]\ndo\n\tlet REWIND=\"0\"\n\tfor b in \"$TARGET_FRAMEWORKS/\"*dylib* ; do\n\t\t#echo \"  Processing $b\"\n\t\tfor a in $(otool -L \"$b\"  | grep \"$EXTERNAL_LIBS\" | awk ' { print $1 } ') ; do\n\t\t\t#echo \"Processing $a\"\n\t\t\tif [ ! -f  \"$TARGET_FRAMEWORKS/$(basename $a)\" ]; then\n\t\t\t\techo \"    Packaging $a\"\n\t\t\t\tcp -f \"$a\" \"$TARGET_FRAMEWORKS/\"\n\t\t\t\tchmod u+w \"$TARGET_FRAMEWORKS/$(basename $a)\"\n\t\t\t\tlet REWIND=\"1\"\n\t\t\tfi\n\t\t\tinstall_name_tool -change \"$a\" \"$DYLIB_NAMEPATH/$(basename $a)\" \"$TARGET_FRAMEWORKS/$(basename $b)\"\n\t\tdone \n\tdone\ndone\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -7846,12 +7835,18 @@
 					"-Wl,-headerpad_max_install_names",
 					"-Wl,-all_load",
 					"-L$XBMC_DEPENDS/lib",
+					"-lbz2",
+					"-lintl",
+					"-lexpat",
+					"-lssl",
+					"-lgpg-error",
+					"-lresolv",
+					"-lffi",
 					"-lssh",
 					"-llzo2",
 					"-lpcre",
 					"-lpcrecpp",
 					"-lfribidi",
-					"-lcdio",
 					"-lfreetype",
 					"-lfontconfig",
 					"-lsqlite3",
@@ -7884,7 +7879,7 @@
 				VALIDATE_PRODUCT = NO;
 				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = app;
-				XBMC_DEPENDS = "/Users/Shared/xbmc-depends/$(SDK_NAME)_$(ARCHS)";
+				XBMC_DEPENDS = "/Users/Shared/xbmc-depends/$(SDK_NAME)_$(CURRENT_ARCH)-target";
 			};
 			name = Debug;
 		};
@@ -7968,12 +7963,18 @@
 					"-Wl,-headerpad_max_install_names",
 					"-Wl,-all_load",
 					"-L$XBMC_DEPENDS/lib",
+					"-lbz2",
+					"-lintl",
+					"-lexpat",
+					"-lssl",
+					"-lgpg-error",
+					"-lresolv",
+					"-lffi",
 					"-lssh",
 					"-llzo2",
 					"-lpcre",
 					"-lpcrecpp",
 					"-lfribidi",
-					"-lcdio",
 					"-lfreetype",
 					"-lfontconfig",
 					"-lsqlite3",
@@ -8006,7 +8007,7 @@
 				VALIDATE_PRODUCT = NO;
 				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = app;
-				XBMC_DEPENDS = "/Users/Shared/xbmc-depends/$(SDK_NAME)_$(ARCHS)";
+				XBMC_DEPENDS = "/Users/Shared/xbmc-depends/$(SDK_NAME)_$(CURRENT_ARCH)-target";
 			};
 			name = Release;
 		};

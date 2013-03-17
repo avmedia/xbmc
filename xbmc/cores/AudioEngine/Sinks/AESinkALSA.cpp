@@ -66,10 +66,10 @@ static unsigned int ALSASampleRateList[] =
 };
 
 CAESinkALSA::CAESinkALSA() :
-  m_pcm(NULL),
   m_bufferSize(0),
   m_formatSampleRateMul(0.0),
   m_passthrough(false),
+  m_pcm(NULL),
   m_timeout(0)
 {
   /* ensure that ALSA has been initialized */
@@ -336,20 +336,19 @@ bool CAESinkALSA::InitializeHW(AEAudioFormat &format)
   snd_pcm_hw_params_get_period_size_max(hw_params, &periodSize, NULL);
 
   /* 
-   We want to make sure, that we have approx 500 to 800 ms Buffer with 
-   a periodSize of approx 100 ms.
-   It is calced:
-   periodSize = sampleRate / 10 
-   buffersize = periodSize * 1 frame * 8.
+   We want to make sure, that we have max 200 ms Buffer with 
+   a periodSize of approx 50 ms. Choosing a higher bufferSize
+   will cause problems with menu sounds. Buffer will be increased
+   after those are fixed.
   */
-  periodSize  = std::min(periodSize, (snd_pcm_uframes_t) sampleRate / 10);
-  bufferSize  = std::min(bufferSize, (snd_pcm_uframes_t) periodSize * 8);
+  periodSize  = std::min(periodSize, (snd_pcm_uframes_t) sampleRate / 20);
+  bufferSize  = std::min(bufferSize, (snd_pcm_uframes_t) sampleRate / 5);
   
   /* 
-     According to upstream we should set buffer size first - so make sure it is always at least
-     double of period size to not get underruns
+   According to upstream we should set buffer size first - so make sure it is always at least
+   4x period size to not get underruns (some systems seem to have issues with only 2 periods)
   */
-  periodSize = std::min(periodSize, bufferSize / 2);
+  periodSize = std::min(periodSize, bufferSize / 4);
 
   CLog::Log(LOGDEBUG, "CAESinkALSA::InitializeHW - Request: periodSize %lu, bufferSize %lu", periodSize, bufferSize);
 

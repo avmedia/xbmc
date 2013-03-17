@@ -41,6 +41,7 @@
 #include "DVDFileInfo.h"
 
 #include "utils/LangCodeExpander.h"
+#include "guilib/Key.h"
 #include "guilib/LocalizeStrings.h"
 
 #include "utils/URIUtils.h"
@@ -412,6 +413,8 @@ CDVDPlayer::CDVDPlayer(IPlayerCallback& callback)
   m_offset_pts = 0.0;
   m_playSpeed = DVD_PLAYSPEED_NORMAL;
   m_caching = CACHESTATE_DONE;
+  m_HasVideo = false;
+  m_HasAudio = false;
 
   memset(&m_SpeedState, 0, sizeof(m_SpeedState));
 
@@ -510,6 +513,9 @@ bool CDVDPlayer::CloseFile()
 
   m_Edl.Clear();
   m_EdlAutoSkipMarkers.Clear();
+
+  m_HasVideo = false;
+  m_HasAudio = false;
 
   CLog::Log(LOGNOTICE, "DVDPlayer: finished waiting");
 #if defined(HAS_VIDEO_PLAYBACK)
@@ -2410,14 +2416,12 @@ bool CDVDPlayer::IsPaused() const
 
 bool CDVDPlayer::HasVideo() const
 {
-  if (m_pInputStream && m_pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD)) return true;
-
-  return m_SelectionStreams.Count(STREAM_VIDEO) > 0 ? true : false;
+  return m_HasVideo;
 }
 
 bool CDVDPlayer::HasAudio() const
 {
-  return m_SelectionStreams.Count(STREAM_AUDIO) > 0 ? true : false;
+  return m_HasAudio;
 }
 
 bool CDVDPlayer::IsPassthrough() const
@@ -2578,7 +2582,7 @@ void CDVDPlayer::GetVideoInfo(CStdString& strVideoInfo)
   { CSingleLock lock(m_StateSection);
     strVideoInfo.Format("D(%s)", m_StateInput.demux_video.c_str());
   }
-  strVideoInfo.AppendFormat(" P(%s)", m_dvdPlayerVideo.GetPlayerInfo().c_str());
+  strVideoInfo.AppendFormat("\nP(%s)", m_dvdPlayerVideo.GetPlayerInfo().c_str());
 }
 
 void CDVDPlayer::GetGeneralInfo(CStdString& strGeneralInfo)
@@ -2852,6 +2856,7 @@ bool CDVDPlayer::OpenAudioStream(int iStream, int source, bool reset)
   m_CurrentAudio.hint = hint;
   m_CurrentAudio.stream = (void*)pStream;
   m_CurrentAudio.started = false;
+  m_HasAudio = true;
 
   /* we are potentially going to be waiting on this */
   m_dvdPlayerAudio.SendMessage(new CDVDMsg(CDVDMsg::PLAYER_STARTED), 1);
@@ -2924,6 +2929,7 @@ bool CDVDPlayer::OpenVideoStream(int iStream, int source, bool reset)
   m_CurrentVideo.hint = hint;
   m_CurrentVideo.stream = (void*)pStream;
   m_CurrentVideo.started = false;
+  m_HasVideo = true;
 
   /* we are potentially going to be waiting on this */
   m_dvdPlayerVideo.SendMessage(new CDVDMsg(CDVDMsg::PLAYER_STARTED), 1);

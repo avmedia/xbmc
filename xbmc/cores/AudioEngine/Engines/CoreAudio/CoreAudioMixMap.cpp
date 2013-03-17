@@ -58,12 +58,12 @@ void CCoreAudioMixMap::Rebuild(AudioChannelLayout& inLayout, AudioChannelLayout&
   // Try to find a 'well-known' matrix
   const AudioChannelLayout* layouts[] = {&inLayout, &outLayout};
   UInt32 propSize = 0;
-  OSStatus ret = AudioFormatGetPropertyInfo(kAudioFormatProperty_MatrixMixMap,
+  AudioFormatGetPropertyInfo(kAudioFormatProperty_MatrixMixMap,
     sizeof(layouts), layouts, &propSize);
   m_pMap = (Float32*)calloc(1,propSize);
 
   // Try and get a predefined mixmap
-  ret = AudioFormatGetProperty(kAudioFormatProperty_MatrixMixMap,
+  OSStatus ret = AudioFormatGetProperty(kAudioFormatProperty_MatrixMixMap,
     sizeof(layouts), layouts, &propSize, m_pMap);
   if (!ret)
   {
@@ -221,14 +221,14 @@ bool CCoreAudioMixMap::SetMixingMatrix(CAUMatrixMixer *mixerUnit,
   if(fmt->mChannelsPerFrame > dims[1])
   {
     CLog::Log(LOGERROR, "CCoreAudioMixMap::SetMixingMatrix - ouput format doesn't fit mixer size %u > %u"
-              , fmt->mChannelsPerFrame, dims[0]);
+              , fmt->mChannelsPerFrame, dims[1]);
     return false;
   }
 
   if(fmt->mChannelsPerFrame < dims[1])
   {
     CLog::Log(LOGWARNING, "CCoreAudioMixMap::SetMixingMatrix - ouput format doesn't specify all outputs %u < %u"
-              , fmt->mChannelsPerFrame, dims[0]);
+              , fmt->mChannelsPerFrame, dims[1]);
   }
 
   // Configure the mixing matrix

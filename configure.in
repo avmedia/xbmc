@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([xbmc], [12.9.2], [http://trac.xbmc.org])
+AC_INIT([xbmc], [12.9.3], [http://trac.xbmc.org])
 AC_CONFIG_HEADERS([xbmc/config.h])
 AH_TOP([#pragma once])
 m4_include([m4/ax_python_devel.m4])
@@ -2377,7 +2377,6 @@ OUTPUT_FILES="Makefile \
     lib/libhdhomerun/Makefile \
     lib/libsquish/Makefile \
     lib/cximage-6.0/Makefile \
-    lib/addons/script.module.pil/Makefile \
     lib/libUPnP/Makefile \
     xbmc/DllPaths_generated.h \
     xbmc/DllPaths_generated_android.h \

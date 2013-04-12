@@ -22,7 +22,7 @@
 namespace JSONRPC
 {
   const char* const JSONRPC_SERVICE_ID          = "http://www.xbmc.org/jsonrpc/ServiceDescription.json";
-  const char* const JSONRPC_SERVICE_VERSION     = "6.1.0";
+  const char* const JSONRPC_SERVICE_VERSION     = "6.3.0";
   const char* const JSONRPC_SERVICE_DESCRIPTION = "JSON-RPC API of XBMC";
 
   const char* const JSONRPC_SERVICE_TYPES[] = {  
@@ -174,7 +174,7 @@ namespace JSONRPC
     "\"Playlist.Item\": {"
       "\"type\": ["
         "{ \"type\": \"object\", \"properties\": { \"file\": { \"type\": \"string\", \"description\": \"Path to a file (not a directory) to be added to the playlist\", \"required\": true } }, \"additionalProperties\": false },"
-        "{ \"type\": \"object\", \"properties\": { \"directory\": { \"type\": \"string\", \"required\": true } }, \"additionalProperties\": false },"
+        "{ \"type\": \"object\", \"properties\": { \"directory\": { \"type\": \"string\", \"required\": true }, \"recursive\": { \"type\": \"boolean\", \"default\": false } }, \"additionalProperties\": false },"
         "{ \"type\": \"object\", \"properties\": { \"movieid\": { \"$ref\": \"Library.Id\", \"required\": true } }, \"additionalProperties\": false },"
         "{ \"type\": \"object\", \"properties\": { \"episodeid\": { \"$ref\": \"Library.Id\", \"required\": true } }, \"additionalProperties\": false },"
         "{ \"type\": \"object\", \"properties\": { \"musicvideoid\": { \"$ref\": \"Library.Id\", \"required\": true } }, \"additionalProperties\": false },"
@@ -2522,7 +2522,8 @@ namespace JSONRPC
         "{ \"name\": \"thumbnail\", \"$ref\": \"Optional.String\" },"
         "{ \"name\": \"fanart\", \"$ref\": \"Optional.String\" },"
         "{ \"name\": \"tag\", \"type\": [ \"null\", { \"$ref\": \"Array.String\", \"required\": true } ], \"default\": null },"
-        "{ \"name\": \"art\", \"type\": [ \"null\", { \"$ref\": \"Media.Artwork\", \"required\": true } ], \"default\": null }"
+        "{ \"name\": \"art\", \"type\": [ \"null\", { \"$ref\": \"Media.Artwork\", \"required\": true } ], \"default\": null },"
+        "{ \"name\": \"resume\", \"type\": [ \"null\", { \"$ref\": \"Video.Resume\", \"required\": true } ], \"default\": null }"
       "],"
       "\"returns\": \"string\""
     "}",
@@ -2577,7 +2578,8 @@ namespace JSONRPC
         "{ \"name\": \"originaltitle\", \"$ref\": \"Optional.String\" },"
         "{ \"name\": \"thumbnail\", \"$ref\": \"Optional.String\" },"
         "{ \"name\": \"fanart\", \"$ref\": \"Optional.String\" },"
-        "{ \"name\": \"art\", \"type\": [ \"null\", { \"$ref\": \"Media.Artwork\", \"required\": true } ], \"default\": null }"
+        "{ \"name\": \"art\", \"type\": [ \"null\", { \"$ref\": \"Media.Artwork\", \"required\": true } ], \"default\": null },"
+        "{ \"name\": \"resume\", \"type\": [ \"null\", { \"$ref\": \"Video.Resume\", \"required\": true } ], \"default\": null }"
       "],"
       "\"returns\": \"string\""
     "}",
@@ -2603,7 +2605,8 @@ namespace JSONRPC
         "{ \"name\": \"thumbnail\", \"$ref\": \"Optional.String\" },"
         "{ \"name\": \"fanart\", \"$ref\": \"Optional.String\" },"
         "{ \"name\": \"tag\", \"type\": [ \"null\", { \"$ref\": \"Array.String\", \"required\": true } ], \"default\": null },"
-        "{ \"name\": \"art\", \"type\": [ \"null\", { \"$ref\": \"Media.Artwork\", \"required\": true } ], \"default\": null }"
+        "{ \"name\": \"art\", \"type\": [ \"null\", { \"$ref\": \"Media.Artwork\", \"required\": true } ], \"default\": null },"
+        "{ \"name\": \"resume\", \"type\": [ \"null\", { \"$ref\": \"Video.Resume\", \"required\": true } ], \"default\": null }"
       "],"
       "\"returns\": \"string\""
     "}",

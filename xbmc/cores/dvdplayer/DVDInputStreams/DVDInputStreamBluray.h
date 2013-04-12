@@ -82,6 +82,9 @@ public:
   virtual bool OnMouseClick(const CPoint &point) { return false; }
   virtual double GetTimeStampCorrection()        { return 0.0; }
   virtual void SkipStill();
+  virtual bool GetState(std::string &xmlstate)         { return false; }
+  virtual bool SetState(const std::string &xmlstate)   { return false; }
+
 
   void UserInput(bd_vk_key_e vk);
 
@@ -111,8 +114,8 @@ protected:
 
   void OverlayFlush(int64_t pts);
   void OverlayClose();
-  void OverlayClear(SPlane& plane, int x, int y, int w, int h);
-  void OverlayInit (SPlane& plane, int w, int h);
+  static void OverlayClear(SPlane& plane, int x, int y, int w, int h);
+  static void OverlayInit (SPlane& plane, int w, int h);
 
   IDVDPlayer*   m_player;
   DllLibbluray *m_dll;

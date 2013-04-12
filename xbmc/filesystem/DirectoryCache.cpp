@@ -19,7 +19,6 @@
  */
 
 #include "DirectoryCache.h"
-#include "settings/Settings.h"
 #include "FileItem.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
@@ -64,7 +63,7 @@ bool CDirectoryCache::GetDirectory(const CStdString& strPath, CFileItemList &ite
 {
   CSingleLock lock (m_cs);
 
-  CStdString storedPath = URIUtils::SubstitutePath(strPath);
+  CStdString storedPath = strPath;
   URIUtils::RemoveSlashAtEnd(storedPath);
 
   ciCache i = m_cache.find(storedPath);
@@ -103,7 +102,7 @@ void CDirectoryCache::SetDirectory(const CStdString& strPath, const CFileItemLis
   // this is the best solution for now.
   CSingleLock lock (m_cs);
 
-  CStdString storedPath = URIUtils::SubstitutePath(strPath);
+  CStdString storedPath = strPath;
   URIUtils::RemoveSlashAtEnd(storedPath);
 
   ClearDirectory(storedPath);
@@ -127,7 +126,7 @@ void CDirectoryCache::ClearDirectory(const CStdString& strPath)
 {
   CSingleLock lock (m_cs);
 
-  CStdString storedPath = URIUtils::SubstitutePath(strPath);
+  CStdString storedPath = strPath;
   URIUtils::RemoveSlashAtEnd(storedPath);
 
   iCache i = m_cache.find(storedPath);
@@ -139,7 +138,7 @@ void CDirectoryCache::ClearSubPaths(const CStdString& strPath)
 {
   CSingleLock lock (m_cs);
 
-  CStdString storedPath = URIUtils::SubstitutePath(strPath);
+  CStdString storedPath = strPath;
   URIUtils::RemoveSlashAtEnd(storedPath);
 
   iCache i = m_cache.begin();
@@ -176,11 +175,13 @@ bool CDirectoryCache::FileExists(const CStdString& strFile, bool& bInCache)
   CSingleLock lock (m_cs);
   bInCache = false;
 
-  CStdString strPath;
-  URIUtils::GetDirectory(strFile, strPath);
+  CStdString strPath(strFile);
   URIUtils::RemoveSlashAtEnd(strPath);
+  CStdString storedPath;
+  URIUtils::GetDirectory(strPath, storedPath);
+  URIUtils::RemoveSlashAtEnd(storedPath);
 
-  ciCache i = m_cache.find(strPath);
+  ciCache i = m_cache.find(storedPath);
   if (i != m_cache.end())
   {
     bInCache = true;

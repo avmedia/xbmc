@@ -23,12 +23,11 @@
 #include "ListItem.h"
 #include "PlayList.h"
 #include "PlayListPlayer.h"
-#include "settings/Settings.h"
+#include "settings/MediaSettings.h"
 #include "Application.h"
 #include "ApplicationMessenger.h"
 #include "GUIInfoManager.h"
 #include "AddonUtils.h"
-#include "utils/LangCodeExpander.h"
 #include "utils/log.h"
 #include "cores/IPlayer.h"
 
@@ -74,7 +73,7 @@ namespace XBMCAddon
       if (!item.empty())
       {
         // set fullscreen or windowed
-        g_settings.m_bStartVideoWindowed = windowed;
+        CMediaSettings::Get().SetVideoStartWindowed(windowed);
 
         // force a playercore before playing
         g_application.m_eForcedNextPlayer = playerCore;
@@ -102,7 +101,7 @@ namespace XBMCAddon
       TRACE;
       DelayedCallGuard dc(languageHook);
       // set fullscreen or windowed
-      g_settings.m_bStartVideoWindowed = windowed;
+      CMediaSettings::Get().SetVideoStartWindowed(windowed);
 
       // force a playercore before playing
       g_application.m_eForcedNextPlayer = playerCore;
@@ -120,7 +119,7 @@ namespace XBMCAddon
       if (playlist != NULL)
       {
         // set fullscreen or windowed
-        g_settings.m_bStartVideoWindowed = windowed;
+        CMediaSettings::Get().SetVideoStartWindowed(windowed);
 
         // force a playercore before playing
         g_application.m_eForcedNextPlayer = playerCore;
@@ -373,8 +372,8 @@ namespace XBMCAddon
         {
           g_application.m_pPlayer->SetSubtitle(nStream);
           g_application.m_pPlayer->SetSubtitleVisible(true);
-          g_settings.m_currentVideoSettings.m_SubtitleDelay = 0.0f;
-          g_application.m_pPlayer->SetSubTitleDelay(g_settings.m_currentVideoSettings.m_SubtitleDelay);
+          CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleDelay = 0.0f;
+          g_application.m_pPlayer->SetSubTitleDelay(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleDelay);
         }
       }
     }
@@ -384,7 +383,7 @@ namespace XBMCAddon
       TRACE;
       if (g_application.m_pPlayer)
       {
-        g_settings.m_currentVideoSettings.m_SubtitleOn = bVisible != 0;
+        CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn = bVisible != 0;
         g_application.m_pPlayer->SetSubtitleVisible(bVisible != 0);
       }
     }
@@ -396,11 +395,11 @@ namespace XBMCAddon
       {
         SPlayerSubtitleStreamInfo info;
         g_application.m_pPlayer->GetSubtitleStreamInfo(g_application.m_pPlayer->GetSubtitle(), info);
-        CStdString strName = info.name;
 
-        if (strName == "Unknown(Invalid)")
-          strName = "";
-        return strName;
+        if (info.language.length() > 0)
+          return info.language;
+        else
+          return info.name;
       }
 
       return NULL;
@@ -412,7 +411,7 @@ namespace XBMCAddon
       CLog::Log(LOGWARNING,"'xbmc.Player().disableSubtitles()' is deprecated and will be removed in future releases, please use 'xbmc.Player().showSubtitles(false)' instead");
       if (g_application.m_pPlayer)
       {
-        g_settings.m_currentVideoSettings.m_SubtitleOn = false;
+        CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn = false;
         g_application.m_pPlayer->SetSubtitleVisible(false);
       }
     }
@@ -428,10 +427,10 @@ namespace XBMCAddon
           SPlayerSubtitleStreamInfo info;
           g_application.m_pPlayer->GetSubtitleStreamInfo(iStream, info);
 
-          CStdString FullLang;
-          if (!g_LangCodeExpander.Lookup(FullLang, info.name))
-            FullLang = info.name;
-          (*ret)[iStream] = FullLang;
+          if (info.language.length() > 0)
+            (*ret)[iStream] = info.language;
+          else
+            (*ret)[iStream] = info.name;
         }
         return ret;
       }
@@ -463,11 +462,10 @@ namespace XBMCAddon
           SPlayerAudioStreamInfo info;
           g_application.m_pPlayer->GetAudioStreamInfo(iStream, info);
 
-          CStdString FullLang;
-          g_LangCodeExpander.Lookup(FullLang, info.language);
-          if (FullLang.IsEmpty())
-            FullLang = info.name;
-          (*ret)[iStream] = FullLang;
+          if (info.language.length() > 0)
+            (*ret)[iStream] = info.language;
+          else
+            (*ret)[iStream] = info.name;
         }
         return ret;
       }

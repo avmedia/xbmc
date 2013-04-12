@@ -38,6 +38,7 @@
 #include "Favourites.h"
 #include "utils/LabelFormatter.h"
 #include "dialogs/GUIDialogProgress.h"
+#include "profiles/ProfilesManager.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/GUISettings.h"
 #include "URL.h"
@@ -49,7 +50,6 @@
 #include "dialogs/GUIDialogOK.h"
 #include "playlists/PlayList.h"
 #include "storage/MediaManager.h"
-#include "settings/Settings.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "guilib/Key.h"
@@ -294,12 +294,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
         return true;
       }
       else if (iControl == CONTROL_BTN_FILTER)
-      {
-        if (m_canFilterAdvanced)
-          return true;
-
-        return Filter();
-      }
+        return Filter(false);
       else if (m_viewControl.HasControl(iControl))  // list/thumb control
       {
         int iItem = m_viewControl.GetSelectedItem();
@@ -420,11 +415,10 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
       }
       else if (message.GetParam1() == GUI_MSG_FILTER_ITEMS && IsActive())
       {
-        CStdString filter;
+        CStdString filter = GetProperty("filter").asString();
         // check if this is meant for advanced filtering
         if (message.GetParam2() != 10)
         {
-          filter = GetProperty("filter").asString();
           if (message.GetParam2() == 1) // append
             filter += message.GetStringParam();
           else if (message.GetParam2() == 2)
@@ -571,8 +565,7 @@ void CGUIMediaWindow::UpdateButtons()
   items.Format("%i %s", m_vecItems->GetObjectCount(), g_localizeStrings.Get(127).c_str());
   SET_CONTROL_LABEL(CONTROL_LABELFILES, items);
 
-  if (!m_canFilterAdvanced)
-    SET_CONTROL_LABEL2(CONTROL_BTN_FILTER, GetProperty("filter").asString());
+  SET_CONTROL_LABEL2(CONTROL_BTN_FILTER, GetProperty("filter").asString());
 }
 
 void CGUIMediaWindow::ClearFileItems()
@@ -887,8 +880,7 @@ bool CGUIMediaWindow::Update(const CStdString &strDirectory, bool updateFilterPa
   OnCacheFileItems(*m_vecItems);
 
   // Filter and group the items if necessary
-  CStdString titleFilter = GetProperty("filter").asString();
-  OnFilterItems(titleFilter);
+  OnFilterItems(GetProperty("filter").asString());
 
   // Ask the devived class if it wants to do custom list operations,
   // eg. changing the label
@@ -1023,7 +1015,7 @@ bool CGUIMediaWindow::OnClick(int iItem)
     if ( pItem->m_bIsShareOrDrive )
     {
       const CStdString& strLockType=m_guiState->GetLockType();
-      if (g_settings.GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE)
+      if (CProfilesManager::Get().GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE)
         if (!strLockType.IsEmpty() && !g_passwordManager.IsItemUnlocked(pItem.get(), strLockType))
             return true;
 
@@ -1032,8 +1024,8 @@ bool CGUIMediaWindow::OnClick(int iItem)
     }
 
     // check for the partymode playlist items - they may not exist yet
-    if ((pItem->GetPath() == g_settings.GetUserDataItem("PartyMode.xsp")) ||
-        (pItem->GetPath() == g_settings.GetUserDataItem("PartyMode-Video.xsp")))
+    if ((pItem->GetPath() == CProfilesManager::Get().GetUserDataItem("PartyMode.xsp")) ||
+        (pItem->GetPath() == CProfilesManager::Get().GetUserDataItem("PartyMode-Video.xsp")))
     {
       // party mode playlist item - if it doesn't exist, prompt for user to define it
       if (!XFILE::CFile::Exists(pItem->GetPath()))
@@ -1482,7 +1474,7 @@ void CGUIMediaWindow::OnDeleteItem(int iItem)
   if (item->IsPlayList())
     item->m_bIsFolder = false;
 
-  if (g_settings.GetCurrentProfile().getLockMode() != LOCK_MODE_EVERYONE && g_settings.GetCurrentProfile().filesLocked())
+  if (CProfilesManager::Get().GetCurrentProfile().getLockMode() != LOCK_MODE_EVERYONE && CProfilesManager::Get().GetCurrentProfile().filesLocked())
     if (!g_passwordManager.IsMasterLockUnlocked(true))
       return;
 
@@ -1496,7 +1488,7 @@ void CGUIMediaWindow::OnRenameItem(int iItem)
 {
   if ( iItem < 0 || iItem >= m_vecItems->Size()) return;
 
-  if (g_settings.GetCurrentProfile().getLockMode() != LOCK_MODE_EVERYONE && g_settings.GetCurrentProfile().filesLocked())
+  if (CProfilesManager::Get().GetCurrentProfile().getLockMode() != LOCK_MODE_EVERYONE && CProfilesManager::Get().GetCurrentProfile().filesLocked())
     if (!g_passwordManager.IsMasterLockUnlocked(true))
       return;
 
@@ -1746,25 +1738,21 @@ void CGUIMediaWindow::OnFilterItems(const CStdString &filter)
     }
   }
 
-  if (filtered)
+  SetProperty("filter", filter);
+  if (filtered && m_canFilterAdvanced)
   {
-    if (!m_canFilterAdvanced)
-      SetProperty("filter", filter);
-    else
+    // to be able to select the same item as before we need to adjust
+    // the path of the item i.e. add or remove the "filter=" URL option
+    // but that's only necessary for folder items
+    if (currentItem.get() != NULL && currentItem->m_bIsFolder)
     {
-      // to be able to select the same item as before we need to adjust
-      // the path of the item i.e. add or remove the "filter=" URL option
-      // but that's only necessary for folder items
-      if (currentItem.get() != NULL && currentItem->m_bIsFolder)
-      {
-        CURL curUrl(currentItemPath), newUrl(m_strFilterPath);
-        if (newUrl.HasOption("filter"))
-          curUrl.SetOption("filter", newUrl.GetOption("filter"));
-        else if (curUrl.HasOption("filter"))
-          curUrl.RemoveOption("filter");
+      CURL curUrl(currentItemPath), newUrl(m_strFilterPath);
+      if (newUrl.HasOption("filter"))
+        curUrl.SetOption("filter", newUrl.GetOption("filter"));
+      else if (curUrl.HasOption("filter"))
+        curUrl.RemoveOption("filter");
 
-        currentItemPath = curUrl.Get();
-      }
+      currentItemPath = curUrl.Get();
     }
   }
 
@@ -1788,14 +1776,15 @@ void CGUIMediaWindow::OnFilterItems(const CStdString &filter)
 
 bool CGUIMediaWindow::GetFilteredItems(const CStdString &filter, CFileItemList &items)
 {
+  bool result = false;
   if (m_canFilterAdvanced)
-    return GetAdvanceFilteredItems(items);
+    result = GetAdvanceFilteredItems(items);
 
   CStdString trimmedFilter(filter);
   trimmedFilter.TrimLeft().ToLower();
   
   if (trimmedFilter.IsEmpty())
-    return true;
+    return result;
 
   CFileItemList filteredItems(items.GetPath()); // use the original path - it'll likely be relied on for other things later.
   bool numericMatch = StringUtils::IsNaturalNumber(trimmedFilter);
@@ -1903,10 +1892,10 @@ bool CGUIMediaWindow::IsFiltered()
          (m_canFilterAdvanced && !m_filter.IsEmpty());
 }
 
-bool CGUIMediaWindow::Filter()
+bool CGUIMediaWindow::Filter(bool advanced /* = true */)
 {
   // basic filtering
-  if (!m_canFilterAdvanced)
+  if (!m_canFilterAdvanced || !advanced)
   {
     const CGUIControl *btnFilter = GetControl(CONTROL_BTN_FILTER);
     if (btnFilter != NULL && btnFilter->GetControlType() == CGUIControl::GUICONTROL_EDIT)

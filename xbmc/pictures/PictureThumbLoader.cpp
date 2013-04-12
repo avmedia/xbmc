@@ -29,7 +29,6 @@
 #include "GUIUserMessages.h"
 #include "settings/GUISettings.h"
 #include "utils/URIUtils.h"
-#include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
 #include "video/VideoThumbLoader.h"
 
@@ -133,7 +132,8 @@ void CPictureThumbLoader::ProcessFoldersAndArchives(CFileItem *pItem)
       return;
     }
   }
-  if ((pItem->m_bIsFolder || pItem->IsCBR() || pItem->IsCBZ()) && !pItem->m_bIsShareOrDrive && !pItem->IsParentFolder())
+  if ((pItem->m_bIsFolder || pItem->IsCBR() || pItem->IsCBZ()) && !pItem->m_bIsShareOrDrive
+      && !pItem->IsParentFolder() && !pItem->GetPath().Equals("add"))
   {
     // first check for a folder.jpg
     CStdString thumb = "folder.jpg";
@@ -165,7 +165,7 @@ void CPictureThumbLoader::ProcessFoldersAndArchives(CFileItem *pItem)
 
       CFileItemList items;
 
-      CDirectory::GetDirectory(strPath, items, g_settings.m_pictureExtensions, DIR_FLAG_NO_FILE_DIRS);
+      CDirectory::GetDirectory(strPath, items, g_advancedSettings.m_pictureExtensions, DIR_FLAG_NO_FILE_DIRS);
       
       // create the folder thumb by choosing 4 random thumbs within the folder and putting
       // them into one thumb.
@@ -184,7 +184,7 @@ void CPictureThumbLoader::ProcessFoldersAndArchives(CFileItem *pItem)
       {
         if (pItem->IsCBZ() || pItem->IsCBR())
         {
-          CDirectory::GetDirectory(strPath, items, g_settings.m_pictureExtensions, DIR_FLAG_NO_FILE_DIRS);
+          CDirectory::GetDirectory(strPath, items, g_advancedSettings.m_pictureExtensions, DIR_FLAG_NO_FILE_DIRS);
           for (int i=0;i<items.Size();++i)
           {
             CFileItemPtr item = items[i];

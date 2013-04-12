@@ -107,11 +107,31 @@ public:
   virtual bool IsFileItem() const { return true; };
 
   bool Exists(bool bUseCache = true) const;
+  
+  /*!
+   \brief Check whether an item is a video item. Note that this returns true for
+    anything with a video info tag, so that may include eg. folders.
+   \return true if item is video, false otherwise. 
+   */
   bool IsVideo() const;
+
   bool IsDiscStub() const;
+
+  /*!
+   \brief Check whether an item is a picture item. Note that this returns true for
+    anything with a picture info tag, so that may include eg. folders.
+   \return true if item is picture, false otherwise. 
+   */
   bool IsPicture() const;
   bool IsLyrics() const;
+
+  /*!
+   \brief Check whether an item is an audio item. Note that this returns true for
+    anything with a music info tag, so that may include eg. folders.
+   \return true if item is audio, false otherwise. 
+   */
   bool IsAudio() const;
+
   bool IsKaraoke() const;
   bool IsCUESheet() const;
   bool IsInternetStream(const bool bStrictCheck = false) const;
@@ -477,6 +497,7 @@ public:
   void Remove(int iItem);
   CFileItemPtr Get(int iItem);
   const CFileItemPtr Get(int iItem) const;
+  const VECFILEITEMS GetList() const { return m_items; }
   CFileItemPtr Get(const CStdString& strPath);
   const CFileItemPtr Get(const CStdString& strPath) const;
   int Size() const;

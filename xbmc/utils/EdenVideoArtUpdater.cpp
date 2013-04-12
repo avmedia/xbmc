@@ -30,8 +30,8 @@
 #include "TextureCache.h"
 #include "TextureCacheJob.h"
 #include "pictures/Picture.h"
+#include "profiles/ProfilesManager.h"
 #include "settings/GUISettings.h"
-#include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
 #include "guilib/Texture.h"
 #include "guilib/GUIWindowManager.h"
@@ -45,7 +45,7 @@ using namespace std;
 using namespace VIDEO;
 using namespace XFILE;
 
-CEdenVideoArtUpdater::CEdenVideoArtUpdater() : CThread("EdenVideoArtUpdater")
+CEdenVideoArtUpdater::CEdenVideoArtUpdater() : CThread("VideoArtUpdater")
 {
   m_textureDB.Open();
 }
@@ -77,7 +77,7 @@ void CEdenVideoArtUpdater::Process()
   handle->SetTitle(g_localizeStrings.Get(12349));
 
   // movies
-  db.GetMoviesByWhere("videodb://1/2/", CDatabase::Filter(), items);
+  db.GetMoviesByWhere("videodb://movies/titles/", CDatabase::Filter(), items);
   for (int i = 0; i < items.Size(); i++)
   {
     CFileItemPtr item = items[i];
@@ -111,7 +111,7 @@ void CEdenVideoArtUpdater::Process()
   items.Clear();
 
   // music videos
-  db.GetMusicVideosNav("videodb://3/2/", items, false);
+  db.GetMusicVideosNav("videodb://musicvideos/titles/", items, false);
   for (int i = 0; i < items.Size(); i++)
   {
     CFileItemPtr item = items[i];
@@ -146,7 +146,7 @@ void CEdenVideoArtUpdater::Process()
 
   // tvshows
   // count the number of episodes
-  db.GetTvShowsNav("videodb://2/2/", items);
+  db.GetTvShowsNav("videodb://tvshows/titles/", items);
   for (int i = 0; i < items.Size(); i++)
   {
     CFileItemPtr item = items[i];
@@ -198,7 +198,7 @@ void CEdenVideoArtUpdater::Process()
 
     // now episodes...
     CFileItemList items2;
-    db.GetEpisodesByWhere("videodb://2/2/-1/-1/", db.PrepareSQL("episodeview.idShow=%d", item->GetVideoInfoTag()->m_iDbId), items2);
+    db.GetEpisodesByWhere("videodb://tvshows/titles/-1/-1/", db.PrepareSQL("episodeview.idShow=%d", item->GetVideoInfoTag()->m_iDbId), items2);
     for (int j = 0; j < items2.Size(); j++)
     {
       handle->SetProgress(j, items2.Size());
@@ -225,7 +225,7 @@ void CEdenVideoArtUpdater::Process()
   items.Clear();
 
   // now sets
-  db.GetSetsNav("videodb://1/7/", items, VIDEODB_CONTENT_MOVIES);
+  db.GetSetsNav("videodb://movies/sets/", items, VIDEODB_CONTENT_MOVIES);
   for (int i = 0; i < items.Size(); i++)
   {
     CFileItemPtr item = items[i];
@@ -235,7 +235,7 @@ void CEdenVideoArtUpdater::Process()
     if (!db.GetArtForItem(item->GetVideoInfoTag()->m_iDbId, item->GetVideoInfoTag()->m_type, artwork))
     { // grab the first movie from this set
       CFileItemList items2;
-      db.GetMoviesNav("videodb://1/2/", items2, -1, -1, -1, -1, -1, -1, item->GetVideoInfoTag()->m_iDbId);
+      db.GetMoviesNav("videodb://movies/titles/", items2, -1, -1, -1, -1, -1, -1, item->GetVideoInfoTag()->m_iDbId);
       if (items2.Size() > 1)
       {
         if (db.GetArtForItem(items2[0]->GetVideoInfoTag()->m_iDbId, items2[0]->GetVideoInfoTag()->m_type, artwork))
@@ -248,10 +248,10 @@ void CEdenVideoArtUpdater::Process()
   // now actors
   if (g_guiSettings.GetBool("videolibrary.actorthumbs"))
   {
-    db.GetActorsNav("videodb://1/4/", items, VIDEODB_CONTENT_MOVIES);
-    db.GetActorsNav("videodb://2/4/", items, VIDEODB_CONTENT_TVSHOWS);
-    db.GetActorsNav("videodb://2/4/", items, VIDEODB_CONTENT_EPISODES);
-    db.GetActorsNav("videodb://3/4/", items, VIDEODB_CONTENT_MUSICVIDEOS);
+    db.GetActorsNav("videodb://movies/titles/", items, VIDEODB_CONTENT_MOVIES);
+    db.GetActorsNav("videodb://tvshows/titles/", items, VIDEODB_CONTENT_TVSHOWS);
+    db.GetActorsNav("videodb://tvshows/titles/", items, VIDEODB_CONTENT_EPISODES);
+    db.GetActorsNav("videodb://musicvideos/titles/", items, VIDEODB_CONTENT_MUSICVIDEOS);
     for (int i = 0; i < items.Size(); i++)
     {
       CFileItemPtr item = items[i];
@@ -330,7 +330,7 @@ bool CEdenVideoArtUpdater::CacheTexture(std::string &originalUrl, const std::str
 
 CStdString CEdenVideoArtUpdater::GetCachedActorThumb(const CFileItem &item)
 {
-  return GetThumb("actor" + item.GetLabel(), g_settings.GetVideoThumbFolder(), true);
+  return GetThumb("actor" + item.GetLabel(), CProfilesManager::Get().GetVideoThumbFolder(), true);
 }
 
 CStdString CEdenVideoArtUpdater::GetCachedSeasonThumb(int season, const CStdString &path)
@@ -342,7 +342,7 @@ CStdString CEdenVideoArtUpdater::GetCachedSeasonThumb(int season, const CStdStri
     label = g_localizeStrings.Get(20381);
   else
     label.Format(g_localizeStrings.Get(20358), season);
-  return GetThumb("season" + path + label, g_settings.GetVideoThumbFolder(), true);
+  return GetThumb("season" + path + label, CProfilesManager::Get().GetVideoThumbFolder(), true);
 }
 
 CStdString CEdenVideoArtUpdater::GetCachedEpisodeThumb(const CFileItem &item)
@@ -350,31 +350,31 @@ CStdString CEdenVideoArtUpdater::GetCachedEpisodeThumb(const CFileItem &item)
   // get the locally cached thumb
   CStdString strCRC;
   strCRC.Format("%sepisode%i", item.GetVideoInfoTag()->m_strFileNameAndPath.c_str(), item.GetVideoInfoTag()->m_iEpisode);
-  return GetThumb(strCRC, g_settings.GetVideoThumbFolder(), true);
+  return GetThumb(strCRC, CProfilesManager::Get().GetVideoThumbFolder(), true);
 }
 
 CStdString CEdenVideoArtUpdater::GetCachedVideoThumb(const CFileItem &item)
 {
   if (item.m_bIsFolder && !item.GetVideoInfoTag()->m_strPath.IsEmpty())
-    return GetThumb(item.GetVideoInfoTag()->m_strPath, g_settings.GetVideoThumbFolder(), true);
+    return GetThumb(item.GetVideoInfoTag()->m_strPath, CProfilesManager::Get().GetVideoThumbFolder(), true);
   else if (!item.GetVideoInfoTag()->m_strFileNameAndPath.IsEmpty())
   {
     CStdString path = item.GetVideoInfoTag()->m_strFileNameAndPath;
     if (URIUtils::IsStack(path))
       path = CStackDirectory::GetFirstStackedFile(path);
-    return GetThumb(path, g_settings.GetVideoThumbFolder(), true);
+    return GetThumb(path, CProfilesManager::Get().GetVideoThumbFolder(), true);
   }
-  return GetThumb(item.GetPath(), g_settings.GetVideoThumbFolder(), true);
+  return GetThumb(item.GetPath(), CProfilesManager::Get().GetVideoThumbFolder(), true);
 }
 
 CStdString CEdenVideoArtUpdater::GetCachedFanart(const CFileItem &item)
 {
   if (!item.GetVideoInfoTag()->m_artist.empty())
-    return GetThumb(StringUtils::Join(item.GetVideoInfoTag()->m_artist, g_advancedSettings.m_videoItemSeparator), URIUtils::AddFileToFolder(g_settings.GetThumbnailsFolder(), "Music/Fanart/"), false);
+    return GetThumb(StringUtils::Join(item.GetVideoInfoTag()->m_artist, g_advancedSettings.m_videoItemSeparator), URIUtils::AddFileToFolder(CProfilesManager::Get().GetThumbnailsFolder(), "Music/Fanart/"), false);
   CStdString path = item.GetVideoInfoTag()->GetPath();
   if (path.empty())
     return "";
-  return GetThumb(path, URIUtils::AddFileToFolder(g_settings.GetVideoThumbFolder(), "Fanart/"), false);
+  return GetThumb(path, URIUtils::AddFileToFolder(CProfilesManager::Get().GetVideoThumbFolder(), "Fanart/"), false);
 }
 
 CStdString CEdenVideoArtUpdater::GetThumb(const CStdString &path, const CStdString &path2, bool split)

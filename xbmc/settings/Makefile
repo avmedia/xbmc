@@ -1,7 +1,10 @@
 SRCS=AdvancedSettings.cpp \
+     DisplaySettings.cpp \
      GUISettings.cpp \
-     Profile.cpp \
+     MediaSettings.cpp \
+     MediaSourceSettings.cpp \
      Settings.cpp \
+     SkinSettings.cpp \
      VideoSettings.cpp \
 
 LIB=settings.a

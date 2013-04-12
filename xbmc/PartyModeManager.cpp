@@ -25,12 +25,12 @@
 #include "music/windows/GUIWindowMusicPlaylist.h"
 #include "video/VideoDatabase.h"
 #include "playlists/SmartPlayList.h"
+#include "profiles/ProfilesManager.h"
 #include "dialogs/GUIDialogProgress.h"
 #include "GUIUserMessages.h"
 #include "guilib/GUIWindowManager.h"
 #include "dialogs/GUIDialogOK.h"
 #include "playlists/PlayList.h"
-#include "settings/Settings.h"
 #include "utils/TimeUtils.h"
 #include "utils/log.h"
 #include "Application.h"
@@ -65,9 +65,9 @@ bool CPartyModeManager::Enable(PartyModeContext context /*= PARTYMODECONTEXT_MUS
   if (!strXspPath.IsEmpty()) //if a path to a smartplaylist is supplied use it
     partyModePath = strXspPath;
   else if (m_bIsVideo)
-    partyModePath = g_settings.GetUserDataItem("PartyMode-Video.xsp");
+    partyModePath = CProfilesManager::Get().GetUserDataItem("PartyMode-Video.xsp");
   else
-    partyModePath = g_settings.GetUserDataItem("PartyMode.xsp");
+    partyModePath = CProfilesManager::Get().GetUserDataItem("PartyMode.xsp");
 
   playlistLoaded=playlist.Load(partyModePath);
 
@@ -620,14 +620,14 @@ bool CPartyModeManager::AddInitialSongs(vector<pair<int,int> > &songIDs)
       sqlWhereMusic[sqlWhereMusic.size() - 1] = ')'; // replace the last comma with closing bracket
       CMusicDatabase database;
       database.Open();
-      database.GetSongsByWhere("musicdb://4/", sqlWhereMusic, items);
+      database.GetSongsByWhere("musicdb://songs/", sqlWhereMusic, items);
     }
     if (sqlWhereVideo.size() > 19)
     {
       sqlWhereVideo[sqlWhereVideo.size() - 1] = ')'; // replace the last comma with closing bracket
       CVideoDatabase database;
       database.Open();
-      database.GetMusicVideosByWhere("videodb://3/2/", sqlWhereVideo, items);
+      database.GetMusicVideosByWhere("videodb://musicvideos/titles/", sqlWhereVideo, items);
     }
 
     m_history = chosenSongIDs;

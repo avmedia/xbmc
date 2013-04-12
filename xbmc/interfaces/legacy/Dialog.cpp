@@ -8,7 +8,7 @@
 #include "guilib/GUIWindowManager.h"
 #include "dialogs/GUIDialogFileBrowser.h"
 #include "dialogs/GUIDialogNumeric.h"
-#include "settings/Settings.h"
+#include "settings/MediaSourceSettings.h"
 
 #define ACTIVE_WINDOW g_windowManager.GetActiveWindow()
 
@@ -132,7 +132,7 @@ namespace XBMCAddon
       DelayedCallGuard dcguard(languageHook);
       CStdString value;
       std::string mask = maskparam;
-      VECSOURCES *shares = g_settings.GetSourcesFromType(s_shares);
+      VECSOURCES *shares = CMediaSourceSettings::Get().GetSources(s_shares);
       if (!shares) 
         throw WindowException("Error: GetSourcesFromType given %s is NULL.",s_shares.c_str());
 
@@ -154,7 +154,7 @@ namespace XBMCAddon
                           bool useFileDirectories, const String& defaultt ) throw (WindowException)
     {
       DelayedCallGuard dcguard(languageHook);
-      VECSOURCES *shares = g_settings.GetSourcesFromType(s_shares);
+      VECSOURCES *shares = CMediaSourceSettings::Get().GetSources(s_shares);
       CStdStringArray tmpret;
       String lmask = mask;
       if (!shares) 
@@ -305,6 +305,66 @@ namespace XBMCAddon
     {
       return dlg->IsCanceled();
     }
+
+    DialogProgressBG::~DialogProgressBG() { TRACE; deallocating(); }
+
+    void DialogProgressBG::deallocating()
+    {
+      TRACE;
+
+      if (dlg)
+      {
+        DelayedCallGuard dg;
+        dlg->Close();
+      }
+    }
+
+    void DialogProgressBG::create(const String& heading, const String& message) throw (WindowException)
+    {
+      DelayedCallGuard dcguard(languageHook);
+      CGUIDialogExtendedProgressBar* pDialog = 
+          (CGUIDialogExtendedProgressBar*)g_windowManager.GetWindow(WINDOW_DIALOG_EXT_PROGRESS);
+
+      if (pDialog == NULL)
+        throw WindowException("Error: Window is NULL, this is not possible :-)");
+
+      CGUIDialogProgressBarHandle* pHandle = pDialog->GetHandle(heading);
+
+      dlg = pDialog;
+      handle = pHandle;
+
+      pHandle->SetTitle(heading);
+      if (!message.empty())
+        pHandle->SetText(message);
+    }
+
+    void DialogProgressBG::update(int percent, const String& heading, const String& message) throw (WindowException)
+    {
+      DelayedCallGuard dcguard(languageHook);
+      CGUIDialogExtendedProgressBar* pDialog = dlg;
+      CGUIDialogProgressBarHandle* pHandle = handle;
+
+      if (pDialog == NULL)
+        throw WindowException("Error: Window is NULL, this is not possible :-)");
+
+      if (percent >= 0 && percent <= 100)
+        pHandle->SetPercentage((float)percent);
+      if (!heading.empty())
+        pHandle->SetTitle(heading);
+      if (!message.empty())
+        pHandle->SetText(message);
+    }
+
+    void DialogProgressBG::close()
+    {
+      DelayedCallGuard dcguard(languageHook);
+      handle->MarkFinished();
+    }
+
+    bool DialogProgressBG::isFinished()
+    {
+      return handle->IsFinished();
+    }
+
   }
 }
-

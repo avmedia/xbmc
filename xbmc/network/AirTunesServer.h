@@ -41,13 +41,16 @@
 #include "utils/HttpParser.h"
 #include "utils/StdString.h"
 #include "filesystem/PipeFile.h"
+#include "interfaces/IAnnouncer.h"
 
 class DllLibShairport;
 
 
-class CAirTunesServer : public CThread
+class CAirTunesServer : public CThread, public ANNOUNCEMENT::IAnnouncer
 {
 public:
+  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
+
   static bool StartServer(int port, bool nonlocal, bool usePassword, const CStdString &password="");
   static void StopServer(bool bWait);
   static void SetMetadataFromBuffer(const char *buffer, unsigned int size);
@@ -86,6 +89,7 @@ private:
       static void  audio_destroy(void *cls, void *session);
 #else
       static void ao_initialize(void);
+      static void ao_set_volume(float volume);
       static int ao_play(ao_device *device, char *output_samples, uint32_t num_bytes);
       static int ao_default_driver_id(void);
       static ao_device* ao_open_live( int driver_id, ao_sample_format *format,

@@ -29,7 +29,7 @@
 
 CDVDMessageTracker g_dvdMessageTracker;
 
-CDVDMessageTracker::CDVDMessageTracker() : CThread()
+CDVDMessageTracker::CDVDMessageTracker() : CThread("DVDMsgTracker")
 {
   m_bInitialized = false;
   InitializeCriticalSection(&m_critSection);
@@ -76,7 +76,7 @@ void CDVDMessageTracker::UnRegister(CDVDMsg* pMsg)
       delete pItem;
       break;
     }
-    iter++;
+    ++iter;
   }
 
 }
@@ -108,7 +108,7 @@ void CDVDMessageTracker::Process()
           pItem->m_debug_logged = true;
         }
       }
-      iter++;
+      ++iter;
     }
 
   }

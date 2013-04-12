@@ -36,16 +36,16 @@ if [ -f "/usr/libexec/fauxsu/libfauxsu.dylib" ]; then
 elif [ -f "/usr/bin/sudo" ]; then
   SUDO="/usr/bin/sudo"
 fi
-if [ -f "/Users/Shared/xbmc-depends/toolchain/bin/dpkg-deb" ]; then
+if [ -f "/Users/Shared/xbmc-depends/buildtools-native/bin/dpkg-deb" ]; then
   # make sure we pickup our tar, gnutar will fail when dpkg -i
-  bin_path=$(cd /Users/Shared/xbmc-depends/toolchain/bin; pwd)
+  bin_path=$(cd /Users/Shared/xbmc-depends/buildtools-native/bin; pwd)
   export PATH=${bin_path}:${PATH}
 fi
 
 PACKAGE=org.xbmc.xbmc-atv2
 
 VERSION=13.0
-REVISION=0~alpha2
+REVISION=0~alpha3
 ARCHIVE=${PACKAGE}_${VERSION}-${REVISION}_iphoneos-arm.deb
 
 echo Creating $PACKAGE package version $VERSION revision $REVISION

@@ -20,7 +20,6 @@
 
 #include "Addon.h"
 #include "AddonManager.h"
-#include "settings/Settings.h"
 #include "settings/GUISettings.h"
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
@@ -512,6 +511,7 @@ void CAddon::SaveSettings(void)
   CXBMCTinyXML doc;
   SettingsToXML(doc);
   doc.SaveFile(m_userSettingsPath);
+  m_userSettingsLoaded = true;
   
   CAddonMgr::Get().ReloadSettings(ID());//push the settings changes to the running addon instance
   g_pythonParser.OnSettingsChanged(ID());

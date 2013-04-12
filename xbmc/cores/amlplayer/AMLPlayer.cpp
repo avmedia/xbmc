@@ -302,7 +302,7 @@ static const char* AudioCodecName(int aformat)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 CAMLSubTitleThread::CAMLSubTitleThread(DllLibAmplayer *dll) :
-  CThread("CAMLSubTitleThread"),
+  CThread("AMLSubTitle"),
   m_dll(dll),
   m_subtitle_codec(-1)
 {
@@ -316,7 +316,7 @@ CAMLSubTitleThread::~CAMLSubTitleThread()
 void CAMLSubTitleThread::UpdateSubtitle(CStdString &subtitle, int64_t elapsed_ms)
 {
   CSingleLock lock(m_subtitle_csection);
-  if (m_subtitle_strings.size())
+  if (!m_subtitle_strings.empty())
   {
     AMLSubtitle *amlsubtitle;
     // remove any expired subtitles
@@ -327,7 +327,7 @@ void CAMLSubTitleThread::UpdateSubtitle(CStdString &subtitle, int64_t elapsed_ms
       if (elapsed_ms > amlsubtitle->endtime)
         it = m_subtitle_strings.erase(it);
       else
-        it++;
+        ++it;
     }
 
     // find the current subtitle
@@ -340,7 +340,7 @@ void CAMLSubTitleThread::UpdateSubtitle(CStdString &subtitle, int64_t elapsed_ms
         subtitle = amlsubtitle->string;
         break;
       }
-      it++;
+      ++it;
     }
   }
 }
@@ -364,7 +364,6 @@ void CAMLSubTitleThread::Process(void)
       int sub_size = m_dll->codec_get_sub_size_fd(m_subtitle_codec);
       if (sub_size > 0)
       {
-        int sub_type = 0, sub_pts = 0;
         // calloc sub_size + 1 so we auto terminate the string
         char *sub_buffer = (char*)calloc(sub_size + 1, 1);
         m_dll->codec_read_sub_data_fd(m_subtitle_codec, sub_buffer, sub_size);
@@ -381,10 +380,9 @@ void CAMLSubTitleThread::Process(void)
             CSingleLock lock(m_subtitle_csection);
 
             AMLSubtitle *subtitle = new AMLSubtitle;
-
-            sub_type  = (sub_buffer[5] << 16)  | (sub_buffer[6] << 8)   | sub_buffer[7];
+            int sub_type  = (sub_buffer[5] << 16)  | (sub_buffer[6] << 8)   | sub_buffer[7];
             // sub_pts are in ffmpeg timebase, not ms timebase, convert it.
-            sub_pts = (sub_buffer[12] << 24) | (sub_buffer[13] << 16) | (sub_buffer[14] << 8) | sub_buffer[15];
+            int sub_pts = (sub_buffer[12] << 24) | (sub_buffer[13] << 16) | (sub_buffer[14] << 8) | sub_buffer[15];
 
             /* TODO: handle other subtitle codec types
             // subtitle codecs
@@ -502,20 +500,46 @@ void CAMLSubTitleThread::Process(void)
 ////////////////////////////////////////////////////////////////////////////////////////////
 CAMLPlayer::CAMLPlayer(IPlayerCallback &callback)
   : IPlayer(callback),
-  CThread("CAMLPlayer"),
-  m_ready(true)
+  CThread                 ("AMLPlayer" ),
+  m_cpu                   (0            ),
+  m_speed                 (0            ),
+  m_paused                (false        ),
+  m_bAbortRequest         (false        ),
+  m_ready                 (true         ),
+  m_audio_index           (0            ),
+  m_audio_count           (0            ),
+  m_audio_delay           (0            ),
+  m_audio_passthrough_ac3 (false        ),
+  m_audio_passthrough_dts (false        ),
+  m_audio_mute            (false        ),
+  m_audio_volume          (0.0f         ),
+  m_video_index           (0            ),
+  m_video_count           (0            ),
+  m_video_width           (0            ),
+  m_video_height          (0            ),
+  m_video_fps_numerator   (0            ),
+  m_video_fps_denominator (0            ),
+  m_subtitle_index        (0            ),
+  m_subtitle_count        (0            ),
+  m_subtitle_show         (false        ),
+  m_subtitle_delay        (0            ),
+  m_subtitle_thread       (NULL         ),
+  m_chapter_index         (0            ),
+  m_chapter_count         (0            ),
+  m_show_mainvideo        (0            ),
+  m_view_mode             (0            ),
+  m_zoom                  (0            ),
+  m_contrast              (0            ),
+  m_brightness            (0            )
 {
   m_dll = new DllLibAmplayer;
   m_dll->Load();
   m_pid = -1;
-  m_speed = 0;
-  m_paused = false;
 #if defined(_DEBUG)
   m_log_level = 5;
 #else
   m_log_level = 3;
 #endif
-  m_bAbortRequest = false;
 
   // for external subtitles
   m_dvdOverlayContainer = new CDVDOverlayContainer;
@@ -814,7 +838,7 @@ void CAMLPlayer::SetVolume(float volume)
 void CAMLPlayer::GetAudioInfo(CStdString &strAudioInfo)
 {
   CSingleLock lock(m_aml_csection);
-  if (m_audio_streams.size() == 0 || m_audio_index > (int)(m_audio_streams.size() - 1))
+  if (m_audio_streams.empty() || m_audio_index > (int)(m_audio_streams.size() - 1))
     return;
 
   strAudioInfo.Format("Audio stream (%s) [Kb/s:%.2f]",
@@ -825,7 +849,7 @@ void CAMLPlayer::GetAudioInfo(CStdString &strAudioInfo)
 void CAMLPlayer::GetVideoInfo(CStdString &strVideoInfo)
 {
   CSingleLock lock(m_aml_csection);
-  if (m_video_streams.size() == 0 || m_video_index > (int)(m_video_streams.size() - 1))
+  if (m_video_streams.empty() || m_video_index > (int)(m_video_streams.size() - 1))
     return;
 
   strVideoInfo.Format("Video stream (%s) [fr:%.3f Mb/s:%.2f]",
@@ -914,24 +938,9 @@ void CAMLPlayer::GetSubtitleStreamInfo(int index, SPlayerSubtitleStreamInfo &inf
   if (index > (int)m_subtitle_streams.size() -1 || index < 0)
     return;
 
-  if (m_subtitle_streams[m_subtitle_index]->source == STREAM_SOURCE_NONE)
-  {
-    if ( m_subtitle_streams[index]->language.size())
-    {
-      CStdString name;
-      g_LangCodeExpander.Lookup(name, m_subtitle_streams[index]->language);
-      info.name = name;
-    }
-    else
-      info.name = g_localizeStrings.Get(13205); // Unknown
-  }
-  else
-  {
-    if(m_subtitle_streams[m_subtitle_index]->name.length() > 0)
-      info.name = m_subtitle_streams[m_subtitle_index]->name;
-    else
-      info.name = g_localizeStrings.Get(13205); // Unknown
-  }
+  info.language = m_subtitle_streams[index]->language;
+  info.name = m_subtitle_streams[m_subtitle_index]->name;
+
   if (m_log_level > 5)
     CLog::Log(LOGDEBUG, "CAMLPlayer::GetSubtitleName, iStream(%d)", index);
 }
@@ -968,7 +977,7 @@ bool CAMLPlayer::GetSubtitleVisible()
 void CAMLPlayer::SetSubtitleVisible(bool bVisible)
 {
   m_subtitle_show = (bVisible && m_subtitle_count);
-  g_settings.m_currentVideoSettings.m_SubtitleOn = bVisible;
+  CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn = bVisible;
 
   if (m_subtitle_show  && m_subtitle_count)
   {
@@ -1100,32 +1109,48 @@ __int64 CAMLPlayer::GetTotalTime()
 void CAMLPlayer::GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info)
 {
   CSingleLock lock(m_aml_csection);
-  if (index < 0 || m_audio_streams.size() == 0 || index > (int)(m_audio_streams.size() - 1))
+  if (index < 0 || m_audio_streams.empty() || index > (int)(m_audio_streams.size() - 1))
     return;
 
   info.bitrate = m_audio_streams[index]->bit_rate;
 
-  if ( m_audio_streams[index]->language.size())
-    info.language = m_audio_streams[index]->language;
+  info.language = m_audio_streams[index]->language;
 
   info.channels = m_audio_streams[index]->channel;
 
   info.audioCodecName = AudioCodecName(m_audio_streams[index]->format);
 
-  info.name.Format("Undefined");
-    
-  if ( m_audio_streams[index]->language.size())
+  if (info.audioCodecName.size())
+    info.name = info.audioCodecName + " ";
+
+  switch(info.channels)
   {
-    CStdString name;
-    g_LangCodeExpander.Lookup( name, m_audio_streams[index]->language);
-    info.name = name;
+  case 1:
+    info.name += "Mono";
+    break;
+  case 2: 
+    info.name += "Stereo";
+    break;
+  case 6: 
+    info.name += "5.1";
+    break;
+  case 7:
+    info.name += "6.1";
+    break;
+  case 8:
+    info.name += "7.1";
+    break;
+  default:
+    char temp[32];
+    sprintf(temp, "%d-chs", info.channels);
+    info.name += temp;
   }
 }
 
 void CAMLPlayer::GetVideoStreamInfo(SPlayerVideoStreamInfo &info)
 {
   CSingleLock lock(m_aml_csection);
-  if (m_video_streams.size() == 0 || m_video_index > (int)(m_video_streams.size() - 1))
+  if (m_video_streams.empty() || m_video_index > (int)(m_video_streams.size() - 1))
     return;
 
   info.bitrate = m_video_streams[m_video_index]->bit_rate;
@@ -1149,7 +1174,7 @@ int CAMLPlayer::GetBitsPerSample()
 int CAMLPlayer::GetSampleRate()
 {
   CSingleLock lock(m_aml_csection);
-  if (m_audio_streams.size() == 0 || m_audio_index > (int)(m_audio_streams.size() - 1))
+  if (m_audio_streams.empty() || m_audio_index > (int)(m_audio_streams.size() - 1))
     return 0;
   
   return m_audio_streams[m_audio_index]->sample_rate;
@@ -1237,7 +1262,7 @@ void CAMLPlayer::OnStartup()
   //m_CurrentAudio.Clear();
   //m_CurrentSubtitle.Clear();
 
-  //CThread::SetName("CAMLPlayer");
+  //CThread::SetName("AMLPlayer");
 }
 
 void CAMLPlayer::OnExit()
@@ -1421,10 +1446,10 @@ void CAMLPlayer::Process()
       GetStatus();
 
       // restore mute setting.
-      SetMute(g_settings.m_bMute);
+      SetMute(g_application.IsMuted());
 
       // restore system volume setting.
-      SetVolume(g_settings.m_fVolumeLevel);
+      SetVolume(g_application.GetVolume(false));
 
       // the default staturation is to high, drop it
       SetVideoSaturation(110);
@@ -1436,11 +1461,11 @@ void CAMLPlayer::Process()
       // check for video in media content
       if (GetVideoStreamCount() > 0)
       {
-        SetAVDelay(g_settings.m_currentVideoSettings.m_AudioDelay);
+        SetAVDelay(CMediaSettings::Get().GetCurrentVideoSettings().m_AudioDelay);
 
         // turn on/off subs
-        SetSubtitleVisible(g_settings.m_currentVideoSettings.m_SubtitleOn);
-        SetSubTitleDelay(g_settings.m_currentVideoSettings.m_SubtitleDelay);
+        SetSubtitleVisible(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn);
+        SetSubTitleDelay(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleDelay);
 
         // setup renderer for bypass. This tell renderer to get out of the way as
         // hw decoder will be doing the actual video rendering in a video plane
@@ -1929,7 +1954,16 @@ bool CAMLPlayer::WaitForFormatValid(int timeout_ms)
             info->format          = media_info.audio_info[i]->aformat;
 #if !defined(TARGET_ANDROID)
             if (media_info.audio_info[i]->audio_language[0] != 0)
+            {
               info->language = std::string(media_info.audio_info[i]->audio_language, 3);
+
+              if (info->language.length() == 2)
+              {
+                CStdString lang;
+                g_LangCodeExpander.ConvertToThreeCharCode(lang, info->language);
+                info->language = lang;
+              }
+            }
 #endif
             m_audio_streams.push_back(info);
           }
@@ -1953,7 +1987,16 @@ bool CAMLPlayer::WaitForFormatValid(int timeout_ms)
             info->id   = media_info.sub_info[i]->id;
             info->type = STREAM_SUBTITLE;
             if (media_info.sub_info[i]->sub_language && media_info.sub_info[i]->sub_language[0] != 0)
+            {
               info->language = std::string(media_info.sub_info[i]->sub_language, 3);
+
+              if (info->language.length() == 2)
+              {
+                CStdString lang;
+                g_LangCodeExpander.ConvertToThreeCharCode(lang, info->language);
+                info->language = lang;
+              }
+            }
             m_subtitle_streams.push_back(info);
           }
           m_subtitle_index = media_info.stream_info.cur_sub_index;
@@ -2084,11 +2127,11 @@ void CAMLPlayer::FindSubtitleFiles()
 int CAMLPlayer::AddSubtitleFile(const std::string &filename, const std::string &subfilename)
 {
   std::string ext = URIUtils::GetExtension(filename);
-  std::string vobsubfile = subfilename;
 
   if(ext == ".idx")
   {
     /* TODO: we do not handle idx/sub binary subs yet.
+    std::string vobsubfile = subfilename;
     if (vobsubfile.empty())
       vobsubfile = URIUtils::ReplaceExtension(filename, ".sub");
 
@@ -2198,20 +2241,20 @@ void CAMLPlayer::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   // do not do anything stupid here.
 
   // video zoom adjustment.
-  float zoom = g_settings.m_currentVideoSettings.m_CustomZoomAmount;
+  float zoom = CMediaSettings::Get().GetCurrentVideoSettings().m_CustomZoomAmount;
   if ((int)(zoom * 1000) != (int)(m_zoom * 1000))
   {
     m_zoom = zoom;
   }
   // video contrast adjustment.
-  int contrast = g_settings.m_currentVideoSettings.m_Contrast;
+  int contrast = CMediaSettings::Get().GetCurrentVideoSettings().m_Contrast;
   if (contrast != m_contrast)
   {
     SetVideoContrast(contrast);
     m_contrast = contrast;
   }
   // video brightness adjustment.
-  int brightness = g_settings.m_currentVideoSettings.m_Brightness;
+  int brightness = CMediaSettings::Get().GetCurrentVideoSettings().m_Brightness;
   if (brightness != m_brightness)
   {
     SetVideoBrightness(brightness);
@@ -2219,10 +2262,10 @@ void CAMLPlayer::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   }
 
   // check if destination rect or video view mode has changed
-  if ((m_dst_rect != DestRect) || (m_view_mode != g_settings.m_currentVideoSettings.m_ViewMode))
+  if ((m_dst_rect != DestRect) || (m_view_mode != CMediaSettings::Get().GetCurrentVideoSettings().m_ViewMode))
   {
     m_dst_rect  = DestRect;
-    m_view_mode = g_settings.m_currentVideoSettings.m_ViewMode;
+    m_view_mode = CMediaSettings::Get().GetCurrentVideoSettings().m_ViewMode;
   }
   else
   {
@@ -2238,7 +2281,7 @@ void CAMLPlayer::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   // so we have to setup video axis for 720p instead of 1080p... Boooo.
   display = g_graphicsContext.GetViewWindow();
   //RESOLUTION res = g_graphicsContext.GetVideoResolution();
-  //display.SetRect(0, 0, g_settings.m_ResInfo[res].iScreenWidth, g_settings.m_ResInfo[res].iScreenHeight);
+  //display.SetRect(0, 0, CDisplaySettings::Get().GetResolutionInfo(res).iScreenWidth, CDisplaySettings::Get().GetResolutionInfo(res).iScreenHeight);
   dst_rect = m_dst_rect;
   if (gui != display)
   {

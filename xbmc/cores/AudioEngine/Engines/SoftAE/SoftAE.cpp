@@ -513,7 +513,7 @@ bool CSoftAE::Initialize()
   CSingleLock lock(m_threadLock);
   InternalOpenSink();
   m_running = true;
-  m_thread  = new CThread(this, "CSoftAE");
+  m_thread  = new CThread(this, "SoftAE");
   m_thread->Create();
   m_thread->SetPriority(THREAD_PRIORITY_ABOVE_NORMAL);
   return true;
@@ -975,8 +975,10 @@ bool CSoftAE::Suspend()
 {
   CLog::Log(LOGDEBUG, "CSoftAE::Suspend - Suspending AE processing");
   m_isSuspended = true;
+
+  StopAllSounds();
+
   CSingleLock streamLock(m_streamLock);
-  
   for (StreamList::iterator itt = m_playingStreams.begin(); itt != m_playingStreams.end(); ++itt)
   {
     CSoftAEStream *stream = *itt;
@@ -985,7 +987,6 @@ bool CSoftAE::Suspend()
   streamLock.Leave();
   #if defined(TARGET_LINUX)
   /*workaround sinks not playing sound after resume */
-    StopAllSounds();
     bool ret = true;
     if(m_sink)
     {
@@ -1536,7 +1537,8 @@ inline void CSoftAE::ProcessSuspend()
      */
     if (!m_isSuspended && (!m_playingStreams.empty() || !m_playing_sounds.empty()))
     {
-      m_reOpen = !m_sink->SoftResume() || m_reOpen; // sink returns false if it requires reinit (worthless with current implementation)
+      // the sink might still be not initialized after Resume of real suspend
+      m_reOpen = m_sink && (!m_sink->SoftResume() || m_reOpen); // sink returns false if it requires reinit (worthless with current implementation)
       m_sinkIsSuspended = false; //sink processing data
       m_softSuspend   = false; //break suspend loop (under some conditions)
       CLog::Log(LOGDEBUG, "Resumed the Sink");

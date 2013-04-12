@@ -31,6 +31,9 @@
 #include "Application.h"
 #include "AdvancedSettings.h"
 #include "guilib/LocalizeStrings.h"
+#include "utils/CharsetConverter.h"
+#include "settings/DisplaySettings.h"
+#include "settings/VideoSettings.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
 #include "utils/log.h"
@@ -40,13 +43,13 @@
 #include "cores/dvdplayer/DVDCodecs/Video/CrystalHD.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "cores/AudioEngine/AEAudioFormat.h"
+#include "cores/paplayer/AudioDecoder.h"
 #include "filesystem/CurlFile.h"
 #include "guilib/GUIFont.h" // for FONT_STYLE_* definitions
 #if defined(TARGET_DARWIN_OSX)
   #include "cores/AudioEngine/Engines/CoreAudio/CoreAudioHardware.h"
 #endif
 #include "guilib/GUIFontManager.h"
-#include "utils/Weather.h"
 #include "LangInfo.h"
 #include "pvr/PVRManager.h"
 #include "utils/XMLUtils.h"
@@ -85,6 +88,18 @@ using namespace PVR;
 #define DEFAULT_VISUALISATION "visualization.glspectrum"
 #endif
 #endif
+
+#define DEFAULT_WEB_INTERFACE "webinterface.default"
+
+#ifdef MID
+#define DEFAULT_VSYNC       VSYNC_DISABLED
+#else  // MID
+#if defined(TARGET_DARWIN) || defined(_WIN32) || defined(TARGET_RASPBERRY_PI)
+#define DEFAULT_VSYNC       VSYNC_ALWAYS
+#else
+#define DEFAULT_VSYNC       VSYNC_DRIVER
+#endif
+#endif // MID
 
 struct sortsettings
 {
@@ -226,6 +241,24 @@ CSettingAddon::CSettingAddon(int iOrder, const char *strSetting, int iLabel, con
 {
 }
 
+CSettingsCategory* CSettingsGroup::AddCategory(const char *strCategory, int labelID)
+{
+  // Remove the category if it already exists
+  for (vecSettingsCategory::iterator it = m_vecCategories.begin(); it != m_vecCategories.end(); it++)
+  {
+    if ((*it)->m_strCategory.Equals(strCategory))
+    {
+      delete (*it);
+      m_vecCategories.erase(it);
+      break;
+    }
+  }
+  CSettingsCategory *pCategory = new CSettingsCategory(strCategory, labelID);
+  if (pCategory)
+    m_vecCategories.push_back(pCategory);
+  return pCategory;
+}
+
 void CSettingsGroup::GetCategories(vecSettingsCategory &vecCategories)
 {
   vecCategories.clear();
@@ -256,8 +289,6 @@ CGUISettings::CGUISettings(void)
 
 void CGUISettings::Initialize()
 {
-  ZeroMemory(&m_replayGain, sizeof(ReplayGainSettings));
-
   // Pictures settings
   AddGroup(SETTINGS_PICTURES, 1);
   CSettingsCategory* pic = AddCategory(SETTINGS_PICTURES, "pictures", 14081);
@@ -390,7 +421,7 @@ void CGUISettings::Initialize()
   AddInt(vs, "videoscreen.screen", 240, 0, -1, 1, 32, SPIN_CONTROL_TEXT);
 #endif
   // this setting would ideally not be saved, as its value is systematically derived from videoscreen.screenmode.
-  // contains an index to the g_settings.m_ResInfo array. the only meaningful fields are iScreen, iWidth, iHeight.
+  // contains an index to the resolution info array in CDisplaySettings. the only meaningful fields are iScreen, iWidth, iHeight.
 #if defined(TARGET_DARWIN)
   #if !defined(TARGET_DARWIN_IOS_ATV2)
     AddInt(vs, "videoscreen.resolution", 131, -1, 0, 1, INT_MAX, SPIN_CONTROL_TEXT);
@@ -686,6 +717,8 @@ void CGUISettings::Initialize()
 #endif
   AddInt(vp, "videoplayer.rendermethod", 13415, RENDER_METHOD_AUTO, renderers, SPIN_CONTROL_TEXT);
 
+  AddInt(vp, "videoplayer.hqscalers", 13435, 0, 0, 10, 100, SPIN_CONTROL_INT);
+
 #ifdef HAVE_LIBVDPAU
   AddBool(vp, "videoplayer.usevdpau", 13425, true);
 #endif
@@ -754,11 +787,11 @@ void CGUISettings::Initialize()
   AddInt(vp, "videoplayer.errorinaspect", 22021, 0, 0, 1, 20, SPIN_CONTROL_INT_PLUS, MASK_PERCENT, TEXT_NONE);
 
   map<int,int> stretch;
-  stretch.insert(make_pair(630,VIEW_MODE_NORMAL));
-  stretch.insert(make_pair(633,VIEW_MODE_WIDE_ZOOM));
-  stretch.insert(make_pair(634,VIEW_MODE_STRETCH_16x9));
-  stretch.insert(make_pair(631,VIEW_MODE_ZOOM));
-  AddInt(vp, "videoplayer.stretch43", 173, VIEW_MODE_NORMAL, stretch, SPIN_CONTROL_TEXT);
+  stretch.insert(make_pair(630,ViewModeNormal));
+  stretch.insert(make_pair(633,ViewModeWideZoom));
+  stretch.insert(make_pair(634,ViewModeStretch16x9));
+  stretch.insert(make_pair(631,ViewModeZoom));
+  AddInt(vp, "videoplayer.stretch43", 173, ViewModeNormal, stretch, SPIN_CONTROL_TEXT);
 #ifdef HAVE_LIBVDPAU
   AddBool(NULL, "videoplayer.vdpau_allow_xrandr", 13122, false);
 #endif
@@ -785,6 +818,11 @@ void CGUISettings::Initialize()
   AddBool(vid, "myvideos.extractflags",20433, true);
   AddBool(vid, "myvideos.replacelabels", 20419, true);
   AddBool(NULL, "myvideos.extractthumb",20433, true);
+
+  AddSeparator(NULL, "myvideos.sep1");
+  AddInt(NULL, "myvideos.startwindow", 0, WINDOW_VIDEO_FILES, WINDOW_VIDEO_FILES, 1, WINDOW_VIDEO_NAV, SPIN_CONTROL_INT);
+  AddBool(NULL, "myvideos.stackvideos", 0, false);
+  AddBool(NULL, "myvideos.flatten", 0, false);
 
   CSettingsCategory* sub = AddCategory(SETTINGS_VIDEOS, "subtitles", 287);
   AddString(sub, "subtitles.font", 14089, "arial.ttf", SPIN_CONTROL_TEXT);
@@ -960,6 +998,14 @@ void CGUISettings::Initialize()
   AddInt(NULL, "window.height", 0, 480, 10, 1, INT_MAX, SPIN_CONTROL_INT);
 
   AddPath(NULL,"system.playlistspath",20006,"set default",BUTTON_CONTROL_PATH_INPUT,false);
+
+  AddInt(NULL, "mymusic.startwindow", 0, WINDOW_MUSIC_FILES, WINDOW_MUSIC_FILES, 1, WINDOW_MUSIC_NAV, SPIN_CONTROL_INT);
+  AddBool(NULL, "mymusic.songthumbinvis", 0, false);
+  AddString(NULL, "mymusic.defaultlibview", 0, "", BUTTON_CONTROL_STANDARD);
+
+  AddBool(NULL, "general.addonautoupdate", 0, true);
+  AddBool(NULL, "general.addonnotifications", 0, true);
+  AddBool(NULL, "general.addonforeignfilter", 0, false);
 
   // tv settings (access over TV menu from home window)
   AddGroup(SETTINGS_PVR, 19180);
@@ -1445,10 +1491,11 @@ void CGUISettings::LoadXML(TiXmlElement *pRootElement, bool hideSettings /* = fa
  // g_videoConfig.SetVSyncMode((VSYNC)GetInt("videoscreen.vsync"));
 
   // Move replaygain settings into our struct
-  m_replayGain.iPreAmp = GetInt("musicplayer.replaygainpreamp");
-  m_replayGain.iNoGainPreAmp = GetInt("musicplayer.replaygainnogainpreamp");
-  m_replayGain.iType = GetInt("musicplayer.replaygaintype");
-  m_replayGain.bAvoidClipping = GetBool("musicplayer.replaygainavoidclipping");
+  ReplayGainSettings &replayGainSettings = CAudioDecoder::GetReplayGainSettings();
+  replayGainSettings.iPreAmp = GetInt("musicplayer.replaygainpreamp");
+  replayGainSettings.iNoGainPreAmp = GetInt("musicplayer.replaygainnogainpreamp");
+  replayGainSettings.iType = GetInt("musicplayer.replaygaintype");
+  replayGainSettings.bAvoidClipping = GetBool("musicplayer.replaygainavoidclipping");
 
   bool use_timezone = false;
 
@@ -1577,116 +1624,4 @@ void CGUISettings::Clear()
   settingsGroups.clear();
 
   SetChanged();
-}
-
-float square_error(float x, float y)
-{
-  float yonx = (x > 0) ? y / x : 0;
-  float xony = (y > 0) ? x / y : 0;
-  return std::max(yonx, xony);
-}
-
-RESOLUTION CGUISettings::GetResolution() const
-{
-  return GetResFromString(GetString("videoscreen.screenmode"));
-}
-
-RESOLUTION CGUISettings::GetResFromString(const CStdString &res)
-{
-  if (res == "DESKTOP")
-    return RES_DESKTOP;
-  else if (res == "WINDOW")
-    return RES_WINDOW;
-  else if (res.GetLength() == 21)
-  {
-    // format: SWWWWWHHHHHRRR.RRRRRP, where S = screen, W = width, H = height, R = refresh, P = interlace
-    int screen = atol(res.Mid(0,1).c_str());
-    int width = atol(res.Mid(1,5).c_str());
-    int height = atol(res.Mid(6,5).c_str());
-    float refresh = (float)atof(res.Mid(11,9).c_str());
-    // look for 'i' and treat everything else as progressive,
-    // and use 100/200 to get a nice square_error.
-    int interlaced = (res.Right(1) == "i") ? 100:200;
-    // find the closest match to these in our res vector.  If we have the screen, we score the res
-    RESOLUTION bestRes = RES_DESKTOP;
-    float bestScore = FLT_MAX;
-    for (unsigned int i = RES_DESKTOP; i < g_settings.m_ResInfo.size(); ++i)
-    {
-      const RESOLUTION_INFO &info = g_settings.m_ResInfo[i];
-      if (info.iScreen != screen)
-        continue;
-      float score = 10 * (square_error((float)info.iScreenWidth, (float)width) +
-        square_error((float)info.iScreenHeight, (float)height) +
-        square_error(info.fRefreshRate, refresh) +
-        square_error((float)((info.dwFlags & D3DPRESENTFLAG_INTERLACED) ? 100:200), (float)interlaced));
-      if (score < bestScore)
-      {
-        bestScore = score;
-        bestRes = (RESOLUTION)i;
-      }
-    }
-    return bestRes;
-  }
-  return RES_DESKTOP;
-}
-
-void CGUISettings::SetResolution(RESOLUTION res)
-{
-  CStdString mode;
-  if (res == RES_DESKTOP)
-    mode = "DESKTOP";
-  else if (res == RES_WINDOW)
-    mode = "WINDOW";
-  else if (res >= RES_CUSTOM && res < (RESOLUTION)g_settings.m_ResInfo.size())
-  {
-    const RESOLUTION_INFO &info = g_settings.m_ResInfo[res];
-    mode.Format("%1i%05i%05i%09.5f%s", info.iScreen,
-      info.iScreenWidth, info.iScreenHeight, info.fRefreshRate,
-      (info.dwFlags & D3DPRESENTFLAG_INTERLACED) ? "i":"p");
-  }
-  else
-  {
-    CLog::Log(LOGWARNING, "%s, setting invalid resolution %i", __FUNCTION__, res);
-    mode = "DESKTOP";
-  }
-  SetString("videoscreen.screenmode", mode);
-  m_LookAndFeelResolution = res;
-
-  SetChanged();
-}
-
-bool CGUISettings::SetLanguage(const CStdString &strLanguage)
-{
-  CStdString strPreviousLanguage = GetString("locale.language");
-  CStdString strNewLanguage = strLanguage;
-  if (strNewLanguage != strPreviousLanguage)
-  {
-    CStdString strLangInfoPath;
-    strLangInfoPath.Format("special://xbmc/language/%s/langinfo.xml", strNewLanguage.c_str());
-    if (!g_langInfo.Load(strLangInfoPath))
-      return false;
-
-    if (g_langInfo.ForceUnicodeFont() && !g_fontManager.IsFontSetUnicode())
-    {
-      CLog::Log(LOGINFO, "Language needs a ttf font, loading first ttf font available");
-      CStdString strFontSet;
-      if (g_fontManager.GetFirstFontSetUnicode(strFontSet))
-        strNewLanguage = strFontSet;
-      else
-        CLog::Log(LOGERROR, "No ttf font found but needed: %s", strFontSet.c_str());
-    }
-    SetString("locale.language", strNewLanguage);
-
-    g_charsetConverter.reset();
-
-    if (!g_localizeStrings.Load("special://xbmc/language/", strNewLanguage))
-      return false;
-
-    // also tell our weather and skin to reload as these are localized
-    g_weatherManager.Refresh();
-    g_PVRManager.LocalizationChanged();
-    g_application.ReloadSkin();
-  }
-
-  return true;
 }

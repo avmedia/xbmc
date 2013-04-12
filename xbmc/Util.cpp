@@ -57,12 +57,15 @@
 #ifdef HAS_UPNP
 #include "filesystem/UPnPDirectory.h"
 #endif
+#include "profiles/ProfilesManager.h"
 #include "utils/RegExp.h"
 #include "settings/GUISettings.h"
+#include "guilib/GraphicContext.h"
 #include "guilib/TextureManager.h"
 #include "utils/fstrcmp.h"
 #include "storage/MediaManager.h"
 #ifdef _WIN32
+#include "utils/CharsetConverter.h"
 #include <shlobj.h>
 #include "WIN32Util.h"
 #endif
@@ -74,6 +77,7 @@
 #include "settings/Settings.h"
 #include "utils/StringUtils.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/MediaSettings.h"
 #ifdef HAS_IRSERVERSUITE
   #include "input/windows/IRServerSuite.h"
 #endif
@@ -506,7 +510,7 @@ bool CUtil::IsPicture(const CStdString& strFile)
     return false;
 
   extension.ToLower();
-  if (g_settings.m_pictureExtensions.Find(extension) != -1)
+  if (g_advancedSettings.m_pictureExtensions.Find(extension) != -1)
     return true;
 
   if (extension == ".tbn" || extension == ".dds")
@@ -644,7 +648,7 @@ void CUtil::GetDVDDriveIcon( const CStdString& strPath, CStdString& strIcon )
 
 void CUtil::RemoveTempFiles()
 {
-  CStdString searchPath = g_settings.GetDatabaseFolder();
+  CStdString searchPath = CProfilesManager::Get().GetDatabaseFolder();
   CFileItemList items;
   if (!XFILE::CDirectory::GetDirectory(searchPath, items, ".tmp", DIR_FLAG_NO_FILE_DIRS))
     return;
@@ -1093,14 +1097,14 @@ void CUtil::SplitParams(const CStdString &paramString, std::vector<CStdString> &
     lastEscaped = escaped;
     if (inQuotes)
     { // if we're in a quote, we accept everything until the closing quote
-      if (ch == '\"' && !escaped)
+      if (ch == '"' && !escaped)
       { // finished a quote - no need to add the end quote to our string
         inQuotes = false;
       }
     }
     else
     { // not in a quote, so check if we should be starting one
-      if (ch == '\"' && !escaped)
+      if (ch == '"' && !escaped)
       { // start of quote - no need to add the quote to our string
         inQuotes = true;
       }
@@ -1117,15 +1121,25 @@ void CUtil::SplitParams(const CStdString &paramString, std::vector<CStdString> &
         if (whiteSpacePos)
           parameter = parameter.Left(whiteSpacePos);
         // trim off start and end quotes
-        if (parameter.GetLength() > 1 && parameter[0] == '\"' && parameter[parameter.GetLength() - 1] == '\"')
+        if (parameter.GetLength() > 1 && parameter[0] == '"' && parameter[parameter.GetLength() - 1] == '"')
           parameter = parameter.Mid(1,parameter.GetLength() - 2);
+        else if (parameter.GetLength() > 3 && parameter[parameter.GetLength() - 1] == '"')
+        {
+          // check name="value" style param.
+          int quotaPos = parameter.Find('"');
+          if (quotaPos > 1 && quotaPos < parameter.GetLength() - 1 && parameter[quotaPos - 1] == '=')
+          {
+            parameter.Delete(parameter.GetLength() - 1);
+            parameter.Delete(quotaPos);
+          }
+        }
         parameters.push_back(parameter);
         parameter.Empty();
         whiteSpacePos = 0;
         continue;
       }
     }
-    if ((ch == '\"' || ch == '\\') && escaped)
+    if ((ch == '"' || ch == '\\') && escaped)
     { // escaped quote or backslash
       parameter[parameter.size()-1] = ch;
       continue;
@@ -1147,8 +1161,18 @@ void CUtil::SplitParams(const CStdString &paramString, std::vector<CStdString> &
   if (whiteSpacePos)
     parameter = parameter.Left(whiteSpacePos);
   // trim off start and end quotes
-  if (parameter.GetLength() > 1 && parameter[0] == '\"' && parameter[parameter.GetLength() - 1] == '\"')
+  if (parameter.GetLength() > 1 && parameter[0] == '"' && parameter[parameter.GetLength() - 1] == '"')
     parameter = parameter.Mid(1,parameter.GetLength() - 2);
+  else if (parameter.GetLength() > 3 && parameter[parameter.GetLength() - 1] == '"')
+  {
+    // check name="value" style param.
+    int quotaPos = parameter.Find('"');
+    if (quotaPos > 1 && quotaPos < parameter.GetLength() - 1 && parameter[quotaPos - 1] == '=')
+    {
+      parameter.Delete(parameter.GetLength() - 1);
+      parameter.Delete(quotaPos);
+    }
+  }
   if (!parameter.IsEmpty() || parameters.size())
     parameters.push_back(parameter);
 }
@@ -1888,20 +1912,20 @@ void CUtil::ScanForExternalSubtitles(const CStdString& strMovie, std::vector<CSt
   CStdString strMovieFileNameNoExt(URIUtils::ReplaceExtension(strMovieFileName, ""));
   strLookInPaths.push_back(strPath);
   
-  if (!g_settings.iAdditionalSubtitleDirectoryChecked && !g_guiSettings.GetString("subtitles.custompath").IsEmpty()) // to avoid checking non-existent directories (network) every time..
+  if (!CMediaSettings::Get().GetAdditionalSubtitleDirectoryChecked() && !g_guiSettings.GetString("subtitles.custompath").IsEmpty()) // to avoid checking non-existent directories (network) every time..
   {
     if (!g_application.getNetwork().IsAvailable() && !URIUtils::IsHD(g_guiSettings.GetString("subtitles.custompath")))
     {
       CLog::Log(LOGINFO,"CUtil::CacheSubtitles: disabling alternate subtitle directory for this session, it's nonaccessible");
-      g_settings.iAdditionalSubtitleDirectoryChecked = -1; // disabled
+      CMediaSettings::Get().SetAdditionalSubtitleDirectoryChecked(-1); // disabled
     }
     else if (!CDirectory::Exists(g_guiSettings.GetString("subtitles.custompath")))
     {
       CLog::Log(LOGINFO,"CUtil::CacheSubtitles: disabling alternate subtitle directory for this session, it's nonexistant");
-      g_settings.iAdditionalSubtitleDirectoryChecked = -1; // disabled
+      CMediaSettings::Get().SetAdditionalSubtitleDirectoryChecked(-1); // disabled
     }
     
-    g_settings.iAdditionalSubtitleDirectoryChecked = 1;
+    CMediaSettings::Get().SetAdditionalSubtitleDirectoryChecked(1);
   }
   
   if (strMovie.Left(6) == "rar://") // <--- if this is found in main path then ignore it!
@@ -1967,7 +1991,7 @@ void CUtil::ScanForExternalSubtitles(const CStdString& strMovie, std::vector<CSt
   // .. done checking for cd-dirs
   
   // this is last because we dont want to check any common subdirs or cd-dirs in the alternate <subtitles> dir.
-  if (g_settings.iAdditionalSubtitleDirectoryChecked == 1)
+  if (CMediaSettings::Get().GetAdditionalSubtitleDirectoryChecked() == 1)
   {
     strPath = g_guiSettings.GetString("subtitles.custompath");
     URIUtils::AddSlashAtEnd(strPath);

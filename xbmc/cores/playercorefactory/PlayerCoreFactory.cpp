@@ -29,6 +29,7 @@
 #include "settings/GUISettings.h"
 #include "URL.h"
 #include "FileItem.h"
+#include "profiles/ProfilesManager.h"
 #include "settings/AdvancedSettings.h"
 #include "utils/AutoPtrHandle.h"
 #include "cores/ExternalPlayer/ExternalPlayer.h"
@@ -39,6 +40,8 @@
 #include "PlayerSelectionRule.h"
 #include "guilib/LocalizeStrings.h"
 
+#define PLAYERCOREFACTORY_XML "playercorefactory.xml"
+
 using namespace AUTOPTR;
 
 CPlayerCoreFactory::CPlayerCoreFactory()
@@ -46,9 +49,9 @@ CPlayerCoreFactory::CPlayerCoreFactory()
 
 CPlayerCoreFactory::~CPlayerCoreFactory()
 {
-  for(std::vector<CPlayerCoreConfig *>::iterator it = m_vecCoreConfigs.begin(); it != m_vecCoreConfigs.end(); it++)
+  for(std::vector<CPlayerCoreConfig *>::iterator it = m_vecCoreConfigs.begin(); it != m_vecCoreConfigs.end(); ++it)
     delete *it;
-  for(std::vector<CPlayerSelectionRule *>::iterator it = m_vecCoreSelectionRules.begin(); it != m_vecCoreSelectionRules.end(); it++)
+  for(std::vector<CPlayerSelectionRule *>::iterator it = m_vecCoreSelectionRules.begin(); it != m_vecCoreSelectionRules.end(); ++it)
     delete *it;
 }
 
@@ -56,6 +59,12 @@ CPlayerCoreFactory& CPlayerCoreFactory::Get()
 {
   static CPlayerCoreFactory sPlayerCoreFactory;
   return sPlayerCoreFactory;
+}
+
+void CPlayerCoreFactory::OnSettingsLoaded()
+{
+  LoadConfiguration("special://xbmc/system/" PLAYERCOREFACTORY_XML, true);
+  LoadConfiguration(CProfilesManager::Get().GetUserDataItem(PLAYERCOREFACTORY_XML), false);
 }
 
 /* generic function to make a vector unique, removes later duplicates */
@@ -80,7 +89,7 @@ IPlayer* CPlayerCoreFactory::CreatePlayer(const CStdString& strCore, IPlayerCall
 IPlayer* CPlayerCoreFactory::CreatePlayer(const PLAYERCOREID eCore, IPlayerCallback& callback) const
 {
   CSingleLock lock(m_section);
-  if (!m_vecCoreConfigs.size() || eCore-1 > m_vecCoreConfigs.size()-1)
+  if (m_vecCoreConfigs.empty() || eCore-1 > m_vecCoreConfigs.size()-1)
     return NULL;
 
   return m_vecCoreConfigs[eCore-1]->CreatePlayer(callback);
@@ -259,7 +268,7 @@ PLAYERCOREID CPlayerCoreFactory::GetDefaultPlayer( const CFileItem& item ) const
   GetPlayers(item, vecCores);
 
   //If we have any players return the first one
-  if( vecCores.size() > 0 ) return vecCores.at(0);
+  if( !vecCores.empty() ) return vecCores.at(0);
 
   return EPC_NONE;
 }
@@ -320,7 +329,7 @@ bool CPlayerCoreFactory::LoadConfiguration(const std::string &file, bool clear)
 
   if (clear)
   {
-    for(std::vector<CPlayerCoreConfig *>::iterator it = m_vecCoreConfigs.begin(); it != m_vecCoreConfigs.end(); it++)
+    for(std::vector<CPlayerCoreConfig *>::iterator it = m_vecCoreConfigs.begin(); it != m_vecCoreConfigs.end(); ++it)
       delete *it;
     m_vecCoreConfigs.clear();
     // Builtin players; hard-coded because re-ordering them would break scripts
@@ -354,7 +363,7 @@ bool CPlayerCoreFactory::LoadConfiguration(const std::string &file, bool clear)
 	dsplayer->m_bPlaysAudio = dsplayer->m_bPlaysVideo = true;
 	s_vecCoreConfigs.push_back(dsplayer);
 #endif
-    for(std::vector<CPlayerSelectionRule *>::iterator it = m_vecCoreSelectionRules.begin(); it != m_vecCoreSelectionRules.end(); it++)
+    for(std::vector<CPlayerSelectionRule *>::iterator it = m_vecCoreSelectionRules.begin(); it != m_vecCoreSelectionRules.end(); ++it)
       delete *it;
     m_vecCoreSelectionRules.clear();
   }
@@ -432,7 +441,7 @@ void CPlayerCoreFactory::OnPlayerDiscovered(const CStdString& id, const CStdStri
   std::vector<CPlayerCoreConfig *>::iterator it;
   for(it  = m_vecCoreConfigs.begin();
       it != m_vecCoreConfigs.end();
-      it++)
+      ++it)
   {
     if ((*it)->GetId() == id)
     {
@@ -454,7 +463,7 @@ void CPlayerCoreFactory::OnPlayerRemoved(const CStdString& id)
   std::vector<CPlayerCoreConfig *>::iterator it;
   for(it  = m_vecCoreConfigs.begin();
       it != m_vecCoreConfigs.end();
-      it++)
+      ++it)
   {
     if ((*it)->GetId() == id)
       (*it)->m_eCore = EPC_NONE;

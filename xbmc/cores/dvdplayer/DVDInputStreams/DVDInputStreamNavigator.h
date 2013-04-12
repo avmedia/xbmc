@@ -44,10 +44,23 @@ class CDVDOverlayPicture;
 
 struct dvdnav_s;
 
+struct DVDNavStreamInfo
+{
+  std::string name;
+  std::string language;
+  int channels;
+
+  DVDNavStreamInfo() : channels(0) {}
+};
+
 class DVDNavResult
 {
 public:
-  DVDNavResult(){};
+  DVDNavResult() :
+      pData (NULL ),
+      type  (0    )
+  {
+  };
   DVDNavResult(void* p, int t) { pData = p; type = t; };
   void* pData;
   int type;
@@ -96,20 +109,20 @@ public:
   bool IsInMenu() { return m_bInMenu; }
 
   int GetActiveSubtitleStream();
-  std::string GetSubtitleStreamLanguage(int iId);
   int GetSubTitleStreamCount();
+  bool GetSubtitleStreamInfo(const int iId, DVDNavStreamInfo &info);
 
   bool SetActiveSubtitleStream(int iId);
   void EnableSubtitleStream(bool bEnable);
   bool IsSubtitleStreamEnabled();
 
   int GetActiveAudioStream();
-  std::string GetAudioStreamLanguage(int iId);
   int GetAudioStreamCount();
   bool SetActiveAudioStream(int iId);
+  bool GetAudioStreamInfo(const int iId, DVDNavStreamInfo &info);
 
-  bool GetNavigatorState(std::string &xmlstate);
-  bool SetNavigatorState(std::string &xmlstate);
+  bool GetState(std::string &xmlstate);
+  bool SetState(const std::string &xmlstate);
 
   int GetChapter()      { return m_iPart; }      // the current part in the current title
   int GetChapterCount() { return m_iPartCount; } // the number of parts in the current title
@@ -144,6 +157,9 @@ protected:
    */
   int ConvertSubtitleStreamId_XBMCToExternal(int id);
   int ConvertSubtitleStreamId_ExternalToXBMC(int id);
+
+  void SetAudioStreamName(DVDNavStreamInfo &info, const audio_attr_t audio_attributes);
+  void SetSubtitleStreamName(DVDNavStreamInfo &info, const subp_attr_t subp_attributes);
 
   DllDvdNav m_dll;
   bool m_bCheckButtons;

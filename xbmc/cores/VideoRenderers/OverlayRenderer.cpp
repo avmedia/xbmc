@@ -27,7 +27,9 @@
 #include "cores/dvdplayer/DVDCodecs/Overlay/DVDOverlaySSA.h"
 #include "cores/VideoRenderers/RenderManager.h"
 #include "Application.h"
+#include "guilib/GraphicContext.h"
 #include "windowing/WindowingFactory.h"
+#include "settings/DisplaySettings.h"
 #include "settings/Settings.h"
 #include "threads/SingleLock.h"
 #include "utils/MathUtils.h"
@@ -129,7 +131,7 @@ void CRenderer::Release(SElementV& list)
   SElementV l = list;
   list.clear();
 
-  for(SElementV::iterator it = l.begin(); it != l.end(); it++)
+  for(SElementV::iterator it = l.begin(); it != l.end(); ++it)
   {
     if(it->overlay)
       it->overlay->Release();
@@ -143,7 +145,7 @@ void CRenderer::Release(COverlayV& list)
   COverlayV l = list;
   list.clear();
 
-  for(COverlayV::iterator it = l.begin(); it != l.end(); it++)
+  for(COverlayV::iterator it = l.begin(); it != l.end(); ++it)
     (*it)->Release();
 }
 
@@ -174,7 +176,7 @@ void CRenderer::Render()
   Release(m_cleanup);
 
   SElementV& list = m_buffers[m_render];
-  for(SElementV::iterator it = list.begin(); it != list.end(); it++)
+  for(SElementV::iterator it = list.begin(); it != list.end(); ++it)
   {
     COverlay* o = NULL;
 
@@ -198,7 +200,7 @@ void CRenderer::Render(COverlay* o)
   RESOLUTION_INFO res;
   g_renderManager.GetVideoRect(rs, rd);
   rv  = g_graphicsContext.GetViewWindow();
-  res = g_settings.m_ResInfo[g_renderManager.GetResolution()];
+  res = CDisplaySettings::Get().GetResolutionInfo(g_renderManager.GetResolution());
 
   SRenderState state;
   state.x       = o->m_x;

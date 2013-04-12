@@ -30,8 +30,6 @@
 
 static CCriticalSection g_inputCond;
 
-PHANDLE_EVENT_FUNC CWinEventsBase::m_pEventFunc = NULL;
-
 static std::list<XBMC_Event> events;
 
 void CWinEventsIOS::DeInit()
@@ -84,16 +82,7 @@ bool CWinEventsIOS::MessagePump()
     }
     else
       ret |= g_application.OnEvent(pumpEvent);
-
-//on ios touch devices - unfocus controls on finger lift
-#if !defined(TARGET_DARWIN_IOS_ATV2)
-    if (pumpEvent.type == XBMC_MOUSEBUTTONUP)
-    {
-      g_windowManager.SendMessage(GUI_MSG_UNFOCUS_ALL, 0, 0, 0, 0);
-    }
-#endif
   }
-
   return ret;
 }
 

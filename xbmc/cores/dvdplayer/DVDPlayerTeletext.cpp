@@ -92,7 +92,7 @@ signed int CDVDTeletextTools::deh24(unsigned char *p)
 
 
 CDVDTeletextData::CDVDTeletextData()
-: CThread("CDVDTeletextData")
+: CThread("DVDTeletextData")
 , m_messageQueue("teletext")
 {
   m_speed = DVD_PLAYSPEED_NORMAL;
@@ -254,7 +254,7 @@ void CDVDTeletextData::Process()
       continue;
     }
 
-    if (MSGQ_IS_ERROR(ret) || ret == MSGQ_ABORT)
+    if (MSGQ_IS_ERROR(ret))
     {
       CLog::Log(LOGERROR, "Got MSGQ_ABORT or MSGO_IS_ERROR return true (%i)", ret);
       break;

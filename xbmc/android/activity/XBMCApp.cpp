@@ -306,8 +306,6 @@ void CXBMCApp::XBMC_Pause(bool pause)
   // Only send the PAUSE action if we are pausing XBMC and something is currently playing
   if (pause && g_application.IsPlaying() && !g_application.IsPaused())
     CApplicationMessenger::Get().SendAction(CAction(ACTION_PAUSE), WINDOW_INVALID, true);
-
-  g_application.m_AppActive = g_application.m_AppFocused = !pause;
 }
 
 void CXBMCApp::XBMC_Stop()
@@ -941,7 +939,7 @@ int CXBMCApp::GetMaxSystemVolume(JNIEnv *env)
   jmethodID mgetStreamMaxVolume = env->GetMethodID(cAudioManager, "getStreamMaxVolume", "(I)I");
   jfieldID fstreamMusic = env->GetStaticFieldID(cAudioManager, "STREAM_MUSIC", "I");
   jint stream_music = env->GetStaticIntField(cAudioManager, fstreamMusic);
-  int maxVolume = (int)env->CallObjectMethod(oAudioManager, mgetStreamMaxVolume, stream_music); // AudioManager.STREAM_MUSIC
+  int maxVolume = (int)env->CallIntMethod(oAudioManager, mgetStreamMaxVolume, stream_music); // AudioManager.STREAM_MUSIC
 
   env->DeleteLocalRef(oAudioManager);
   env->DeleteLocalRef(cAudioManager);

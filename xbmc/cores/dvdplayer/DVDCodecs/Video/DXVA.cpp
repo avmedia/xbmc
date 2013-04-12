@@ -39,6 +39,7 @@
 #include "boost/shared_ptr.hpp"
 #include "utils/AutoPtrHandle.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/MediaSettings.h"
 #include "cores/VideoRenderers/RenderManager.h"
 #include "win32/WIN32Util.h"
 
@@ -312,7 +313,7 @@ CSurfaceContext::CSurfaceContext()
 
 CSurfaceContext::~CSurfaceContext()
 {
-  for (vector<IDirect3DSurface9*>::iterator it = m_heldsurfaces.begin(); it != m_heldsurfaces.end(); it++)
+  for (vector<IDirect3DSurface9*>::iterator it = m_heldsurfaces.begin(); it != m_heldsurfaces.end(); ++it)
     SAFE_RELEASE(*it);
 }
 
@@ -939,7 +940,7 @@ int CDecoder::GetBuffer(AVCodecContext *avctx, AVFrame *pic)
 
   pic->reordered_opaque = avctx->reordered_opaque;
   pic->type = FF_BUFFER_TYPE_USER;
-  pic->age  = 256*256*256*64; // as everybody else, i've got no idea about this one
+
   for(unsigned i = 0; i < 4; i++)
   {
     pic->data[i] = NULL;
@@ -1175,8 +1176,8 @@ bool CProcessor::Open(UINT width, UINT height, unsigned int flags, unsigned int 
   // And for those GPUs, the correct values will be calculated with the first Render() and the correct processor
   // will replace the one allocated here, before the user sees anything.
   // It's a bit inefficient, that's all.
-  m_deinterlace_mode = g_settings.m_currentVideoSettings.m_DeinterlaceMode;
-  m_interlace_method = g_renderManager.AutoInterlaceMethod(g_settings.m_currentVideoSettings.m_InterlaceMethod);;
+  m_deinterlace_mode = CMediaSettings::Get().GetCurrentVideoSettings().m_DeinterlaceMode;
+  m_interlace_method = g_renderManager.AutoInterlaceMethod(CMediaSettings::Get().GetCurrentVideoSettings().m_InterlaceMethod);;
 
   EvaluateQuirkNoDeintProcForProg();
 
@@ -1460,10 +1461,10 @@ bool CProcessor::Render(CRect src, CRect dst, IDirect3DSurface9* target, REFEREN
   // With auto deinterlacing, the Ion Gen. 1 drops some frames with deinterlacing processor + progressive flags for progressive material.
   // For that GPU (or when specified by an advanced setting), use the progressive processor.
   // This is at the expense of the switch speed when video interlacing flags change and a deinterlacing processor is actually required.
-  EDEINTERLACEMODE mode = g_settings.m_currentVideoSettings.m_DeinterlaceMode;
+  EDEINTERLACEMODE mode = CMediaSettings::Get().GetCurrentVideoSettings().m_DeinterlaceMode;
   if (g_advancedSettings.m_DXVANoDeintProcForProgressive || m_quirk_nodeintprocforprog)
     mode = (flags & RENDER_FLAG_FIELD0 || flags & RENDER_FLAG_FIELD1) ? VS_DEINTERLACEMODE_FORCE : VS_DEINTERLACEMODE_OFF;
-  EINTERLACEMETHOD method = g_renderManager.AutoInterlaceMethod(g_settings.m_currentVideoSettings.m_InterlaceMethod);
+  EINTERLACEMETHOD method = g_renderManager.AutoInterlaceMethod(CMediaSettings::Get().GetCurrentVideoSettings().m_InterlaceMethod);
   if(m_interlace_method != method
   || m_deinterlace_mode != mode
   || !m_process)
@@ -1489,7 +1490,7 @@ bool CProcessor::Render(CRect src, CRect dst, IDirect3DSurface9* target, REFEREN
       it = m_sample.erase(it);
     }
     else
-      it++;
+      ++it;
   }
 
   if(m_sample.empty())
@@ -1519,7 +1520,7 @@ bool CProcessor::Render(CRect src, CRect dst, IDirect3DSurface9* target, REFEREN
   for (int i = 0; i < count; i++)
     samp[i].SampleFormat.SampleFormat = DXVA2_SampleUnknown;
 
-  for(it = m_sample.begin(); it != m_sample.end() && valid < count; it++)
+  for(it = m_sample.begin(); it != m_sample.end() && valid < count; ++it)
   {
     if (it->sample.Start >= MinTime && it->sample.Start <= MaxTime)
     {
@@ -1577,9 +1578,9 @@ bool CProcessor::Render(CRect src, CRect dst, IDirect3DSurface9* target, REFEREN
     blt.DestFormat.NominalRange          = DXVA2_NominalRange_0_255;
   blt.Alpha = DXVA2_Fixed32OpaqueAlpha();
 
-  blt.ProcAmpValues.Brightness = ConvertRange( m_brightness, g_settings.m_currentVideoSettings.m_Brightness
+  blt.ProcAmpValues.Brightness = ConvertRange( m_brightness, CMediaSettings::Get().GetCurrentVideoSettings().m_Brightness
                                              , 0, 100, 50);
-  blt.ProcAmpValues.Contrast   = ConvertRange( m_contrast, g_settings.m_currentVideoSettings.m_Contrast
+  blt.ProcAmpValues.Contrast   = ConvertRange( m_contrast, CMediaSettings::Get().GetCurrentVideoSettings().m_Contrast
                                              , 0, 100, 50);
   blt.ProcAmpValues.Hue        = m_hue.DefaultValue;
   blt.ProcAmpValues.Saturation = m_saturation.DefaultValue;

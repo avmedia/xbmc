@@ -288,6 +288,21 @@
     <Filter Include="settings\windows">
       <UniqueIdentifier>{1a1eb956-43d1-4709-9467-ce471d54941d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="profiles">
+      <UniqueIdentifier>{e0e6a2e7-683d-442f-bbd1-bc4e0ecd140a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="profiles\dialogs">
+      <UniqueIdentifier>{e658a9f4-98f8-4403-aa85-a5ed7ec67868}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="profiles\windows">
+      <UniqueIdentifier>{b5a6d872-7e56-4976-81c5-47baad252337}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="input\touch">
+      <UniqueIdentifier>{4e236b17-3720-4ed8-89af-90cb86bf9b03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="input\touch\generic">
+      <UniqueIdentifier>{d062c356-66f2-49e7-9510-b216701d2298}</UniqueIdentifier>
+    </Filter>
     <Filter Include="cores\DSPlayer\FilterCoreFactory">
       <UniqueIdentifier>{e51e3d8c-ee41-4a89-b895-7855b6655146}</UniqueIdentifier>
     </Filter>
@@ -632,9 +647,6 @@
     <ClCompile Include="..\..\xbmc\cores\DllLoader\exports\emu_msvcrt.cpp">
       <Filter>cores\DllLoader\exports</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\cores\DllLoader\exports\win32-dirent.cpp">
-      <Filter>cores\DllLoader\exports</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\DllLoader\exports\emu_socket\inet_aton.c">
       <Filter>cores\DllLoader\exports\emu_socket</Filter>
     </ClCompile>
@@ -722,9 +734,6 @@
     <ClCompile Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeArtist.cpp">
       <Filter>filesystem\MusicDatabaseDirectory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeGenre.cpp">
-      <Filter>filesystem\MusicDatabaseDirectory</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeOverview.cpp">
       <Filter>filesystem\MusicDatabaseDirectory</Filter>
     </ClCompile>
@@ -743,9 +752,6 @@
     <ClCompile Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeTop100.cpp">
       <Filter>filesystem\MusicDatabaseDirectory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeYear.cpp">
-      <Filter>filesystem\MusicDatabaseDirectory</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeYearAlbum.cpp">
       <Filter>filesystem\MusicDatabaseDirectory</Filter>
     </ClCompile>
@@ -758,46 +764,10 @@
     <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNode.cpp">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeActor.cpp">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeDirector.cpp">   
-	  <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClCompile>	
-	<ClCompile Include="..\..\xbmc\video\FFmpegVideoDecoder.cpp">
-      <Filter>video</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\view\GUIViewControl.cpp">
-      <Filter>view</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\view\GUIViewState.cpp">
-      <Filter>view</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\view\ViewDatabase.cpp">
-      <Filter>view</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\guilib\imagefactory.cpp">
-      <Filter>guilib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\guilib\cximage.cpp">
-      <Filter>guilib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\filesystem\DAVFile.cpp">
-      <Filter>filesystem</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\filesystem\DAVCommon.cpp">
-      <Filter>filesystem</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeEpisodes.cpp">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeGenre.cpp">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeMoviesOverview.cpp">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeMusicVideoAlbum.cpp">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeMusicVideosOverview.cpp">
@@ -821,12 +791,6 @@
     <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeSeasons.cpp">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeSets.cpp">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeStudio.cpp">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeTitleMovies.cpp">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClCompile>
@@ -837,9 +801,6 @@
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeTvShowsOverview.cpp">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeYear.cpp">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\QueryParams.cpp">
@@ -868,9 +829,6 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\addons\Skin.cpp">
       <Filter>addons</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeCountry.cpp">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\addons\PluginSource.cpp">
       <Filter>addons</Filter>
@@ -1495,9 +1453,6 @@
       <Filter>settings</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\settings\GUISettings.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\Profile.cpp">
       <Filter>settings</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\settings\Settings.cpp">
@@ -2586,9 +2541,6 @@
     <ClCompile Include="..\..\xbmc\music\karaoke\karaokevideobackground.cpp">
       <Filter>music\karaoke</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\filesystem\VideoDatabaseDirectory\DirectoryNodeTags.cpp">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\EdenVideoArtUpdater.cpp">
       <Filter>utils</Filter>
     </ClCompile>
@@ -2803,9 +2755,6 @@
     <ClCompile Include="..\..\xbmc\network\upnp\UPnPInternal.cpp">
       <Filter>network\upnp</Filter>
     </ClCompile>
-     <ClCompile Include="..\..\xbmc\network\upnp\UPnPPlayer.cpp">
-      <Filter>network\upnp</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\network\upnp\UPnPRenderer.cpp">
       <Filter>network\upnp</Filter>
     </ClCompile>
@@ -2999,12 +2948,6 @@
     <ClCompile Include="..\..\xbmc\settings\dialogs\GUIDialogContentSettings.cpp">
       <Filter>settings\dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\dialogs\GUIDialogLockSettings.cpp">
-      <Filter>settings\dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\dialogs\GUIDialogProfileSettings.cpp">
-      <Filter>settings\dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\settings\dialogs\GUIDialogSettings.cpp">
       <Filter>settings\dialogs</Filter>
     </ClCompile>
@@ -3017,9 +2960,6 @@
     <ClCompile Include="..\..\xbmc\settings\windows\GUIWindowSettingsCategory.cpp">
       <Filter>settings\windows</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\settings\windows\GUIWindowSettingsProfile.cpp">
-      <Filter>settings\windows</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\settings\windows\GUIWindowSettingsScreenCalibration.cpp">
       <Filter>settings\windows</Filter>
     </ClCompile>
@@ -3028,6 +2968,57 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\RssManager.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\SkinSettings.cpp">
+      <Filter>settings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\MediaSourceSettings.cpp">
+      <Filter>settings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\view\ViewStateSettings.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\MediaSettings.cpp">
+      <Filter>settings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\settings\DisplaySettings.cpp">
+      <Filter>settings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\profiles\dialogs\GUIDialogLockSettings.cpp">
+      <Filter>profiles\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\profiles\dialogs\GUIDialogProfileSettings.cpp">
+      <Filter>profiles\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\profiles\windows\GUIWindowSettingsProfile.cpp">
+      <Filter>profiles\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\profiles\Profile.cpp">
+      <Filter>profiles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\profiles\ProfilesManager.cpp">
+      <Filter>profiles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\input\touch\generic\GenericTouchActionHandler.cpp">
+      <Filter>input\touch\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\input\touch\generic\GenericTouchSwipeDetector.cpp">
+      <Filter>input\touch\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\input\touch\ITouchInputHandling.cpp">
+      <Filter>input\touch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\utils\Vector.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\video\PlayerController.cpp">
+      <Filter>video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\filesystem\VideoDatabaseDirectory\DirectoryNodeGrouped.cpp">
+      <Filter>filesystem\VideoDatabaseDirectory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\filesystem\MusicDatabaseDirectory\DirectoryNodeGrouped.cpp">
+      <Filter>filesystem\MusicDatabaseDirectory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\cores\DSPlayer\GraphFilters.cpp">
       <Filter>cores\DSPlayer</Filter>
@@ -3558,9 +3549,6 @@
     <ClInclude Include="..\..\xbmc\cores\DllLoader\exports\emu_msvcrt.h">
       <Filter>cores\DllLoader\exports</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\DllLoader\exports\win32-dirent.h">
-      <Filter>cores\DllLoader\exports</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\DllLoader\exports\emu_socket\emu_socket.h">
       <Filter>cores\DllLoader\exports\emu_socket</Filter>
     </ClInclude>
@@ -3645,9 +3633,6 @@
     <ClInclude Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeArtist.h">
       <Filter>filesystem\MusicDatabaseDirectory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeGenre.h">
-      <Filter>filesystem\MusicDatabaseDirectory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeOverview.h">
       <Filter>filesystem\MusicDatabaseDirectory</Filter>
     </ClInclude>
@@ -3666,9 +3651,6 @@
     <ClInclude Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeTop100.h">
       <Filter>filesystem\MusicDatabaseDirectory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeYear.h">
-      <Filter>filesystem\MusicDatabaseDirectory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\FileSystem\MusicDatabaseDirectory\DirectoryNodeYearAlbum.h">
       <Filter>filesystem\MusicDatabaseDirectory</Filter>
     </ClInclude>
@@ -3681,22 +3663,10 @@
     <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNode.h">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeActor.h">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeDirector.h">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeEpisodes.h">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeGenre.h">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeMoviesOverview.h">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeMusicVideoAlbum.h">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeMusicVideosOverview.h">
@@ -3720,12 +3690,6 @@
     <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeSeasons.h">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeSets.h">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeStudio.h">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeTitleMovies.h">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClInclude>
@@ -3736,9 +3700,6 @@
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeTvShowsOverview.h">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeYear.h">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\QueryParams.h">
@@ -3776,9 +3737,6 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\addons\Skin.h">
       <Filter>addons</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\FileSystem\VideoDatabaseDirectory\DirectoryNodeCountry.h">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cdrip\DllFlacEnc.h">
       <Filter>cores\paplayer</Filter>
@@ -4479,9 +4437,6 @@
       <Filter>settings</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\settings\GUISettings.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\Profile.h">
       <Filter>settings</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\settings\Settings.h">
@@ -5662,9 +5617,6 @@
     <ClInclude Include="..\..\xbmc\utils\ISortable.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\filesystem\VideoDatabaseDirectory\DirectoryNodeTags.h">
-      <Filter>filesystem\VideoDatabaseDirectory</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\guilib\GUIKeyboard.h">
       <Filter>guilib</Filter>
     </ClInclude>
@@ -5916,12 +5868,6 @@
     <ClInclude Include="..\..\xbmc\settings\dialogs\GUIDialogContentSettings.h">
       <Filter>settings\dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\dialogs\GUIDialogLockSettings.h">
-      <Filter>settings\dialogs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\dialogs\GUIDialogProfileSettings.h">
-      <Filter>settings\dialogs</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\settings\dialogs\GUIDialogSettings.h">
       <Filter>settings\dialogs</Filter>
     </ClInclude>
@@ -5932,9 +5878,6 @@
       <Filter>settings\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\settings\windows\GUIWindowSettingsCategory.h">
-      <Filter>settings\windows</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\settings\windows\GUIWindowSettingsProfile.h">
       <Filter>settings\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\settings\windows\GUIWindowSettingsScreenCalibration.h">
@@ -5950,6 +5893,75 @@
       <Filter>utils</Filter>
     </ClInclude>    <ClInclude Include="..\..\xbmc\cores\DSPlayer\ChaptersManager.h">
       <Filter>cores\DSPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\ISettingsHandler.h">
+      <Filter>settings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\ISubSettings.h">
+      <Filter>settings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\SkinSettings.h">
+      <Filter>settings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\MediaSourceSettings.h">
+      <Filter>settings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\view\ViewStateSettings.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\MediaSettings.h">
+      <Filter>settings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\settings\DisplaySettings.h">
+      <Filter>settings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\profiles\dialogs\GUIDialogLockSettings.h">
+      <Filter>profiles\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\profiles\dialogs\GUIDialogProfileSettings.h">
+      <Filter>profiles\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\profiles\windows\GUIWindowSettingsProfile.h">
+      <Filter>profiles\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\profiles\Profile.h">
+      <Filter>profiles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\profiles\ProfilesManager.h">
+      <Filter>profiles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\input\touch\ITouchActionHandler.h">
+      <Filter>input\touch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\input\touch\generic\GenericTouchActionHandler.h">
+      <Filter>input\touch\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\input\touch\TouchTypes.h">
+      <Filter>input\touch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\input\touch\generic\GenericTouchSwipeDetector.h">
+      <Filter>input\touch\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\input\touch\generic\IGenericTouchGestureDetector.h">
+      <Filter>input\touch\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\input\touch\ITouchInputHandler.h">
+      <Filter>input\touch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\input\touch\ITouchInputHandling.h">
+      <Filter>input\touch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\utils\Vector.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\video\PlayerController.h">
+      <Filter>video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\filesystem\VideoDatabaseDirectory\DirectoryNodeGrouped.h">
+      <Filter>filesystem\VideoDatabaseDirectory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\filesystem\MusicDatabaseDirectory\DirectoryNodeGrouped.h">
+      <Filter>filesystem\MusicDatabaseDirectory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\DSPlayer\DSGraph.h">
       <Filter>cores\DSPlayer</Filter>

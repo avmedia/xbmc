@@ -21,8 +21,8 @@
 #include "system.h"
 #include "interfaces/Builtins.h"
 #include "ButtonTranslator.h"
+#include "profiles/ProfilesManager.h"
 #include "utils/URIUtils.h"
-#include "settings/Settings.h"
 #include "guilib/Key.h"
 #include "guilib/WindowIDs.h"
 #include "input/XBMC_keysym.h"
@@ -218,6 +218,8 @@ static const ActionMapping actions[] =
         {"decreasepar"       , ACTION_DECREASE_PAR},
         {"volampup"          , ACTION_VOLAMP_UP},
         {"volampdown"        , ACTION_VOLAMP_DOWN},
+        {"createbookmark"        , ACTION_CREATE_BOOKMARK},
+        {"createepisodebookmark" , ACTION_CREATE_EPISODE_BOOKMARK},
 
         // PVR actions
         {"channelup"             , ACTION_CHANNEL_UP},
@@ -568,7 +570,7 @@ bool CButtonTranslator::Load(bool AlwaysLoad)
   else
     CLog::Log(LOGDEBUG, "CButtonTranslator::Load - no system %s found, skipping", REMOTEMAP);
 
-  lircmapPath = g_settings.GetUserDataItem(REMOTEMAP);
+  lircmapPath = CProfilesManager::Get().GetUserDataItem(REMOTEMAP);
   if(CFile::Exists(lircmapPath))
     success |= LoadLircMap(lircmapPath);
   else
@@ -870,7 +872,7 @@ bool CButtonTranslator::TranslateJoystickString(int window, const char* szDevice
   return (action > 0);
 }
 
-bool CButtonTranslator::TranslateTouchAction(int window, int touchAction, int touchPointers, int &action)
+bool CButtonTranslator::TranslateTouchAction(int touchAction, int touchPointers, int &window, int &action)
 {
   action = 0;
   if (touchPointers <= 0)
@@ -881,7 +883,10 @@ bool CButtonTranslator::TranslateTouchAction(int window, int touchAction, int to
 
   action = GetTouchActionCode(window, touchAction);
   if (action <= 0)
+  {
+    window = WINDOW_INVALID;
     action = GetTouchActionCode(-1, touchAction);
+  }
 
   return action > 0;
 }
@@ -1461,9 +1466,9 @@ uint32_t CButtonTranslator::TranslateTouchCommand(TiXmlElement *pButton, CButton
   CStdString strTouchCommand = szButton;
   strTouchCommand.ToLower();
 
-  std::string strTmp;
-  if (pButton->QueryStringAttribute("direction", &strTmp) == TIXML_SUCCESS)
-    strTouchCommand += strTmp;
+  const char *attrVal = pButton->Attribute("direction");
+  if (attrVal != NULL)
+    strTouchCommand += attrVal;
 
   uint32_t actionId = ACTION_NONE;
   for (unsigned int i = 0; i < sizeof(touchcommands)/sizeof(touchcommands[0]); i++)
@@ -1481,10 +1486,10 @@ uint32_t CButtonTranslator::TranslateTouchCommand(TiXmlElement *pButton, CButton
     return ACTION_NONE;
   }
 
-  strTmp.clear();
-  if (pButton->QueryStringAttribute("pointers", &strTmp) == TIXML_SUCCESS)
+  attrVal = pButton->Attribute("pointers");
+  if (attrVal != NULL)
   {
-    int pointers = (int)strtol(strTmp.c_str(), NULL, 0);
+    int pointers = (int)strtol(attrVal, NULL, 0);
     if (pointers >= 1)
       actionId += pointers - 1;
   }

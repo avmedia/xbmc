@@ -19,11 +19,11 @@
  */
 
 #include "AutoSwitch.h"
-#include "settings/Settings.h"
 #include "settings/GUISettings.h"
 #include "guilib/GUIWindowManager.h"
 #include "FileItem.h"
 #include "guilib/WindowIDs.h"
+#include "view/ViewState.h"
 
 #define METHOD_BYFOLDERS  0
 #define METHOD_BYFILES   1

@@ -21,8 +21,10 @@
 #include "SpecialProtocol.h"
 #include "URL.h"
 #include "Util.h"
+#include "guilib/GraphicContext.h"
+#include "profiles/ProfilesManager.h"
+#include "settings/AdvancedSettings.h"
 #include "settings/GUISettings.h"
-#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 
@@ -129,11 +131,11 @@ CStdString CSpecialProtocol::TranslatePath(const CURL &url)
   if (RootDir.Equals("subtitles"))
     URIUtils::AddFileToFolder(g_guiSettings.GetString("subtitles.custompath"), FileName, translatedPath);
   else if (RootDir.Equals("userdata"))
-    URIUtils::AddFileToFolder(g_settings.GetUserDataFolder(), FileName, translatedPath);
+    URIUtils::AddFileToFolder(CProfilesManager::Get().GetUserDataFolder(), FileName, translatedPath);
   else if (RootDir.Equals("database"))
-    URIUtils::AddFileToFolder(g_settings.GetDatabaseFolder(), FileName, translatedPath);
+    URIUtils::AddFileToFolder(CProfilesManager::Get().GetDatabaseFolder(), FileName, translatedPath);
   else if (RootDir.Equals("thumbnails"))
-    URIUtils::AddFileToFolder(g_settings.GetThumbnailsFolder(), FileName, translatedPath);
+    URIUtils::AddFileToFolder(CProfilesManager::Get().GetThumbnailsFolder(), FileName, translatedPath);
   else if (RootDir.Equals("recordings") || RootDir.Equals("cdrips"))
     URIUtils::AddFileToFolder(g_guiSettings.GetString("audiocds.recordingpath", false), FileName, translatedPath);
   else if (RootDir.Equals("screenshots"))
@@ -145,7 +147,7 @@ CStdString CSpecialProtocol::TranslatePath(const CURL &url)
   else if (RootDir.Equals("skin"))
     URIUtils::AddFileToFolder(g_graphicsContext.GetMediaDir(), FileName, translatedPath);
   else if (RootDir.Equals("logpath"))
-    URIUtils::AddFileToFolder(g_settings.m_logFolder, FileName, translatedPath);
+    URIUtils::AddFileToFolder(g_advancedSettings.m_logFolder, FileName, translatedPath);
 
 
   // from here on, we have our "real" special paths

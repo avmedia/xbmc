@@ -23,7 +23,6 @@
 #if (defined HAVE_CONFIG_H) && (!defined WIN32)
   #include "config.h"
 #endif
-// enum CodecID
 
 #include <string>
 #include <vector>
@@ -61,7 +60,7 @@ extern "C" {
 class CDVDCodecOption
 {
 public:
-  CDVDCodecOption(std::string name, std::string value) { m_name = name; m_value = value; }
+  CDVDCodecOption(const std::string& name, const std::string& value) : m_name(name), m_value(value) {}
   std::string m_name;
   std::string m_value;
 };

@@ -35,7 +35,7 @@ class CDVDInputStream;
   #include "config.h"
 #endif
 #ifndef _LINUX
-enum CodecID;
+// enum CodecID; // auto defined when neccesary
 #include <libavcodec/avcodec.h>
 #else
 extern "C" {
@@ -213,11 +213,8 @@ class CDemuxStreamSubtitle : public CDemuxStream
 public:
   CDemuxStreamSubtitle() : CDemuxStream()
   {
-    identifier = 0;
     type = STREAM_SUBTITLE;
   }
-
-  int identifier;
 };
 
 class CDemuxStreamTeletext : public CDemuxStream

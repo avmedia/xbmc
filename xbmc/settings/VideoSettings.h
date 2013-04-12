@@ -105,6 +105,15 @@ enum EDSSCALINGMETHOD
 	DS_SCALINGMETHOD_BILINEAR_2_100
 };
 #endif
+typedef enum {
+  ViewModeNormal      = 0,
+  ViewModeZoom,
+  ViewModeStretch4x3,
+  ViewModeWideZoom,
+  ViewModeStretch16x9,
+  ViewModeOriginal,
+  ViewModeCustom
+} ViewMode;
 
 class CVideoSettings
 {

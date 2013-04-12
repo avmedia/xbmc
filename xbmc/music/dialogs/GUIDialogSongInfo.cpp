@@ -32,9 +32,9 @@
 #include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
 #include "FileItem.h"
-#include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/GUISettings.h"
+#include "settings/MediaSourceSettings.h"
 #include "guilib/LocalizeStrings.h"
 #include "TextureCache.h"
 #include "music/Album.h"
@@ -111,7 +111,7 @@ bool CGUIDialogSongInfo::OnMessage(CGUIMessage& message)
         {
           CFileItem item(*m_song);
           CStdString path;
-          path.Format("musicdb://3/%li",m_albumId);
+          path.Format("musicdb://albums/%li",m_albumId);
           item.SetPath(path);
           item.m_bIsFolder = true;
           window->OnInfo(&item, true);
@@ -289,7 +289,7 @@ void CGUIDialogSongInfo::OnGetThumb()
   }
 
   CStdString result;
-  VECSOURCES sources(g_settings.m_musicSources);
+  VECSOURCES sources(*CMediaSourceSettings::Get().GetSources("music"));
   CGUIDialogMusicInfo::AddItemPathToFileBrowserSources(sources, *m_song);
   g_mediaManager.GetLocalDrives(sources);
   if (!CGUIDialogFileBrowser::ShowAndGetImage(items, sources, g_localizeStrings.Get(1030), result))

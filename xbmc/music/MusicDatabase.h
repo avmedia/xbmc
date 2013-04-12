@@ -117,12 +117,18 @@ public:
   bool GetAlbumInfo(int idAlbum, CAlbum &info, VECSONGS* songs, bool scrapedInfo = false);
   bool HasAlbumInfo(int idAlbum);
   bool GetArtistInfo(int idArtist, CArtist &info, bool needAll=true);
+
+  /*! \brief Check if an artist entity has additional metadata (scraped)
+   \param idArtist the id of the Artist to check
+   \return true or false - whether the artist has metadata
+   */
+  bool HasArtistInfo(int idArtist);
   bool GetSongByFileName(const CStdString& strFileName, CSong& song, int startOffset = 0);
   int GetAlbumIdByPath(const CStdString& path);
   bool GetSongById(int idSong, CSong& song);
   bool GetSongByKaraokeNumber( int number, CSong& song );
   bool SetKaraokeSongDelay( int idSong, int delay );
-  bool GetSongsByPath(const CStdString& strPath, CSongMap& songs, bool bAppendToMap = false);
+  bool GetSongsByPath(const CStdString& strPath, MAPSONGS& songs, bool bAppendToMap = false);
   bool Search(const CStdString& search, CFileItemList &items);
 
   bool GetAlbumFromSong(int idSong, CAlbum &album);
@@ -148,13 +154,13 @@ public:
    \param item CFileItem to increment the playcount for
    */
   void IncrementPlayCount(const CFileItem &item);
-  bool RemoveSongsFromPath(const CStdString &path, CSongMap &songs, bool exact=true);
+  bool RemoveSongsFromPath(const CStdString &path, MAPSONGS& songs, bool exact=true);
   bool CleanupOrphanedItems();
   bool GetPaths(std::set<CStdString> &paths);
   bool SetPathHash(const CStdString &path, const CStdString &hash);
   bool GetPathHash(const CStdString &path, CStdString &hash);
   bool GetGenresNav(const CStdString& strBaseDir, CFileItemList& items, const Filter &filter = Filter(), bool countOnly = false);
-  bool GetYearsNav(const CStdString& strBaseDir, CFileItemList& items);
+  bool GetYearsNav(const CStdString& strBaseDir, CFileItemList& items, const Filter &filter = Filter());
   bool GetArtistsNav(const CStdString& strBaseDir, CFileItemList& items, bool albumArtistsOnly = false, int idGenre = -1, int idAlbum = -1, int idSong = -1, const Filter &filter = Filter(), const SortDescription &sortDescription = SortDescription(), bool countOnly = false);
   bool GetCommonNav(const CStdString &strBaseDir, const CStdString &table, const CStdString &labelField, CFileItemList &items, const Filter &filter /* = Filter() */, bool countOnly /* = false */);
   bool GetAlbumTypesNav(const CStdString &strBaseDir, CFileItemList &items, const Filter &filter = Filter(), bool countOnly = false);
@@ -201,6 +207,11 @@ public:
    \return true if the scraper is in use, false otherwise.
    */
   bool ScraperInUse(const CStdString &scraperID) const;
+
+  // retrieve a list of items
+  bool GetItems(const CStdString &strBaseDir, CFileItemList &items, const Filter &filter = Filter(), const SortDescription &sortDescription = SortDescription());
+  bool GetItems(const CStdString &strBaseDir, const CStdString &itemType, CFileItemList &items, const Filter &filter = Filter(), const SortDescription &sortDescription = SortDescription());
+  CStdString GetItemById(const CStdString &itemType, int id);
 
   void ExportToXML(const CStdString &xmlFile, bool singleFiles = false, bool images=false, bool overwrite=false);
   void ImportFromXML(const CStdString &xmlFile);

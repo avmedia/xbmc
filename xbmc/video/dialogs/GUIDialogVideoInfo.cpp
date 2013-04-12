@@ -39,9 +39,10 @@
 #include "FileItem.h"
 #include "storage/MediaManager.h"
 #include "utils/AsyncFileCopy.h"
-#include "settings/Settings.h"
+#include "profiles/ProfilesManager.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/GUISettings.h"
+#include "settings/MediaSourceSettings.h"
 #include "guilib/Key.h"
 #include "guilib/LocalizeStrings.h"
 #include "GUIUserMessages.h"
@@ -208,12 +209,12 @@ void CGUIDialogVideoInfo::OnInitWindow()
     database.Close();
   }
 
-  CONTROL_ENABLE_ON_CONDITION(CONTROL_BTN_REFRESH, (g_settings.GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !m_movieItem->GetVideoInfoTag()->m_strIMDBNumber.Left(2).Equals("xx") && scraper);
-  CONTROL_ENABLE_ON_CONDITION(CONTROL_BTN_GET_THUMB, (g_settings.GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !m_movieItem->GetVideoInfoTag()->m_strIMDBNumber.Mid(2).Equals("plugin"));
+  CONTROL_ENABLE_ON_CONDITION(CONTROL_BTN_REFRESH, (CProfilesManager::Get().GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !m_movieItem->GetVideoInfoTag()->m_strIMDBNumber.Left(2).Equals("xx") && scraper);
+  CONTROL_ENABLE_ON_CONDITION(CONTROL_BTN_GET_THUMB, (CProfilesManager::Get().GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !m_movieItem->GetVideoInfoTag()->m_strIMDBNumber.Mid(2).Equals("plugin"));
 
   VIDEODB_CONTENT_TYPE type = (VIDEODB_CONTENT_TYPE)m_movieItem->GetVideoContentType();
   if (type == VIDEODB_CONTENT_TVSHOWS || type == VIDEODB_CONTENT_MOVIES)
-    CONTROL_ENABLE_ON_CONDITION(CONTROL_BTN_GET_FANART, (g_settings.GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !m_movieItem->GetVideoInfoTag()->m_strIMDBNumber.Mid(2).Equals("plugin"));
+    CONTROL_ENABLE_ON_CONDITION(CONTROL_BTN_GET_FANART, (CProfilesManager::Get().GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !m_movieItem->GetVideoInfoTag()->m_strIMDBNumber.Mid(2).Equals("plugin"));
   else
     CONTROL_DISABLE(CONTROL_BTN_GET_FANART);
 
@@ -569,7 +570,7 @@ void CGUIDialogVideoInfo::Play(bool resume)
   if (!m_movieItem->GetVideoInfoTag()->m_strEpisodeGuide.IsEmpty())
   {
     CStdString strPath;
-    strPath.Format("videodb://2/2/%i/",m_movieItem->GetVideoInfoTag()->m_iDbId);
+    strPath.Format("videodb://tvshows/titles/%i/",m_movieItem->GetVideoInfoTag()->m_iDbId);
     Close();
     g_windowManager.ActivateWindow(WINDOW_VIDEO_NAV,strPath);
     return;
@@ -724,7 +725,7 @@ void CGUIDialogVideoInfo::OnGetArt()
     }
 
     CStdString result;
-    VECSOURCES sources(g_settings.m_videoSources);
+    VECSOURCES sources(*CMediaSourceSettings::Get().GetSources("video"));
     AddItemPathToFileBrowserSources(sources, *m_movieItem);
     g_mediaManager.GetLocalDrives(sources);
     if (CGUIDialogFileBrowser::ShowAndGetImage(items, sources, g_localizeStrings.Get(13511), result) &&
@@ -823,7 +824,7 @@ void CGUIDialogVideoInfo::OnGetFanart()
   }
 
   CStdString result;
-  VECSOURCES sources(g_settings.m_videoSources);
+  VECSOURCES sources(*CMediaSourceSettings::Get().GetSources("video"));
   AddItemPathToFileBrowserSources(sources, item);
   g_mediaManager.GetLocalDrives(sources);
   bool flip=false;

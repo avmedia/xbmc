@@ -20,6 +20,8 @@
  */
 
 #include <vector>
+
+#include "settings/ISettingsHandler.h"
 #include "utils/StdString.h"
 #include "utils/GlobalsHandling.h"
 
@@ -80,12 +82,14 @@ struct RefreshVideoLatency
 
 typedef std::vector<TVShowRegexp> SETTINGS_TVSHOWLIST;
 
-class CAdvancedSettings
+class CAdvancedSettings : public ISettingsHandler
 {
   public:
     CAdvancedSettings();
 
     static CAdvancedSettings* getInstance();
+
+    virtual void OnSettingsLoaded();
 
     void Initialize();
     bool Initialized() { return m_initialized; };
@@ -364,6 +368,16 @@ class CAdvancedSettings
     bool m_initialized;
 
     void SetDebugMode(bool debug);
+
+    // runtime settings which cannot be set from advancedsettings.xml
+    CStdString m_pictureExtensions;
+    CStdString m_musicExtensions;
+    CStdString m_videoExtensions;
+    CStdString m_discStubExtensions;
+
+    CStdString m_logFolder;
+
+    CStdString m_userAgent;
 };
 
 XBMC_GLOBAL(CAdvancedSettings,g_advancedSettings);

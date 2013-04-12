@@ -23,10 +23,7 @@
 #if (defined HAVE_CONFIG_H) && (!defined WIN32)
   #include "config.h"
 #endif
-#ifndef _LINUX
-enum StreamType;
-enum CodecID;
-#else
+
 #include "DVDDemuxers/DVDDemux.h"
 extern "C" {
 #if (defined USE_EXTERNAL_FFMPEG)
@@ -39,7 +36,6 @@ extern "C" {
   #include "libavcodec/avcodec.h"
 #endif
 }
-#endif
 
 class CDemuxStream;
 
@@ -87,7 +83,6 @@ public:
   int bitspersample;
 
   // SUBTITLE
-  int identifier;
 
   // CODEC EXTRADATA
   void*        extradata; // extra data for codec to use
@@ -96,10 +91,21 @@ public:
 
   bool operator==(const CDVDStreamInfo& right)      { return Equal(right, true);}
   bool operator!=(const CDVDStreamInfo& right)      { return !Equal(right, true);}
-  void operator=(const CDVDStreamInfo& right)       { Assign(right, true); }
+
+  CDVDStreamInfo& operator=(const CDVDStreamInfo& right)
+  {
+    if (this != &right)
+      Assign(right, true);
+
+    return *this; 
+  }
 
   bool operator==(const CDemuxStream& right)      { return Equal( CDVDStreamInfo(right, true), true);}
   bool operator!=(const CDemuxStream& right)      { return !Equal( CDVDStreamInfo(right, true), true);}
-  void operator=(const CDemuxStream& right)      { Assign(right, true); }
 
+  CDVDStreamInfo& operator=(const CDemuxStream& right)
+  { 
+    Assign(right, true);
+    return *this;
+  }
 };

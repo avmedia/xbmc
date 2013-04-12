@@ -24,6 +24,7 @@
 #include "music/GUIViewStateMusic.h"
 #include "video/GUIViewStateVideo.h"
 #include "pictures/GUIViewStatePictures.h"
+#include "profiles/ProfilesManager.h"
 #include "programs/GUIViewStatePrograms.h"
 #include "PlayListPlayer.h"
 #include "utils/URIUtils.h"
@@ -38,6 +39,7 @@
 #include "view/ViewState.h"
 #include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/MediaSourceSettings.h"
 #include "settings/Settings.h"
 #include "FileItem.h"
 #include "guilib/Key.h"
@@ -311,7 +313,7 @@ bool CGUIViewState::HideParentDirItems()
 
 bool CGUIViewState::DisableAddSourceButtons()
 {
-  if (g_settings.GetCurrentProfile().canWriteSources() || g_passwordManager.bMasterUser)
+  if (CProfilesManager::Get().GetCurrentProfile().canWriteSources() || g_passwordManager.bMasterUser)
     return !g_guiSettings.GetBool("filelists.showaddsourcebuttons");
 
   return true;
@@ -405,7 +407,7 @@ void CGUIViewState::AddAndroidSource(const CStdString &content, const CStdString
 
 void CGUIViewState::AddLiveTVSources()
 {
-  VECSOURCES *sources = g_settings.GetSourcesFromType("video");
+  VECSOURCES *sources = CMediaSourceSettings::Get().GetSources("video");
   for (IVECSOURCES it = sources->begin(); it != sources->end(); it++)
   {
     if (URIUtils::IsLiveTV((*it).strPath))

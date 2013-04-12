@@ -3922,6 +3922,58 @@ msgstr ""
 
 #empty strings from id 10102 to 10209
 
+msgctxt "#10126"
+msgid "File browser"
+msgstr ""
+
+msgctxt "#10128"
+msgid "Network setup"
+msgstr ""
+
+msgctxt "#10129"
+msgid "Media source"
+msgstr ""
+
+msgctxt "#10130"
+msgid "Profile settings"
+msgstr ""
+
+msgctxt "#10131"
+msgid "Lock settings"
+msgstr ""
+
+msgctxt "#10132"
+msgid "Content settings"
+msgstr ""
+
+msgctxt "#10134"
+msgid "Favourites"
+msgstr ""
+
+msgctxt "#10135"
+msgid "Songs/Info"
+msgstr ""
+
+msgctxt "#10136"
+msgid "Smart playlist editor"
+msgstr ""
+
+msgctxt "#10137"
+msgid "Smart playlist rule editor"
+msgstr ""
+
+msgctxt "#10139"
+msgid "Pictures/Info"
+msgstr ""
+
+msgctxt "#10140"
+msgid "Add-on settings"
+msgstr ""
+
+msgctxt "#10146"
+msgid "Add-ons/Info"
+msgstr ""
+
 msgctxt "#10210"
 msgid "Looking for subtitles..."
 msgstr ""
@@ -5348,7 +5400,12 @@ msgctxt "#13434"
 msgid "Play only this"
 msgstr ""
 
-#empty strings from id 13435 to 13499
+#: xbmc/settings/GUISettings.cpp
+msgctxt "#13435"
+msgid "Enable HQ Scalers for scalings above %"
+msgstr ""
+
+#empty strings from id 13436 to 13499
 
 #: xbmc/settings/GUISettings.cpp
 msgctxt "#13500"
@@ -9168,7 +9225,10 @@ msgctxt "#20403"
 msgid "Set actor thumb"
 msgstr ""
 
-#empty string with id 20404
+#: xbmc/video/dialogs/GUIDialogVideoBookmarks.cpp
+msgctxt "#20404"
+msgid "Remove bookmark"
+msgstr ""
 
 msgctxt "#20405"
 msgid "Remove episode bookmark"
@@ -9223,7 +9283,10 @@ msgctxt "#20417"
 msgid "Writer"
 msgstr ""
 
-#empty string with id 20418
+#: xbmc/playlists/SmartPlayList.cpp
+msgctxt "#20418"
+msgid "Writers"
+msgstr ""
 
 #: xbmc/settings/GUISettings.cpp
 msgctxt "#20419"
@@ -9411,7 +9474,27 @@ msgctxt "#20464"
 msgid "Select %s"
 msgstr ""
 
-#empty strings from id 20465 to 21329
+msgctxt "#20465"
+msgid "Manage movie set"
+msgstr ""
+
+msgctxt "#20466"
+msgid "Select movie set"
+msgstr ""
+
+msgctxt "#20467"
+msgid "No set (Remove from %s)"
+msgstr ""
+
+msgctxt "#20468"
+msgid "Add movie to a new set"
+msgstr ""
+
+msgctxt "#20469"
+msgid "Keep current set (%s)"
+msgstr ""
+
+#empty strings from id 20470 to 21329
 #up to 21329 is reserved for the video db !! !
 
 #: xbmc/settings/GUISettings.cpp
@@ -9464,7 +9547,17 @@ msgctxt "#21361"
 msgid "Look for remote UPnP players"
 msgstr ""
 
-#empty strings from id 21362 to 21363
+#: xbmc/video/dialogs/GUIDialogVideoBookmarks.cpp
+msgctx "#21362"
+msgid "Bookmark created"
+msgstr ""
+
+#: xbmc/video/dialogs/GUIDialogVideoBookmarks.cpp
+msgctxt "#21363"
+msgid "Episode Bookmark created"
+msgstr ""
+
+
 
 msgctxt "#21364"
 msgid "Edit media share"
@@ -9853,7 +9946,13 @@ msgctxt "#21457"
 msgid "Watched episode count"
 msgstr ""
 
-#empty strings from id 21458 to 21459
+msgctxt "#21458"
+msgid "Group by"
+msgstr ""
+
+msgctxt "#21459"
+msgid "mixed"
+msgstr ""
 
 #: xbmc/settings/GUISettings.cpp
 msgctxt "#21460"
@@ -10041,7 +10140,19 @@ msgctxt "#21843"
 msgid "Orientation"
 msgstr ""
 
-#empty strings from id 21844 to 21859
+#empty strings from id 21844 to 21856
+
+msgctxt "#21857"
+msgid "Sub-location"
+msgstr ""
+
+msgctxt "#21858"
+msgid "Image type"
+msgstr ""
+
+msgctxt "#21859"
+msgid "Time created"
+msgstr ""
 
 msgctxt "#21860"
 msgid "Supplemental categories"
@@ -10116,7 +10227,7 @@ msgid "Date created"
 msgstr ""
 
 msgctxt "#21878"
-msgid "Copyright flag"
+msgid "Urgency"
 msgstr ""
 
 msgctxt "#21879"
@@ -11222,7 +11333,12 @@ msgctxt "#33083"
 msgid "Enable custom script button"
 msgstr ""
 
-#empty strings from id 33084 to 33099
+#: addons/skin.confluence/720p/SettingsProfile.xml
+msgctxt "#33084"
+msgid "Auto login"
+msgstr ""
+
+#empty strings from id 33085 to 33099
 
 #: xbmc/network/network.cpp
 msgctxt "#33100"
@@ -11587,7 +11703,9 @@ msgctxt "#36009"
 msgid "Put devices in standby mode when activating screensaver"
 msgstr ""
 
-#empty string with id 36010
+msgctxt "#36010"
+msgid "Wake devices when deactivating screensaver"
+msgstr ""
 
 #: xbmc/peripherals/devices/peripheralcecadapter.cpp
 msgctxt "#36011"
@@ -11745,6 +11863,40 @@ msgstr ""
 #: xbmc/settings/GUISettings.cpp
 msgctxt "#36042"
 msgid "Use limited color range (16-235)"
+msgstr ""
+#: xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamNavigator.cpp
+msgctxt "#37000"
+msgid "(Visually Impaired)"
+msgstr ""
+
+#: xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamNavigator.cpp
+msgctxt "#37001"
+msgid "(Directors Comments)"
+msgstr ""
+
+#: xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamNavigator.cpp
+msgctxt "#37002"
+msgid "(Directors Comments 2)"
+msgstr ""
+
+#: xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamNavigator.cpp
+msgctxt "#37011"
+msgid "(CC)"
+msgstr ""
+
+#: xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamNavigator.cpp
+msgctxt "#37012"
+msgid "(Forced)"
+msgstr ""
+
+#: xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamNavigator.cpp
+msgctxt "#37013"
+msgid "(Directors Comments)"
+msgstr ""
+
+#: xbmc/GUIInfoManager.cpp
+msgctxt "#37014"
+msgid "Last used profile"
 msgstr ""
 
 

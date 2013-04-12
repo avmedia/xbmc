@@ -46,11 +46,13 @@
 #include "settings/AdvancedSettings.h"
 #include "utils/EndianSwap.h"
 #include "URL.h"
+#include "interfaces/AnnouncementManager.h"
 
 #include <map>
 #include <string>
 
 using namespace XFILE;
+using namespace ANNOUNCEMENT;
 
 #if defined(TARGET_WINDOWS)
 DllLibShairplay *CAirTunesServer::m_pLibShairplay = NULL;
@@ -91,6 +93,16 @@ void CAirTunesServer::SetMetadataFromBuffer(const char *buffer, unsigned int siz
   if(metadata["asar"].length())    
     tag.SetArtist(metadata["asar"]);//artist
   CApplicationMessenger::Get().SetCurrentSongTag(tag);
+}
+
+void CAirTunesServer::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
+{
+  if ( (flag & Player) && strcmp(sender, "xbmc") == 0 && strcmp(message, "OnStop") == 0)
+  {
+#ifdef HAS_AIRPLAY
+    CAirPlayServer::restoreVolume();
+#endif
+  }
 }
 
 void CAirTunesServer::SetCoverArtFromBuffer(const char *buffer, unsigned int size)
@@ -192,6 +204,9 @@ void  CAirTunesServer::AudioOutputFunctions::audio_set_volume(void *cls, void *s
 {
   //volume from -30 - 0 - -144 means mute
   float volPercent = volume < -30.0f ? 0 : 1 - volume/-30;
+#ifdef HAS_AIRPLAY
+  CAirPlayServer::backupVolume();
+#endif
   g_application.SetVolume(volPercent, false);//non-percent volume 0.0-1.0
 }
 
@@ -287,6 +302,17 @@ struct ao_device_xbmc
 void CAirTunesServer::AudioOutputFunctions::ao_initialize(void)
 {
 }
+
+void  CAirTunesServer::AudioOutputFunctions::ao_set_volume(float volume)
+{
+  //volume from -30 - 0 - -144 means mute
+  float volPercent = volume < -30.0f ? 0 : 1 - volume/-30;
+#ifdef HAS_AIRPLAY
+  CAirPlayServer::backupVolume();
+#endif
+  g_application.SetVolume(volPercent, false);//non-percent volume 0.0-1.0
+}
+
 
 int CAirTunesServer::AudioOutputFunctions::ao_play(ao_device *device, char *output_samples, uint32_t num_bytes)
 {
@@ -563,6 +589,7 @@ CAirTunesServer::CAirTunesServer(int port, bool nonlocal) : CThread("AirTunesSer
 #else
   m_pLibShairport = new DllLibShairport();
 #endif
+  CAnnouncementManager::AddAnnouncer(this);
 }
 
 CAirTunesServer::~CAirTunesServer()
@@ -581,6 +608,7 @@ CAirTunesServer::~CAirTunesServer()
   }
   delete m_pLibShairport;
 #endif
+  CAnnouncementManager::RemoveAnnouncer(this);
 }
 
 void CAirTunesServer::Process()
@@ -675,6 +703,11 @@ bool CAirTunesServer::Initialize(const CStdString &password)
 #ifdef HAVE_STRUCT_AUDIOOUTPUT_AO_SET_METADATA
     ao.ao_set_metadata = AudioOutputFunctions::ao_set_metadata;    
     ao.ao_set_metadata_coverart = AudioOutputFunctions::ao_set_metadata_coverart;        
+#endif
+#if defined(SHAIRPORT_AUDIOOUTPUT_VERSION)
+#if   SHAIRPORT_AUDIOOUTPUT_VERSION >= 2
+    ao.ao_set_volume = AudioOutputFunctions::ao_set_volume;
+#endif
 #endif
     struct printfPtr funcPtr;
     funcPtr.extprintf = shairport_log;

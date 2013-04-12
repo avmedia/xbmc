@@ -28,6 +28,7 @@
 #include "guilib/Key.h"
 #include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/GUISettings.h"
 
 using namespace MUSIC_INFO;
 
@@ -59,7 +60,7 @@ bool CGUIWindowVisualisation::OnAction(const CAction &action)
   case ACTION_SHOW_INFO:
     {
       m_initTimer.Stop();
-      g_settings.m_bMyMusicSongThumbInVis = g_infoManager.ToggleShowInfo();
+      g_guiSettings.SetBool("mymusic.songthumbinvis", g_infoManager.ToggleShowInfo());
       return true;
     }
     break;
@@ -176,7 +177,7 @@ bool CGUIWindowVisualisation::OnMessage(CGUIMessage& message)
       if (g_infoManager.GetCurrentSongTag())
         m_tag = *g_infoManager.GetCurrentSongTag();
 
-      if (g_settings.m_bMyMusicSongThumbInVis)
+      if (g_guiSettings.GetBool("mymusic.songthumbinvis"))
       { // always on
         m_initTimer.Stop();
       }
@@ -198,6 +199,8 @@ EVENT_RESULT CGUIWindowVisualisation::OnMouseEvent(const CPoint &point, const CM
     OnAction(CAction(ACTION_SHOW_GUI));
     return EVENT_RESULT_HANDLED;
   }
+  if (event.m_id == ACTION_GESTURE_NOTIFY)
+    return EVENT_RESULT_UNHANDLED;
   if (event.m_id != ACTION_MOUSE_MOVE || event.m_offsetX || event.m_offsetY)
   { // some other mouse action has occurred - bring up the OSD
     CGUIDialog *pOSD = (CGUIDialog *)g_windowManager.GetWindow(WINDOW_DIALOG_MUSIC_OSD);
@@ -225,7 +228,7 @@ void CGUIWindowVisualisation::FrameMove()
   if (m_initTimer.IsRunning() && m_initTimer.GetElapsedSeconds() > (float)g_advancedSettings.m_songInfoDuration)
   {
     m_initTimer.Stop();
-    if (!g_settings.m_bMyMusicSongThumbInVis)
+    if (!g_guiSettings.GetBool("mymusic.songthumbinvis"))
     { // reached end of fade in, fade out again
       g_infoManager.SetShowInfo(false);
     }

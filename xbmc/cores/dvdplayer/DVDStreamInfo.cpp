@@ -67,7 +67,6 @@ void CDVDStreamInfo::Clear()
   bitrate    = 0;
   bitspersample = 0;
 
-  identifier = 0;
   orientation = 0;
 }
 
@@ -108,7 +107,6 @@ bool CDVDStreamInfo::Equal(const CDVDStreamInfo& right, bool withextradata)
   ||  bitspersample != right.bitspersample ) return false;
 
   // SUBTITLE
-  if( identifier != right.identifier ) return false;
 
   return true;
 }
@@ -155,6 +153,8 @@ void CDVDStreamInfo::Assign(const CDVDStreamInfo& right, bool withextradata)
   forced_aspect = right.forced_aspect;
   orientation = right.orientation;
   bitsperpixel = right.bitsperpixel;
+  vfr = right.vfr;
+  software = right.software;
 
   // AUDIO
   channels      = right.channels;
@@ -164,7 +164,6 @@ void CDVDStreamInfo::Assign(const CDVDStreamInfo& right, bool withextradata)
   bitspersample = right.bitspersample;
 
   // SUBTITLE
-  identifier = right.identifier;
 }
 
 void CDVDStreamInfo::Assign(const CDemuxStream& right, bool withextradata)
@@ -209,7 +208,5 @@ void CDVDStreamInfo::Assign(const CDemuxStream& right, bool withextradata)
   }
   else if(  right.type == STREAM_SUBTITLE )
   {
-    const CDemuxStreamSubtitle *stream = static_cast<const CDemuxStreamSubtitle*>(&right);
-    identifier = stream->identifier;
   }
 }

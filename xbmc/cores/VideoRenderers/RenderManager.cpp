@@ -34,6 +34,7 @@
 #include "settings/Settings.h"
 #include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/MediaSettings.h"
 
 #if defined(HAS_GL)
   #include "LinuxRendererGL.h"
@@ -64,7 +65,8 @@ class CRetakeLock
 {
 public:
   CRetakeLock(CSharedSection &section, bool immidiate = true, CCriticalSection &owned = g_graphicsContext)
-    : m_owned(owned)
+    : m_lock (NULL  ),
+      m_owned(owned )
   {
     m_count = m_owned.exit();
     m_lock  = new T(section);
@@ -106,6 +108,10 @@ CXBMCRenderManager::CXBMCRenderManager()
 #ifdef HAS_DS_PLAYER
   m_pRendererType = RENDERER_UNINIT;
 #endif
+  m_presentcorr = 0.0;
+  m_presenterr = 0.0;
+  memset(&m_errorbuff, 0, ERRORBUFFSIZE);
+  m_errorindex = 0;
 }
 
 CXBMCRenderManager::~CXBMCRenderManager()
@@ -517,7 +523,7 @@ void CXBMCRenderManager::ManageCaptures()
         if (capture->IsAsync() && !(capture->GetFlags() & CAPTUREFLAG_IMMEDIATELY))
           RenderCapture(capture);
 
-        it++;
+        ++it;
       }
       else
       {
@@ -526,7 +532,7 @@ void CXBMCRenderManager::ManageCaptures()
     }
     else
     {
-      it++;
+      ++it;
     }
   }
 
@@ -586,10 +592,8 @@ void CXBMCRenderManager::FlipPage(volatile bool& bStop, double timestamp /* = 0L
     m_presentfield = sync;
     m_presentstep  = PRESENT_FLIP;
     m_presentsource = source;
-    EDEINTERLACEMODE deinterlacemode = g_settings.m_currentVideoSettings.m_DeinterlaceMode;
-    EINTERLACEMETHOD interlacemethod = AutoInterlaceMethodInternal(g_settings.m_currentVideoSettings.m_InterlaceMethod);
-
-    bool invert = false;
+    EDEINTERLACEMODE deinterlacemode = CMediaSettings::Get().GetCurrentVideoSettings().m_DeinterlaceMode;
+    EINTERLACEMETHOD interlacemethod = AutoInterlaceMethodInternal(CMediaSettings::Get().GetCurrentVideoSettings().m_InterlaceMethod);
 
     if (deinterlacemode == VS_DEINTERLACEMODE_OFF)
       m_presentmethod = PRESENT_METHOD_SINGLE;
@@ -599,6 +603,7 @@ void CXBMCRenderManager::FlipPage(volatile bool& bStop, double timestamp /* = 0L
         m_presentmethod = PRESENT_METHOD_SINGLE;
       else
       {
+        bool invert = false;
         if      (interlacemethod == VS_INTERLACEMETHOD_RENDER_BLEND)            m_presentmethod = PRESENT_METHOD_BLEND;
         else if (interlacemethod == VS_INTERLACEMETHOD_RENDER_WEAVE)            m_presentmethod = PRESENT_METHOD_WEAVE;
         else if (interlacemethod == VS_INTERLACEMETHOD_RENDER_WEAVE_INVERTED) { m_presentmethod = PRESENT_METHOD_WEAVE ; invert = true; }

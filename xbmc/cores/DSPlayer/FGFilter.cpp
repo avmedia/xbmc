@@ -38,7 +38,7 @@
 #include "utils/charsetconverter.h"
 #include "utils/XMLUtils.h"
 #include "filesystem/File.h"
-#include "settings/Settings.h"
+#include "profiles/ProfilesManager.h"
 #include "Dmodshow.h"
 #include "Dmoreg.h"
 #include "../../filesystem/SpecialProtocol.h "
@@ -351,7 +351,7 @@ CFGFilterFile::CFGFilterFile( TiXmlElement *pFilter )
     if (!XFILE::CFile::Exists(m_path))
     {
         CStdString path(m_path);
-		m_path = g_settings.GetUserDataItem("dsplayer/" + path);
+		m_path = CProfilesManager::Get().GetUserDataItem("dsplayer/" + path);
 		if (!XFILE::CFile::Exists(m_path))
 		{
 			m_path.Format("special://xbmc/system/players/dsplayer/%s", path.c_str()); 

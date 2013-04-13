@@ -56,6 +56,7 @@
 #include "settings/AdvancedSettings.h"
 #include "Application.h"
 #include "GUIUserMessages.h"
+#include "guilib/Key.h"
 
 using namespace PVR;
 using namespace std;

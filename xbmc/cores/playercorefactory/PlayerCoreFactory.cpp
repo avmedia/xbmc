@@ -361,7 +361,7 @@ bool CPlayerCoreFactory::LoadConfiguration(const std::string &file, bool clear)
 #ifdef HAS_DS_PLAYER
 	CPlayerCoreConfig* dsplayer = new CPlayerCoreConfig("DSPlayer", EPC_DSPLAYER, NULL);
 	dsplayer->m_bPlaysAudio = dsplayer->m_bPlaysVideo = true;
-	s_vecCoreConfigs.push_back(dsplayer);
+	m_vecCoreConfigs.push_back(dsplayer);
 #endif
     for(std::vector<CPlayerSelectionRule *>::iterator it = m_vecCoreSelectionRules.begin(); it != m_vecCoreSelectionRules.end(); ++it)
       delete *it;

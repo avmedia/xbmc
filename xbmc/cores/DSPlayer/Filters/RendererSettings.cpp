@@ -28,7 +28,7 @@
 #include "filesystem/file.h"
 #include "utils/log.h"
 #include "util.h"
-#include "settings/Settings.h"
+#include "profiles/ProfilesManager.h"
 #include "settings/GuiSettings.h"
 #include "utils/XMLUtils.h"
 #include "utils/SystemInfo.h"
@@ -87,7 +87,7 @@ CDSSettings::~CDSSettings(void)
 
 void CDSSettings::LoadConfig()
 {
-  CStdString strDsConfigFile = g_settings.GetUserDataItem("dsplayer/renderersettings.xml");
+  CStdString strDsConfigFile = CProfilesManager::Get().GetUserDataItem("dsplayer/renderersettings.xml");
   if (!CFile::Exists(strDsConfigFile))
   {
     CLog::Log(LOGNOTICE, "No renderersettings.xml to load (%s)", strDsConfigFile.c_str());

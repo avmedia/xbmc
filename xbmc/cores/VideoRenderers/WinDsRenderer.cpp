@@ -35,7 +35,8 @@
 #include "StreamsManager.h"
 #include "Filters\DX9AllocatorPresenter.h"
 #include "IPaintCallback.h"
-#include "settings/GUISettings.h"
+#include "settings/DisplaySettings.h"
+#include "settings/MediaSettings.h"
 
 CWinDsRenderer::CWinDsRenderer():
   m_bConfigured(false), m_paintCallback(NULL)
@@ -63,7 +64,7 @@ bool CWinDsRenderer::Configure(unsigned int width, unsigned int height, unsigned
   // calculate the input frame aspect ratio
   CalculateFrameAspectRatio(d_width, d_height);
   ChooseBestResolution(fps);
-  SetViewMode(g_settings.m_currentVideoSettings.m_ViewMode);
+  SetViewMode(CMediaSettings::Get().GetCurrentVideoSettings().m_ViewMode);
   ManageDisplay();
 
   m_bConfigured = true;
@@ -105,7 +106,7 @@ unsigned int CWinDsRenderer::PreInit()
   m_bConfigured = false;
 
   UnInit();
-  m_resolution = g_guiSettings.m_LookAndFeelResolution;
+  m_resolution = CDisplaySettings::Get().GetCurrentResolution();
   if ( m_resolution == RES_WINDOW )
     m_resolution = RES_DESKTOP;
 

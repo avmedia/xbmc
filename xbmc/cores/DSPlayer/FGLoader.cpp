@@ -37,7 +37,7 @@
 #include "dialogs/GUIDialogOK.h"
 #include "guilib/GUIWindowManager.h"
 #include "filtercorefactory/filtercorefactory.h"
-#include "settings/Settings.h"
+#include "profiles/ProfilesManager.h"
 #include "settings/GUISettings.h"
 #include "utils/SystemInfo.h"
 
@@ -542,11 +542,11 @@ HRESULT CFGLoader::LoadConfig()
   // Two steps
 
   // First, filters
-  LoadFilterCoreFactorySettings(g_settings.GetUserDataItem("dsplayer/filtersconfig.xml"), FILTERS, true);
+  LoadFilterCoreFactorySettings(CProfilesManager::Get().GetUserDataItem("dsplayer/filtersconfig.xml"), FILTERS, true);
   LoadFilterCoreFactorySettings("special://xbmc/system/players/dsplayer/filtersconfig.xml", FILTERS, false);
 
   // Second, medias rules
-  LoadFilterCoreFactorySettings(g_settings.GetUserDataItem("dsplayer/mediasconfig.xml"), MEDIAS, false);
+  LoadFilterCoreFactorySettings(CProfilesManager::Get().GetUserDataItem("dsplayer/mediasconfig.xml"), MEDIAS, false);
   LoadFilterCoreFactorySettings("special://xbmc/system/players/dsplayer/mediasconfig.xml", MEDIAS, false);
 
   return S_OK;

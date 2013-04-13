@@ -22,7 +22,7 @@
 #ifdef HAS_DS_PLAYER
 
 #include "PixelShaderList.h"
-#include "settings/Settings.h"
+#include "profiles/ProfilesManager.h"
 #include "FileSystem\File.h"
 #include "FileSystem\Directory.h"
 #include "utils/XMLUtils.h"
@@ -47,7 +47,7 @@ CPixelShaderList::~CPixelShaderList()
 
 void CPixelShaderList::SaveXML()
 {
-  CStdString userDataDSPlayer = URIUtils::AddFileToFolder(g_settings.GetUserDataFolder(), "dsplayer");
+  CStdString userDataDSPlayer = URIUtils::AddFileToFolder(CProfilesManager::Get().GetUserDataFolder(), "dsplayer");
   if (! XFILE::CDirectory::Exists(userDataDSPlayer))
   {
     if (! XFILE::CDirectory::Create(userDataDSPlayer))
@@ -77,7 +77,7 @@ void CPixelShaderList::SaveXML()
 
 void CPixelShaderList::Load()
 {
-  LoadXMLFile(g_settings.GetUserDataItem("dsplayer/shaders.xml"));
+  LoadXMLFile(CProfilesManager::Get().GetUserDataItem("dsplayer/shaders.xml"));
   LoadXMLFile("special://xbmc/system/players/dsplayer/shaders/shaders.xml");
 }
 

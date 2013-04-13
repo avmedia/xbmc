@@ -152,7 +152,7 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
   }
   EndEnumFilters
 
-  SetVolume(g_settings.m_fVolumeLevel);
+  SetVolume( g_application.GetVolume(false));
   
   CDSPlayer::PlayerState = DSPLAYER_LOADED;
   return hr;

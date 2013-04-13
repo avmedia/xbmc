@@ -35,7 +35,7 @@
 #include "DSUtil/SmartPtr.h"
 #include "windowing/WindowingFactory.h"
 #include "LangInfo.h"
-#include "settings/GUISettings.h"
+#include "settings/MediaSettings.h"
 #include "Filters\RendererSettings.h"
 #include "Utils/URIUtils.h"
 
@@ -577,7 +577,7 @@ void CStreamsManager::LoadStreams()
   if (! SubtitleManager->Ready())
   {
     SubtitleManager->Unload();
-    SubtitleManager->SetSubtitleVisible(g_settings.m_currentVideoSettings.m_SubtitleOn);
+    SubtitleManager->SetSubtitleVisible(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn);
 
     return;
   }
@@ -592,10 +592,10 @@ void CStreamsManager::LoadStreams()
   {
     SubtitleManager->AddSubtitle(*it);
   }
-  g_settings.m_currentVideoSettings.m_SubtitleCached = true;
+  CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleCached = true;
   SubtitleManager->SelectBestSubtitle();
 
-  SubtitleManager->SetSubtitleVisible(g_settings.m_currentVideoSettings.m_SubtitleOn);
+  SubtitleManager->SetSubtitleVisible(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn);
 }
 
 bool CStreamsManager::InitManager()
@@ -932,8 +932,8 @@ CSubtitleManager::CSubtitleManager(CStreamsManager* pStreamManager):
   memset(&m_subtitleMediaType, 0, sizeof(AM_MEDIA_TYPE));
   m_subtitleMediaType.majortype = MEDIATYPE_Subtitle;
 
-  m_bSubtitlesVisible = g_settings.m_currentVideoSettings.m_SubtitleOn;
-  SetSubtitleDelay(g_settings.m_currentVideoSettings.m_SubtitleDelay);
+  m_bSubtitlesVisible = CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn;
+  SetSubtitleDelay(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleDelay);
 
   m_pManager.reset();
 }
@@ -1267,7 +1267,7 @@ bool CSubtitleManager::GetSubtitleVisible()
 
 void CSubtitleManager::SetSubtitleVisible( bool bVisible )
 {
-  g_settings.m_currentVideoSettings.m_SubtitleOn = bVisible;
+  CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn = bVisible;
   m_bSubtitlesVisible = bVisible;
   if (m_pManager)
     m_pManager->SetEnable(bVisible);

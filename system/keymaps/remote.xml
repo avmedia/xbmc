@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- This file contains the mapping of keys (gamepad, remote, and keyboard) to actions within XBMC -->
 <!-- The <global> section is a fall through - they will only be used if the button is not          -->
 <!-- used in the current window's section.  Note that there is only handling                       -->
@@ -58,7 +59,7 @@
       <skipminus>SkipPrevious</skipminus>
       <display>FullScreen</display>
       <start>PreviousMenu</start>
-      <record>Screenshot</record>
+      <record>Record</record>
       <volumeplus>VolumeUp</volumeplus>
       <volumeminus>VolumeDown</volumeminus>
       <mute>Mute</mute>
@@ -145,9 +146,9 @@
       <nine>Number9</nine>
       <left>StepBack</left>
       <right>StepForward</right>
-      <up>BigStepForward</up>
-      <down>BigStepBack</down>
-      <back>SmallStepBack</back>
+      <up>ChapterOrBigStepForward</up>
+      <down>ChapterOrBigStepBack</down>
+      <back>Back</back>
       <menu>OSD</menu>
       <start>OSD</start>
       <select>OSD</select>
@@ -188,7 +189,7 @@
       <right>NextPreset</right>
       <up>IncreaseRating</up>
       <down>DecreaseRating</down>
-      <back>LockPreset</back>
+      <back>Back</back>
       <title>CodecInfo</title>
       <select>XBMC.ActivateWindow(VisualisationPresetList)</select>
       <menu>OSD</menu>
@@ -510,8 +511,8 @@
   </Favourites>
   <FullscreenLiveTV>
     <remote>
-      <left>PreviousChannelGroup</left>
-      <right>NextChannelGroup</right>
+      <left>StepBack</left>
+      <right>StepForward</right>
       <up>ChannelUp</up>
       <down>ChannelDown</down>
     </remote>

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,9 +24,7 @@
 #if !defined(AFX_VIDEOSETTINGS_H__562A722A_CD2A_4B4A_8A67_32DE8088A7D3__INCLUDED_)
 #define AFX_VIDEOSETTINGS_H__562A722A_CD2A_4B4A_8A67_32DE8088A7D3__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 enum EDEINTERLACEMODE
 {
@@ -94,6 +92,11 @@ enum ESCALINGMETHOD
   VS_SCALINGMETHOD_MAX // do not use and keep as last enum value.
 };
 
+enum EDECODEMETHOD
+{
+  VS_DECODEMETHOD_SOFTWARE=0,
+  VS_DECODEMETHOD_HARDWARE=1
+};
 #ifdef HAS_DS_PLAYER
 enum EDSSCALINGMETHOD
 {
@@ -156,6 +159,8 @@ public:
   int m_CropBottom;
   int m_CropLeft;
   int m_CropRight;
+  int m_StereoMode;
+  bool m_StereoInvert;
 
 private:
 };

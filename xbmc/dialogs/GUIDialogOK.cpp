@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,6 +44,17 @@ bool CGUIDialogOK::OnMessage(CGUIMessage& message)
     }
   }
   return CGUIDialogBoxBase::OnMessage(message);
+}
+
+// \brief Show CGUIDialogOK dialog, then wait for user to dismiss it.
+void CGUIDialogOK::ShowAndGetInput(const CVariant &heading, const CVariant &text)
+{
+  CGUIDialogOK *dialog = (CGUIDialogOK *)g_windowManager.GetWindow(WINDOW_DIALOG_OK);
+  if (!dialog)
+    return;
+  dialog->SetHeading(heading);
+  dialog->SetText(text);
+  dialog->DoModal();
 }
 
 // \brief Show CGUIDialogOK dialog, then wait for user to dismiss it.

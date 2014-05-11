@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,16 +20,22 @@
  *
  */
 
+#include <vector>
+
 #include "guilib/Resolution.h"
 #include "guilib/Geometry.h"
 #include "RenderFormats.h"
+#include "RenderFeatures.h"
 
 #define MAX_PLANES 3
 #define MAX_FIELDS 3
+#define NUM_BUFFERS 3
+
+class CSetting;
 
 typedef struct YV12Image
 {
-  BYTE *   plane[MAX_PLANES];
+  uint8_t* plane[MAX_PLANES];
   int      planesize[MAX_PLANES];
   unsigned stride[MAX_PLANES];
   unsigned width;
@@ -48,21 +54,17 @@ enum EFIELDSYNC
   FS_BOT
 };
 
-enum ERENDERFEATURE
+// Render Methods
+enum RenderMethods
 {
-  RENDERFEATURE_GAMMA,
-  RENDERFEATURE_BRIGHTNESS,
-  RENDERFEATURE_CONTRAST,
-  RENDERFEATURE_NOISE,
-  RENDERFEATURE_SHARPNESS,
-  RENDERFEATURE_NONLINSTRETCH,
-  RENDERFEATURE_ROTATION,
-  RENDERFEATURE_STRETCH,
-  RENDERFEATURE_CROP,
-  RENDERFEATURE_ZOOM,
-  RENDERFEATURE_VERTICAL_SHIFT,
-  RENDERFEATURE_PIXEL_RATIO,
-  RENDERFEATURE_POSTPROCESS
+  RENDER_METHOD_AUTO     = 0,
+  RENDER_METHOD_ARB,
+  RENDER_METHOD_GLSL,
+  RENDER_METHOD_SOFTWARE,
+  RENDER_METHOD_D3D_PS,
+  RENDER_METHOD_DXVA,
+  RENDER_METHOD_DXVAHD,
+  RENDER_OVERLAYS        = 99   // to retain compatibility
 };
 
 #ifdef HAS_DS_PLAYER
@@ -75,6 +77,7 @@ typedef enum _RENDERERTYPE
 #endif
 
 typedef void (*RenderUpdateCallBackFn)(const void *ctx, const CRect &SrcRect, const CRect &DestRect);
+typedef void (*RenderFeaturesCallBackFn)(const void *ctx, Features &renderFeatures);
 
 struct DVDVideoPicture;
 
@@ -89,10 +92,16 @@ public:
   void GetVideoRect(CRect &source, CRect &dest);
   float GetAspectRatio() const;
 
-  virtual bool AddVideoPicture(DVDVideoPicture* picture) { return false; }
+  virtual bool AddVideoPicture(DVDVideoPicture* picture, int index) { return false; }
   virtual void Flush() {};
 
+  /**
+   * Returns number of references a single buffer can retain when rendering a single frame
+   */
   virtual unsigned int GetProcessorSize() { return 0; }
+  virtual unsigned int GetMaxBufferSize() { return 0; }
+  virtual void         SetBufferSize(int numBuffers) { }
+  virtual void         ReleaseBuffer(int idx) { }
 
   virtual bool Supports(ERENDERFEATURE feature) { return false; }
 
@@ -100,6 +109,9 @@ public:
   std::vector<ERenderFormat> SupportedFormats()  { return std::vector<ERenderFormat>(); }
 
   virtual void RegisterRenderUpdateCallBack(const void *ctx, RenderUpdateCallBackFn fn);
+  virtual void RegisterRenderFeaturesCallBack(const void *ctx, RenderFeaturesCallBackFn fn);
+
+  static void SettingOptionsRenderMethodsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
 
 protected:
   void       ChooseBestResolution(float fps);
@@ -137,7 +149,11 @@ protected:
 
   // rendering flags
   unsigned m_iFlags;
+  ERenderFormat m_format;
 
   const void* m_RenderUpdateCallBackCtx;
   RenderUpdateCallBackFn m_RenderUpdateCallBackFn;
+
+  const void* m_RenderFeaturesCallBackCtx;
+  RenderFeaturesCallBackFn m_RenderFeaturesCallBackFn;
 };

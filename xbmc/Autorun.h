@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,15 @@ namespace XFILE
   class IDirectory;
 }
 
+class CSetting;
+
+enum AutoCDAction
+{
+  AUTOCD_NONE = 0,
+  AUTOCD_PLAY,
+  AUTOCD_RIP
+};
+
 namespace MEDIA_DETECT
 {
 class CAutorun
@@ -54,6 +63,10 @@ public:
   void Disable();
   void HandleAutorun();
   static void ExecuteAutorun(const CStdString& path = "", bool bypassSettings = false, bool ignoreplaying = false, bool startFromBeginning = false);
+
+  static void SettingOptionAudioCdActionsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+  static void SettingOptionAudioCdEncodersFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+
 protected:
   static bool RunDisc(XFILE::IDirectory* pDir, const CStdString& strDrive, int& nAddedToPlaylist, bool bRoot, bool bypassSettings, bool startFromBeginning);
   bool m_bEnable;

@@ -10,7 +10,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -132,6 +132,8 @@
 #define GUI_MSG_SET_TEXT        42
 
 #define GUI_MSG_WINDOW_LOAD 43
+
+#define GUI_MSG_VALIDITY_CHANGED  44
 
 #define GUI_MSG_USER         1000
 
@@ -305,7 +307,7 @@ public:
   CGUIMessage(int msg, int senderID, int controlID, int param1, int param2, const CGUIListItemPtr &item);
   CGUIMessage(const CGUIMessage& msg);
   virtual ~CGUIMessage(void);
-  const CGUIMessage& operator = (const CGUIMessage& msg);
+  CGUIMessage& operator = (const CGUIMessage& msg);
 
   int GetControlId() const ;
   int GetMessage() const;

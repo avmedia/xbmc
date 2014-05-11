@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,130 @@
 #include "XBDateTime.h"
 #include "dbwrappers/dataset.h"
 #include "URL.h"
+#include "utils/StringUtils.h"
+#include "utils/Variant.h"
+
+enum TextureField
+{
+  TF_None = 0,
+  TF_Id,
+  TF_Url,
+  TF_CachedUrl,
+  TF_LastHashCheck,
+  TF_ImageHash,
+  TF_Width,
+  TF_Height,
+  TF_UseCount,
+  TF_LastUsed,
+  TF_Max
+};
+
+typedef struct
+{
+  char string[14];
+  TextureField field;
+  CDatabaseQueryRule::FIELD_TYPE type;
+  bool browseable;
+  int localizedString;
+} translateField;
+
+static const translateField fields[] = {
+  { "none",          TF_None,          CDatabaseQueryRule::TEXT_FIELD    },
+  { "textureid",     TF_Id,            CDatabaseQueryRule::NUMERIC_FIELD },
+  { "url",           TF_Url,           CDatabaseQueryRule::TEXT_FIELD    },
+  { "cachedurl",     TF_CachedUrl,     CDatabaseQueryRule::TEXT_FIELD    },
+  { "lasthashcheck", TF_LastHashCheck, CDatabaseQueryRule::TEXT_FIELD    },
+  { "imagehash",     TF_ImageHash,     CDatabaseQueryRule::TEXT_FIELD    },
+  { "width",         TF_Width,         CDatabaseQueryRule::NUMERIC_FIELD },
+  { "height",        TF_Height,        CDatabaseQueryRule::NUMERIC_FIELD },
+  { "usecount",      TF_UseCount,      CDatabaseQueryRule::NUMERIC_FIELD },
+  { "lastused",      TF_LastUsed,      CDatabaseQueryRule::TEXT_FIELD    }
+};
+
+static const size_t NUM_FIELDS = sizeof(fields) / sizeof(translateField);
+
+int CTextureRule::TranslateField(const char *field) const
+{
+  for (unsigned int i = 0; i < NUM_FIELDS; i++)
+    if (StringUtils::EqualsNoCase(field, fields[i].string)) return fields[i].field;
+  return FieldNone;
+}
+
+CStdString CTextureRule::TranslateField(int field) const
+{
+  for (unsigned int i = 0; i < NUM_FIELDS; i++)
+    if (field == fields[i].field) return fields[i].string;
+  return "none";
+}
+
+CStdString CTextureRule::GetField(int field, const CStdString &type) const
+{
+  if (field == TF_Id) return "texture.id";
+  else if (field == TF_Url) return "texture.url";
+  else if (field == TF_CachedUrl) return "texture.cachedurl";
+  else if (field == TF_LastHashCheck) return "texture.lasthashcheck";
+  else if (field == TF_ImageHash) return "texture.imagehash";
+  else if (field == TF_Width) return "sizes.width";
+  else if (field == TF_Height) return "sizes.height";
+  else if (field == TF_UseCount) return "sizes.usecount";
+  else if (field == TF_LastUsed) return "sizes.lastusetime";
+  return "";
+}
+
+CDatabaseQueryRule::FIELD_TYPE CTextureRule::GetFieldType(int field) const
+{
+  for (unsigned int i = 0; i < NUM_FIELDS; i++)
+    if (field == fields[i].field) return fields[i].type;
+  return TEXT_FIELD;
+}
+
+CStdString CTextureRule::FormatParameter(const CStdString &operatorString, const CStdString &param, const CDatabase &db, const CStdString &strType) const
+{
+  CStdString parameter(param);
+  if (m_field == TF_Url)
+    parameter = CTextureUtils::UnwrapImageURL(param);
+  return CDatabaseQueryRule::FormatParameter(operatorString, parameter, db, strType);
+}
+
+void CTextureRule::GetAvailableFields(std::vector<std::string> &fieldList)
+{
+  // start at 1 to skip TF_None
+  for (unsigned int i = 1; i < NUM_FIELDS; i++)
+    fieldList.push_back(fields[i].string);
+}
+
+CStdString CTextureUtils::GetWrappedImageURL(const CStdString &image, const CStdString &type, const CStdString &options)
+{
+  if (StringUtils::StartsWith(image, "image://"))
+    return image; // already wrapped
+
+  CURL url;
+  url.SetProtocol("image");
+  url.SetUserName(type);
+  url.SetHostName(image);
+  if (!options.empty())
+  {
+    url.SetFileName("transform");
+    url.SetOptions("?" + options);
+  }
+  return url.Get();
+}
+
+CStdString CTextureUtils::GetWrappedThumbURL(const CStdString &image)
+{
+  return GetWrappedImageURL(image, "", "size=thumb");
+}
+
+CStdString CTextureUtils::UnwrapImageURL(const CStdString &image)
+{
+  if (StringUtils::StartsWith(image, "image://"))
+  {
+    CURL url(image);
+    if (url.GetUserName().empty() && url.GetOptions().empty())
+      return url.GetHostName();
+  }
+  return image;
+}
 
 CTextureDatabase::CTextureDatabase()
 {
@@ -37,41 +161,32 @@ bool CTextureDatabase::Open()
   return CDatabase::Open();
 }
 
-bool CTextureDatabase::CreateTables()
+void CTextureDatabase::CreateTables()
 {
-  try
-  {
-    CDatabase::CreateTables();
+  CLog::Log(LOGINFO, "create texture table");
+  m_pDS->exec("CREATE TABLE texture (id integer primary key, url text, cachedurl text, imagehash text, lasthashcheck text)");
 
-    CLog::Log(LOGINFO, "create texture table");
-    m_pDS->exec("CREATE TABLE texture (id integer primary key, url text, cachedurl text, imagehash text, lasthashcheck text)");
+  CLog::Log(LOGINFO, "create sizes table, index,  and trigger");
+  m_pDS->exec("CREATE TABLE sizes (idtexture integer, size integer, width integer, height integer, usecount integer, lastusetime text)");
 
-    CLog::Log(LOGINFO, "create textures index");
-    m_pDS->exec("CREATE INDEX idxTexture ON texture(url)");
-
-    CLog::Log(LOGINFO, "create sizes table, index,  and trigger");
-    m_pDS->exec("CREATE TABLE sizes (idtexture integer, size integer, width integer, height integer, usecount integer, lastusetime text)");
-    m_pDS->exec("CREATE INDEX idxSize ON sizes(idtexture, size)");
-    m_pDS->exec("CREATE INDEX idxSize2 ON sizes(idtexture, width, height)");
-    m_pDS->exec("CREATE TRIGGER textureDelete AFTER delete ON texture FOR EACH ROW BEGIN delete from sizes where sizes.idtexture=old.id; END");
-
-    CLog::Log(LOGINFO, "create path table");
-    m_pDS->exec("CREATE TABLE path (id integer primary key, url text, type text, texture text)\n");
-
-    // TODO: Should the path index be a covering index? (we need only retrieve texture)
-    CLog::Log(LOGINFO, "create path index");
-    m_pDS->exec("CREATE INDEX idxPath ON path(url, type)");
-  }
-  catch (...)
-  {
-    CLog::Log(LOGERROR, "%s unable to create tables", __FUNCTION__);
-    return false;
-  }
-
-  return true;
+  CLog::Log(LOGINFO, "create path table");
+  m_pDS->exec("CREATE TABLE path (id integer primary key, url text, type text, texture text)\n");
 }
 
-bool CTextureDatabase::UpdateOldVersion(int version)
+void CTextureDatabase::CreateAnalytics()
+{
+  CLog::Log(LOGINFO, "%s creating indices", __FUNCTION__);
+  m_pDS->exec("CREATE INDEX idxTexture ON texture(url)");
+  m_pDS->exec("CREATE INDEX idxSize ON sizes(idtexture, size)");
+  m_pDS->exec("CREATE INDEX idxSize2 ON sizes(idtexture, width, height)");
+  // TODO: Should the path index be a covering index? (we need only retrieve texture)
+  m_pDS->exec("CREATE INDEX idxPath ON path(url, type)");
+
+  CLog::Log(LOGINFO, "%s creating triggers", __FUNCTION__);
+  m_pDS->exec("CREATE TRIGGER textureDelete AFTER delete ON texture FOR EACH ROW BEGIN delete from sizes where sizes.idtexture=old.id; END");
+}
+
+void CTextureDatabase::UpdateTables(int version)
 {
   if (version < 7)
   { // update all old thumb://foo urls to image://foo?size=thumb
@@ -99,24 +214,18 @@ bool CTextureDatabase::UpdateOldVersion(int version)
   }
   if (version < 9)
   { // get rid of the old path table and add the type column
-    m_pDS->dropIndex("path", "idxPath");
-    m_pDS->exec("DROP TABLE path");
+    m_pDS->exec("DROP TABLE IF EXISTS path");
     m_pDS->exec("CREATE TABLE path (id integer primary key, urlhash integer, url text, type text, texture text)\n");
-    m_pDS->exec("CREATE INDEX idxPath ON path(urlhash, type)");
   }
   if (version < 10)
   { // get rid of urlhash in both tables...
-    m_pDS->dropIndex("path", "idxPath");
-    m_pDS->exec("DROP TABLE path");
+    m_pDS->exec("DROP TABLE IF EXISTS path");
     m_pDS->exec("CREATE TABLE path (id integer primary key, url text, type text, texture text)\n");
-    m_pDS->exec("CREATE INDEX idxPath ON path(url, type)");
 
-    m_pDS->dropIndex("texture", "idxTexture");
     m_pDS->exec("CREATE TEMPORARY TABLE texture_backup(id,url,cachedurl,usecount,lastusetime,imagehash,lasthashcheck)");
     m_pDS->exec("INSERT INTO texture_backup SELECT id,url,cachedurl,usecount,lastusetime,imagehash,lasthashcheck FROM texture");
     m_pDS->exec("DROP TABLE texture");
     m_pDS->exec("CREATE TABLE texture (id integer primary key, url text, cachedurl text, usecount integer, lastusetime text, imagehash text, lasthashcheck text)");
-    m_pDS->exec("CREATE INDEX idxTexture ON texture(url)");
     m_pDS->exec("INSERT INTO texture SELECT * FROM texture_backup");
     m_pDS->exec("DROP TABLE texture_backup");
   }
@@ -126,18 +235,10 @@ bool CTextureDatabase::UpdateOldVersion(int version)
   }
   if (version < 12)
   { // create new sizes table and move usecount info to it.
-    m_pDS->exec("DROP TABLE texture");
+    m_pDS->exec("DROP TABLE IF EXISTS texture");
     m_pDS->exec("CREATE TABLE texture (id integer primary key, url text, cachedurl text, imagehash text, lasthashcheck text)");
-    m_pDS->exec("CREATE INDEX idxTexture ON texture(url)");
     m_pDS->exec("CREATE TABLE sizes (idtexture integer, size integer, width integer, height integer, usecount integer, lastusetime text)");
-    m_pDS->exec("CREATE INDEX idxSize ON sizes(idtexture, size)");
-    m_pDS->exec("CREATE TRIGGER textureDelete AFTER delete ON texture FOR EACH ROW BEGIN delete from sizes where sizes.idtexture=old.id; END");
   }
-  if (version < 13)
-  { // index for updateusecount
-    m_pDS->exec("CREATE INDEX idxSize2 ON sizes(idtexture, width, height)");
-  }
-  return true;
 }
 
 bool CTextureDatabase::IncrementUseCount(const CTextureDetails &details)
@@ -177,6 +278,52 @@ bool CTextureDatabase::GetCachedTexture(const CStdString &url, CTextureDetails &
   return false;
 }
 
+bool CTextureDatabase::GetTextures(CVariant &items, const Filter &filter)
+{
+  try
+  {
+    if (NULL == m_pDB.get()) return false;
+    if (NULL == m_pDS.get()) return false;
+
+    CStdString sql = "SELECT %s FROM texture JOIN sizes ON (texture.id=sizes.idtexture AND sizes.size=1)";
+    CStdString sqlFilter;
+    if (!CDatabase::BuildSQL("", filter, sqlFilter))
+      return false;
+
+    sql = PrepareSQL(sql, !filter.fields.empty() ? filter.fields.c_str() : "*") + sqlFilter;
+    if (!m_pDS->query(sql.c_str()))
+      return false;
+
+    while (!m_pDS->eof())
+    {
+      CVariant texture;
+      texture["textureid"] = m_pDS->fv(0).get_asInt();
+      texture["url"] = m_pDS->fv(1).get_asString();
+      texture["cachedurl"] = m_pDS->fv(2).get_asString();
+      texture["imagehash"] = m_pDS->fv(3).get_asString();
+      texture["lasthashcheck"] = m_pDS->fv(4).get_asString();
+      CVariant size(CVariant::VariantTypeObject);
+      // 5 is sizes.idtexture
+      size["size"]  = m_pDS->fv(6).get_asInt();
+      size["width"] = m_pDS->fv(7).get_asInt();
+      size["height"] = m_pDS->fv(8).get_asInt();
+      size["usecount"] = m_pDS->fv(9).get_asInt();
+      size["lastused"] = m_pDS->fv(10).get_asString();
+      texture["sizes"] = CVariant(CVariant::VariantTypeArray);
+      texture["sizes"].push_back(size);
+      items.push_back(texture);
+      m_pDS->next();
+    }
+    m_pDS->close();
+    return true;
+  }
+  catch (...)
+  {
+    CLog::Log(LOGERROR, "%s, failed", __FUNCTION__);
+  }
+  return false;
+}
+
 bool CTextureDatabase::SetCachedTextureValid(const CStdString &url, bool updateable)
 {
   CStdString date = updateable ? CDateTime::GetCurrentDateTime().GetAsDBDateTime() : "";
@@ -212,21 +359,26 @@ bool CTextureDatabase::AddCachedTexture(const CStdString &url, const CTextureDet
 
 bool CTextureDatabase::ClearCachedTexture(const CStdString &url, CStdString &cacheFile)
 {
+  std::string id = GetSingleValue(PrepareSQL("select id from texture where url='%s'", url.c_str()));
+  return !id.empty() ? ClearCachedTexture(strtol(id.c_str(), NULL, 10), cacheFile) : false;
+}
+
+bool CTextureDatabase::ClearCachedTexture(int id, CStdString &cacheFile)
+{
   try
   {
     if (NULL == m_pDB.get()) return false;
     if (NULL == m_pDS.get()) return false;
 
-    CStdString sql = PrepareSQL("select id, cachedurl from texture where url='%s'", url.c_str());
+    CStdString sql = PrepareSQL("select cachedurl from texture where id=%u", id);
     m_pDS->query(sql.c_str());
 
     if (!m_pDS->eof())
     { // have some information
-      int textureID = m_pDS->fv(0).get_asInt();
-      cacheFile = m_pDS->fv(1).get_asString();
+      cacheFile = m_pDS->fv(0).get_asString();
       m_pDS->close();
       // remove it
-      sql = PrepareSQL("delete from texture where id=%u", textureID);
+      sql = PrepareSQL("delete from texture where id=%u", id);
       m_pDS->exec(sql.c_str());
       return true;
     }
@@ -234,7 +386,7 @@ bool CTextureDatabase::ClearCachedTexture(const CStdString &url, CStdString &cac
   }
   catch (...)
   {
-    CLog::Log(LOGERROR, "%s, failed on url '%s'", __FUNCTION__, url.c_str());
+    CLog::Log(LOGERROR, "%s, failed on texture id %u", __FUNCTION__, id);
   }
   return false;
 }
@@ -322,4 +474,14 @@ void CTextureDatabase::ClearTextureForPath(const CStdString &url, const CStdStri
     CLog::Log(LOGERROR, "%s failed on url '%s'", __FUNCTION__, url.c_str());
   }
   return;
+}
+
+CDatabaseQueryRule *CTextureDatabase::CreateRule() const
+{
+  return new CTextureRule();
+}
+
+CDatabaseQueryRuleCombination *CTextureDatabase::CreateCombination() const
+{
+  return new CDatabaseQueryRuleCombination();
 }

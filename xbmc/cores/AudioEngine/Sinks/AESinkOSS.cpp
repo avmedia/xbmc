@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,13 +22,14 @@
 #include <stdint.h>
 #include <limits.h>
 
-#include "Utils/AEUtil.h"
+#include "cores/AudioEngine/Utils/AEUtil.h"
 #include "utils/StdString.h"
 #include "utils/log.h"
 #include "threads/SingleLock.h"
 #include <sstream>
 
 #include <sys/ioctl.h>
+#include <sys/fcntl.h>
 
 #if defined(OSS4) || defined(TARGET_FREEBSD)
   #include <sys/soundcard.h>
@@ -65,6 +66,7 @@ static int OSSSampleRateList[] =
 CAESinkOSS::CAESinkOSS()
 {
   m_fd = 0;
+  m_blockingNeedsUpdate = true;
 }
 
 CAESinkOSS::~CAESinkOSS()
@@ -148,7 +150,10 @@ bool CAESinkOSS::Initialize(AEAudioFormat &format, std::string &device)
   else if ((format.m_dataFormat == AE_FMT_U8   ) && (format_mask & AFMT_U8    ))
     oss_fmt = AFMT_U8;
   else if ((AE_IS_RAW(format.m_dataFormat)     ) && (format_mask & AFMT_AC3   ))
+  {
     oss_fmt = AFMT_AC3;
+    format.m_dataFormat = AE_FMT_S16NE;
+  }
   else if (AE_IS_RAW(format.m_dataFormat))
   {
     close(m_fd);
@@ -257,7 +262,7 @@ bool CAESinkOSS::Initialize(AEAudioFormat &format, std::string &device)
 
 #if defined(TARGET_FREEBSD)
   /* fix hdmi 8 channels order */
-  if (!AE_IS_RAW(format.m_dataFormat) && 8 == oss_ch)
+  if ((oss_fmt != AFMT_AC3) && 8 == oss_ch)
   {
     unsigned long long order = 0x0000000087346521ULL;
 
@@ -336,6 +341,8 @@ void CAESinkOSS::Deinitialize()
 
   if (m_fd != -1)
     close(m_fd);
+  
+  m_blockingNeedsUpdate = true;
 }
 
 inline CAEChannelInfo CAESinkOSS::GetChannelLayout(AEAudioFormat format)
@@ -367,19 +374,6 @@ inline CAEChannelInfo CAESinkOSS::GetChannelLayout(AEAudioFormat format)
   return info;
 }
 
-bool CAESinkOSS::IsCompatible(const AEAudioFormat format, const std::string &device)
-{
-  AEAudioFormat tmp  = format;
-  tmp.m_channelLayout = GetChannelLayout(format);
-
-  return (
-    tmp.m_sampleRate    == m_initFormat.m_sampleRate    &&
-    tmp.m_dataFormat    == m_initFormat.m_dataFormat    &&
-    tmp.m_channelLayout == m_initFormat.m_channelLayout &&
-    GetDeviceUse(tmp, device) == m_device
-  );
-}
-
 void CAESinkOSS::Stop()
 {
 #ifdef SNDCTL_DSP_RESET
@@ -400,7 +394,7 @@ double CAESinkOSS::GetDelay()
   return (double)delay / (m_format.m_frameSize * m_format.m_sampleRate);
 }
 
-unsigned int CAESinkOSS::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio)
+unsigned int CAESinkOSS::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio, bool blocking)
 {
   int size = frames * m_format.m_frameSize;
   if (m_fd == -1)
@@ -409,9 +403,24 @@ unsigned int CAESinkOSS::AddPackets(uint8_t *data, unsigned int frames, bool has
     return INT_MAX;
   }
 
+  if(m_blockingNeedsUpdate)
+  {
+    if(!blocking)
+    {
+      if (fcntl(m_fd, F_SETFL,  fcntl(m_fd, F_GETFL, 0) | O_NONBLOCK) == -1)
+      {
+        CLog::Log(LOGERROR, "CAESinkOSS::Initialize - Failed to set non blocking writes");
+      }
+    }
+    m_blockingNeedsUpdate = false;
+  }
+
   int wrote = write(m_fd, data, size);
   if (wrote < 0)
   {
+    if(!blocking && (errno == EAGAIN || errno == EWOULDBLOCK))
+      return 0;
+
     CLog::Log(LOGERROR, "CAESinkOSS::AddPackets - Failed to write");
     return INT_MAX;
   }
@@ -424,7 +433,10 @@ void CAESinkOSS::Drain()
   if (m_fd == -1)
     return;
 
-  // ???
+  if(ioctl(m_fd, SNDCTL_DSP_SYNC, NULL) == -1)
+  {
+    CLog::Log(LOGERROR, "CAESinkOSS::Drain - Draining the Sink failed");
+  }
 }
 
 void CAESinkOSS::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
@@ -434,8 +446,8 @@ void CAESinkOSS::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 
   if ((mixerfd = open(mixerdev, O_RDWR, 0)) == -1)
   {
-    CLog::Log(LOGERROR,
-	  "CAESinkOSS::EnumerateDevicesEx - Failed to open mixer: %s", mixerdev);
+    CLog::Log(LOGNOTICE,
+	  "CAESinkOSS::EnumerateDevicesEx - No OSS mixer device present: %s", mixerdev);
     return;
   }	
 

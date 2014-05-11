@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2009-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "utils/URIUtils.h"
 #include "filesystem/File.h"
 #include "utils/log.h"
-
+#include "utils/StringUtils.h"
 #include <cstdlib>
 #include <cstdio>
 
@@ -47,9 +47,9 @@ bool ModplugCodec::Init(const CStdString &strFile, unsigned int filecache)
     return false;
 
   // set correct codec name
-  URIUtils::GetExtension(strFile,m_CodecName);
-  m_CodecName.erase(0,1);
-  m_CodecName.ToUpper();
+  m_CodecName = URIUtils::GetExtension(strFile);
+  StringUtils::TrimLeft(m_CodecName, ".");
+  StringUtils::ToUpper(m_CodecName);
 
   // Read our file to memory so it can be passed to ModPlug_Load()
   CFile file;

@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,10 +38,9 @@ public:
   CDVDPlayerSubtitle(CDVDOverlayContainer* pOverlayContainer);
   ~CDVDPlayerSubtitle();
 
-  void Process(double pts);
+  void Process(double pts, double offset);
   void Flush();
   void FindSubtitles(const char* strFilename);
-  void GetCurrentSubtitle(CStdString& strSubtitle, double pts);
   int GetSubtitleCount();
 
   void UpdateOverlayInfo(CDVDInputStreamNavigator* pStream, int iAction) { m_pOverlayContainer->UpdateOverlayInfo(pStream, &m_dvdspus, iAction); }

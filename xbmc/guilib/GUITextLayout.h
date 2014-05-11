@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -66,9 +66,11 @@ class CGUITextLayout
 public:
   CGUITextLayout(CGUIFont *font, bool wrap, float fHeight=0.0f, CGUIFont *borderFont = NULL);  // this may need changing - we may just use this class to replace CLabelInfo completely
 
+  bool UpdateScrollinfo(CScrollInfo &scrollInfo);
+
   // main function to render strings
   void Render(float x, float y, float angle, color_t color, color_t shadowColor, uint32_t alignment, float maxWidth, bool solid = false);
-  void RenderScrolling(float x, float y, float angle, color_t color, color_t shadowColor, uint32_t alignment, float maxWidth, CScrollInfo &scrollInfo);
+  void RenderScrolling(float x, float y, float angle, color_t color, color_t shadowColor, uint32_t alignment, float maxWidth, const CScrollInfo &scrollInfo);
   void RenderOutline(float x, float y, color_t color, color_t outlineColor, uint32_t alignment, float maxWidth);
 
   /*! \brief Returns the precalculated width and height of the text to be rendered (in constant time).
@@ -88,6 +90,15 @@ public:
   bool Update(const CStdString &text, float maxWidth = 0, bool forceUpdate = false, bool forceLTRReadingOrder = false);
   bool UpdateW(const CStdStringW &text, float maxWidth = 0, bool forceUpdate = false, bool forceLTRReadingOrder = false);
 
+  /*! \brief Update text from a pre-styled vecText/vecColors combination
+   Allows styled text to be passed directly to the text layout.
+   \param text the styled text to set.
+   \param colors the colors used on the text.
+   \param maxWidth the maximum width for wrapping text, defaults to 0 (no max width).
+   \param forceLTRReadingOrder whether to force left to right reading order, defaults to false.
+   */
+  void UpdateStyled(const vecText &text, const vecColors &colors, float maxWidth = 0, bool forceLTRReadingOrder = false);
+
   unsigned int GetTextLength() const;
   void GetFirstText(vecText &text) const;
   void Reset();
@@ -100,12 +111,12 @@ public:
   static void Filter(CStdString &text);
 
 protected:
-  void ParseText(const CStdStringW &text, vecText &parsedText);
   void LineBreakText(const vecText &text, std::vector<CGUIString> &lines);
   void WrapText(const vecText &text, float maxWidth);
-  void BidiTransform(std::vector<CGUIString> &lines, bool forceLTRReadingOrder);
-  CStdStringW BidiFlip(const CStdStringW &text, bool forceLTRReadingOrder);
+  static void BidiTransform(std::vector<CGUIString> &lines, bool forceLTRReadingOrder);
+  static CStdStringW BidiFlip(const CStdStringW &text, bool forceLTRReadingOrder);
   void CalcTextExtent();
+  void UpdateCommon(const CStdStringW &text, float maxWidth, bool forceLTRReadingOrder);
 
   // our text to render
   vecColors m_colors;
@@ -121,6 +132,7 @@ protected:
   // the default color (may differ from the font objects defaults)
   color_t m_textColor;
 
+  std::string m_lastUtf8Text;
   CStdStringW m_lastText;
   float m_textWidth;
   float m_textHeight;
@@ -136,7 +148,7 @@ private:
   };
   static void AppendToUTF32(const CStdString &utf8, character_t colStyle, vecText &utf32);
   static void AppendToUTF32(const CStdStringW &utf16, character_t colStyle, vecText &utf32);
-  static void ParseText(const CStdStringW &text, uint32_t defaultStyle, vecColors &colors, vecText &parsedText);
+  static void ParseText(const CStdStringW &text, uint32_t defaultStyle, color_t defaultColor, vecColors &colors, vecText &parsedText);
 
   static void utf8ToW(const CStdString &utf8, CStdStringW &utf16);
 };

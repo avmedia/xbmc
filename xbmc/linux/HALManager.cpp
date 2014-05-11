@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -175,7 +175,7 @@ void CHALManager::Initialize()
 
   GenerateGDL();
 
-  CLog::Log(LOGINFO, "HAL: Sucessfully initialized");
+  CLog::Log(LOGINFO, "HAL: Successfully initialized");
   m_Notifications = true;
 }
 
@@ -432,7 +432,7 @@ void CHALManager::HandleNewVolume(CStorageDevice *dev)
         if (dev->Label.size() > 0)
         {
           MountPoint = dev->Label.c_str();
-          TestPath.Format("/media/%s", MountPoint.c_str());
+          TestPath = StringUtils::Format("/media/%s", MountPoint.c_str());
           struct stat St;
           if (stat("/media", &St) != 0)
             return; //If /media doesn't exist something is wrong.
@@ -440,13 +440,13 @@ void CHALManager::HandleNewVolume(CStorageDevice *dev)
           {
             CLog::Log(LOGDEBUG, "HAL: Proposed Mountpoint already existed");
             MountPoint.append("_");
-            TestPath.Format("/media/%s", MountPoint.c_str());
+            TestPath = StringUtils::Format("/media/%s", MountPoint.c_str());
           }
         }
         else
         {
           MountPoint = StorageTypeToString(dev->Type);
-          TestPath.Format("/media/%s", MountPoint.c_str());
+          TestPath = StringUtils::Format("/media/%s", MountPoint.c_str());
           int Nbr = 0;
           struct stat St;
           if (stat("/media", &St) != 0)
@@ -455,8 +455,8 @@ void CHALManager::HandleNewVolume(CStorageDevice *dev)
           {
             CLog::Log(LOGDEBUG, "HAL: Proposed Mountpoint already existed");
             Nbr++;
-            MountPoint.Format("%s%i", StorageTypeToString(dev->Type), Nbr);
-            TestPath.Format("/media/%s", MountPoint.c_str());
+            MountPoint = StringUtils::Format("%s%i", StorageTypeToString(dev->Type), Nbr);
+            TestPath = StringUtils::Format("/media/%s", MountPoint.c_str());
           }
         }
         if (Mount(dev, MountPoint))
@@ -696,10 +696,10 @@ bool CHALManager::Mount(CStorageDevice *volume, CStdString mountpath)
     if (volume->FileSystem.Equals("vfat"))
     {
       int mask = umask (0);
-      temporaryString.Format("umask=%#o", mask);
+      temporaryString = StringUtils::Format("umask=%#o", mask);
       s = temporaryString.c_str();
       dbus_message_iter_append_basic(&sub, DBUS_TYPE_STRING, &s);
-      temporaryString.Format("uid=%u", getuid());
+      temporaryString = StringUtils::Format("uid=%u", getuid());
       s = temporaryString.c_str();
       dbus_message_iter_append_basic(&sub, DBUS_TYPE_STRING, &s);
       s = "shortname=mixed";

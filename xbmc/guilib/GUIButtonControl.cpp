@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -125,7 +125,7 @@ void CGUIButtonControl::ProcessText(unsigned int currentTime)
   CStdString label2(m_info2.GetLabel(m_parentID));
   changed |= m_label2.SetMaxRect(m_posX, m_posY, m_width, m_height);
   changed |= m_label2.SetText(label2);
-  if (!label2.IsEmpty())
+  if (!label2.empty())
   {
     changed |= m_label2.SetAlign(XBFONT_RIGHT | (m_label.GetLabelInfo().align & XBFONT_CENTER_Y) | XBFONT_TRUNCATED);
     changed |= m_label2.SetScrolling(HasFocus());
@@ -137,8 +137,10 @@ void CGUIButtonControl::ProcessText(unsigned int currentTime)
                   m_label2.GetRenderRect() != label2RenderRect);
 
     changed |= m_label2.SetColor(GetTextColor());
+    changed |= m_label2.Process(currentTime);
   }
   changed |= m_label.SetColor(GetTextColor());
+  changed |= m_label.Process(currentTime);
   if (changed)
     MarkDirtyRegion();
 }

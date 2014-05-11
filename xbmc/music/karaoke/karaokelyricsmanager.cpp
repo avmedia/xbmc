@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include "threads/SystemClock.h"
 #include "Application.h"
 #include "guilib/GUIWindowManager.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 
 #include "karaokelyrics.h"
 #include "karaokelyricsfactory.h"
@@ -64,7 +64,7 @@ bool CKaraokeLyricsManager::Start(const CStdString & strSongPath)
     Stop();  // shouldn't happen, but...
 
   // If disabled by configuration, do nothing
-  if ( !g_guiSettings.GetBool("karaoke.enabled") )
+  if ( !CSettings::Get().GetBool("karaoke.enabled") )
     return false;
 
   m_Lyrics = CKaraokeLyricsFactory::CreateLyrics( strSongPath );
@@ -136,7 +136,7 @@ void CKaraokeLyricsManager::ProcessSlow()
 {
   CSingleLock lock (m_CritSection);
 
-  if ( g_application.IsPlaying() )
+  if ( g_application.m_pPlayer->IsPlaying() )
   {
     if ( m_karaokeSongPlaying )
       m_lastPlayedTime = XbmcThreads::SystemClockMillis();
@@ -144,7 +144,7 @@ void CKaraokeLyricsManager::ProcessSlow()
     return;
   }
 
-  if ( !m_karaokeSongPlayed || !g_guiSettings.GetBool("karaoke.autopopupselector") )
+  if ( !m_karaokeSongPlayed || !CSettings::Get().GetBool("karaoke.autopopupselector") )
     return;
 
   // If less than 750ms passed return; we're still processing STOP events

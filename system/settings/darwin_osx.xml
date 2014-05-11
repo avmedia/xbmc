@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<settings>
+  <section id="system">
+    <category id="input">
+      <group id="1">
+        <setting id="input.appleremotealwayson">
+          <level>1</level>
+        </setting>
+      </group>
+    </category>
+  </section>
+  <section id="videos">
+    <category id="videoacceleration">
+      <group id="3">
+        <setting id="videoplayer.usevda" type="boolean" parent="videoplayer.decodingmethod" label="13429" help="36160">
+          <dependencies>
+            <dependency type="enable" setting="videoplayer.decodingmethod" operator="is">1</dependency>
+          </dependencies>
+          <level>2</level>
+          <default>true</default>
+          <control type="toggle" />
+        </setting>
+      </group>
+    </category>
+  </section>
+</settings>
+
+

@@ -29,6 +29,7 @@
 
 #include <map>
 #include "streams.h"
+#include "utils/StdString.h"
 
 namespace Com
 {

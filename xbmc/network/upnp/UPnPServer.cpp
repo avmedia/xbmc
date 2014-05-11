@@ -1,3 +1,22 @@
+/*
+ *      Copyright (C) 2012-2013 Team XBMC
+ *      http://xbmc.org
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ */
 #include "UPnPServer.h"
 #include "UPnPInternal.h"
 #include "Application.h"
@@ -14,7 +33,7 @@
 #include "guilib/WindowIDs.h"
 #include "music/tags/MusicInfoTag.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/md5.h"
 #include "utils/StringUtils.h"
@@ -24,6 +43,7 @@
 #include "video/VideoDatabase.h"
 #include "guilib/GUIWindowManager.h"
 #include "xbmc/GUIUserMessages.h"
+#include "utils/FileUtils.h"
 
 using namespace std;
 using namespace ANNOUNCEMENT;
@@ -137,7 +157,7 @@ CUPnPServer::PropagateUpdates()
     string buffer;
     map<string,pair<bool, unsigned long> >::iterator itr;
 
-    if (m_scanning || !g_guiSettings.GetBool("services.upnpannounce"))
+    if (m_scanning || !CSettings::Get().GetBool("services.upnpannounce"))
         return;
 
     NPT_CHECK_LABEL(FindServiceById("urn:upnp-org:serviceId:ContentDirectory", service), failed);
@@ -205,7 +225,7 @@ NPT_String CUPnPServer::BuildSafeResourceUri(const NPT_HttpUrl &rooturi,
     else
       filename = URIUtils::GetFileName(file_path);
 
-    CURL::Encode(filename);
+    filename = CURL::Encode(filename);
     md5state.append(file_path);
     md5state.getDigest(md5);
     md5 += "/" + filename;
@@ -272,23 +292,23 @@ CUPnPServer::Build(CFileItemPtr                  item,
 
                     if (params.GetSongId() >= 0 ) {
                         CSong song;
-                        if (db.GetSongById(params.GetSongId(), song))
+                        if (db.GetSong(params.GetSongId(), song))
                             item->GetMusicInfoTag()->SetSong(song);
                     }
                     else if (params.GetAlbumId() >= 0 ) {
                         CAlbum album;
-                        if (db.GetAlbumInfo(params.GetAlbumId(), album, NULL))
+                        if (db.GetAlbum(params.GetAlbumId(), album, false))
                             item->GetMusicInfoTag()->SetAlbum(album);
                     }
                     else if (params.GetArtistId() >= 0 ) {
                         CArtist artist;
-                        if (db.GetArtistInfo(params.GetArtistId(), artist, false))
+                        if (db.GetArtist(params.GetArtistId(), artist, false))
                             item->GetMusicInfoTag()->SetArtist(artist);
                     }
                 }
 
 
-                if (item->GetLabel().IsEmpty()) {
+                if (item->GetLabel().empty()) {
                     /* if no label try to grab it from node type */
                     CStdString label;
                     if (CMusicDatabaseDirectory::GetLabel((const char*)path, label)) {
@@ -298,7 +318,7 @@ CUPnPServer::Build(CFileItemPtr                  item,
                 }
             }
         } else if (file_path.StartsWith("library://") || file_path.StartsWith("videodb://")) {
-            if (path == "library://video" ) {
+            if (path == "library://video/" ) {
                 item->SetLabel("Video Library");
                 item->SetLabelPreformated(true);
             } else {
@@ -327,13 +347,13 @@ CUPnPServer::Build(CFileItemPtr                  item,
                 }
 
                 // try to grab title from tag
-                if (item->HasVideoInfoTag() && !item->GetVideoInfoTag()->m_strTitle.IsEmpty()) {
+                if (item->HasVideoInfoTag() && !item->GetVideoInfoTag()->m_strTitle.empty()) {
                     item->SetLabel(item->GetVideoInfoTag()->m_strTitle);
                     item->SetLabelPreformated(true);
                 }
 
                 // try to grab it from the folder
-                if (item->GetLabel().IsEmpty()) {
+                if (item->GetLabel().empty()) {
                     CStdString label;
                     if (CVideoDatabaseDirectory::GetLabel((const char*)path, label)) {
                         item->SetLabel(label);
@@ -454,7 +474,7 @@ static NPT_String TranslateWMPObjectId(NPT_String id)
         id = "virtualpath://upnproot/";
     } else if (id == "15") {
         // Xbox 360 asking for videos
-        id = "library://video";
+        id = "library://video/";
     } else if (id == "16") {
         // Xbox 360 asking for photos
     } else if (id == "107") {
@@ -470,6 +490,14 @@ static NPT_String TranslateWMPObjectId(NPT_String id)
 
     CLog::Log(LOGDEBUG, "UPnP Translated id to '%s'", (const char*)id);
     return id;
+}
+
+NPT_Result
+ObjectIDValidate(const NPT_String& id)
+{
+    if (CFileUtils::RemoteAccessAllowed(id.GetChars()))
+        return NPT_SUCCESS;
+    return NPT_ERROR_NO_SUCH_FILE;
 }
 
 /*----------------------------------------------------------------------
@@ -491,11 +519,15 @@ CUPnPServer::OnBrowseMetadata(PLT_ActionReference&          action,
     NPT_String                     didl;
     NPT_Reference<PLT_MediaObject> object;
     NPT_String                     id = TranslateWMPObjectId(object_id);
-    vector<CStdString>             paths;
     CFileItemPtr                   item;
     NPT_Reference<CThumbLoader>    thumb_loader;
 
     CLog::Log(LOGINFO, "Received UPnP Browse Metadata request for object '%s'", (const char*)object_id);
+
+    if(NPT_FAILED(ObjectIDValidate(id))) {
+        action->SetError(701, "Incorrect ObjectID.");
+        return NPT_FAILURE;
+    }
 
     if (id.StartsWith("virtualpath://")) {
         id.TrimRight("/");
@@ -505,6 +537,7 @@ CUPnPServer::OnBrowseMetadata(PLT_ActionReference&          action,
             item->SetLabel("Root");
             item->SetLabelPreformated(true);
             object = Build(item, true, context, thumb_loader);
+            object->m_ParentID = "-1";
         } else {
             return NPT_FAILURE;
         }
@@ -512,16 +545,28 @@ CUPnPServer::OnBrowseMetadata(PLT_ActionReference&          action,
         // determine if it's a container by calling CDirectory::Exists
         item.reset(new CFileItem((const char*)id, CDirectory::Exists((const char*)id)));
 
-        // determine parent id for shared paths only
-        // otherwise let db find out
+        // attempt to determine the parent of this item
         CStdString parent;
-        if (!URIUtils::GetParentPath((const char*)id, parent)) parent = "0";
-
-//#ifdef WMP_ID_MAPPING
-//        if (!id.StartsWith("musicdb://") && !id.StartsWith("videodb://")) {
-//            parent = "";
-//        }
-//#endif
+        if (URIUtils::IsVideoDb((const char*)id) || URIUtils::IsMusicDb((const char*)id) || StringUtils::StartsWithNoCase((const char*)id, "library://video/")) {
+            if (!URIUtils::GetParentPath((const char*)id, parent)) {
+                parent = "0";
+            }
+        }
+        else {
+            // non-library objects - playlists / sources
+            //
+            // we could instead store the parents in a hash during every browse
+            // or could handle this in URIUtils::GetParentPath() possibly,
+            // however this is quicker to implement and subsequently purge when a
+            // better solution presents itself
+            CStdString child_id((const char*)id);
+            if      (StringUtils::StartsWithNoCase(child_id, "special://musicplaylists/"))          parent = "musicdb://";
+            else if (StringUtils::StartsWithNoCase(child_id, "special://videoplaylists/"))          parent = "library://video/";
+            else if (StringUtils::StartsWithNoCase(child_id, "sources://video/"))                   parent = "library://video/";
+            else if (StringUtils::StartsWithNoCase(child_id, "special://profile/playlists/music/")) parent = "special://musicplaylists/";
+            else if (StringUtils::StartsWithNoCase(child_id, "special://profile/playlists/video/")) parent = "special://videoplaylists/";
+            else parent = "sources://video/"; // this can only match video sources
+        }
 
         if (item->IsVideoDb()) {
             thumb_loader = NPT_Reference<CThumbLoader>(new CVideoThumbLoader());
@@ -530,7 +575,7 @@ CUPnPServer::OnBrowseMetadata(PLT_ActionReference&          action,
             thumb_loader = NPT_Reference<CThumbLoader>(new CMusicThumbLoader());
         }
         if (!thumb_loader.IsNull()) {
-            thumb_loader->Initialize();
+            thumb_loader->OnLoaderStart();
         }
         object = Build(item, true, context, thumb_loader, parent.empty()?NULL:parent.c_str());
     }
@@ -577,6 +622,11 @@ CUPnPServer::OnBrowseDirectChildren(PLT_ActionReference&          action,
 
     CLog::Log(LOGINFO, "UPnP: Received Browse DirectChildren request for object '%s', with sort criteria %s", object_id, sort_criteria);
 
+    if(NPT_FAILED(ObjectIDValidate(parent_id))) {
+        action->SetError(701, "Incorrect ObjectID.");
+        return NPT_FAILURE;
+    }
+
     items.SetPath(CStdString(parent_id));
 
     // guard against loading while saving to the same cache file
@@ -600,12 +650,12 @@ CUPnPServer::OnBrowseDirectChildren(PLT_ActionReference&          action,
             items.Add(item);
 
             // video library
-            item.reset(new CFileItem("library://video", true));
+            item.reset(new CFileItem("library://video/", true));
             item->SetLabel("Video Library");
             item->SetLabelPreformated(true);
             items.Add(item);
 
-            items.Sort(SORT_METHOD_LABEL, SortOrderAscending);
+            items.Sort(SortByLabel, SortOrderAscending);
         } else {
             // this is the only way to hide unplayable items in the 'files'
             // view as we cannot tell what context (eg music vs video) the
@@ -634,7 +684,7 @@ CUPnPServer::OnBrowseDirectChildren(PLT_ActionReference&          action,
       CVideoDatabase database;
       database.Open();
       if (database.HasContent(VIDEODB_CONTENT_MUSICVIDEOS)) {
-          CFileItemPtr mvideos(new CFileItem("videodb://3/", true));
+          CFileItemPtr mvideos(new CFileItem("library://video/musicvideos/", true));
           mvideos->SetLabel(g_localizeStrings.Get(20389));
           items.Add(mvideos);
       }
@@ -679,24 +729,24 @@ CUPnPServer::BuildResponse(PLT_ActionReference&          action,
     NPT_Reference<CThumbLoader> thumb_loader;
 
     if (URIUtils::IsVideoDb(items.GetPath()) ||
-        StringUtils::StartsWith(items.GetPath(), "library://video") ||
-        StringUtils::StartsWith(items.GetPath(), "special://profile/playlists/video/")) {
+        StringUtils::StartsWithNoCase(items.GetPath(), "library://video/") ||
+        StringUtils::StartsWithNoCase(items.GetPath(), "special://profile/playlists/video/")) {
 
         thumb_loader = NPT_Reference<CThumbLoader>(new CVideoThumbLoader());
     }
     else if (URIUtils::IsMusicDb(items.GetPath()) ||
-        StringUtils::StartsWith(items.GetPath(), "special://profile/playlists/music/")) {
+        StringUtils::StartsWithNoCase(items.GetPath(), "special://profile/playlists/music/")) {
 
         thumb_loader = NPT_Reference<CThumbLoader>(new CMusicThumbLoader());
     }
     if (!thumb_loader.IsNull()) {
-        thumb_loader->Initialize();
+        thumb_loader->OnLoaderStart();
     }
 
     // this isn't pretty but needed to properly hide the addons node from clients
-    if (items.GetPath().Left(7) == "library") {
+    if (StringUtils::StartsWith(items.GetPath(), "library")) {
         for (int i=0; i<items.Size(); i++) {
-            if (items[i]->GetPath().Left(6) == "addons")
+            if (StringUtils::StartsWith(items[i]->GetPath(), "addons"))
                 items.Remove(i);
         }
     }
@@ -831,25 +881,24 @@ CUPnPServer::OnSearchContainer(PLT_ActionReference&          action,
         if (genre.GetLength() > 0) {
             // all tracks by genre filtered by artist and/or album
             CStdString strPath;
-            strPath.Format("musicdb://genres/%ld/%ld/%ld/",
-                database.GetGenreByName((const char*)genre),
-                database.GetArtistByName((const char*)artist), // will return -1 if no artist
-                database.GetAlbumByName((const char*)album));  // will return -1 if no album
+            strPath = StringUtils::Format("musicdb://genres/%ld/%ld/%ld/",
+                                          database.GetGenreByName((const char*)genre),
+                                          database.GetArtistByName((const char*)artist), // will return -1 if no artist
+                                          database.GetAlbumByName((const char*)album));  // will return -1 if no album
 
             return OnBrowseDirectChildren(action, strPath.c_str(), filter, starting_index, requested_count, sort_criteria, context);
         } else if (artist.GetLength() > 0) {
             // all tracks by artist name filtered by album if passed
             CStdString strPath;
-            strPath.Format("musicdb://artists/%ld/%ld/",
-                database.GetArtistByName((const char*)artist),
-                database.GetAlbumByName((const char*)album)); // will return -1 if no album
+            strPath = StringUtils::Format("musicdb://artists/%ld/%ld/",
+                                          database.GetArtistByName((const char*)artist),
+                                          database.GetAlbumByName((const char*)album)); // will return -1 if no album
 
             return OnBrowseDirectChildren(action, strPath.c_str(), filter, starting_index, requested_count, sort_criteria, context);
         } else if (album.GetLength() > 0) {
             // all tracks by album name
-            CStdString strPath;
-            strPath.Format("musicdb://albums/%ld/",
-                database.GetAlbumByName((const char*)album));
+            CStdString strPath = StringUtils::Format("musicdb://albums/%ld/",
+                                                     database.GetAlbumByName((const char*)album));
 
             return OnBrowseDirectChildren(action, strPath.c_str(), filter, starting_index, requested_count, sort_criteria, context);
         }
@@ -871,15 +920,13 @@ CUPnPServer::OnSearchContainer(PLT_ActionReference&          action,
         database.Open();
 
         if (genre.GetLength() > 0) {
-            CStdString strPath;
-            strPath.Format("musicdb://genres/%ld/%ld/",
-                database.GetGenreByName((const char*)genre),
-                database.GetArtistByName((const char*)artist)); // no artist should return -1
+            CStdString strPath = StringUtils::Format("musicdb://genres/%ld/%ld/",
+                                                     database.GetGenreByName((const char*)genre),
+                                                     database.GetArtistByName((const char*)artist)); // no artist should return -1
             return OnBrowseDirectChildren(action, strPath.c_str(), filter, starting_index, requested_count, sort_criteria, context);
         } else if (artist.GetLength() > 0) {
-            CStdString strPath;
-            strPath.Format("musicdb://artists/%ld/",
-                database.GetArtistByName((const char*)artist));
+            CStdString strPath = StringUtils::Format("musicdb://artists/%ld/",
+                                                     database.GetArtistByName((const char*)artist));
             return OnBrowseDirectChildren(action, strPath.c_str(), filter, starting_index, requested_count, sort_criteria, context);
         }
 
@@ -891,8 +938,7 @@ CUPnPServer::OnSearchContainer(PLT_ActionReference&          action,
         if (genre.GetLength() > 0) {
             CMusicDatabase database;
             database.Open();
-            CStdString strPath;
-            strPath.Format("musicdb://genres/%ld/", database.GetGenreByName((const char*)genre));
+            CStdString strPath = StringUtils::Format("musicdb://genres/%ld/", database.GetGenreByName((const char*)genre));
             return OnBrowseDirectChildren(action, strPath.c_str(), filter, starting_index, requested_count, sort_criteria, context);
         }
         return OnBrowseDirectChildren(action, "musicdb://artists/", filter, starting_index, requested_count, sort_criteria, context);
@@ -942,7 +988,7 @@ CUPnPServer::OnUpdateObject(PLT_ActionReference&             action,
                             NPT_Map<NPT_String,NPT_String>&  new_vals,
                             const PLT_HttpRequestContext&    context)
 {
-    CStdString path = CURL::Decode(object_id);
+    CStdString path(CURL::Decode(object_id));
     CFileItem updated;
     updated.SetPath(path);
     CLog::Log(LOGINFO, "UPnP: OnUpdateObject: %s from %s", path.c_str(),
@@ -1146,53 +1192,55 @@ bool
 CUPnPServer::SortItems(CFileItemList& items, const char* sort_criteria)
 {
   CStdString criteria(sort_criteria);
-  if (criteria.IsEmpty()) {
+  if (criteria.empty()) {
     return false;
   }
 
   bool sorted = false;
   CStdStringArray tokens = StringUtils::SplitString(criteria, ",");
   for (vector<CStdString>::reverse_iterator itr = tokens.rbegin(); itr != tokens.rend(); itr++) {
+    SortDescription sorting;
     /* Platinum guarantees 1st char is - or + */
-    SortOrder order = itr->Left(1).Equals("+") ? SortOrderAscending : SortOrderDescending;
-    CStdString method = itr->Mid(1);
-
-    SORT_METHOD scheme = SORT_METHOD_LABEL_IGNORE_THE;
+    sorting.sortOrder = StringUtils::StartsWith(*itr, "+") ? SortOrderAscending : SortOrderDescending;
+    CStdString method = itr->substr(1);
 
     /* resource specific */
     if (method.Equals("res@duration"))
-      scheme = SORT_METHOD_DURATION;
+      sorting.sortBy = SortByTime;
     else if (method.Equals("res@size"))
-      scheme = SORT_METHOD_SIZE;
+      sorting.sortBy = SortBySize;
     else if (method.Equals("res@bitrate"))
-      scheme = SORT_METHOD_BITRATE;
+      sorting.sortBy = SortByBitrate;
 
     /* dc: */
     else if (method.Equals("dc:date"))
-      scheme = SORT_METHOD_DATE;
+      sorting.sortBy = SortByDate;
     else if (method.Equals("dc:title"))
-      scheme = SORT_METHOD_TITLE_IGNORE_THE;
+    {
+      sorting.sortBy = SortByTitle;
+      sorting.sortAttributes = SortAttributeIgnoreArticle;
+    }
 
     /* upnp: */
     else if (method.Equals("upnp:album"))
-      scheme = SORT_METHOD_ALBUM;
+      sorting.sortBy = SortByAlbum;
     else if (method.Equals("upnp:artist") || method.Equals("upnp:albumArtist"))
-      scheme = SORT_METHOD_ARTIST;
+      sorting.sortBy = SortByArtist;
     else if (method.Equals("upnp:episodeNumber"))
-      scheme = SORT_METHOD_EPISODE;
+      sorting.sortBy = SortByEpisodeNumber;
     else if (method.Equals("upnp:genre"))
-      scheme = SORT_METHOD_GENRE;
+      sorting.sortBy = SortByGenre;
     else if (method.Equals("upnp:originalTrackNumber"))
-      scheme = SORT_METHOD_TRACKNUM;
+      sorting.sortBy = SortByTrackNumber;
     else if(method.Equals("upnp:rating"))
-      scheme = SORT_METHOD_SONG_RATING;
+      sorting.sortBy = SortByRating;
     else {
       CLog::Log(LOGINFO, "UPnP: unsupported sort criteria '%s' passed", method.c_str());
       continue; // needed so unidentified sort methods don't re-sort by label
     }
 
-    CLog::Log(LOGINFO, "UPnP: Sorting by %d, %d", scheme, order);
-    items.Sort(scheme, order);
+    CLog::Log(LOGINFO, "UPnP: Sorting by method %d, order %d, attributes %d", sorting.sortBy, sorting.sortOrder, sorting.sortAttributes);
+    items.Sort(sorting);
     sorted = true;
   }
 
@@ -1205,7 +1253,8 @@ CUPnPServer::DefaultSortItems(CFileItemList& items)
   CGUIViewState* viewState = CGUIViewState::GetViewState(items.IsVideoDb() ? WINDOW_VIDEO_NAV : -1, items);
   if (viewState)
   {
-    items.Sort(viewState->GetSortMethod(), viewState->GetSortOrder());
+    SortDescription sorting = viewState->GetSortMethod();
+    items.Sort(sorting.sortBy, sorting.sortOrder, sorting.sortAttributes);
     delete viewState;
   }
 }

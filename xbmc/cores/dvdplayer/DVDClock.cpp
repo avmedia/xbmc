@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ int64_t CDVDClock::m_systemOffset;
 int64_t CDVDClock::m_systemFrequency;
 int64_t CDVDClock::m_timeBase = DVD_TIME_BASE;
 CCriticalSection CDVDClock::m_systemsection;
-
 bool CDVDClock::m_ismasterclock;
+CDVDClock *CDVDClock::m_playerclock = NULL;;
 
 CDVDClock::CDVDClock()
 {
@@ -46,10 +46,15 @@ CDVDClock::CDVDClock()
 
   m_ismasterclock = true;
   m_startClock = 0;
+
+  m_playerclock = this;
 }
 
 CDVDClock::~CDVDClock()
-{}
+{
+  CSingleLock lock(m_systemsection);
+  m_playerclock = NULL;
+}
 
 // Returns the current absolute clock in units of DVD_TIME_BASE (usually microseconds).
 double CDVDClock::GetAbsoluteClock(bool interpolated /*= true*/)
@@ -89,6 +94,12 @@ double CDVDClock::WaitAbsoluteClock(double target)
   systemtarget = g_VideoReferenceClock.Wait(systemtarget);
   systemtarget -= offset;
   return (double)systemtarget / freq * m_timeBase;
+}
+
+CDVDClock* CDVDClock::GetMasterClock()
+{
+  CSingleLock lock(m_systemsection);
+  return m_playerclock;
 }
 
 double CDVDClock::GetClock(bool interpolated /*= true*/)
@@ -234,7 +245,8 @@ double CDVDClock::SystemToPlaying(int64_t system)
   {
     m_startClock = system;
     m_systemUsed = m_systemFrequency;
-    m_pauseClock = 0;
+    if(m_pauseClock)
+      m_pauseClock = m_startClock;
     m_iDisc = 0;
     m_bReset = false;
   }

@@ -1,13 +1,12 @@
 # XBMC Media Center language file
-# XBMC-core v12.0
 msgid ""
 msgstr ""
-"Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
+"Project-Id-Version: XBMC Main\n"
 "Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: XBMC Translation Team\n"
-"Language-Team: Serbian (http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/sr/)\n"
+"Language-Team: Serbian (http://www.transifex.com/projects/p/xbmc-main/language/sr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -818,25 +817,13 @@ msgctxt "#249"
 msgid "Music"
 msgstr "Muzika"
 
-msgctxt "#250"
-msgid "Visualization"
-msgstr "Vizualizacija"
-
 msgctxt "#251"
 msgid "Select destination directory"
 msgstr "Izaberite odredišnu fasciklu"
 
-msgctxt "#252"
-msgid "Output stereo to all speakers"
-msgstr "Stereo izlaz ka svim zvučnicima"
-
 msgctxt "#253"
 msgid "Number of channels"
 msgstr "Broj kanala"
-
-msgctxt "#254"
-msgid "- DTS capable receiver"
-msgstr "- Sposoban DTS prijemnik"
 
 msgctxt "#255"
 msgid "CDDB"
@@ -975,8 +962,8 @@ msgid "Font"
 msgstr "Slova"
 
 msgctxt "#289"
-msgid "- Size"
-msgstr "- Veličina"
+msgid "Size"
+msgstr "Velič."
 
 msgctxt "#290"
 msgid "Dynamic range compression"
@@ -1009,22 +996,6 @@ msgstr "Pomeraj zvuka u vremenu"
 msgctxt "#298"
 msgid "Bookmarks"
 msgstr "Obeleživači"
-
-msgctxt "#299"
-msgid "- AAC capable receiver"
-msgstr "- Sposoban AAC prijemnik"
-
-msgctxt "#300"
-msgid "- MP1 capable receiver"
-msgstr "- Sposoban MP1 prijemnik"
-
-msgctxt "#301"
-msgid "- MP2 capable receiver"
-msgstr "- Sposoban MP2 prijemnik"
-
-msgctxt "#302"
-msgid "- MP3 capable receiver"
-msgstr "- Sposoban MP3 prijemnik"
 
 msgctxt "#303"
 msgid "Delay"
@@ -1142,18 +1113,6 @@ msgctxt "#336"
 msgid "Framerate conversion"
 msgstr "Konverzija brzine sličica"
 
-msgctxt "#337"
-msgid "Audio output"
-msgstr "Izlaz zvuka"
-
-msgctxt "#338"
-msgid "Analog"
-msgstr "Analogni"
-
-msgctxt "#339"
-msgid "Optical/Coax"
-msgstr "Digitalni"
-
 msgctxt "#340"
 msgid "Various artists"
 msgstr "Različiti izvođači"
@@ -1177,10 +1136,6 @@ msgstr "Glumci"
 msgctxt "#345"
 msgid "Year"
 msgstr "Godina"
-
-msgctxt "#346"
-msgid "Boost volume level on downmix"
-msgstr "Pojačaj nivo zvuka pri prebacivanju u manji br. kanala"
 
 msgctxt "#350"
 msgid "Programs"
@@ -1237,10 +1192,6 @@ msgstr "Nivo zatamljenja čuvara ekrana"
 msgctxt "#363"
 msgid "Sort by: File"
 msgstr "Složi po: Dato."
-
-msgctxt "#364"
-msgid "- Dolby Digital (AC3) capable receiver"
-msgstr "- Sposoban Dolby Digital (AC3) prijemnik"
 
 msgctxt "#365"
 msgid "Sort by: Name"
@@ -1454,10 +1405,6 @@ msgctxt "#419"
 msgid "High"
 msgstr "Maks."
 
-msgctxt "#420"
-msgid "HDMI"
-msgstr "HDMI"
-
 msgctxt "#422"
 msgid "Delete album info"
 msgstr "Izbriši podatke o albumu"
@@ -1518,10 +1465,6 @@ msgctxt "#439"
 msgid "Cache"
 msgstr "Keš"
 
-msgctxt "#440"
-msgid "Harddisk"
-msgstr "Čvrsti disk"
-
 msgctxt "#441"
 msgid "UDF"
 msgstr "UDF"
@@ -1549,10 +1492,6 @@ msgstr "DVD"
 msgctxt "#447"
 msgid "Autorun media"
 msgstr "Automatska reprod. medija"
-
-msgctxt "#448"
-msgid "LCD"
-msgstr "LCD"
 
 msgctxt "#449"
 msgid "Enabled"
@@ -1637,10 +1576,6 @@ msgstr "OSD pozicija"
 msgctxt "#470"
 msgid "Credits"
 msgstr "Zasluge"
-
-msgctxt "#471"
-msgid "Modchip"
-msgstr "Izme. čip"
 
 msgctxt "#474"
 msgid "Off"
@@ -1761,10 +1696,6 @@ msgstr "Učitavanje podataka o mediju iz datoteka..."
 msgctxt "#507"
 msgid "Sort by: Usage"
 msgstr "Složi po: Upotrebi"
-
-msgctxt "#510"
-msgid "Enable visualizations"
-msgstr "Omogući vizualizacije"
 
 msgctxt "#511"
 msgid "Enable video mode switching"
@@ -2186,14 +2117,6 @@ msgctxt "#636"
 msgid "Custom"
 msgstr "Prilagođeno"
 
-msgctxt "#637"
-msgid "Replay gain"
-msgstr "Normalizacija"
-
-msgctxt "#638"
-msgid "Replaygain volume adjustments"
-msgstr "Podeš. glasnoće normaliz. zvuka"
-
 msgctxt "#639"
 msgid "Use track levels"
 msgstr "Koristi na nivou numere"
@@ -2201,18 +2124,6 @@ msgstr "Koristi na nivou numere"
 msgctxt "#640"
 msgid "Use album levels"
 msgstr "Koristi na nivou albuma"
-
-msgctxt "#641"
-msgid "PreAmp Level - Replay gained files"
-msgstr "Nivo predpojačanja - sa normalizacijom datoteka"
-
-msgctxt "#642"
-msgid "PreAmp Level - Non replay gained files"
-msgstr "Nivo predpojačanja - bez normalizacije datoteka"
-
-msgctxt "#643"
-msgid "Avoid clipping on replay gained files"
-msgstr "Izbegni isečke pri normalizaciji datoteka"
 
 msgctxt "#644"
 msgid "Crop black bars"
@@ -2314,10 +2225,6 @@ msgctxt "#705"
 msgid "Network"
 msgstr "Mreža"
 
-msgctxt "#706"
-msgid "- Server"
-msgstr "- Server"
-
 msgctxt "#708"
 msgid "Use an HTTP proxy server to access the internet"
 msgstr "Koristi posrednički HTTP server za pristup Internetu"
@@ -2334,10 +2241,6 @@ msgctxt "#713"
 msgid "HTTP proxy"
 msgstr "HTTP posrednik"
 
-msgctxt "#715"
-msgid "- Assignment"
-msgstr "- Zadatak"
-
 msgctxt "#716"
 msgid "Automatic (DHCP)"
 msgstr "Automatski (DHCP)"
@@ -2347,20 +2250,8 @@ msgid "Manual (Static)"
 msgstr "Ručno (statička)"
 
 msgctxt "#719"
-msgid "- IP address"
-msgstr "- IP adresa"
-
-msgctxt "#720"
-msgid "- Netmask"
-msgstr "- Mrežna maska"
-
-msgctxt "#721"
-msgid "- Default gateway"
-msgstr "- Mrežni prolaz"
-
-msgctxt "#722"
-msgid "- DNS server"
-msgstr "- DNS server"
+msgid "IP address"
+msgstr "IP adresa"
 
 msgctxt "#723"
 msgid "Save & restart"
@@ -2387,32 +2278,24 @@ msgid "FTP server"
 msgstr "FTP server"
 
 msgctxt "#730"
-msgid "- Port"
-msgstr "- Priključak"
+msgid "Port"
+msgstr "Priključak"
 
 msgctxt "#732"
 msgid "Save & apply"
 msgstr "Sačuvaj i primeni"
 
 msgctxt "#733"
-msgid "- Password"
-msgstr "- Lozinka"
+msgid "Password"
+msgstr "Lozinka"
 
 msgctxt "#734"
 msgid "No pass"
 msgstr "Bez lozinke"
 
 msgctxt "#735"
-msgid "- Character set"
-msgstr "- Skup znakova"
-
-msgctxt "#736"
-msgid "- Style"
-msgstr "- Stil"
-
-msgctxt "#737"
-msgid "- Colour"
-msgstr "- Boja"
+msgid "Character set"
+msgstr "Skup znakova"
 
 msgctxt "#738"
 msgid "Normal"
@@ -2543,16 +2426,8 @@ msgid "Network interface"
 msgstr "Mrežni interfejs"
 
 msgctxt "#776"
-msgid "- Wireless network name (ESSID)"
-msgstr "- Ime bežične mreže (ESSID)"
-
-msgctxt "#777"
-msgid "- Wireless password"
-msgstr "- Lozinka za pristup bežičnoj mreži"
-
-msgctxt "#778"
-msgid "- Wireless security"
-msgstr "- Bezbednost bežične mreže"
+msgid "Wireless network name (ESSID)"
+msgstr "Ime bežične mreže (ESSID)"
 
 msgctxt "#779"
 msgid "Save and apply network interface settings"
@@ -2653,10 +2528,6 @@ msgstr "Dodaj Muziku..."
 msgctxt "#999"
 msgid "Add Videos..."
 msgstr "Dodaj Video..."
-
-msgctxt "#1000"
-msgid "- Preview"
-msgstr "Pregled čuvara ekrana"
 
 msgctxt "#1001"
 msgid "Unable to connect"
@@ -2826,10 +2697,6 @@ msgctxt "#1043"
 msgid "Program Add-ons"
 msgstr "Dodaci za program"
 
-msgctxt "#1044"
-msgid "Set plugin thumb"
-msgstr "Postavi sličicu dodatka"
-
 msgctxt "#1045"
 msgid "Add-on settings"
 msgstr "Postavke dodatka"
@@ -2843,8 +2710,8 @@ msgid "Other..."
 msgstr "Ostalo..."
 
 msgctxt "#1048"
-msgid "- Username"
-msgstr "- Korisničko ime"
+msgid "Username"
+msgstr "Korisničko ime"
 
 msgctxt "#1049"
 msgid "Script settings"
@@ -2994,10 +2861,6 @@ msgctxt "#1271"
 msgid "Device name"
 msgstr "Ime uređaja"
 
-msgctxt "#1272"
-msgid "- Use password protection"
-msgstr " - Koristi zaštitu lozinkom"
-
 msgctxt "#1273"
 msgid "AirPlay"
 msgstr "AirPlay"
@@ -3094,6 +2957,18 @@ msgctxt "#1418"
 msgid "Thunderstorms"
 msgstr "grmljavina"
 
+msgctxt "#1439"
+msgid "and"
+msgstr "i"
+
+msgctxt "#1441"
+msgid "with"
+msgstr "sa"
+
+msgctxt "#1443"
+msgid "of"
+msgstr "od"
+
 msgctxt "#1446"
 msgid "Unknown"
 msgstr "Nepoznato"
@@ -3113,10 +2988,6 @@ msgstr "Trajanje"
 msgctxt "#2100"
 msgid "Script failed! : %s"
 msgstr "Skripta je „pukla“! : %s"
-
-msgctxt "#4501"
-msgid "Enable LCD/VFD"
-msgstr "Omogući LCD/VFD"
 
 msgctxt "#10000"
 msgid "Home"
@@ -3222,13 +3093,21 @@ msgctxt "#10034"
 msgid "Settings - Profiles"
 msgstr "Postavke - Profili"
 
-msgctxt "#10100"
-msgid "Yes/No dialog"
-msgstr "Da/Ne prozor"
+msgctxt "#10037"
+msgid "Standard"
+msgstr "Uobičajeno"
 
-msgctxt "#10101"
-msgid "Progress dialog"
-msgstr "Prozor napretka"
+msgctxt "#10131"
+msgid "Lock settings"
+msgstr "Zaključaj postavke"
+
+msgctxt "#10134"
+msgid "Favourites"
+msgstr "Omiljeno"
+
+msgctxt "#10140"
+msgid "Add-on settings"
+msgstr "Postavke dodatka"
 
 msgctxt "#10210"
 msgid "Looking for subtitles..."
@@ -3318,17 +3197,9 @@ msgctxt "#10524"
 msgid "Movie info"
 msgstr "Podaci o filmu"
 
-msgctxt "#12000"
-msgid "Select dialog"
-msgstr "Izaberite dijalog"
-
 msgctxt "#12001"
 msgid "Music/Info"
 msgstr "Muzika/Podaci"
-
-msgctxt "#12002"
-msgid "Dialog OK"
-msgstr "Dijalog u redu"
 
 msgctxt "#12003"
 msgid "Videos/Info"
@@ -3341,14 +3212,6 @@ msgstr "Skripte/Podaci"
 msgctxt "#12005"
 msgid "Fullscreen video"
 msgstr "Film preko čitavog ekrana"
-
-msgctxt "#12006"
-msgid "Audio visualization"
-msgstr "Vizualizacija zvuka"
-
-msgctxt "#12008"
-msgid "File stacking dialog"
-msgstr "Dijalog slaganja datoteka"
 
 msgctxt "#12009"
 msgid "Rebuild index..."
@@ -3506,10 +3369,6 @@ msgctxt "#12346"
 msgid "Password retry limit exceeded."
 msgstr "Prekomerni broj pokušaja unosa lozinke."
 
-msgctxt "#12347"
-msgid "The system will now shut off."
-msgstr "Sistem će sada biti isključen."
-
 msgctxt "#12348"
 msgid "Item locked"
 msgstr "Stavka je zaključana"
@@ -3658,10 +3517,6 @@ msgctxt "#13013"
 msgid "Reboot"
 msgstr "Ponovo pokreni"
 
-msgctxt "#13014"
-msgid "Minimize"
-msgstr "Umanji"
-
 msgctxt "#13015"
 msgid "Power button action"
 msgstr "Akcija dugmeta za uključivanje"
@@ -3722,10 +3577,6 @@ msgctxt "#13110"
 msgid "Save resolution?"
 msgstr "Sačuvati rezoluciju?"
 
-msgctxt "#13111"
-msgid "Would you like to keep this resolution?"
-msgstr "Želite li da zadržite ovu rezoluciju?"
-
 msgctxt "#13112"
 msgid "High quality upscaling"
 msgstr "Visok kvalitet uvećanja"
@@ -3765,10 +3616,6 @@ msgstr "VDPAU"
 msgctxt "#13121"
 msgid "VDPAU HQ Upscaling level"
 msgstr "VDPAU HQ Upscaling level"
-
-msgctxt "#13122"
-msgid "VDPAU Studio level color conversion"
-msgstr "VDPAU Studio level color conversion"
 
 msgctxt "#13130"
 msgid "Blank other displays"
@@ -3821,10 +3668,6 @@ msgstr "Mrežni prolaz"
 msgctxt "#13161"
 msgid "Primary DNS"
 msgstr "Primarni DNS"
-
-msgctxt "#13162"
-msgid "Initialize failed"
-msgstr "Nije uspela inicijalizacija"
 
 msgctxt "#13170"
 msgid "Never"
@@ -3994,10 +3837,6 @@ msgctxt "#13302"
 msgid "Fan speed override"
 msgstr "Nametni brzinu ventilatora"
 
-msgctxt "#13303"
-msgid "- Fonts"
-msgstr "- Slova"
-
 msgctxt "#13304"
 msgid "Enable flipping bi-directional strings"
 msgstr "Omogući obrtanje bi-direkcionih stringova"
@@ -4057,10 +3896,6 @@ msgstr "Prikaži reproduk. slajdova"
 msgctxt "#13318"
 msgid "Recursive slideshow"
 msgstr "Rekurzivna reprod. slajdova"
-
-msgctxt "#13319"
-msgid "Randomize"
-msgstr "Nasumično"
 
 msgctxt "#13320"
 msgid "Stereo"
@@ -4171,8 +4006,8 @@ msgid "Scan for new content"
 msgstr "Potraži novi sadržaj"
 
 msgctxt "#13350"
-msgid "Now playing..."
-msgstr "Trenutno se reprodukuje..."
+msgid "Current playlist"
+msgstr "Trenutni rep. spisak"
 
 msgctxt "#13351"
 msgid "Album information"
@@ -4274,21 +4109,9 @@ msgctxt "#13388"
 msgid "Preset"
 msgstr "Unapred zadato"
 
-msgctxt "#13389"
-msgid "There are no presets available\nfor this visualization"
-msgstr "Ne postoje unapred zadate postavke\nza ovu vizualizaciju"
-
-msgctxt "#13390"
-msgid "There are no settings available\nfor this visualization"
-msgstr "Ne postoje dostupne postavke\nza ovu vizualizaciju"
-
 msgctxt "#13391"
 msgid "Eject/Load"
 msgstr "Izbaci/Ubaci"
-
-msgctxt "#13392"
-msgid "Use visualization if playing audio"
-msgstr "Koristi vizualizaciju, ukoliko se reprodukuje zvuk"
 
 msgctxt "#13393"
 msgid "Calculate size"
@@ -4418,6 +4241,10 @@ msgctxt "#13425"
 msgid "Allow hardware acceleration (VDPAU)"
 msgstr "Broadcom Crystal HD"
 
+msgctxt "#13455"
+msgid "Software"
+msgstr "Softver"
+
 msgctxt "#13500"
 msgid "A/V sync method"
 msgstr "A/V način sinhron."
@@ -4433,10 +4260,6 @@ msgstr "Časovnik filma (Drop/Dupe zvuk)"
 msgctxt "#13503"
 msgid "Video clock (Resample audio)"
 msgstr "Časovnik filma (Ponov. odab. zvuka)"
-
-msgctxt "#13504"
-msgid "Maximum resample amount (%)"
-msgstr "Maksimalna količina pon. odabir. (%)"
 
 msgctxt "#13505"
 msgid "Resample quality"
@@ -4505,10 +4328,6 @@ msgstr "Višestruki daljinski (Složno)"
 msgctxt "#13620"
 msgid "Apple Remote Error"
 msgstr "Greška Apple daljinskog upravljača"
-
-msgctxt "#13621"
-msgid "Apple Remote support could be enabled."
-msgstr "Podrška za Apple dalj. upravljač može biti omogućena."
 
 msgctxt "#14000"
 msgid "Stack"
@@ -4602,41 +4421,17 @@ msgctxt "#14024"
 msgid "Enter the nearest large town"
 msgstr "Unesite najbliži veći grad"
 
-msgctxt "#14025"
-msgid "Video/Audio/DVD cache - Harddisk"
-msgstr "Video/Zvučni/DVD keš - čvrsti disk"
-
 msgctxt "#14026"
 msgid "Video cache - DVD-ROM"
 msgstr "Video keš - DVD-ROM"
-
-msgctxt "#14027"
-msgid "- Local Network"
-msgstr "- Lokalna mreža"
-
-msgctxt "#14028"
-msgid "- Internet"
-msgstr "- Internet"
 
 msgctxt "#14030"
 msgid "Audio cache - DVD-ROM"
 msgstr "Keš zvuka - DVD-ROM"
 
-msgctxt "#14031"
-msgid "- Local Network"
-msgstr "- Lokalna mreža"
-
-msgctxt "#14032"
-msgid "- Internet"
-msgstr "- Internet"
-
 msgctxt "#14034"
 msgid "DVD cache - DVD-ROM"
 msgstr "DVD keš - DVD-ROM"
-
-msgctxt "#14035"
-msgid "- Local Network"
-msgstr "- Lokalna mreža"
 
 msgctxt "#14036"
 msgid "Services"
@@ -4786,10 +4581,6 @@ msgctxt "#14077"
 msgid "Remove from favourites"
 msgstr "Ukloni iz omiljenog"
 
-msgctxt "#14078"
-msgid "- Colours"
-msgstr "- Boje"
-
 msgctxt "#14079"
 msgid "Timezone country"
 msgstr "Zemlja vremenske zone"
@@ -4910,10 +4701,6 @@ msgctxt "#15109"
 msgid "Skin default"
 msgstr "Podrazumevana maska"
 
-msgctxt "#15111"
-msgid "- Theme"
-msgstr "- Tema"
-
 msgctxt "#15112"
 msgid "Default theme"
 msgstr "Podrazumevana tema"
@@ -4921,30 +4708,6 @@ msgstr "Podrazumevana tema"
 msgctxt "#15200"
 msgid "Last.fm"
 msgstr "Last.fm"
-
-msgctxt "#15201"
-msgid "Submit songs to Last.fm"
-msgstr "Pošalji pesme na Last.fm"
-
-msgctxt "#15202"
-msgid "Last.fm username"
-msgstr "Last.fm korisničko ime"
-
-msgctxt "#15203"
-msgid "Last.fm password"
-msgstr "Last.fm lozinka"
-
-msgctxt "#15204"
-msgid "Unable to handshake: sleeping..."
-msgstr "Nije moguće usaglašavanje: stanje spavanja..."
-
-msgctxt "#15205"
-msgid "Please update XBMC"
-msgstr "Molimo, ažurirajte XBMC"
-
-msgctxt "#15206"
-msgid "Bad authorization: Check username and password"
-msgstr "Pogrešna autorizacija: Proverite korisničko ime i lozinku"
 
 msgctxt "#15207"
 msgid "Connected"
@@ -4954,29 +4717,9 @@ msgctxt "#15208"
 msgid "Not connected"
 msgstr "Nije povezano"
 
-msgctxt "#15209"
-msgid "Submit interval %i"
-msgstr "Učestalost slanja %i"
-
-msgctxt "#15210"
-msgid "Cached %i songs"
-msgstr "Keširano %i pesama"
-
-msgctxt "#15211"
-msgid "Submitting..."
-msgstr "Slanje je u toku..."
-
-msgctxt "#15212"
-msgid "Submitting in %i secs"
-msgstr "Slanje za %i sekundi"
-
 msgctxt "#15213"
 msgid "Play using..."
 msgstr "Reprodukuj pomoću..."
-
-msgctxt "#15214"
-msgid "Use smoothed A/V synchronization"
-msgstr "Koristi umekšanu A/V sinhronizaciju"
 
 msgctxt "#15215"
 msgid "Hide file names in thumbs view"
@@ -4985,218 +4728,6 @@ msgstr "Sakrij nazive datoteka prilikom prikaza omota"
 msgctxt "#15216"
 msgid "Play in party mode"
 msgstr "Reprodukuj u režimu žurke"
-
-msgctxt "#15217"
-msgid "Submit songs to Libre.fm"
-msgstr "Pošalji pesme na Libre.fm"
-
-msgctxt "#15218"
-msgid "Libre.fm username"
-msgstr "Libre.fm korisničko ime"
-
-msgctxt "#15219"
-msgid "Libre.fm password"
-msgstr "Libre.fm lozinka"
-
-msgctxt "#15220"
-msgid "Libre.fm"
-msgstr "Libre.fm"
-
-msgctxt "#15221"
-msgid "Song submission"
-msgstr "Slanje pesme"
-
-msgctxt "#15250"
-msgid "Submit Last.fm radio to Last.fm"
-msgstr "Pošalji Last.fm radio na Last.fm"
-
-msgctxt "#15251"
-msgid "Connecting to Last.fm..."
-msgstr "Povezivanje sa Last.fm..."
-
-msgctxt "#15252"
-msgid "Selecting station..."
-msgstr "Biranje stanice..."
-
-msgctxt "#15253"
-msgid "Search similar artists..."
-msgstr "Pronađi slične izvođače..."
-
-msgctxt "#15254"
-msgid "Search similar tags..."
-msgstr "Pronađi slične oznake..."
-
-msgctxt "#15255"
-msgid "Your profile (%name%)"
-msgstr "Vaš profil (%name%)"
-
-msgctxt "#15256"
-msgid "Overall top tags"
-msgstr "Sveobuhvatno najbolje oznake"
-
-msgctxt "#15257"
-msgid "Top artists for tag %name%"
-msgstr "Najbolji izvođači sa oznakom %name%"
-
-msgctxt "#15258"
-msgid "Top albums for tag %name%"
-msgstr "Najbolji albumi sa oznakom %name%"
-
-msgctxt "#15259"
-msgid "Top tracks for tag %name%"
-msgstr "Najbolje numere sa oznakom %name%"
-
-msgctxt "#15260"
-msgid "Listen to tag %name% Last.fm radio"
-msgstr "Slušaj oznaku %name% Last.fm radija"
-
-msgctxt "#15261"
-msgid "Similar artists as %name%"
-msgstr "Izvođači koji su slični sa %name%"
-
-msgctxt "#15262"
-msgid "Top %name% albums"
-msgstr "Najbolji %name% albumi"
-
-msgctxt "#15263"
-msgid "Top %name% tracks"
-msgstr "Najbolje %name% numere"
-
-msgctxt "#15264"
-msgid "Top %name% tags"
-msgstr "Najbolje %name% oznake"
-
-msgctxt "#15265"
-msgid "Biggest fans of %name%"
-msgstr "Najveći %name% obožavaoci"
-
-msgctxt "#15266"
-msgid "Listen to %name% fans Last.fm radio"
-msgstr "Slušaj obožavaoce %name%, Last.fm radija"
-
-msgctxt "#15267"
-msgid "Listen to %name% similar artists Last.fm radio"
-msgstr "Slušaj slične izvođače kao što je %name% na Last.fm radiju"
-
-msgctxt "#15268"
-msgid "Top artists for user %name%"
-msgstr "Najbolji izvođači korisnika %name%"
-
-msgctxt "#15269"
-msgid "Top albums for user %name%"
-msgstr "Najbolji albumi korisnika %name%"
-
-msgctxt "#15270"
-msgid "Top tracks for user %name%"
-msgstr "Najbolje numere korisnika %name%"
-
-msgctxt "#15271"
-msgid "Friends of user %name%"
-msgstr "Prijatelji korisnika %name%"
-
-msgctxt "#15272"
-msgid "Neighbours of user %name%"
-msgstr "Komšije korisnika %name%"
-
-msgctxt "#15273"
-msgid "Weekly artist chart for %name%"
-msgstr "Nedeljni spisak najboljih izvođača korisnika %name%"
-
-msgctxt "#15274"
-msgid "Weekly album chart for %name%"
-msgstr "Nedeljni spisak najboljih albuma korisnika %name%"
-
-msgctxt "#15275"
-msgid "Weekly track chart for %name%"
-msgstr "Nedeljni spisak najboljih numera korisnika %name%"
-
-msgctxt "#15276"
-msgid "Listen to %name%'s neighbours Last.fm radio"
-msgstr "Slušaj komšijin Last.fm radio korisnika %name%"
-
-msgctxt "#15277"
-msgid "Listen to %name%'s personal Last.fm radio"
-msgstr "Slušaj lični Last.fm radio korisnika %name%"
-
-msgctxt "#15278"
-msgid "Listen to %name%'s mix Last.fm radio"
-msgstr "Slušaj voljene numere Last.fm radija korisnika %name%"
-
-msgctxt "#15279"
-msgid "Retrieving list from Last.fm..."
-msgstr "Preuzimanje spiska sa Last.fm..."
-
-msgctxt "#15280"
-msgid "Can't retrieve list from Last.fm..."
-msgstr "Nije moguće preuzeti spisak sa Last.fm..."
-
-msgctxt "#15281"
-msgid "Enter an artist name to find related ones"
-msgstr "Unesite naziv izvođača kako biste pronašli slične"
-
-msgctxt "#15282"
-msgid "Enter a tag name to find similar ones"
-msgstr "Unesite oznaku za pronalaženje sličnih"
-
-msgctxt "#15283"
-msgid "Tracks recently listened by %name%"
-msgstr "Nedavno odslušane numere korisnika %name%"
-
-msgctxt "#15284"
-msgid "Listen to %name%'s recommendations Last.fm radio"
-msgstr "Slušaj po preporuci Last.fm radio korisnika %name%"
-
-msgctxt "#15285"
-msgid "Top tags for user %name%"
-msgstr "Najbolje oznake za korisnika %name%"
-
-msgctxt "#15287"
-msgid "Do you want to add the current track to your loved tracks?"
-msgstr "Želite li da dodate trenutnu numeru u vaše voljene numere?"
-
-msgctxt "#15288"
-msgid "Do you want to ban the current track?"
-msgstr "Želite li da zabranite trenutnu numeru?"
-
-msgctxt "#15289"
-msgid "Added to your loved tracks: '%s'."
-msgstr "Dodato u vaše voljene numere: „%s“."
-
-msgctxt "#15290"
-msgid "Could not add '%s' to your loved tracks."
-msgstr "Nije moguće dodati „%s“ u vaše voljene numere."
-
-msgctxt "#15291"
-msgid "Banned: '%s'."
-msgstr "Zabranjeno: „%s“."
-
-msgctxt "#15292"
-msgid "Could not ban '%s'."
-msgstr "Nije moguće zabraniti „%s“."
-
-msgctxt "#15293"
-msgid "Tracks recently loved by %name%"
-msgstr "Numere koje je nedavno zavoleo %name%"
-
-msgctxt "#15294"
-msgid "Tracks recently banned by %name%"
-msgstr "Numere koje je nedavno zabranio %name%"
-
-msgctxt "#15295"
-msgid "Remove from loved tracks"
-msgstr "Uklonjeno iz voljenih numera"
-
-msgctxt "#15296"
-msgid "Un-ban"
-msgstr "Opozovi zabranu"
-
-msgctxt "#15297"
-msgid "Do you want to remove this track from your loved tracks?"
-msgstr "Želite li da uklonite ovu numeru iz voljenih numera?"
-
-msgctxt "#15298"
-msgid "Do you want to un-ban this track?"
-msgstr "Želite li da opozovete zabranu za ovu numeru?"
 
 msgctxt "#15300"
 msgid "Path not found or invalid"
@@ -5325,10 +4856,6 @@ msgstr "Režim žurke je prekinut."
 msgctxt "#16031"
 msgid "No matching songs in the library."
 msgstr "Nema podudarajućih pesama u biblioteci."
-
-msgctxt "#16032"
-msgid "Could not initialize database."
-msgstr "Nije moguće pokrenuti bazu podataka."
 
 msgctxt "#16033"
 msgid "Could not open database."
@@ -5461,10 +4988,6 @@ msgstr "(VDPAU) Oštrina"
 msgctxt "#16314"
 msgid "Inverse Telecine"
 msgstr "Obrnuti Telecine"
-
-msgctxt "#16315"
-msgid "Lanczos3 optimized"
-msgstr "Optimizovani Lanczos3"
 
 msgctxt "#16316"
 msgid "Auto"
@@ -5782,14 +5305,6 @@ msgctxt "#20085"
 msgid "Show system info"
 msgstr "Prikaži podatke o sistemu"
 
-msgctxt "#20086"
-msgid "Show available disc space C: E: F:"
-msgstr "Prikaži slobodan prostor na disku C: E: F:"
-
-msgctxt "#20087"
-msgid "Show available disc space E: F: G:"
-msgstr "Prikaži slobodan prostor na disku E: F: G:"
-
 msgctxt "#20088"
 msgid "Weather info"
 msgstr "Podaci o vremenu"
@@ -5875,8 +5390,8 @@ msgid "Root"
 msgstr "Korena fascikla"
 
 msgctxt "#20109"
-msgid "- Zoom"
-msgstr "- Uveličavanje"
+msgid "Zoom"
+msgstr "Uveličan"
 
 msgctxt "#20110"
 msgid "UPnP settings"
@@ -6286,17 +5801,9 @@ msgctxt "#20309"
 msgid "Make new folder"
 msgstr "Napravi novu fasciklu"
 
-msgctxt "#20310"
-msgid "Dim LCD on playback"
-msgstr "Zatamni LCD prilikom reprodukcije"
-
 msgctxt "#20311"
 msgid "Unknown or onboard (protected)"
 msgstr "Nepoznato ili je ugrađen na ploči (zaštićeno)"
-
-msgctxt "#20312"
-msgid "Dim LCD on paused"
-msgstr "Zatamni LCD prilikom pauze"
 
 msgctxt "#20314"
 msgid "Videos - Library"
@@ -6317,10 +5824,6 @@ msgstr "Ponovna kalibracija"
 msgctxt "#20326"
 msgid "This will reset the calibration values for %s"
 msgstr "Ovim ćete poništiti vrednosti kalibracije za %s"
-
-msgctxt "#20327"
-msgid "to it's default values."
-msgstr "na podrazumevane vrednosti."
 
 msgctxt "#20328"
 msgid "Browse for destination"
@@ -6534,10 +6037,6 @@ msgctxt "#20381"
 msgid "Specials"
 msgstr "Posebne emisije"
 
-msgctxt "#20382"
-msgid "Automatically grab season thumbs"
-msgstr "Automatski preuzmi sličicu sezone"
-
 msgctxt "#20383"
 msgid "Selected folder contains a single video"
 msgstr "Izabrana fascikla sadrži jedan film"
@@ -6650,17 +6149,9 @@ msgctxt "#20411"
 msgid "Flatten"
 msgstr "Poravnat spisak"
 
-msgctxt "#20412"
-msgid "Flatten TV shows"
-msgstr "Poravnat spisak TV serija"
-
 msgctxt "#20413"
 msgid "Get fanart"
 msgstr "Zanim. slika"
-
-msgctxt "#20414"
-msgid "Show Fanart in video and music libraries"
-msgstr "Prikaži zanimljivu sliku u filmskim i muzičkim bibliotekama"
 
 msgctxt "#20415"
 msgid "Scanning for new content"
@@ -6870,17 +6361,9 @@ msgctxt "#21365"
 msgid "Remove media share"
 msgstr "Ukloni deljenu lokaciju medija"
 
-msgctxt "#21366"
-msgid "Subtitle folder"
-msgstr "Fascikla sa titlovima"
-
 msgctxt "#21367"
 msgid "Movie & alternate subtitle directory"
 msgstr "Fascikla filmova i alternativnih titlova"
-
-msgctxt "#21369"
-msgid "Enable mouse and Touch Screen support"
-msgstr "Omogući korišćenje miša"
 
 msgctxt "#21370"
 msgid "Play navigation sounds during media playback"
@@ -7067,8 +6550,8 @@ msgid "Default music video scraper"
 msgstr "Podraz. dobavljač podataka za muzičke spotove"
 
 msgctxt "#21417"
-msgid "- Settings"
-msgstr "- Postavke"
+msgid "Settings"
+msgstr "Postavke"
 
 msgctxt "#21418"
 msgid "Multilingual"
@@ -7199,8 +6682,8 @@ msgid "Remote control sends keyboard presses"
 msgstr "Daljinski upravljač šalje kôdove tastature"
 
 msgctxt "#21450"
-msgid "- Edit"
-msgstr "- Uredi"
+msgid "Edit"
+msgstr "Uredi"
 
 msgctxt "#21451"
 msgid "Internet connection required."
@@ -7209,10 +6692,6 @@ msgstr "Internet konekcija je neophodna"
 msgctxt "#21452"
 msgid "Get More..."
 msgstr "Nađi jos..."
-
-msgctxt "#21460"
-msgid "Subtitle location"
-msgstr "Lokacija prevoda"
 
 msgctxt "#21800"
 msgid "File name"
@@ -7418,10 +6897,6 @@ msgctxt "#21877"
 msgid "Date created"
 msgstr "Datum pravljenja"
 
-msgctxt "#21878"
-msgid "Copyright flag"
-msgstr "Oznaka autorskog prava"
-
 msgctxt "#21879"
 msgid "Country code"
 msgstr "Kôd države"
@@ -7518,10 +6993,6 @@ msgctxt "#22001"
 msgid "Hide progress of library updates"
 msgstr "Uvek ažuriraj biblioteku u pozadini"
 
-msgctxt "#22002"
-msgid "- DNS suffix"
-msgstr "- DNS sufiks"
-
 msgctxt "#22004"
 msgid "Delayed by: %2.3fs"
 msgstr "Usporeno za: %2.3f sek."
@@ -7590,10 +7061,6 @@ msgctxt "#22020"
 msgid "Guide"
 msgstr "Vodič"
 
-msgctxt "#22021"
-msgid "Allowed error in aspect ratio to minimize black bars"
-msgstr "Dozv. greška u odnosu, radi smanjenja crnih traka"
-
 msgctxt "#22022"
 msgid "Show video files in listings"
 msgstr "Prikaži video datoteke u spiskovima"
@@ -7611,16 +7078,8 @@ msgid "Font"
 msgstr "Slova"
 
 msgctxt "#22031"
-msgid "- Size"
-msgstr "- Veličina"
-
-msgctxt "#22032"
-msgid "- Colours"
-msgstr "- Boja"
-
-msgctxt "#22033"
-msgid "- Charset"
-msgstr "- Znakovi"
+msgid "Size"
+msgstr "Velič."
 
 msgctxt "#22034"
 msgid "Export karaoke titles as HTML"
@@ -7734,10 +7193,6 @@ msgctxt "#24009"
 msgid "Script"
 msgstr "Skripta"
 
-msgctxt "#24010"
-msgid "Visualization"
-msgstr "Vizualizacija"
-
 msgctxt "#24011"
 msgid "Add-on repository"
 msgstr "Spremište dodatnog prog."
@@ -7779,6 +7234,10 @@ msgid "Enable"
 msgstr "Omogući dodatni prog."
 
 msgctxt "#24023"
+msgid "Disabled"
+msgstr "Onemogućeno"
+
+msgctxt "#24024"
 msgid "Add-on disabled"
 msgstr "Dodatni prog. je onemogućen"
 
@@ -7890,6 +7349,10 @@ msgctxt "#24094"
 msgid "(current)"
 msgstr "Omogući hardversko ubrzanje (CrystalHD)"
 
+msgctxt "#24121"
+msgid "Enter search string"
+msgstr "Unesite reč za pretragu"
+
 msgctxt "#29800"
 msgid "Library Mode"
 msgstr "Režim biblioteke"
@@ -7961,10 +7424,6 @@ msgstr "Pitaj za preuzimanje pre reprodukcije filma"
 msgctxt "#33016"
 msgid "Clips"
 msgstr "Klipovi"
-
-msgctxt "#33017"
-msgid "Restart plugin to enable"
-msgstr "Ponovo pokrenite dodatak za aktiviranje"
 
 msgctxt "#33018"
 msgid "Tonight"
@@ -8203,8 +7662,8 @@ msgid "DXVA2"
 msgstr "DXVA"
 
 msgctxt "#34100"
-msgid "Speaker Configuration"
-msgstr "Konfiguracija zvučnika"
+msgid "Number of channels"
+msgstr "Broj kanala"
 
 msgctxt "#34101"
 msgid "2.0"
@@ -8269,3 +7728,11 @@ msgstr "Povezano"
 msgctxt "#36035"
 msgid "Always"
 msgstr "Uvek"
+
+msgctxt "#36426"
+msgid "Switch to channel"
+msgstr "Prebaci na kanal"
+
+msgctxt "#36428"
+msgid "Record"
+msgstr "Snimi"

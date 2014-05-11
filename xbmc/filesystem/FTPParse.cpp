@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,9 +18,14 @@
  *
  */
 
-#if _WIN32
-#define PCRE_STATIC
-#endif
+#if TARGET_WINDOWS
+#define PCRE_STATIC 1
+#ifdef _DEBUG
+#pragma comment(lib, "pcrecppd.lib")
+#else  // ! _DEBUG
+#pragma comment(lib, "pcrecpp.lib")
+#endif // ! _DEBUG
+#endif // TARGET_WINDOWS
 #include <pcrecpp.h>
 #include <cmath>
 #include "FTPParse.h"

@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -62,9 +62,14 @@ public:
   bool SetVSync(EGLDisplay display, bool enable);
   bool IsExtSupported(const char* extension);
   bool GetConfigAttrib(EGLDisplay display, EGLConfig config, EGLint attribute, EGLint *value);
+  bool SurfaceAttrib(EGLDisplay display, EGLSurface surface, EGLint  attribute, EGLint  value);
+
+  bool TrustSurfaceSize();
+
+  static void* GetProcAddress(const char* function);
 
 private:
-    CEGLNativeType          *m_nativeTypes;
-    EGLint                  m_result;
-};
 
+  CEGLNativeType *m_nativeTypes;
+  EGLint         m_result;
+};

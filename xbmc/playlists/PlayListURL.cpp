@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -60,15 +60,15 @@ bool CPlayListURL::Load(const CStdString& strFileName)
     strLine = szLine;
     StringUtils::RemoveCRLF(strLine);
 
-    if (strLine.Left(18) == "[InternetShortcut]")
+    if (StringUtils::StartsWith(strLine, "[InternetShortcut]"))
     {
       if (file.ReadString(szLine,1024))
       {
         strLine  = szLine;
         StringUtils::RemoveCRLF(strLine);
-        if (strLine.Left(4) == "URL=")
+        if (StringUtils::StartsWith(strLine, "URL="))
         {
-          CFileItemPtr newItem(new CFileItem(strLine.Mid(4),false));
+          CFileItemPtr newItem(new CFileItem(strLine.substr(4), false));
           Add(newItem);
         }
       }

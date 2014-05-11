@@ -1,28 +1,31 @@
 /*
-*      Copyright (C) 2007-2013 Team XBMC
-*      http://www.xbmc.org
-*
-*  This Program is free software; you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; either version 2, or (at your option)
-*  any later version.
-*
-*  This Program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with XBMC; see the file COPYING.  If not, see
-*  <http://www.gnu.org/licenses/>.
-*
-*/
+ *      Copyright (C) 2007-2013 Team XBMC
+ *      http://xbmc.org
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ */
 
 #include "system.h"
 #include "SDLJoystick.h"
 #include "ButtonTranslator.h"
+#include "peripherals/devices/PeripheralImon.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/lib/Setting.h"
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 
 #include <math.h>
 
@@ -43,6 +46,16 @@ CJoystick::CJoystick()
   m_HatState = SDL_HAT_CENTERED;
   m_ActiveFlags = JACTIVE_NONE;
   SetDeadzone(0);
+}
+
+void CJoystick::OnSettingChanged(const CSetting *setting)
+{
+  if (setting == NULL)
+    return;
+
+  const std::string &settingId = setting->GetId();
+  if (settingId == "input.enablejoystick")
+    SetEnabled(((CSettingBool*)setting)->GetValue() && PERIPHERALS::CPeripheralImon::GetCountOfImonsConflictWithDInput() == 0);
 }
 
 void CJoystick::Initialize()
@@ -93,14 +106,33 @@ void CJoystick::Initialize()
         continue;
       }
 #endif
-
-      m_Joysticks.push_back(joy);
       if (joy)
       {
-        m_JoystickNames.push_back(string(SDL_JoystickName(i)));
-        CLog::Log(LOGNOTICE, "Enabled Joystick: %s", SDL_JoystickName(i));
-        CLog::Log(LOGNOTICE, "Details: Total Axis: %d Total Hats: %d Total Buttons: %d",
-            SDL_JoystickNumAxes(joy), SDL_JoystickNumHats(joy), SDL_JoystickNumButtons(joy));        
+        // Some (Microsoft) Keyboards are recognized as Joysticks by modern kernels
+        // Don't enumerate them
+        // https://bugs.launchpad.net/ubuntu/+source/linux/+bug/390959
+        // NOTICE: Enabled Joystick: Microsoft Wired Keyboard 600
+        // Details: Total Axis: 37 Total Hats: 0 Total Buttons: 57
+        // NOTICE: Enabled Joystick: Microsoft Microsoft® 2.4GHz Transceiver v6.0
+        // Details: Total Axis: 37 Total Hats: 0 Total Buttons: 57
+        // also checks if we have at least 1 button, fixes 
+        // NOTICE: Enabled Joystick: ST LIS3LV02DL Accelerometer
+        // Details: Total Axis: 3 Total Hats: 0 Total Buttons: 0
+        int num_axis = SDL_JoystickNumAxes(joy);
+        int num_buttons = SDL_JoystickNumButtons(joy);
+        if ((num_axis > 20 && num_buttons > 50) || num_buttons == 0)
+        {
+          CLog::Log(LOGNOTICE, "Ignoring Joystick %s Axis: %d Buttons: %d: invalid device properties",
+           SDL_JoystickName(i), num_axis, num_buttons);
+        }
+        else
+        {
+          m_JoystickNames.push_back(string(SDL_JoystickName(i)));
+          CLog::Log(LOGNOTICE, "Enabled Joystick: %s", SDL_JoystickName(i));
+          CLog::Log(LOGNOTICE, "Details: Total Axis: %d Total Hats: %d Total Buttons: %d",
+            num_axis, SDL_JoystickNumHats(joy), num_buttons);
+          m_Joysticks.push_back(joy);
+        }
       }
       else
       {

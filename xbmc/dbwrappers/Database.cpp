@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include "utils/log.h"
 #include "utils/SortUtils.h"
 #include "utils/URIUtils.h"
+#include "utils/StringUtils.h"
 #include "sqlitedataset.h"
 #include "DatabaseManager.h"
 #include "DbUrl.h"
@@ -105,6 +106,7 @@ CDatabase::CDatabase(void)
   m_openCount = 0;
   m_sqlite = true;
   m_bMultiWrite = false;
+  m_multipleExecute = false;
 }
 
 CDatabase::~CDatabase(void)
@@ -123,8 +125,8 @@ void CDatabase::Split(const CStdString& strFileNameAndPath, CStdString& strPath,
     if (ch == ':' || ch == '/' || ch == '\\') break;
     else i--;
   }
-  strPath = strFileNameAndPath.Left(i);
-  strFileName = strFileNameAndPath.Right(strFileNameAndPath.size() - i);
+  strPath = strFileNameAndPath.substr(0, i);
+  strFileName = strFileNameAndPath.substr(i);
 }
 
 uint32_t CDatabase::ComputeCRC(const CStdString &text)
@@ -132,30 +134,6 @@ uint32_t CDatabase::ComputeCRC(const CStdString &text)
   Crc32 crc;
   crc.ComputeFromLowerCase(text);
   return crc;
-}
-
-
-CStdString CDatabase::FormatSQL(CStdString strStmt, ...)
-{
-  //  %q is the sqlite format string for %s.
-  //  Any bad character, like "'", will be replaced with a proper one
-  strStmt.Replace("%s", "%q");
-  //  the %I64 enhancement is not supported by sqlite3_vmprintf
-  //  must be %ll instead
-  strStmt.Replace("%I64", "%ll");
-
-  va_list args;
-  va_start(args, strStmt);
-  char *szSql = sqlite3_vmprintf(strStmt.c_str(), args);
-  va_end(args);
-
-  CStdString strResult;
-  if (szSql) {
-    strResult = szSql;
-    sqlite3_free(szSql);
-  }
-
-  return strResult;
 }
 
 CStdString CDatabase::PrepareSQL(CStdString strStmt, ...) const
@@ -209,23 +187,43 @@ CStdString CDatabase::GetSingleValue(const CStdString &query)
   return GetSingleValue(query, m_pDS);
 }
 
-bool CDatabase::DeleteValues(const CStdString &strTable, const CStdString &strWhereClause /* = CStdString() */)
+bool CDatabase::DeleteValues(const CStdString &strTable, const Filter &filter /* = Filter() */)
 {
-  bool bReturn = true;
+  CStdString strQuery;
+  BuildSQL(PrepareSQL("DELETE FROM %s ", strTable.c_str()), filter, strQuery);
+  return ExecuteQuery(strQuery);
+}
 
-  CStdString strQueryBase = "DELETE FROM %s";
-  if (!strWhereClause.IsEmpty())
-    strQueryBase.AppendFormat(" WHERE %s", strWhereClause.c_str());
+bool CDatabase::BeginMultipleExecute()
+{
+  m_multipleExecute = true;
+  return true;
+}
 
-  CStdString strQuery = FormatSQL(strQueryBase, strTable.c_str());
-
-  bReturn = ExecuteQuery(strQuery);
-
-  return bReturn;
+bool CDatabase::CommitMultipleExecute()
+{
+  m_multipleExecute = false;
+  BeginTransaction();
+  for (std::vector<std::string>::const_iterator i = m_multipleQueries.begin(); i != m_multipleQueries.end(); ++i)
+  {
+    if (!ExecuteQuery(*i))
+    {
+      RollbackTransaction();
+      return false;
+    }
+  }
+  CommitTransaction();
+  return true;
 }
 
 bool CDatabase::ExecuteQuery(const CStdString &strQuery)
 {
+  if (m_multipleExecute)
+  {
+    m_multipleQueries.push_back(strQuery);
+    return true;
+  }
+
   bool bReturn = false;
 
   try
@@ -268,7 +266,7 @@ bool CDatabase::ResultQuery(const CStdString &strQuery)
 
 bool CDatabase::QueueInsertQuery(const CStdString &strQuery)
 {
-  if (strQuery.IsEmpty())
+  if (strQuery.empty())
     return false;
 
   if (!m_bMultiWrite)
@@ -330,7 +328,7 @@ bool CDatabase::Open(const DatabaseSettings &settings)
   InitSettings(dbSettings);
 
   CStdString dbName = dbSettings.name;
-  dbName.AppendFormat("%d", GetMinVersion());
+  dbName += StringUtils::Format("%d", GetSchemaVersion());
   return Connect(dbName, dbSettings, false);
 }
 
@@ -342,8 +340,8 @@ void CDatabase::InitSettings(DatabaseSettings &dbSettings)
   if ( dbSettings.type.Equals("mysql") )
   {
     // check we have all information before we cancel the fallback
-    if ( ! (dbSettings.host.IsEmpty() ||
-            dbSettings.user.IsEmpty() || dbSettings.pass.IsEmpty()) )
+    if ( ! (dbSettings.host.empty() ||
+            dbSettings.user.empty() || dbSettings.pass.empty()) )
       m_sqlite = false;
     else
       CLog::Log(LOGINFO, "Essential mysql database information is missing. Require at least host, user and pass defined.");
@@ -355,12 +353,12 @@ void CDatabase::InitSettings(DatabaseSettings &dbSettings)
 #endif
   {
     dbSettings.type = "sqlite3";
-    if (dbSettings.host.IsEmpty())
+    if (dbSettings.host.empty())
       dbSettings.host = CSpecialProtocol::TranslatePath(CProfilesManager::Get().GetDatabaseFolder());
   }
 
   // use separate, versioned database
-  if (dbSettings.name.IsEmpty())
+  if (dbSettings.name.empty())
     dbSettings.name = GetBaseDBName();
 }
 
@@ -369,22 +367,22 @@ bool CDatabase::Update(const DatabaseSettings &settings)
   DatabaseSettings dbSettings = settings;
   InitSettings(dbSettings);
 
-  int version = GetMinVersion();
+  int version = GetSchemaVersion();
   CStdString latestDb = dbSettings.name;
-  latestDb.AppendFormat("%d", version);
+  latestDb += StringUtils::Format("%d", version);
 
-  while (version >= 0)
+  while (version >= GetMinSchemaVersion())
   {
     CStdString dbName = dbSettings.name;
     if (version)
-      dbName.AppendFormat("%d", version);
+      dbName += StringUtils::Format("%d", version);
 
     if (Connect(dbName, dbSettings, false))
     {
       // Database exists, take a copy for our current version (if needed) and reopen that one
-      if (version < GetMinVersion())
+      if (version < GetSchemaVersion())
       {
-        CLog::Log(LOGNOTICE, "Old database found - updating from version %i to %i", version, GetMinVersion());
+        CLog::Log(LOGNOTICE, "Old database found - updating from version %i to %i", version, GetSchemaVersion());
 
         bool copy_fail = false;
 
@@ -453,17 +451,20 @@ bool CDatabase::Connect(const CStdString &dbName, const DatabaseSettings &dbSett
   // host name is always required
   m_pDB->setHostName(dbSettings.host.c_str());
 
-  if (!dbSettings.port.IsEmpty())
+  if (!dbSettings.port.empty())
     m_pDB->setPort(dbSettings.port.c_str());
 
-  if (!dbSettings.user.IsEmpty())
+  if (!dbSettings.user.empty())
     m_pDB->setLogin(dbSettings.user.c_str());
 
-  if (!dbSettings.pass.IsEmpty())
+  if (!dbSettings.pass.empty())
     m_pDB->setPasswd(dbSettings.pass.c_str());
 
   // database name is always required
   m_pDB->setDatabase(dbName.c_str());
+
+  // set SSL configuration regardless if any are empty (all empty means no SSL).
+  m_pDB->setSSLConfig(dbSettings.key.c_str(), dbSettings.cert.c_str(), dbSettings.ca.c_str(), dbSettings.capath.c_str(), dbSettings.ciphers.c_str());
 
   // create the datasets
   m_pDS.reset(m_pDB->CreateDataset());
@@ -489,7 +490,7 @@ bool CDatabase::Connect(const CStdString &dbName, const DatabaseSettings &dbSett
         //  Also set the memory cache size to 16k
         m_pDS->exec("PRAGMA default_cache_size=4096\n");
       }
-      CreateTables();
+      CreateDatabase();
     }
 
     // sqlite3 post connection operations
@@ -523,32 +524,39 @@ int CDatabase::GetDBVersion()
 bool CDatabase::UpdateVersion(const CStdString &dbName)
 {
   int version = GetDBVersion();
-  if (version < GetMinVersion())
+  if (version < GetMinSchemaVersion())
   {
-    CLog::Log(LOGNOTICE, "Attempting to update the database %s from version %i to %i", dbName.c_str(), version, GetMinVersion());
-    bool success = false;
+    CLog::Log(LOGERROR, "Can't update database %s from version %i - it's too old", dbName.c_str(), version);
+    return false;
+  }
+  else if (version < GetSchemaVersion())
+  {
+    CLog::Log(LOGNOTICE, "Attempting to update the database %s from version %i to %i", dbName.c_str(), version, GetSchemaVersion());
+    bool success = true;
     BeginTransaction();
     try
     {
-      success = UpdateOldVersion(version);
-      if (success)
-        success = UpdateVersionNumber();
+      // drop old analytics, update table(s), recreate analytics, update version
+      m_pDB->drop_analytics();
+      UpdateTables(version);
+      CreateAnalytics();
+      UpdateVersionNumber();
     }
     catch (...)
     {
-      CLog::Log(LOGERROR, "Exception updating database %s from version %i to %i", dbName.c_str(), version, GetMinVersion());
+      CLog::Log(LOGERROR, "Exception updating database %s from version %i to %i", dbName.c_str(), version, GetSchemaVersion());
       success = false;
     }
     if (!success)
     {
-      CLog::Log(LOGERROR, "Error updating database %s from version %i to %i", dbName.c_str(), version, GetMinVersion());
+      CLog::Log(LOGERROR, "Error updating database %s from version %i to %i", dbName.c_str(), version, GetSchemaVersion());
       RollbackTransaction();
       return false;
     }
     CommitTransaction();
-    CLog::Log(LOGINFO, "Update to version %i successful", GetMinVersion());
+    CLog::Log(LOGINFO, "Update to version %i successful", GetSchemaVersion());
   }
-  else if (version > GetMinVersion())
+  else if (version > GetSchemaVersion())
   {
     CLog::Log(LOGERROR, "Can't open the database %s as it is a NEWER version than what we were expecting?", dbName.c_str());
     return false;
@@ -575,6 +583,7 @@ void CDatabase::Close()
   }
 
   m_openCount = 0;
+  m_multipleExecute = false;
 
   if (NULL == m_pDB.get() ) return ;
   if (NULL != m_pDS.get()) m_pDS->close();
@@ -672,22 +681,33 @@ bool CDatabase::InTransaction()
   return m_pDB->in_transaction();
 }
 
-bool CDatabase::CreateTables()
+bool CDatabase::CreateDatabase()
 {
-
+  BeginTransaction();
+  try
+  {
     CLog::Log(LOGINFO, "creating version table");
     m_pDS->exec("CREATE TABLE version (idVersion integer, iCompressCount integer)\n");
-    CStdString strSQL=PrepareSQL("INSERT INTO version (idVersion,iCompressCount) values(%i,0)\n", GetMinVersion());
+    CStdString strSQL=PrepareSQL("INSERT INTO version (idVersion,iCompressCount) values(%i,0)\n", GetSchemaVersion());
     m_pDS->exec(strSQL.c_str());
 
-    return true;
+    CreateTables();
+    CreateAnalytics();
+  }
+  catch (...)
+  {
+    CLog::Log(LOGERROR, "%s unable to create database:%i", __FUNCTION__, (int)GetLastError());
+    RollbackTransaction();
+    return false;
+  }
+  CommitTransaction();
+  return true;
 }
 
-bool CDatabase::UpdateVersionNumber()
+void CDatabase::UpdateVersionNumber()
 {
-  CStdString strSQL=PrepareSQL("UPDATE version SET idVersion=%i\n", GetMinVersion());
+  CStdString strSQL=PrepareSQL("UPDATE version SET idVersion=%i\n", GetSchemaVersion());
   m_pDS->exec(strSQL.c_str());
-  return true;
 }
 
 bool CDatabase::BuildSQL(const CStdString &strQuery, const Filter &filter, CStdString &strSQL)

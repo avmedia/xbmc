@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,26 +13,25 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
 #include "LanguageHook.h"
 #include "swig.h"
+#include "utils/StringUtils.h"
+#include "interfaces/legacy/AddonString.h"
 
 #include <string>
 
 namespace PythonBindings
 {
-  void PyXBMCInitializeTypeObject(PyTypeObject* type_object, TypeInfo* typeInfo)
+  TypeInfo::TypeInfo(const std::type_info& ti) : swigType(NULL), parentType(NULL), typeIndex(ti)
   {
     static PyTypeObject py_type_object_header = { PyObject_HEAD_INIT(NULL) 0};
-    int size = (long*)&(py_type_object_header.tp_name) - (long*)&py_type_object_header;
-    memset(type_object, 0, sizeof(PyTypeObject));
-    memcpy(type_object, &py_type_object_header, size);
-    memset(typeInfo, 0, sizeof(TypeInfo));
+    static int size = (long*)&(py_type_object_header.tp_name) - (long*)&py_type_object_header;
+    memcpy(&(this->pythonType), &py_type_object_header, size);
   }
 
   class PyObjectDecrementor
@@ -48,6 +47,14 @@ namespace PythonBindings
   void PyXBMCGetUnicodeString(std::string& buf, PyObject* pObject, bool coerceToString,
                               const char* argumentName, const char* methodname) throw (XBMCAddon::WrongTypeException)
   {
+    // It's okay for a string to be "None". In this case the buf returned
+    // will be the emptyString.
+    if (pObject == Py_None)
+    {
+      buf = XBMCAddon::emptyString;
+      return;
+    }
+
     // TODO: UTF-8: Does python use UTF-16?
     //              Do we need to convert from the string charset to UTF-8
     //              for non-unicode data?
@@ -163,9 +170,9 @@ namespace PythonBindings
       {
           PyObject *tracebackModule;
 
-          msg.AppendFormat("Error Type: %s\n", PyString_AsString(pystring));
+          msg += StringUtils::Format("Error Type: %s\n", PyString_AsString(pystring));
           if (PyObject_Str(exc_value))
-            msg.AppendFormat("Error Contents: %s\n", PyString_AsString(PyObject_Str(exc_value)));
+            msg += StringUtils::Format("Error Contents: %s\n", PyString_AsString(PyObject_Str(exc_value)));
 
           tracebackModule = PyImport_ImportModule((char*)"traceback");
           if (tracebackModule != NULL)
@@ -176,7 +183,7 @@ namespace PythonBindings
             emptyString = PyString_FromString("");
             strRetval = PyObject_CallMethod(emptyString, (char*)"join", (char*)"O", tbList);
             
-            msg.Format("%s%s", msg.c_str(),PyString_AsString(strRetval));
+            msg = StringUtils::Format("%s%s", msg.c_str(),PyString_AsString(strRetval));
 
             Py_DECREF(tbList);
             Py_DECREF(emptyString);
@@ -200,23 +207,23 @@ namespace PythonBindings
     SetMessage("%s",msg.c_str());
   }
 
-  void* doretrieveApiInstance(const PyHolder* pythonType, const TypeInfo* typeInfo, const char* expectedType, 
+  XBMCAddon::AddonClass* doretrieveApiInstance(const PyHolder* pythonObj, const TypeInfo* typeInfo, const char* expectedType, 
                               const char* methodNamespacePrefix, const char* methodNameForErrorString) throw (XBMCAddon::WrongTypeException)
   {
-    if (pythonType == NULL || pythonType->magicNumber != XBMC_PYTHON_TYPE_MAGIC_NUMBER)
+    if (pythonObj->magicNumber != XBMC_PYTHON_TYPE_MAGIC_NUMBER)
       throw XBMCAddon::WrongTypeException("Non api type passed to \"%s\" in place of the expected type \"%s.\"",
                                           methodNameForErrorString, expectedType);
     if (!isParameterRightType(typeInfo->swigType,expectedType,methodNamespacePrefix))
     {
       // maybe it's a child class
       if (typeInfo->parentType)
-        return doretrieveApiInstance(pythonType, typeInfo->parentType,expectedType, 
+        return doretrieveApiInstance(pythonObj, typeInfo->parentType,expectedType, 
                                      methodNamespacePrefix, methodNameForErrorString);
       else
         throw XBMCAddon::WrongTypeException("Incorrect type passed to \"%s\", was expecting a \"%s\" but received a \"%s\"",
                                  methodNameForErrorString,expectedType,typeInfo->swigType);
     }
-    return ((PyHolder*)pythonType)->pSelf;
+    return ((PyHolder*)pythonObj)->pSelf;
   }
 
   /**
@@ -225,19 +232,19 @@ namespace PythonBindings
    */
   void prepareForReturn(XBMCAddon::AddonClass* c)
   {
-    TRACE;
+    XBMC_TRACE;
     if(c) { 
       c->Acquire(); 
       PyThreadState* state = PyThreadState_Get();
-      XBMCAddon::Python::LanguageHook::GetIfExists(state->interp)->RegisterAddonClassInstance(c);
+      XBMCAddon::Python::PythonLanguageHook::GetIfExists(state->interp)->RegisterAddonClassInstance(c);
     }
   }
 
   static bool handleInterpRegistrationForClean(XBMCAddon::AddonClass* c)
   {
-    TRACE;
+    XBMC_TRACE;
     if(c){
-      XBMCAddon::AddonClass::Ref<XBMCAddon::Python::LanguageHook> lh = 
+      XBMCAddon::AddonClass::Ref<XBMCAddon::Python::PythonLanguageHook> lh = 
         XBMCAddon::AddonClass::Ref<XBMCAddon::AddonClass>(c->GetLanguageHook());
 
       if (lh.isNotNull())
@@ -248,7 +255,7 @@ namespace PythonBindings
       else
       {
         PyThreadState* state = PyThreadState_Get();
-        lh = XBMCAddon::Python::LanguageHook::GetIfExists(state->interp);
+        lh = XBMCAddon::Python::PythonLanguageHook::GetIfExists(state->interp);
         if (lh.isNotNull()) lh->UnregisterAddonClassInstance(c);
         return true;
       }
@@ -262,7 +269,7 @@ namespace PythonBindings
    */
   void cleanForDealloc(XBMCAddon::AddonClass* c) 
   { 
-    TRACE;
+    XBMC_TRACE;
     if (handleInterpRegistrationForClean(c))
       c->Release();
   }
@@ -277,7 +284,7 @@ namespace PythonBindings
    */
   void cleanForDealloc(XBMCAddon::xbmcgui::Window* c) 
   {
-    TRACE;
+    XBMC_TRACE;
     if (handleInterpRegistrationForClean(c))
     { 
       c->dispose();
@@ -286,12 +293,18 @@ namespace PythonBindings
   }
 
   /**
-   * This method allows for conversion of the native api Type to the Python type
+   * This method allows for conversion of the native api Type to the Python type.
    *
-   * NOTE: swigTypeString must be in the data segment. That is, it should be an explicit string since
-   * the const char* is stored in a PyHolder struct and never deleted.
+   * When this form of the call is used (and pytype isn't NULL) then the
+   * passed type is used in the instance. This is for classes that extend API
+   * classes in python. The type passed may not be the same type that's stored
+   * in the class metadata of the AddonClass of which 'api' is an instance, 
+   * it can be a subclass in python.
+   *
+   * if pytype is NULL then the type is inferred using the class metadata 
+   * stored in the AddonClass instance 'api'.
    */
-  PyObject* makePythonInstance(void* api, PyTypeObject* typeObj, TypeInfo* typeInfo, bool incrementRefCount)
+  PyObject* makePythonInstance(XBMCAddon::AddonClass* api, PyTypeObject* pytype, bool incrementRefCount)
   {
     // null api types result in Py_None
     if (!api)
@@ -299,6 +312,10 @@ namespace PythonBindings
       Py_INCREF(Py_None);
       return Py_None;
     }
+
+    // retrieve the TypeInfo from the api class
+    const TypeInfo* typeInfo = getTypeInfoForInstance(api);
+    PyTypeObject* typeObj = pytype == NULL ? (PyTypeObject*)(&(typeInfo->pythonType)) : pytype;
 
     PyHolder* self = (PyHolder*)typeObj->tp_alloc(typeObj,0);
     if (!self) return NULL;
@@ -308,6 +325,19 @@ namespace PythonBindings
     if (incrementRefCount)
       Py_INCREF((PyObject*)self);
     return (PyObject*)self;
+  }
+
+  std::map<XbmcCommons::type_index, const TypeInfo*> typeInfoLookup;
+
+  void registerAddonClassTypeInformation(const TypeInfo* classInfo)
+  {
+    typeInfoLookup[classInfo->typeIndex] = classInfo;
+  }
+
+  const TypeInfo* getTypeInfoForInstance(XBMCAddon::AddonClass* obj)
+  {
+    XbmcCommons::type_index ti(typeid(*obj));
+    return typeInfoLookup[ti];
   }
 
 }

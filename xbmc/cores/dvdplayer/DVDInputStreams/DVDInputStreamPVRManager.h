@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 
 #include "DVDInputStream.h"
 #include "FileItem.h"
+#include "threads/SystemClock.h"
 
 namespace XFILE {
 class IFile;
@@ -46,7 +47,7 @@ public:
   virtual ~CDVDInputStreamPVRManager();
   virtual bool Open(const char* strFile, const std::string &content);
   virtual void Close();
-  virtual int Read(BYTE* buf, int buf_size);
+  virtual int Read(uint8_t* buf, int buf_size);
   virtual int64_t Seek(int64_t offset, int whence);
   virtual bool Pause(double dTime) { return false; }
   virtual bool IsEOF();
@@ -98,7 +99,7 @@ protected:
   XFILE::IRecordable*       m_pRecordable;
   bool                      m_eof;
   std::string               m_strContent;
-  unsigned int              m_iScanTimeout;
+  XbmcThreads::EndTime      m_ScanTimeout;
 };
 
 

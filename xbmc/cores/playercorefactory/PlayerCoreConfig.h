@@ -24,9 +24,6 @@
 #include "PlayerCoreFactory.h"
 #include "cores/dvdplayer/DVDPlayer.h"
 #include "cores/paplayer/PAPlayer.h"
-#if defined(HAS_AMLPLAYER)
-#include "cores/amlplayer/AMLPlayer.h"
-#endif
 #if defined(HAS_OMXPLAYER)
 #include "cores/omxplayer/OMXPlayer.h"
 #endif
@@ -99,18 +96,11 @@ public:
         pPlayer = new COMXPlayer(callback); 
         CLog::Log(LOGINFO, "Created player %s for core %d / OMXPlayer forced as DVDPlayer", "OMXPlayer", m_eCore);
         break;
-      case EPC_PAPLAYER: 
-        pPlayer = new COMXPlayer(callback); 
-        CLog::Log(LOGINFO, "Created player %s for core %d / OMXPlayer forced as PAPLayer", "OMXPlayer", m_eCore);
-        break;
 #else
       case EPC_DVDPLAYER: pPlayer = new CDVDPlayer(callback); break;
+#endif
       case EPC_PAPLAYER: pPlayer = new PAPlayer(callback); break;
-#endif
       case EPC_EXTPLAYER: pPlayer = new CExternalPlayer(callback); break;
-#if defined(HAS_AMLPLAYER)
-      case EPC_AMLPLAYER: pPlayer = new CAMLPlayer(callback); break;
-#endif
 #if defined(HAS_OMXPLAYER)
       case EPC_OMXPLAYER: pPlayer = new COMXPlayer(callback); break;
 #endif

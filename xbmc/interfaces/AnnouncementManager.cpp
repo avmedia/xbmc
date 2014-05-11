@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -120,7 +120,11 @@ void CAnnouncementManager::Announce(AnnouncementFlag flag, const char *sender, c
       CVideoDatabase videodatabase;
       if (videodatabase.Open())
       {
-        if (videodatabase.LoadVideoInfo(item->GetPath(), *item->GetVideoInfoTag()))
+        CStdString path = item->GetPath();
+        CStdString videoInfoTagPath(item->GetVideoInfoTag()->m_strFileNameAndPath);
+        if (StringUtils::StartsWith(videoInfoTagPath, "removable://"))
+          path = videoInfoTagPath;
+        if (videodatabase.LoadVideoInfo(path, *item->GetVideoInfoTag()))
           id = item->GetVideoInfoTag()->m_iDbId;
 
         videodatabase.Close();
@@ -138,7 +142,7 @@ void CAnnouncementManager::Announce(AnnouncementFlag flag, const char *sender, c
       item->SetProperty(LOOKUP_PROPERTY, false);
 
       CStdString title = item->GetVideoInfoTag()->m_strTitle;
-      if (title.IsEmpty())
+      if (title.empty())
         title = item->GetLabel();
       object["item"]["title"] = title;
 
@@ -194,7 +198,7 @@ void CAnnouncementManager::Announce(AnnouncementFlag flag, const char *sender, c
       item->SetProperty(LOOKUP_PROPERTY, false);
 
       CStdString title = item->GetMusicInfoTag()->GetTitle();
-      if (title.IsEmpty())
+      if (title.empty())
         title = item->GetLabel();
       object["item"]["title"] = title;
 

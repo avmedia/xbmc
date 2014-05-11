@@ -151,6 +151,10 @@ public:
   /// @return Informations about the current video track
   CStdString GetVideoInfo();
 
+  void GetVideoStreamInfo(SPlayerVideoStreamInfo &info);
+  bool GetStreamDetails(CStreamDetails &details);
+  void GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info);
+
   Com::SmartPtr<IFilterGraph2> pFilterGraph;
 
 private:

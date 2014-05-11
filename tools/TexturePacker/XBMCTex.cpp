@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,13 +13,12 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include <sys/types.h>
 #include <sys/stat.h>
 #define __STDC_FORMAT_MACROS
@@ -42,12 +41,12 @@
 #include "cmdlineargs.h"
 #include "libsquish/squish.h"
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #define strncasecmp strnicmp
 #endif
 
 #ifdef USE_LZO_PACKING
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include "../../lib/win32/liblzo/LZO1X.H"
 #else
 #include <lzo/lzo1x.h>
@@ -576,7 +575,7 @@ int main(int argc, char* argv[])
     {
       OutputFilename = args[++i];
       valid = true;
-#ifdef _LINUX
+#ifdef TARGET_POSIX
       char *c = NULL;
       while ((c = (char *)strchr(OutputFilename.c_str(), '\\')) != NULL) *c = '/';
 #endif

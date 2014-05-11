@@ -3,7 +3,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,6 +50,8 @@ private:
 
   CStdString m_strContentType;
 
+  std::string m_strFileName;
+
   int m_nAudioStream;
 
   int m_audioPos;
@@ -59,6 +61,8 @@ private:
   int  m_nDecodedLen;
 
   CAEChannelInfo m_ChannelInfo;
+
+  bool m_bInited;
 };
 
 #endif

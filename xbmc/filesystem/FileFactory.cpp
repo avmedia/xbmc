@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
  *
  */
 
-
-#if (defined HAVE_CONFIG_H) && (!defined WIN32)
+#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
   #include "config.h"
 #endif
 #include "network/Network.h"
@@ -32,7 +31,7 @@
 #include "ShoutcastFile.h"
 #include "FileReaderFile.h"
 #ifdef HAS_FILESYSTEM_SMB
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include "windows/WINFileSmb.h"
 #else
 #include "SmbFile.h"
@@ -95,6 +94,8 @@
 #include "Application.h"
 #include "URL.h"
 #include "utils/log.h"
+#include "utils/StringUtils.h"
+#include "network/WakeOnAccess.h"
 
 using namespace XFILE;
 
@@ -114,8 +115,11 @@ IFile* CFileFactory::CreateLoader(const CStdString& strFileName)
 
 IFile* CFileFactory::CreateLoader(const CURL& url)
 {
+  if (!CWakeOnAccess::Get().WakeUpHost(url))
+    return NULL;
+
   CStdString strProtocol = url.GetProtocol();
-  strProtocol.MakeLower();
+  StringUtils::ToLower(strProtocol);
 
 #if defined(TARGET_ANDROID)
   if (strProtocol == "apk") return new CAPKFile();
@@ -134,7 +138,7 @@ IFile* CFileFactory::CreateLoader(const CURL& url)
   else if (strProtocol == "special") return new CSpecialProtocolFile();
   else if (strProtocol == "multipath") return new CMultiPathFile();
   else if (strProtocol == "image") return new CImageFile();
-  else if (strProtocol == "file" || strProtocol.IsEmpty()) return new CHDFile();
+  else if (strProtocol == "file" || strProtocol.empty()) return new CHDFile();
   else if (strProtocol == "filereader") return new CFileReaderFile();
 #if defined(HAS_FILESYSTEM_CDDA) && defined(HAS_DVD_DRIVE)
   else if (strProtocol == "cdda") return new CFileCDDA();
@@ -143,6 +147,9 @@ IFile* CFileFactory::CreateLoader(const CURL& url)
   else if (strProtocol == "iso9660") return new CISOFile();
 #endif
   else if(strProtocol == "udf") return new CUDFFile();
+#if defined(TARGET_ANDROID)
+  else if (strProtocol == "androidapp") return new CFileAndroidApp();
+#endif
 
   if( g_application.getNetwork().IsAvailable() )
   {
@@ -161,7 +168,7 @@ IFile* CFileFactory::CreateLoader(const CURL& url)
     else if (strProtocol == "myth") return new CMythFile();
     else if (strProtocol == "cmyth") return new CMythFile();
 #ifdef HAS_FILESYSTEM_SMB
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
     else if (strProtocol == "smb") return new CWINFileSMB();
 #else
     else if (strProtocol == "smb") return new CSmbFile();
@@ -193,9 +200,6 @@ IFile* CFileFactory::CreateLoader(const CURL& url)
     else if (strProtocol == "pipe") return new CPipeFile();    
 #ifdef HAS_UPNP
     else if (strProtocol == "upnp") return new CUPnPFile();
-#endif
-#if defined(TARGET_ANDROID)
-    else if (strProtocol == "androidapp") return new CFileAndroidApp();
 #endif
   }
 

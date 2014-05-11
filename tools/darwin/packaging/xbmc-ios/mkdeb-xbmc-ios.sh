@@ -23,7 +23,7 @@ fi
 #copy bzip2 of dsym to xbmc-depends install dir
 if [ -d $DSYM ]; then
   if [ -d $DSYM_TARGET_DIR ]; then
-    tar -C $DSYM/.. -c $DSYM_FILENAME/ | bzip2 > $DSYM_TARGET_DIR/`$DIRNAME/../../../buildbot/gitrev-posix`-${DSYM_FILENAME}.tar.bz2
+    tar -C $DSYM/.. -c $DSYM_FILENAME/ | bzip2 > $DSYM_TARGET_DIR/`$DIRNAME/../gitrev-posix`-${DSYM_FILENAME}.tar.bz2
   fi
 fi
 
@@ -45,8 +45,8 @@ fi
 
 PACKAGE=org.xbmc.xbmc-ios
 
-VERSION=13.0
-REVISION=0~alpha3
+VERSION=14.0
+REVISION=0~alpha1
 ARCHIVE=${PACKAGE}_${VERSION}-${REVISION}_iphoneos-arm.deb
 
 echo Creating $PACKAGE package version $VERSION revision $REVISION
@@ -58,7 +58,7 @@ mkdir -p $DIRNAME/$PACKAGE/DEBIAN
 echo "Package: $PACKAGE"                          >  $DIRNAME/$PACKAGE/DEBIAN/control
 echo "Priority: Extra"                            >> $DIRNAME/$PACKAGE/DEBIAN/control
 echo "Name: XBMC-iOS"                             >> $DIRNAME/$PACKAGE/DEBIAN/control
-echo "Depends: firmware (>= 4.1), curl, org.xbmc.xbmc-iconpack" >> $DIRNAME/$PACKAGE/DEBIAN/control
+echo "Depends: firmware (>= 4.1), curl"           >> $DIRNAME/$PACKAGE/DEBIAN/control
 echo "Version: $VERSION-$REVISION"                >> $DIRNAME/$PACKAGE/DEBIAN/control
 echo "Architecture: iphoneos-arm"                 >> $DIRNAME/$PACKAGE/DEBIAN/control
 echo "Description: XBMC Multimedia Center for 4.x iOS" >> $DIRNAME/$PACKAGE/DEBIAN/control

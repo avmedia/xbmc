@@ -27,10 +27,10 @@
 using namespace std;
 using namespace PERIPHERALS;
 
-#define PERIPHERAL_DEFAULT_RESCAN_INTERVAL 1000
+#define PERIPHERAL_DEFAULT_RESCAN_INTERVAL 5000
 
-CPeripheralBus::CPeripheralBus(CPeripherals *manager, PeripheralBusType type) :
-    CThread("PeripheralBus"),
+CPeripheralBus::CPeripheralBus(const CStdString &threadname, CPeripherals *manager, PeripheralBusType type) :
+    CThread(threadname),
     m_iRescanTime(PERIPHERAL_DEFAULT_RESCAN_INTERVAL),
     m_bInitialised(false),
     m_bIsStarted(false),
@@ -126,6 +126,8 @@ bool CPeripheralBus::ScanForDevices(void)
   {
     UnregisterRemovedDevices(results);
     RegisterNewDevices(results);
+
+    CPeripherals::Get().NotifyObservers(ObservableMessagePeripheralsChanged);
 
     bReturn = true;
   }

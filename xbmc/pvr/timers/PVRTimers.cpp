@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
  */
 
 #include "FileItem.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "dialogs/GUIDialogOK.h"
 #include "threads/SingleLock.h"
@@ -41,6 +41,7 @@ using namespace EPG;
 CPVRTimers::CPVRTimers(void)
 {
   m_bIsUpdating = false;
+  m_iLastId     = 0;
 }
 
 CPVRTimers::~CPVRTimers(void)
@@ -151,6 +152,7 @@ bool CPVRTimers::UpdateEntries(const CPVRTimers &timers)
           addEntry = itr->second;
         }
 
+        newTimer->m_iTimerId = ++m_iLastId;
         addEntry->push_back(newTimer);
         UpdateEpgEvent(newTimer);
         bChanged = true;
@@ -187,11 +189,11 @@ bool CPVRTimers::UpdateEntries(const CPVRTimers &timers)
         if (g_PVRManager.IsStarted())
         {
           CStdString strMessage;
-          strMessage.Format("%s: '%s'",
-              (timer->EndAsUTC() <= CDateTime::GetCurrentDateTime().GetAsUTCDateTime()) ?
-                  g_localizeStrings.Get(19227) :
-                  g_localizeStrings.Get(19228),
-                  timer->m_strTitle.c_str());
+          strMessage = StringUtils::Format("%s: '%s'",
+                                           (timer->EndAsUTC() <= CDateTime::GetCurrentDateTime().GetAsUTCDateTime()) ?
+                                           g_localizeStrings.Get(19227).c_str() :
+                                           g_localizeStrings.Get(19228).c_str(),
+                                           timer->m_strTitle.c_str());
           timerNotifications.push_back(strMessage);
         }
 
@@ -252,7 +254,7 @@ bool CPVRTimers::UpdateEntries(const CPVRTimers &timers)
 
     NotifyObservers(bAddedOrDeleted ? ObservableMessageTimersReset : ObservableMessageTimers);
 
-    if (g_guiSettings.GetBool("pvrrecord.timernotifications"))
+    if (CSettings::Get().GetBool("pvrrecord.timernotifications"))
     {
       /* queue notifications */
       for (unsigned int iNotificationPtr = 0; iNotificationPtr < timerNotifications.size(); iNotificationPtr++)
@@ -285,6 +287,7 @@ bool CPVRTimers::UpdateFromClient(const CPVRTimerInfoTag &timer)
     {
       addEntry = itr->second;
     }
+    tag->m_iTimerId = ++m_iLastId;
     addEntry->push_back(tag);
   }
 
@@ -485,19 +488,19 @@ bool CPVRTimers::InstantTimer(const CPVRChannel &channel)
     newTimer->m_bIsRadio          = channel.IsRadio();
 
     /* generate summary string */
-    newTimer->m_strSummary.Format("%s %s %s %s %s",
-        newTimer->StartAsLocalTime().GetAsLocalizedDate(),
-        g_localizeStrings.Get(19159),
-        newTimer->StartAsLocalTime().GetAsLocalizedTime(StringUtils::EmptyString, false),
-        g_localizeStrings.Get(19160),
-        newTimer->EndAsLocalTime().GetAsLocalizedTime(StringUtils::EmptyString, false));
+    newTimer->m_strSummary = StringUtils::Format("%s %s %s %s %s",
+                                                 newTimer->StartAsLocalTime().GetAsLocalizedDate().c_str(),
+                                                 g_localizeStrings.Get(19159).c_str(),
+                                                 newTimer->StartAsLocalTime().GetAsLocalizedTime(StringUtils::EmptyString, false).c_str(),
+                                                 g_localizeStrings.Get(19160).c_str(),
+                                                 newTimer->EndAsLocalTime().GetAsLocalizedTime(StringUtils::EmptyString, false).c_str());
   }
 
   CDateTime startTime(0);
   newTimer->SetStartFromUTC(startTime);
   newTimer->m_iMarginStart = 0; /* set the start margin to 0 for instant timers */
 
-  int iDuration = g_guiSettings.GetInt("pvrrecord.instantrecordtime");
+  int iDuration = CSettings::Get().GetInt("pvrrecord.instantrecordtime");
   CDateTime endTime = CDateTime::GetUTCDateTime() + CDateTimeSpan(0, 0, iDuration ? iDuration : 120, 0);
   newTimer->SetEndFromUTC(endTime);
 
@@ -657,10 +660,10 @@ void CPVRTimers::Notify(const Observable &obs, const ObservableMessage msg)
 
 CDateTime CPVRTimers::GetNextEventTime(void) const
 {
-  const bool dailywakup = g_guiSettings.GetBool("pvrpowermanagement.dailywakeup");
+  const bool dailywakup = CSettings::Get().GetBool("pvrpowermanagement.dailywakeup");
   const CDateTime now = CDateTime::GetUTCDateTime();
-  const CDateTimeSpan prewakeup(0, 0, g_guiSettings.GetInt("pvrpowermanagement.prewakeup"), 0);
-  const CDateTimeSpan idle(0, 0, g_guiSettings.GetInt("pvrpowermanagement.backendidletime"), 0);
+  const CDateTimeSpan prewakeup(0, 0, CSettings::Get().GetInt("pvrpowermanagement.prewakeup"), 0);
+  const CDateTimeSpan idle(0, 0, CSettings::Get().GetInt("pvrpowermanagement.backendidletime"), 0);
 
   CDateTime wakeuptime;
 
@@ -678,7 +681,7 @@ CDateTime CPVRTimers::GetNextEventTime(void) const
   if (dailywakup)
   {
     CDateTime dailywakeuptime;
-    dailywakeuptime.SetFromDBTime(g_guiSettings.GetString("pvrpowermanagement.dailywakeuptime", false));
+    dailywakeuptime.SetFromDBTime(CSettings::Get().GetString("pvrpowermanagement.dailywakeuptime"));
     dailywakeuptime = dailywakeuptime.GetAsUTCDateTime();
 
     dailywakeuptime.SetDateTime(
@@ -740,4 +743,33 @@ void CPVRTimers::UpdateChannels(void)
     for (vector<CPVRTimerInfoTagPtr>::iterator timerIt = it->second->begin(); timerIt != it->second->end(); timerIt++)
       (*timerIt)->UpdateChannel();
   }
+}
+
+void CPVRTimers::GetAll(CFileItemList& items) const
+{
+  CFileItemPtr item;
+  CSingleLock lock(m_critSection);
+  for (map<CDateTime, vector<CPVRTimerInfoTagPtr>* >::const_iterator it = m_tags.begin(); it != m_tags.end(); it++)
+  {
+    for (vector<CPVRTimerInfoTagPtr>::const_iterator timerIt = it->second->begin(); timerIt != it->second->end(); timerIt++)
+    {
+      item.reset(new CFileItem(**timerIt));
+      items.Add(item);
+    }
+  }
+}
+
+CPVRTimerInfoTagPtr CPVRTimers::GetById(unsigned int iTimerId) const
+{
+  CPVRTimerInfoTagPtr item;
+  CSingleLock lock(m_critSection);
+  for (map<CDateTime, vector<CPVRTimerInfoTagPtr>* >::const_iterator it = m_tags.begin(); !item && it != m_tags.end(); it++)
+  {
+    for (vector<CPVRTimerInfoTagPtr>::const_iterator timerIt = it->second->begin(); !item && timerIt != it->second->end(); timerIt++)
+    {
+      if ((*timerIt)->m_iTimerId == iTimerId)
+        item = *timerIt;
+    }
+  }
+  return item;
 }

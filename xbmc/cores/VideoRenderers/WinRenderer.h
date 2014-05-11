@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@
  *
  */
 
-#if !defined(_LINUX) && !defined(HAS_GL)
+#if !defined(TARGET_POSIX) && !defined(HAS_GL)
 
 #include "guilib/GraphicContext.h"
 #include "RenderFlags.h"
+#include "RenderFormats.h"
 #include "BaseRenderer.h"
 #include "guilib/D3DResource.h"
 #include "RenderCapture.h"
@@ -32,16 +33,9 @@
 #endif
 #include "settings/VideoSettings.h"
 #include "cores/dvdplayer/DVDCodecs/Video/DXVA.h"
+#include "cores/dvdplayer/DVDCodecs/Video/DXVAHD.h"
 #include "cores/VideoRenderers/RenderFlags.h"
 #include "cores/VideoRenderers/RenderFormats.h"
-
-//#define MP_DIRECTRENDERING
-
-#ifdef MP_DIRECTRENDERING
-#define NUM_BUFFERS 3
-#else
-#define NUM_BUFFERS 2
-#endif
 
 #define ALIGN(value, alignment) (((value)+((alignment)-1))&~((alignment)-1))
 #define CLAMP(a, min, max) ((a) > (max) ? (max) : ( (a) < (min) ? (min) : a ))
@@ -156,7 +150,7 @@ public:
   CWinRenderer();
   ~CWinRenderer();
 
-  virtual void Update(bool bPauseDrawing);
+  virtual void Update();
   virtual void SetupScreenshot() {};
 
   bool RenderCapture(CRenderCapture* capture);
@@ -165,7 +159,7 @@ public:
   virtual bool         Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_format, unsigned int orientation);
   virtual int          GetImage(YV12Image *image, int source = AUTOSOURCE, bool readonly = false);
   virtual void         ReleaseImage(int source, bool preserve = false);
-  virtual bool         AddVideoPicture(DVDVideoPicture* picture);
+  virtual bool         AddVideoPicture(DVDVideoPicture* picture, int index);
   virtual void         FlipPage(int source);
   virtual unsigned int PreInit();
   virtual void         UnInit();
@@ -183,7 +177,9 @@ public:
 
   void                 RenderUpdate(bool clear, DWORD flags = 0, DWORD alpha = 255);
 
-  virtual unsigned int GetProcessorSize() { return m_processor.Size(); }
+  virtual unsigned int GetProcessorSize();
+  virtual void         SetBufferSize(int numBuffers) { m_neededBuffers = numBuffers; }
+  virtual unsigned int GetMaxBufferSize() { return NUM_BUFFERS; }
 
 protected:
   virtual void Render(DWORD flags);
@@ -206,7 +202,7 @@ protected:
   void SelectSWVideoFilter();
   void SelectPSVideoFilter();
   void UpdatePSVideoFilter();
-  bool CreateIntermediateRenderTarget();
+  bool CreateIntermediateRenderTarget(unsigned int width, unsigned int height);
 
   void RenderProcessor(DWORD flags);
   int  m_iYV12RenderBuffer;
@@ -215,7 +211,7 @@ protected:
   bool                 m_bConfigured;
   SVideoBuffer        *m_VideoBuffers[NUM_BUFFERS];
   RenderMethod         m_renderMethod;
-  DXVA::CProcessor     m_processor;
+  DXVA::CProcessor    *m_processor;
   std::vector<ERenderFormat> m_formats;
 
   // software scale libraries (fallback if required pixel shaders version is not available)
@@ -238,7 +234,7 @@ protected:
   ESCALINGMETHOD       m_scalingMethod;
   ESCALINGMETHOD       m_scalingMethodGui;
 
-  D3DCAPS9 m_deviceCaps;
+  D3DCAPS9             m_deviceCaps;
 
   bool                 m_bFilterInitialized;
 
@@ -246,13 +242,14 @@ protected:
 
   // clear colour for "black" bars
   DWORD                m_clearColour;
-  ERenderFormat        m_format;
   unsigned int         m_extended_format;
 
   // Width and height of the render target
   // the separable HQ scalers need this info, but could the m_destRect be used instead?
   unsigned int         m_destWidth;
   unsigned int         m_destHeight;
+
+  int                  m_neededBuffers;
 };
 
 #else

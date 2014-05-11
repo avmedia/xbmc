@@ -9,7 +9,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -204,13 +204,13 @@ public:
   bool GetNavigationAction(int direction, CGUIAction& action) const;
   /*! \brief  Start navigating in given direction.
    */
-  bool Navigate(int direction);
+  bool Navigate(int direction) const;
   virtual void SetFocus(bool focus);
   virtual void SetWidth(float width);
   virtual void SetHeight(float height);
   virtual void SetVisible(bool bVisible, bool setVisState = false);
   void SetVisibleCondition(const CStdString &expression, const CStdString &allowHiddenFocus = "");
-  unsigned int GetVisibleCondition() const { return m_visibleCondition; };
+  bool HasVisibleCondition() const { return m_visibleCondition; };
   void SetEnableCondition(const CStdString &expression);
   virtual void UpdateVisibility(const CGUIListItem *item = NULL);
   virtual void SetInitialVisibility();
@@ -311,7 +311,7 @@ protected:
   virtual bool Animate(unsigned int currentTime);
   virtual bool CheckAnimation(ANIMATION_TYPE animType);
   void UpdateStates(ANIMATION_TYPE type, ANIMATION_PROCESS currentProcess, ANIMATION_STATE currentState);
-  bool SendWindowMessage(CGUIMessage &message);
+  bool SendWindowMessage(CGUIMessage &message) const;
 
   // navigation and actions
   CGUIAction m_actionLeft;
@@ -339,14 +339,14 @@ protected:
   CGUIControl *m_parentControl;   // our parent control if we're part of a group
 
   // visibility condition/state
-  unsigned int m_visibleCondition;
+  INFO::InfoPtr m_visibleCondition;
   GUIVISIBLE m_visible;
   bool m_visibleFromSkinCondition;
   bool m_forceHidden;       // set from the code when a hidden operation is given - overrides m_visible
   CGUIInfoBool m_allowHiddenFocus;
   bool m_hasProcessed;
   // enable/disable state
-  unsigned int m_enableCondition;
+  INFO::InfoPtr m_enableCondition;
   bool m_enabled;
 
   bool m_pushedUpdates;

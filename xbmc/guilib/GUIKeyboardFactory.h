@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,11 @@ class CGUIKeyboardFactory
     static int  ShowAndVerifyPassword(CStdString& strPassword, const CStdString& strHeading, int iRetries, unsigned int autoCloseMs = 0);
     static bool ShowAndGetFilter(CStdString& aTextString, bool searching, unsigned int autoCloseMs = 0);
 
+    static bool SendTextToActiveKeyboard(const std::string &aTextString, bool closeKeyboard = false);
+
+    static bool isKeyboardActivated() { return g_activedKeyboard != NULL; }
   private:
+    static CGUIKeyboard *g_activedKeyboard;
     static FILTERING m_filtering;
     static void keyTypedCB(CGUIKeyboard *ref, const std::string &typedString);
 };

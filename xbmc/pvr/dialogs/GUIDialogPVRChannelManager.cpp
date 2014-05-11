@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,8 +38,9 @@
 #include "pvr/PVRManager.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "pvr/addons/PVRClients.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "storage/MediaManager.h"
+#include "utils/StringUtils.h"
 
 #define BUTTON_OK                 4
 #define BUTTON_APPLY              5
@@ -64,6 +65,9 @@ using namespace PVR;
 CGUIDialogPVRChannelManager::CGUIDialogPVRChannelManager(void) :
     CGUIDialog(WINDOW_DIALOG_PVR_CHANNEL_MANAGER, "DialogPVRChannelManager.xml"),
     m_bIsRadio(false),
+    m_bMovingMode(false),
+    m_bContainsChanges(false),
+    m_iSelected(0),
     m_channelItems(new CFileItemList)
 {
 }
@@ -111,9 +115,9 @@ bool CGUIDialogPVRChannelManager::OnActionMove(const CAction &action)
         unsigned int iNewSelect = bMoveUp ? m_iSelected - 1 : m_iSelected + 1;
         if (m_channelItems->Get(iNewSelect)->GetProperty("Number").asString() != "-")
         {
-          strNumber.Format("%i", m_iSelected+1);
+          strNumber = StringUtils::Format("%i", m_iSelected+1);
           m_channelItems->Get(iNewSelect)->SetProperty("Number", strNumber);
-          strNumber.Format("%i", iNewSelect+1);
+          strNumber = StringUtils::Format("%i", iNewSelect+1);
           m_channelItems->Get(m_iSelected)->SetProperty("Number", strNumber);
         }
         m_channelItems->Swap(iNewSelect, m_iSelected);
@@ -134,9 +138,10 @@ bool CGUIDialogPVRChannelManager::OnAction(const CAction& action)
          CGUIDialog::OnAction(action);
 }
 
-bool CGUIDialogPVRChannelManager::OnMessageInit(CGUIMessage &message)
+void CGUIDialogPVRChannelManager::OnInitWindow()
 {
-  CGUIWindow::OnMessage(message);
+  CGUIDialog::OnInitWindow();
+
   m_iSelected = 0;
   m_bIsRadio = false;
   m_bMovingMode = false;
@@ -144,8 +149,13 @@ bool CGUIDialogPVRChannelManager::OnMessageInit(CGUIMessage &message)
   SetProperty("IsRadio", "");
   Update();
   SetData(m_iSelected);
+}
 
-  return true;
+void CGUIDialogPVRChannelManager::OnDeinitWindow(int nextWindowID)
+{
+  Clear();
+
+  CGUIDialog::OnDeinitWindow(nextWindowID);
 }
 
 bool CGUIDialogPVRChannelManager::OnClickListChannels(CGUIMessage &message)
@@ -302,8 +312,6 @@ bool CGUIDialogPVRChannelManager::OnClickButtonChannelLogo(CGUIMessage &message)
     return false;
   if (CProfilesManager::Get().GetCurrentProfile().canWriteSources() && !g_passwordManager.IsProfileLockUnlocked())
     return false;
-  else if (!g_passwordManager.IsMasterLockUnlocked(true))
-    return false;
 
   // setup our thumb list
   CFileItemList items;
@@ -313,34 +321,34 @@ bool CGUIDialogPVRChannelManager::OnClickButtonChannelLogo(CGUIMessage &message)
   {
     CFileItemPtr current(new CFileItem("thumb://Current", false));
     current->SetArt("thumb", pItem->GetPVRChannelInfoTag()->IconPath());
-    current->SetLabel(g_localizeStrings.Get(20016));
+    current->SetLabel(g_localizeStrings.Get(19282));
     items.Add(current);
   }
   else if (pItem->HasArt("thumb"))
   { // already have a thumb that the share doesn't know about - must be a local one, so we mayaswell reuse it.
     CFileItemPtr current(new CFileItem("thumb://Current", false));
     current->SetArt("thumb", pItem->GetArt("thumb"));
-    current->SetLabel(g_localizeStrings.Get(20016));
+    current->SetLabel(g_localizeStrings.Get(19282));
     items.Add(current);
   }
 
   // and add a "no thumb" entry as well
   CFileItemPtr nothumb(new CFileItem("thumb://None", false));
   nothumb->SetIconImage(pItem->GetIconImage());
-  nothumb->SetLabel(g_localizeStrings.Get(20018));
+  nothumb->SetLabel(g_localizeStrings.Get(19283));
   items.Add(nothumb);
 
   CStdString strThumb;
   VECSOURCES shares;
-  if (g_guiSettings.GetString("pvrmenu.iconpath") != "")
+  if (CSettings::Get().GetString("pvrmenu.iconpath") != "")
   {
     CMediaSource share1;
-    share1.strPath = g_guiSettings.GetString("pvrmenu.iconpath");
-    share1.strName = g_localizeStrings.Get(19018);
+    share1.strPath = CSettings::Get().GetString("pvrmenu.iconpath");
+    share1.strName = g_localizeStrings.Get(19066);
     shares.push_back(share1);
   }
   g_mediaManager.GetLocalDrives(shares);
-  if (!CGUIDialogFileBrowser::ShowAndGetImage(items, shares, g_localizeStrings.Get(1030), strThumb))
+  if (!CGUIDialogFileBrowser::ShowAndGetImage(items, shares, g_localizeStrings.Get(19285), strThumb, NULL, 19285))
     return false;
 
   if (strThumb == "thumb://Current")
@@ -351,6 +359,7 @@ bool CGUIDialogPVRChannelManager::OnClickButtonChannelLogo(CGUIMessage &message)
 
   pItem->SetProperty("Icon", strThumb);
   pItem->SetProperty("Changed", true);
+  pItem->SetProperty("UserSetIcon", true);
   m_bContainsChanges = true;
   return true;
 }
@@ -490,7 +499,7 @@ bool CGUIDialogPVRChannelManager::OnClickButtonNewChannel(CGUIMessage &message)
       CStdString strURL = "";
       if (CGUIKeyboardFactory::ShowAndGetInput(strURL, g_localizeStrings.Get(19214), false))
       {
-        if (!strURL.IsEmpty())
+        if (!strURL.empty())
         {
           CPVRChannel *newchannel = new CPVRChannel(m_bIsRadio);
           newchannel->SetChannelName(g_localizeStrings.Get(19204));
@@ -573,11 +582,6 @@ bool CGUIDialogPVRChannelManager::OnMessage(CGUIMessage& message)
 
   switch (iMessage)
   {
-    case GUI_MSG_WINDOW_DEINIT:
-      Clear();
-      break;
-    case GUI_MSG_WINDOW_INIT:
-      return OnMessageInit(message);
     case GUI_MSG_CLICKED:
       return OnMessageClick(message);
   }
@@ -717,8 +721,7 @@ void CGUIDialogPVRChannelManager::Update()
     channelFile->SetProperty("Icon", channel->IconPath());
     channelFile->SetProperty("EPGSource", (int)0);
     channelFile->SetProperty("ParentalLocked", channel->IsLocked());
-    CStdString number; number.Format("%i", channel->ChannelNumber());
-    channelFile->SetProperty("Number", number);
+    channelFile->SetProperty("Number", StringUtils::Format("%i", channel->ChannelNumber()));
 
     if (channel->IsVirtual())
     {
@@ -771,8 +774,9 @@ bool CGUIDialogPVRChannelManager::PersistChannel(CFileItemPtr pItem, CPVRChannel
   CStdString strChannelName = pItem->GetProperty("Name").asString();
   CStdString strIconPath    = pItem->GetProperty("Icon").asString();
   CStdString strStreamURL   = pItem->GetProperty("StreamURL").asString();
+  bool bUserSetIcon         = pItem->GetProperty("UserSetIcon").asBoolean();
 
-  return group->UpdateChannel(*pItem, bHidden, bVirtual, bEPGEnabled, bParentalLocked, iEPGSource, ++(*iChannelNumber), strChannelName, strIconPath, strStreamURL);
+  return group->UpdateChannel(*pItem, bHidden, bVirtual, bEPGEnabled, bParentalLocked, iEPGSource, ++(*iChannelNumber), strChannelName, strIconPath, strStreamURL, bUserSetIcon);
 }
 
 void CGUIDialogPVRChannelManager::SaveList(void)
@@ -830,7 +834,7 @@ void CGUIDialogPVRChannelManager::Renumber(void)
     pItem = m_channelItems->Get(iChannelPtr);
     if (pItem->GetProperty("ActiveChannel").asBoolean())
     {
-      strNumber.Format("%i", ++iNextChannelNumber);
+      strNumber = StringUtils::Format("%i", ++iNextChannelNumber);
       pItem->SetProperty("Number", strNumber);
     }
     else

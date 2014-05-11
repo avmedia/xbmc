@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public:
 private:
   bool m_bHost;
   bool EnumerateFunc(LPNETRESOURCEW lpnr, CFileItemList &items);
-  CStdString GetLocal(const CStdString& strPath);
-  CStdString URLEncode(const CURL &url);
+  std::string GetLocal(const std::string& strPath);
+  std::string URLEncode(const CURL &url);
 };
 }

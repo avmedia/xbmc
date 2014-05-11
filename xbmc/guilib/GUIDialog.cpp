@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
 #include "GUIWindowManager.h"
 #include "GUILabelControl.h"
 #include "GUIAudioManager.h"
-#include "GUIInfoManager.h"
 #include "threads/SingleLock.h"
 #include "utils/TimeUtils.h"
 #include "Application.h"
@@ -137,10 +136,27 @@ void CGUIDialog::UpdateVisibility()
 {
   if (m_visibleCondition)
   {
-    if (g_infoManager.GetBoolValue(m_visibleCondition))
+    if (m_visibleCondition->Get())
       Show();
     else
       Close();
+  }
+  
+  if (m_autoClosing)
+  { // check if our timer is running
+    if (!m_showStartTime)
+    {
+      if (HasProcessed()) // start timer
+        m_showStartTime = CTimeUtils::GetFrameTime();
+    }
+    else
+    {
+      if (m_showStartTime + m_showDuration < CTimeUtils::GetFrameTime() && !m_closing)
+      {
+        m_bAutoClosed = true;
+        Close();
+      }
+    }
   }
 }
 
@@ -226,27 +242,6 @@ void CGUIDialog::Show()
   }
   else
     Show_Internal();
-}
-
-void CGUIDialog::FrameMove()
-{
-  if (m_autoClosing)
-  { // check if our timer is running
-    if (!m_showStartTime)
-    {
-      if (HasProcessed()) // start timer
-        m_showStartTime = CTimeUtils::GetFrameTime();
-    }
-    else
-    {
-      if (m_showStartTime + m_showDuration < CTimeUtils::GetFrameTime() && !m_closing)
-      {
-        m_bAutoClosed = true;
-        Close();
-      }
-    }
-  }
-  CGUIWindow::FrameMove();
 }
 
 void CGUIDialog::Render()

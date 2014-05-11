@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 #include "video/VideoDatabase.h"
 #include "DirectoryNodeOverview.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "FileItem.h"
 #include "guilib/LocalizeStrings.h"
 #include "video/VideoDbUrl.h"
@@ -71,21 +71,21 @@ bool CDirectoryNodeOverview::GetContent(CFileItemList& items) const
   vector<pair<const char*, int> > vec;
   if (hasMovies)
   {
-    if (g_guiSettings.GetBool("myvideos.flatten"))
+    if (CSettings::Get().GetBool("myvideos.flatten"))
       vec.push_back(make_pair("movies/titles", 342));
     else
       vec.push_back(make_pair("movies", 342));   // Movies
   }
   if (hasTvShows)
   {
-    if (g_guiSettings.GetBool("myvideos.flatten"))
+    if (CSettings::Get().GetBool("myvideos.flatten"))
       vec.push_back(make_pair("tvshows/titles", 20343));
     else
       vec.push_back(make_pair("tvshows", 20343)); // TV Shows
   }
   if (hasMusicVideos)
   {
-    if (g_guiSettings.GetBool("myvideos.flatten"))
+    if (CSettings::Get().GetBool("myvideos.flatten"))
       vec.push_back(make_pair("musicvideos/titles", 20389));
     else
       vec.push_back(make_pair("musicvideos", 20389)); // Music Videos

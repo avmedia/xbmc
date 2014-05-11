@@ -41,7 +41,7 @@
 #include "StreamsManager.h"
 #include "GUIInfoManager.h"
 #include <streams.h>
-
+#include "utils/StdString.h"
 
 #include "FgManager.h"
 #include "qnetwork.h"
@@ -147,7 +147,7 @@ HRESULT CDSGraph::SetFile(const CFileItem& file, const CPlayerOptions &options)
 		  m_pAMOpenProgress = pBF;
 	  }
 
-	  if(!CGraphFilters::Get()->AudioRenderer.osdname.IsEmpty() && !CGraphFilters::Get()->VideoRenderer.osdname.IsEmpty() && m_pAMOpenProgress)
+	  if(!CGraphFilters::Get()->AudioRenderer.osdname.empty() && !CGraphFilters::Get()->VideoRenderer.osdname.empty() && m_pAMOpenProgress)
 		  break;
   }
   EndEnumFilters
@@ -808,6 +808,48 @@ CStdString CDSGraph::GetVideoInfo()
     videoInfo += " | " + strDXVA;
 
   return videoInfo;
+}
+
+void CDSGraph::GetVideoStreamInfo(SPlayerVideoStreamInfo &info)
+{
+	CStreamsManager *c = CStreamsManager::Get();
+	if(c)
+	{
+		// TODO
+		info.bitrate = 0;
+		info.stereoMode = "";
+
+		info.width  = c->GetPictureWidth();
+		info.height = c->GetPictureHeight();
+		info.videoCodecName = c->GetVideoCodecDisplayName();
+		info.videoAspectRatio = g_renderManager.GetAspectRatio();
+		g_renderManager.GetVideoRect(info.SrcRect, info.DestRect);
+	}
+}
+
+bool CDSGraph::GetStreamDetails(CStreamDetails &details)
+{
+	// TODO
+
+	return false;
+}
+
+void CDSGraph::GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info)
+{
+	CStreamsManager *c = CStreamsManager::Get();
+	if(c)
+	{
+		if (index < 0 || index > c->GetAudioStreamCount() - 1 )
+			return;
+		info.audioCodecName = c->GetAudioCodecName();
+		info.bitspersample = c->GetBitsPerSample();
+		info.samplerate = c->GetSampleRate();
+		CStdString name;
+		c->GetAudioStreamName(index, name);
+		info.name = name;
+		info.channels = c->GetChannels();
+
+	}
 }
 
 bool CDSGraph::CanSeek()

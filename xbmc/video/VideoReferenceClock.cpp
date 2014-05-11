@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "utils/MathUtils.h"
 #include "utils/log.h"
 #include "utils/TimeUtils.h"
+#include "utils/StringUtils.h"
 #include "threads/SingleLock.h"
 
 #if defined(HAS_GLX) && defined(HAS_XRANDR)
@@ -36,7 +37,7 @@
   #include "osx/CocoaInterface.h"
 #elif defined(TARGET_DARWIN_IOS)
   #include "windowing/WindowingFactory.h"
-#elif defined(_WIN32) && defined(HAS_DX)
+#elif defined(TARGET_WINDOWS) && defined(HAS_DX)
   #pragma comment (lib,"d3d9.lib")
   #if (D3DX_SDK_VERSION >= 42) //aug 2009 sdk and up there is no dxerr9 anymore
     #include <Dxerr.h>
@@ -53,7 +54,7 @@
 
 using namespace std;
 
-#if defined(_WIN32) && defined(HAS_DX)
+#if defined(TARGET_WINDOWS) && defined(HAS_DX)
 
   void CD3DCallback::Reset()
   {
@@ -146,7 +147,7 @@ void CVideoReferenceClock::Process()
   bool SetupSuccess = false;
   int64_t Now;
 
-#if defined(_WIN32) && defined(HAS_DX)
+#if defined(TARGET_WINDOWS) && defined(HAS_DX)
   //register callback
   m_D3dCallback.Reset();
   g_Windowing.Register(&m_D3dCallback);
@@ -157,13 +158,13 @@ void CVideoReferenceClock::Process()
     //set up the vblank clock
 #if defined(HAS_GLX) && defined(HAS_XRANDR)
     SetupSuccess = SetupGLX();
-#elif defined(_WIN32) && defined(HAS_DX)
+#elif defined(TARGET_WINDOWS) && defined(HAS_DX)
     SetupSuccess = SetupD3D();
 #elif defined(TARGET_DARWIN)
     SetupSuccess = SetupCocoa();
 #elif defined(HAS_GLX)
     CLog::Log(LOGDEBUG, "CVideoReferenceClock: compiled without RandR support");
-#elif defined(_WIN32)
+#elif defined(TARGET_WINDOWS)
     CLog::Log(LOGDEBUG, "CVideoReferenceClock: only available on directx build");
 #else
     CLog::Log(LOGDEBUG, "CVideoReferenceClock: no implementation available");
@@ -189,7 +190,7 @@ void CVideoReferenceClock::Process()
       //run the clock
 #if defined(HAS_GLX) && defined(HAS_XRANDR)
       RunGLX();
-#elif defined(_WIN32) && defined(HAS_DX)
+#elif defined(TARGET_WINDOWS) && defined(HAS_DX)
       RunD3D();
 #elif defined(TARGET_DARWIN)
       RunCocoa();
@@ -211,7 +212,7 @@ void CVideoReferenceClock::Process()
     //clean up the vblank clock
 #if defined(HAS_GLX) && defined(HAS_XRANDR)
     CleanupGLX();
-#elif defined(_WIN32) && defined(HAS_DX)
+#elif defined(TARGET_WINDOWS) && defined(HAS_DX)
     CleanupD3D();
 #elif defined(TARGET_DARWIN)
     CleanupCocoa();
@@ -219,7 +220,7 @@ void CVideoReferenceClock::Process()
     if (!SetupSuccess) break;
   }
 
-#if defined(_WIN32) && defined(HAS_DX)
+#if defined(TARGET_WINDOWS) && defined(HAS_DX)
   g_Windowing.Unregister(&m_D3dCallback);
 #endif
 }
@@ -290,8 +291,7 @@ bool CVideoReferenceClock::SetupGLX()
   }
 
   CStdString Vendor = g_Windowing.GetRenderVendor();
-  Vendor.ToLower();
-  if (Vendor.compare(0, 3, "ati") == 0)
+  if (StringUtils::StartsWithNoCase(Vendor, "ati"))
   {
     CLog::Log(LOGDEBUG, "CVideoReferenceClock: GL_VENDOR: %s, using ati workaround", Vendor.c_str());
     m_bIsATI = true;
@@ -410,7 +410,7 @@ bool CVideoReferenceClock::ParseNvSettings(int& RefreshRate)
   }
 
   CStdString Vendor = VendorPtr;
-  Vendor.ToLower();
+  StringUtils::ToLower(Vendor);
   if (Vendor.find("nvidia") == std::string::npos)
   {
     CLog::Log(LOGDEBUG, "CVideoReferenceClock: GL_VENDOR:%s, not using nvidia-settings", Vendor.c_str());
@@ -693,7 +693,7 @@ void CVideoReferenceClock::RunGLX()
   }
 }
 
-#elif defined(_WIN32) && defined(HAS_DX)
+#elif defined(TARGET_WINDOWS) && defined(HAS_DX)
 
 void CVideoReferenceClock::RunD3D()
 {
@@ -835,7 +835,7 @@ bool CVideoReferenceClock::SetupD3D()
     //build up a string of measured rates
     CStdString StrRates;
     for (list<double>::iterator it = Measures.begin(); it != Measures.end(); it++)
-      StrRates.AppendFormat("%.2f ", *it);
+      StrRates += StringUtils::Format("%.2f ", *it);
 
     //get the top half of the measured rates
     Measures.sort();
@@ -1228,7 +1228,7 @@ bool CVideoReferenceClock::UpdateRefreshrate(bool Forced /*= false*/)
 
   return true;
 
-#elif defined(_WIN32) && defined(HAS_DX)
+#elif defined(TARGET_WINDOWS) && defined(HAS_DX)
 
   D3DDISPLAYMODE DisplayMode;
   m_D3dDev->GetDisplayMode(0, &DisplayMode);

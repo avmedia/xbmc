@@ -19,15 +19,19 @@
  *
  */
 
+#include <vector>
+
 #include "Interfaces/AE.h"
 #include "threads/Thread.h"
+
+class CSetting;
 
 enum AEEngine
 {
   AE_ENGINE_NULL,
-  AE_ENGINE_SOFT,
   AE_ENGINE_COREAUDIO,
-  AE_ENGINE_PULSE
+  AE_ENGINE_ACTIVE,
+  AE_ENGINE_PIAUDIO
 };
 
 class CAEFactory
@@ -48,7 +52,14 @@ public:
   static void EnumerateOutputDevices(AEDeviceList &devices, bool passthrough);
   static void VerifyOutputDevice(std::string &device, bool passthrough);
   static std::string GetDefaultDevice(bool passthrough);
-  static bool SupportsRaw();
+  static bool SupportsRaw(AEDataFormat format, int samplerate);
+  static bool SupportsSilenceTimeout();
+
+  /**
+   * Returns true if current AudioEngine supports at lest two basic quality levels
+   * @return true if quality setting is supported, otherwise false
+   */
+  static bool SupportsQualitySetting(void);
   static void SetMute(const bool enabled);
   static bool IsMuted();
   static float GetVolume();
@@ -58,8 +69,22 @@ public:
     unsigned int encodedSampleRate, CAEChannelInfo channelLayout, unsigned int options = 0);
   static IAEStream *FreeStream(IAEStream *stream);
   static void GarbageCollect();
+
+  static void SettingOptionsAudioDevicesFiller(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current);
+  static void SettingOptionsAudioDevicesPassthroughFiller(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current);
+  static void SettingOptionsAudioQualityLevelsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+  static void SettingOptionsAudioStreamsilenceFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+  static bool IsSettingVisible(const std::string &condition, const std::string &value, const std::string &settingId);
+  static void KeepConfiguration(unsigned int millis);
+  static void DeviceChange();
+
+  static void RegisterAudioCallback(IAudioCallback* pCallback);
+  static void UnregisterAudioCallback();
+
 private:
   static bool LoadEngine(enum AEEngine engine);
   static IAE *AE;
+
+  static void SettingOptionsAudioDevicesFillerGeneral(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current, bool passthrough);
 };
 

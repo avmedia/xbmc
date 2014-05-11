@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,15 +29,16 @@
 #ifdef HAS_DS_PLAYER
 #include "File.h"
 #endif
-#ifndef _LINUX
+#ifdef TARGET_WINDOWS
 #include "utils/CharsetConverter.h"
+#include "win32/WIN32Util.h"
 #endif
 
 #ifndef INVALID_FILE_ATTRIBUTES
 #define INVALID_FILE_ATTRIBUTES ((DWORD) -1)
 #endif
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 typedef WIN32_FIND_DATAW LOCAL_WIN32_FIND_DATA;
 #define LocalFindFirstFile FindFirstFileW
 #define LocalFindNextFile FindNextFileW
@@ -59,6 +60,7 @@ CHDDirectory::~CHDDirectory(void)
 bool CHDDirectory::GetDirectory(const CStdString& strPath1, CFileItemList &items)
 {
   LOCAL_WIN32_FIND_DATA wfd;
+  memset(&wfd, 0, sizeof(wfd));
 
   CStdString strPath=strPath1;
 
@@ -68,11 +70,7 @@ bool CHDDirectory::GetDirectory(const CStdString& strPath1, CFileItemList &items
   CStdString strRoot = strPath;
   CURL url(strPath);
 
-  memset(&wfd, 0, sizeof(wfd));
   URIUtils::AddSlashAtEnd(strRoot);
-#ifdef _WIN32
-  strRoot.Replace("/", "\\");
-#endif
   if (URIUtils::IsDVD(strRoot) && m_isoReader.IsScanned())
   {
     // Reset iso reader and remount or
@@ -80,12 +78,11 @@ bool CHDDirectory::GetDirectory(const CStdString& strPath1, CFileItemList &items
     m_isoReader.Reset();
   }
 
-#ifdef _WIN32
-  CStdStringW strSearchMask;
-  g_charsetConverter.utf8ToW(strRoot, strSearchMask, false);
-  strSearchMask += "*.*";
+#ifdef TARGET_WINDOWS
+  std::wstring strSearchMask(CWIN32Util::ConvertPathToWin32Form(strRoot));
+  strSearchMask += L"*.*";
 #else
-  CStdString strSearchMask = strRoot;
+  CStdString strSearchMask(strRoot);
 #endif
 
   FILETIME localTime;
@@ -102,8 +99,8 @@ bool CHDDirectory::GetDirectory(const CStdString& strPath1, CFileItemList &items
       if (wfd.cFileName[0] != 0)
       {
         CStdString strLabel;
-#ifdef _WIN32
-        g_charsetConverter.wToUTF8(wfd.cFileName,strLabel);
+#ifdef TARGET_WINDOWS
+        g_charsetConverter.wToUTF8(wfd.cFileName,strLabel, true);
 #else
         strLabel = wfd.cFileName;
 #endif
@@ -112,7 +109,7 @@ bool CHDDirectory::GetDirectory(const CStdString& strPath1, CFileItemList &items
           if (strLabel != "." && strLabel != "..")
           {
             CFileItemPtr pItem(new CFileItem(strLabel));
-            CStdString itemPath = strRoot + strLabel;
+            CStdString itemPath(URIUtils::AddFileToFolder(strRoot, strLabel));
             URIUtils::AddSlashAtEnd(itemPath);
             pItem->SetPath(itemPath);
             pItem->m_bIsFolder = true;
@@ -132,7 +129,7 @@ bool CHDDirectory::GetDirectory(const CStdString& strPath1, CFileItemList &items
         else
         {
           CFileItemPtr pItem(new CFileItem(strLabel));
-          pItem->SetPath(strRoot + strLabel);
+          pItem->SetPath(URIUtils::AddFileToFolder(strRoot, strLabel));
           pItem->m_bIsFolder = false;
           pItem->m_dwSize = CUtil::ToInt64(wfd.nFileSizeHigh, wfd.nFileSizeLow);
           FileTimeToLocalFileTime(&wfd.ftLastWriteTime, &localTime);
@@ -152,15 +149,15 @@ bool CHDDirectory::GetDirectory(const CStdString& strPath1, CFileItemList &items
 
 bool CHDDirectory::Create(const char* strPath)
 {
+  if (!strPath || !*strPath)
+    return false;
   CStdString strPath1 = strPath;
   URIUtils::AddSlashAtEnd(strPath1);
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
   if (strPath1.size() == 3 && strPath1[1] == ':')
     return Exists(strPath);  // A drive - we can't "create" a drive
-  CStdStringW strWPath1;
-  g_charsetConverter.utf8ToW(strPath1, strWPath1, false);
-  if(::CreateDirectoryW(strWPath1, NULL))
+  if(::CreateDirectoryW(CWIN32Util::ConvertPathToWin32Form(strPath1).c_str(), NULL))
 #else
   if(::CreateDirectory(strPath1.c_str(), NULL))
 #endif
@@ -173,10 +170,10 @@ bool CHDDirectory::Create(const char* strPath)
 
 bool CHDDirectory::Remove(const char* strPath)
 {
-#ifdef _WIN32
-  CStdStringW strWPath;
-  g_charsetConverter.utf8ToW(strPath, strWPath, false);
-  return (::RemoveDirectoryW(strWPath) || GetLastError() == ERROR_PATH_NOT_FOUND) ? true : false;
+  if (!strPath || !*strPath)
+    return false;
+#ifdef TARGET_WINDOWS
+  return (::RemoveDirectoryW(CWIN32Util::ConvertPathToWin32Form(strPath).c_str()) || GetLastError() == ERROR_PATH_NOT_FOUND) ? true : false;
 #else
   return ::RemoveDirectory(strPath) ? true : false;
 #endif
@@ -186,15 +183,10 @@ bool CHDDirectory::Exists(const char* strPath)
 {
   if (!strPath || !*strPath)
     return false;
-  CStdString strReplaced=strPath;
-#ifdef _WIN32
-  CStdStringW strWReplaced;
-  strReplaced.Replace("/","\\");
-  URIUtils::AddSlashAtEnd(strReplaced);
-  g_charsetConverter.utf8ToW(strReplaced, strWReplaced, false);
-  DWORD attributes = GetFileAttributesW(strWReplaced);
+#ifdef TARGET_WINDOWS
+  DWORD attributes = GetFileAttributesW(CWIN32Util::ConvertPathToWin32Form(strPath).c_str());
 #else
-  DWORD attributes = GetFileAttributes(strReplaced.c_str());
+  DWORD attributes = GetFileAttributes(strPath);
 #endif
   if(attributes == INVALID_FILE_ATTRIBUTES)
     return false;

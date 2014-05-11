@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -63,6 +63,8 @@ bool CDVDOverlayCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
   m_pCodecContext->codec_tag = hints.codec_tag;
   m_pCodecContext->time_base.num = 1;
   m_pCodecContext->time_base.den = DVD_TIME_BASE;
+  m_pCodecContext->pkt_timebase.num = 1;
+  m_pCodecContext->pkt_timebase.den = DVD_TIME_BASE;
 
   if( hints.extradata && hints.extrasize > 0 )
   {
@@ -181,12 +183,13 @@ int CDVDOverlayCodecFFmpeg::Decode(DemuxPacket *pPacket)
 
   double pts_offset = 0.0;
  
-  if (m_pCodecContext->codec_id == CODEC_ID_HDMV_PGS_SUBTITLE && m_Subtitle.format == 0) 
+  if (m_pCodecContext->codec_id == AV_CODEC_ID_HDMV_PGS_SUBTITLE && m_Subtitle.format == 0)
   {
     // for pgs subtitles the packet pts of the end_segments are wrong
     // instead use the subtitle pts to calc the offset here
     // see http://git.videolan.org/?p=ffmpeg.git;a=commit;h=2939e258f9d1fff89b3b68536beb931b54611585
-    if (m_Subtitle.pts != DVD_NOPTS_VALUE)
+
+    if (m_Subtitle.pts != AV_NOPTS_VALUE && pPacket->pts != DVD_NOPTS_VALUE)
     {
       pts_offset = m_Subtitle.pts - pPacket->pts ;
     }
@@ -237,13 +240,9 @@ CDVDOverlay* CDVDOverlayCodecFFmpeg::GetOverlay()
     if(m_SubtitleIndex >= (int)m_Subtitle.num_rects)
       return NULL;
 
-#if LIBAVCODEC_VERSION_INT >= (52<<10)
     if(m_Subtitle.rects[m_SubtitleIndex] == NULL)
       return NULL;
     AVSubtitleRect& rect = *m_Subtitle.rects[m_SubtitleIndex];
-#else
-    AVSubtitleRect& rect = m_Subtitle.rects[m_SubtitleIndex];
-#endif
 
     CDVDOverlayImage* overlay = new CDVDOverlayImage();
 
@@ -251,17 +250,14 @@ CDVDOverlay* CDVDOverlayCodecFFmpeg::GetOverlay()
     overlay->iPTSStopTime  = m_StopTime;
     overlay->replace  = true;
     overlay->linesize = rect.w;
-    overlay->data     = (BYTE*)malloc(rect.w * rect.h);
+    overlay->data     = (uint8_t*)malloc(rect.w * rect.h);
     overlay->palette  = (uint32_t*)malloc(rect.nb_colors*4);
     overlay->palette_colors = rect.nb_colors;
     overlay->x        = rect.x;
     overlay->y        = rect.y;
     overlay->width    = rect.w;
     overlay->height   = rect.h;
-
-#if (!defined USE_EXTERNAL_FFMPEG) || (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,71,100))
     overlay->bForced  = rect.flags != 0;
-#endif
 
     int right  = overlay->x + overlay->width;
     int bottom = overlay->y + overlay->height;
@@ -301,8 +297,8 @@ CDVDOverlay* CDVDOverlayCodecFFmpeg::GetOverlay()
     overlay->source_width  = m_width;
     overlay->source_height = m_height;
 
-    BYTE* s = rect.pict.data[0];
-    BYTE* t = overlay->data;
+    uint8_t* s = rect.pict.data[0];
+    uint8_t* t = overlay->data;
     for(int i=0;i<rect.h;i++)
     {
       memcpy(t, s, rect.w);

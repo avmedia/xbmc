@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ typedef enum {
   FieldBitrate,
   FieldListeners,
   FieldPlaylist,
+  FieldVirtualFolder,
   FieldRandom,
   FieldDateTaken,
 
@@ -119,7 +120,9 @@ typedef enum {
   FieldBorn,
   FieldBandFormed,
   FieldDisbanded,
-  FieldDied
+  FieldDied,
+  FieldStereoMode,
+  FieldMax
 } Field;
 
 typedef std::set<Field> Fields;
@@ -153,8 +156,10 @@ class DatabaseUtils
 public:
   static std::string MediaTypeToString(MediaType mediaType);
   static MediaType MediaTypeFromString(const std::string &strMediaType);
+  static MediaType MediaTypeFromVideoContentType(int videoContentType);
 
   static std::string GetField(Field field, MediaType mediaType, DatabaseQueryPart queryPart);
+  static int GetField(Field field, MediaType mediaType);
   static int GetFieldIndex(Field field, MediaType mediaType);
   static bool GetSelectFields(const Fields &fields, MediaType mediaType, FieldList &selectFields);
   
@@ -162,4 +167,7 @@ public:
   static bool GetDatabaseResults(MediaType mediaType, const FieldList &fields, const std::auto_ptr<dbiplus::Dataset> &dataset, DatabaseResults &results);
 
   static std::string BuildLimitClause(int end, int start = 0);
+
+private:
+  static int GetField(Field field, MediaType mediaType, bool asIndex);
 };

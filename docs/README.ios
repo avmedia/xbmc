@@ -10,7 +10,8 @@ TOC
 5. Packaging
 6. Gesture Handling on iPad/iPhone/iPod touch
 7. Remote control on ATV2
-
+8. Usage/Development on un-jailbroken devices (only interesting for official
+   apple developers!)
 -----------------------------------------------------------------------------
 1. Introduction
 -----------------------------------------------------------------------------
@@ -114,11 +115,11 @@ from the step 3.1.
 -----------------------------------------------------------------------------
 4.1 Using Xcode
 -----------------------------------------------------------------------------
-Start XCode and open the XBMC project (XBMC-IOS.xcodeproj or XBMC-ATV2.xcodeproj)
+Start XCode and open the XBMC project (XBMC.xcodeproj)
 located in $HOME/XBMC.
 
-There are two relevant build targets : Release and Debug. Compile always for device
-end not simulator.
+There are two relevant build configurations : Release and Debug. Compile always for device
+end not simulator and select the wanted target (either XBMC-iOS or XBMC-ATV2)
 
 If you have selected a specific iOS SDK Version in step 3.1 then you might need 
 to adapt the active target to use the same iOS SDK version. Else build will fail 
@@ -129,14 +130,14 @@ to adapt the active target to use the same iOS SDK version. Else build will fail
 -----------------------------------------------------------------------------
 
  $ cd $HOME/XBMC
- $ xcodebuild -project XBMC-IOS.xcodeproj -target XBMC -configuration Release build \
-   ONLY_ACTIVE_ARCH=YES ARCHS=armv7 VALID_ARCHS=armv7 IPHONEOS_DEPLOYMENT_TARGET=4.1 \
+ $ xcodebuild -project XBMC.xcodeproj -target XBMC-iOS -configuration Release build \
+   ONLY_ACTIVE_ARCH=YES ARCHS=armv7 VALID_ARCHS=armv7 IPHONEOS_DEPLOYMENT_TARGET=4.2 \
    SDKROOT=iphoneos4.2
 
 or
 
- $ xcodebuild -project XBMC-ATV2.xcodeproj -target XBMC -configuration Release build \
-  ONLY_ACTIVE_ARCH=YES ARCHS=armv7 VALID_ARCHS=armv7 IPHONEOS_DEPLOYMENT_TARGET=4.1 \
+ $ xcodebuild -project XBMC.xcodeproj -target XBMC-ATV2 -configuration Release build \
+  ONLY_ACTIVE_ARCH=YES ARCHS=armv7 VALID_ARCHS=armv7 IPHONEOS_DEPLOYMENT_TARGET=4.2 \
   SDKROOT=iphoneos4.2
  
  Make sure to set SDKROOT to the iOS SDK you want to use. This should be the same
@@ -189,3 +190,16 @@ distribution.
  - Menu               -> back
  - Menu long press    -> context menu
  
+------------------------------------------------------------------------------
+8. Usage/Development on un-jailbroken devices (only interesting for official apple developers!)
+------------------------------------------------------------------------------
+
+If you are a developer with an official apple code signing identity you can deploy XBMC
+via xcode to work on it on non-jailbroken devices. For this to happen you just need to alter the
+Xcode project by setting your codesign identity. After that the last buildstep in our support script
+will do a full sign of all binaries and the bundle with the given identity (all *.viz, *.pvr, *.so files
+Xcode doesn't know anything about). This should allow you to deploy XBMC to all non-jailbroken devices
+which you can deploy normal apps to. In that case (XBMC will be sandboxed like any other app) - all XBMC
+files are then located in the sandboxed "Documents" folder and can be easily accessed via iTunes file
+sharing.
+Keep in mind that no hardware acceleration will be possible without jailbreaking!

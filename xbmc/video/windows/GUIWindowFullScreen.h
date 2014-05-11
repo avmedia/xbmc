@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@
 #include "guilib/GUIWindow.h"
 #include "threads/CriticalSection.h"
 
-class CGUITextLayout; // forward
-
 class CGUIWindowFullScreen : public CGUIWindow
 {
 public:
@@ -43,7 +41,6 @@ protected:
   virtual EVENT_RESULT OnMouseEvent(const CPoint &point, const CMouseEvent &event);
 
 private:
-  void RenderTTFSubtitles();
   void SeekChapter(int iChapter);
   void FillInTVGroups();
   void ToggleOSD();
@@ -72,7 +69,4 @@ private:
   unsigned int m_timeCodeTimeout;
   int m_timeCodeStamp[6];
   int m_timeCodePosition;
-  
-  CCriticalSection m_fontLock;
-  CGUITextLayout* m_subsLayout;
 };

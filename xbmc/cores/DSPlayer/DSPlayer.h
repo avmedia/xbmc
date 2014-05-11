@@ -94,7 +94,7 @@ public:
   CDSPlayer(IPlayerCallback& callback);
   virtual ~CDSPlayer();
   virtual bool OpenFile(const CFileItem& file, const CPlayerOptions &options);
-  virtual bool CloseFile();
+  virtual bool CloseFile(bool reopen = false);
   virtual bool IsPlaying() const;
   virtual bool IsCaching() const { return false; };
   virtual bool IsPaused() const { return (m_pGraphThread.GetCurrentRate() == 0) && g_dsGraph->IsPaused(); };
@@ -104,7 +104,7 @@ public:
   bool IsInMenu() const { return g_dsGraph->IsInMenu(); };
   virtual void Pause();
   virtual bool CanSeek()                                        { return g_dsGraph->CanSeek(); }
-  virtual void Seek(bool bPlus, bool bLargeStep);
+  virtual void Seek(bool bPlus = true, bool bLargeStep = false, bool bChapterOverride = false);
   virtual void SeekPercentage(float iPercent);
   virtual float GetPercentage()                                 { return g_dsGraph->GetPercentage(); }
   virtual float GetCachePercentage()							{ return g_dsGraph->GetCachePercentage(); }
@@ -115,6 +115,11 @@ public:
   virtual void GetVideoInfo(CStdString& strVideoInfo);
   virtual void GetGeneralInfo(CStdString& strGeneralInfo);
   virtual bool Closing()                                      { return PlayerState == DSPLAYER_CLOSING; }
+
+  virtual int GetSourceBitrate();
+  virtual void GetVideoStreamInfo(SPlayerVideoStreamInfo &info);
+  virtual bool GetStreamDetails(CStreamDetails &details);
+  virtual void GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info);
 
 //Audio stream selection
   virtual int  GetAudioStreamCount() { return (CStreamsManager::Get()) ? CStreamsManager::Get()->GetAudioStreamCount() : 0; }
@@ -180,7 +185,7 @@ public:
   virtual void GetChapterName(CStdString& strChapterName) { CSingleLock lock(m_StateSection); CChaptersManager::Get()->GetChapterName(strChapterName); }
   virtual int  SeekChapter(int iChapter) { return CChaptersManager::Get()->SeekChapter(iChapter); }
 
-  void Update(bool bPauseDrawing) { g_renderManager.Update(bPauseDrawing); }
+  void Update() { g_renderManager.Update(); }
   void GetVideoRect(CRect& SrcRect, CRect& DestRect) { g_renderManager.GetVideoRect(SrcRect, DestRect); }
   virtual void GetVideoAspectRatio(float& fAR) { fAR = g_renderManager.GetAspectRatio(); }
 

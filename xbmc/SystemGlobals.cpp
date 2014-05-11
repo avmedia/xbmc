@@ -23,10 +23,7 @@
 #include "Application.h"
 #include "GUILargeTextureManager.h"
 #include "guilib/TextureManager.h"
-#include "settings/GUISettings.h"
-#include "settings/Settings.h"
 #include "utils/AlarmClock.h"
-#include "utils/DownloadQueueManager.h"
 #include "GUIInfoManager.h"
 #include "filesystem/DllLibCurl.h"
 #include "filesystem/DirectoryCache.h"
@@ -55,8 +52,6 @@
 #include "linux/RBP.h"
 #endif
 
-  CSettings          g_settings;
-
   CXBMCRenderManager g_renderManager;
   CLangInfo          g_langInfo;
   CLangCodeExpander  g_LangCodeExpander;
@@ -75,7 +70,6 @@
   CGUIInfoManager    g_infoManager;
 
   XCURL::DllLibCurlGlobal g_curlInterface;
-  CDownloadQueueManager g_DownloadManager;
   CPartyModeManager     g_partyModeManager;
 
 #ifdef HAS_PYTHON

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -148,13 +148,9 @@ bool CMultiPathDirectory::Remove(const char* strPath)
 
 CStdString CMultiPathDirectory::GetFirstPath(const CStdString &strPath)
 {
-  int pos = strPath.Find("/", 12);
-  if (pos >= 0)
-  {
-    CStdString firstPath = strPath.Mid(12, pos - 12);
-    CURL::Decode(firstPath);
-    return firstPath;
-  }
+  size_t pos = strPath.find("/", 12);
+  if (pos != std::string::npos)
+    return CURL::Decode(strPath.substr(12, pos - 12));
   return "";
 }
 
@@ -164,7 +160,7 @@ bool CMultiPathDirectory::GetPaths(const CStdString& strPath, vector<CStdString>
   CStdString strPath1 = strPath;
 
   // remove multipath:// from path and any trailing / (so that the last path doesn't get any more than it originally had)
-  strPath1 = strPath1.Mid(12);
+  strPath1 = strPath1.substr(12);
   URIUtils::RemoveSlashAtEnd(strPath1);
 
   // split on "/"
@@ -176,9 +172,7 @@ bool CMultiPathDirectory::GetPaths(const CStdString& strPath, vector<CStdString>
   // check each item
   for (unsigned int i = 0; i < vecTemp.size(); i++)
   {
-    CStdString tempPath = vecTemp[i];
-    CURL::Decode(tempPath);
-    vecPaths.push_back(tempPath);
+    vecPaths.push_back(CURL::Decode(vecTemp[i]));
   }
   return true;
 }
@@ -186,7 +180,7 @@ bool CMultiPathDirectory::GetPaths(const CStdString& strPath, vector<CStdString>
 bool CMultiPathDirectory::HasPath(const CStdString& strPath, const CStdString& strPathToFind)
 {
   // remove multipath:// from path and any trailing / (so that the last path doesn't get any more than it originally had)
-  CStdString strPath1 = strPath.Mid(12);
+  CStdString strPath1 = strPath.substr(12);
   URIUtils::RemoveSlashAtEnd(strPath1);
 
   // split on "/"
@@ -198,9 +192,7 @@ bool CMultiPathDirectory::HasPath(const CStdString& strPath, const CStdString& s
   // check each item
   for (unsigned int i = 0; i < vecTemp.size(); i++)
   {
-    CStdString tempPath = vecTemp[i];
-    CURL::Decode(tempPath);
-    if(tempPath == strPathToFind)
+    if (CURL::Decode(vecTemp[i]) == strPathToFind)
       return true;
   }
   return false;
@@ -222,11 +214,9 @@ CStdString CMultiPathDirectory::ConstructMultiPath(const CFileItemList& items, c
 
 void CMultiPathDirectory::AddToMultiPath(CStdString& strMultiPath, const CStdString& strPath)
 {
-  CStdString strPath1 = strPath;
   URIUtils::AddSlashAtEnd(strMultiPath);
   //CLog::Log(LOGDEBUG, "-- adding path: %s", strPath.c_str());
-  CURL::Encode(strPath1);
-  strMultiPath += strPath1;
+  strMultiPath += CURL::Encode(strPath);
   strMultiPath += "/";
 }
 
@@ -260,7 +250,7 @@ void CMultiPathDirectory::MergeItems(CFileItemList &items)
     return;
   // sort items by label
   // folders are before files in this sort method
-  items.Sort(SORT_METHOD_LABEL, SortOrderAscending);
+  items.Sort(SortByLabel, SortOrderAscending);
   int i = 0;
 
   // if first item in the sorted list is a file, just abort

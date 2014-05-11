@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #include "GUIWindowWeather.h"
 #include "guilib/GUIImage.h"
 #include "utils/Weather.h"
-#include "settings/GUISettings.h"
 #include "guilib/GUIWindowManager.h"
 #include "utils/URIUtils.h"
 #ifdef HAS_PYTHON
@@ -33,6 +32,7 @@
 #include "LangInfo.h"
 #include "utils/log.h"
 #include "utils/SystemInfo.h"
+#include "utils/StringUtils.h"
 #include "addons/AddonManager.h"
 
 using namespace ADDON;
@@ -164,8 +164,8 @@ void CGUIWindowWeather::UpdateLocations()
     CStdString strLabel = g_weatherManager.GetLocation(i);
     if (strLabel.size() > 1) //got the location string yet?
     {
-      int iPos = strLabel.ReverseFind(", ");
-      if (iPos)
+      size_t iPos = strLabel.rfind(", ");
+      if (iPos != std::string::npos)
       {
         CStdString strLabel2(strLabel);
         strLabel = strLabel2.substr(0,iPos);
@@ -176,7 +176,7 @@ void CGUIWindowWeather::UpdateLocations()
     }
     else
     {
-      strLabel.Format("AreaCode %i", i);
+      strLabel = StringUtils::Format("AreaCode %i", i);
 
       msg2.SetLabel(strLabel);
       msg2.SetParam1(i);
@@ -250,8 +250,8 @@ void CGUIWindowWeather::SetLocation(int loc)
     ClearProperties();
     g_weatherManager.SetArea(loc);
     CStdString strLabel = g_weatherManager.GetLocation(loc);
-    int iPos = strLabel.ReverseFind(", ");
-    if (iPos)
+    size_t iPos = strLabel.rfind(", ");
+    if (iPos != std::string::npos)
       strLabel = strLabel.substr(0, iPos);
     SET_CONTROL_LABEL(CONTROL_SELECTLOCATION, strLabel);
   }
@@ -282,7 +282,7 @@ void CGUIWindowWeather::SetProperties()
   CStdString day;
   for (int i = 0; i < NUM_DAYS; i++)
   {
-    day.Format("Day%i.", i);
+    day = StringUtils::Format("Day%i.", i);
     SetProperty(day + "Title", g_weatherManager.GetForecast(i).m_day);
     SetProperty(day + "HighTemp", g_weatherManager.GetForecast(i).m_high);
     SetProperty(day + "LowTemp", g_weatherManager.GetForecast(i).m_low);
@@ -314,7 +314,7 @@ void CGUIWindowWeather::ClearProperties()
   CStdString day;
   for (int i = 0; i < NUM_DAYS; i++)
   {
-    day.Format("Day%i.", i);
+    day = StringUtils::Format("Day%i.", i);
     SetProperty(day + "Title", "");
     SetProperty(day + "HighTemp", "");
     SetProperty(day + "LowTemp", "");

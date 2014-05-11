@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -92,6 +92,13 @@ public:
 
   CRectGen<T>() { x1 = y1 = x2 = y2 = 0;};
   CRectGen<T>(T left, T top, T right, T bottom) { x1 = left; y1 = top; x2 = right; y2 = bottom; };
+  CRectGen<T>(const CPointGen<T> &p1, const CPointGen<T> &p2)
+  {
+    x1 = p1.x;
+    y1 = p1.y;
+    x2 = p2.x;
+    y2 = p2.y;
+  }
 
   template <class U> CRectGen<T>(const CRectGen<U>& rhs)
   {
@@ -157,6 +164,16 @@ public:
   {
     return (x2 - x1) * (y2 - y1) == 0;
   };
+
+  inline CPointGen<T> P1() const XBMC_FORCE_INLINE
+  {
+    return CPointGen<T>(x1, y1);
+  }
+
+  inline CPointGen<T> P2() const XBMC_FORCE_INLINE
+  {
+    return CPointGen<T>(x2, y2);
+  }
 
   inline T Width() const XBMC_FORCE_INLINE
   {
@@ -243,7 +260,7 @@ public:
 
   T x1, y1, x2, y2;
 private:
-  inline static float clamp_range(T x, T l, T h) XBMC_FORCE_INLINE
+  inline static T clamp_range(T x, T l, T h) XBMC_FORCE_INLINE
   {
     return (x > h) ? h : ((x < l) ? l : x);
   }

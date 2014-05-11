@@ -1,4 +1,3 @@
-#pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
  *      http://xbmc.org
@@ -18,6 +17,7 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
+#pragma once
 #include "system.h"
 #include "utils/StdString.h"
 #include "NptTypes.h"
@@ -28,6 +28,7 @@
 class CUPnPServer;
 class CFileItem;
 class CThumbLoader;
+class PLT_DeviceData;
 class PLT_HttpRequestContext;
 class PLT_MediaItemResource;
 class PLT_MediaObject;
@@ -63,6 +64,16 @@ namespace UPNP
   };
 
   EClientQuirks GetClientQuirks(const PLT_HttpRequestContext* context);
+
+  enum EMediaControllerQuirks
+  {
+    EMEDIACONTROLLERQUIRKS_NONE   = 0x00
+
+    /* Media Controller expects MIME type video/x-mkv instead of video/x-matroska (Samsung) */
+  , EMEDIACONTROLLERQUIRKS_X_MKV  = 0x01
+  };
+
+  EMediaControllerQuirks GetMediaControllerQuirks(const PLT_DeviceData *device);
 
   const char* GetMimeTypeFromExtension(const char* extension, const PLT_HttpRequestContext* context = NULL);
   NPT_String  GetMimeType(const CFileItem& item, const PLT_HttpRequestContext* context = NULL);

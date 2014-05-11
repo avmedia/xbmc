@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
+#include "utils/StringUtils.h"
 #include "climits"
 
 using namespace std;
@@ -117,9 +118,7 @@ void CDirectoryCache::SetDirectory(const CStdString& strPath, const CFileItemLis
 
 void CDirectoryCache::ClearFile(const CStdString& strFile)
 {
-  CStdString strPath;
-  URIUtils::GetDirectory(strFile, strPath);
-  ClearDirectory(strPath);
+  ClearDirectory(URIUtils::GetDirectory(strFile));
 }
 
 void CDirectoryCache::ClearDirectory(const CStdString& strPath)
@@ -144,8 +143,7 @@ void CDirectoryCache::ClearSubPaths(const CStdString& strPath)
   iCache i = m_cache.begin();
   while (i != m_cache.end())
   {
-    CStdString path = i->first;
-    if (strncmp(path.c_str(), storedPath.c_str(), storedPath.GetLength()) == 0)
+    if (StringUtils::StartsWith(i->first, storedPath))
       Delete(i++);
     else
       i++;
@@ -156,8 +154,7 @@ void CDirectoryCache::AddFile(const CStdString& strFile)
 {
   CSingleLock lock (m_cs);
 
-  CStdString strPath;
-  URIUtils::GetDirectory(strFile, strPath);
+  CStdString strPath = URIUtils::GetDirectory(strFile);
   URIUtils::RemoveSlashAtEnd(strPath);
 
   ciCache i = m_cache.find(strPath);
@@ -177,8 +174,7 @@ bool CDirectoryCache::FileExists(const CStdString& strFile, bool& bInCache)
 
   CStdString strPath(strFile);
   URIUtils::RemoveSlashAtEnd(strPath);
-  CStdString storedPath;
-  URIUtils::GetDirectory(strPath, storedPath);
+  CStdString storedPath = URIUtils::GetDirectory(strPath);
   URIUtils::RemoveSlashAtEnd(storedPath);
 
   ciCache i = m_cache.find(storedPath);
@@ -190,7 +186,7 @@ bool CDirectoryCache::FileExists(const CStdString& strFile, bool& bInCache)
 #ifdef _DEBUG
     m_cacheHits++;
 #endif
-    return dir->m_Items->Contains(strFile);
+    return (strPath.Equals(storedPath) || dir->m_Items->Contains(strFile));
   }
 #ifdef _DEBUG
   m_cacheMisses++;

@@ -22,11 +22,12 @@
 #include "peripherals/Peripherals.h"
 #include <usb.h>
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 
 using namespace PERIPHERALS;
 
 CPeripheralBusUSB::CPeripheralBusUSB(CPeripherals *manager) :
-    CPeripheralBus(manager, PERIPHERAL_BUS_USB)
+    CPeripheralBus("PeripBusUSB", manager, PERIPHERAL_BUS_USB)
 {
   usb_init();
   usb_find_busses();
@@ -50,10 +51,10 @@ bool CPeripheralBusUSB::PerformDeviceScan(PeripheralScanResults &results)
                              dev->config[0].bNumInterfaces > 0 && dev->config[0].interface[0].num_altsetting > 0) ?
                                  GetType(dev->config[0].interface[0].altsetting[0].bInterfaceClass) :
                                  GetType(dev->descriptor.bDeviceClass);
-#ifdef __FreeBSD__
-      result.m_strLocation.Format("%s", dev->filename);
+#ifdef TARGET_FREEBSD
+      result.m_strLocation = StringUtils::Format("%s", dev->filename);
 #else
-      result.m_strLocation.Format("/bus%s/dev%s", bus->dirname, dev->filename);
+      result.m_strLocation = StringUtils::Format("/bus%s/dev%s", bus->dirname, dev->filename);
 #endif
       result.m_iSequence   = GetNumberOfPeripheralsWithId(result.m_iVendorId, result.m_iProductId);
       if (!results.ContainsResult(result))

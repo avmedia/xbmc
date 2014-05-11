@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #define XFILECACHESTRATEGY_H
 
 #include <stdint.h>
-#ifdef _LINUX
+#ifdef TARGET_POSIX
 #include "PlatformDefs.h"
 #include "XHandlePublic.h"
 #include "XFileUtils.h"
@@ -51,11 +51,17 @@ public:
   virtual int64_t WaitForData(unsigned int iMinAvail, unsigned int iMillis) = 0;
 
   virtual int64_t Seek(int64_t iFilePosition) = 0;
-  virtual void Reset(int64_t iSourcePosition) = 0;
+  virtual void Reset(int64_t iSourcePosition, bool clearAnyway=true) = 0;
 
   virtual void EndOfInput(); // mark the end of the input stream so that Read will know when to return EOF
   virtual bool IsEndOfInput();
   virtual void ClearEndOfInput();
+
+  virtual int64_t CachedDataEndPosIfSeekTo(int64_t iFilePosition) = 0;
+  virtual int64_t CachedDataEndPos() = 0;
+  virtual bool IsCachedPosition(int64_t iFilePosition) = 0;
+
+  virtual CCacheStrategy *CreateNew() = 0;
 
   CEvent m_space;
 protected:
@@ -77,8 +83,14 @@ public:
   virtual int64_t WaitForData(unsigned int iMinAvail, unsigned int iMillis) ;
 
   virtual int64_t Seek(int64_t iFilePosition);
-  virtual void Reset(int64_t iSourcePosition);
+  virtual void Reset(int64_t iSourcePosition, bool clearAnyway=true);
   virtual void EndOfInput();
+
+  virtual int64_t CachedDataEndPosIfSeekTo(int64_t iFilePosition);
+  virtual int64_t CachedDataEndPos();
+  virtual bool IsCachedPosition(int64_t iFilePosition);
+
+  virtual CCacheStrategy *CreateNew();
 
   int64_t  GetAvailableRead();
 
@@ -89,6 +101,35 @@ protected:
   volatile int64_t m_nStartPosition;
   volatile int64_t m_nWritePosition;
   volatile int64_t m_nReadPosition;
+};
+
+class CSimpleDoubleCache : public CCacheStrategy{
+public:
+  CSimpleDoubleCache(CCacheStrategy *impl);
+  virtual ~CSimpleDoubleCache();
+
+  virtual int Open() ;
+  virtual void Close() ;
+
+  virtual int WriteToCache(const char *pBuffer, size_t iSize) ;
+  virtual int ReadFromCache(char *pBuffer, size_t iMaxSize) ;
+  virtual int64_t WaitForData(unsigned int iMinAvail, unsigned int iMillis) ;
+
+  virtual int64_t Seek(int64_t iFilePosition);
+  virtual void Reset(int64_t iSourcePosition, bool clearAnyway=true);
+  virtual void EndOfInput();
+  virtual bool IsEndOfInput();
+  virtual void ClearEndOfInput();
+
+  virtual int64_t CachedDataEndPosIfSeekTo(int64_t iFilePosition);
+  virtual int64_t CachedDataEndPos();
+  virtual bool IsCachedPosition(int64_t iFilePosition);
+
+  virtual CCacheStrategy *CreateNew();
+
+protected:
+  CCacheStrategy *m_pCache;
+  CCacheStrategy *m_pCacheOld;
 };
 
 }

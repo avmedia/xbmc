@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,9 +14,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -45,11 +44,7 @@ extern "C" {
 #endif
 
 #if (defined USE_EXTERNAL_FFMPEG)
-  #if (defined HAVE_LIBSWSCALE_SWSCALE_H)
-    #include <libswscale/swscale.h>
-  #elif (defined HAVE_FFMPEG_SWSCALE_H)
-    #include <ffmpeg/swscale.h>
-  #endif
+  #include <libswscale/swscale.h>
 #else
   #include "libswscale/swscale.h"
 #endif
@@ -92,7 +87,7 @@ public:
    virtual void sws_freeContext(struct SwsContext *context)=0;
 };
 
-#if (defined USE_EXTERNAL_FFMPEG) || (defined TARGET_DARWIN) 
+#if (defined USE_EXTERNAL_FFMPEG) || (defined TARGET_DARWIN) || (defined USE_STATIC_FFMPEG)
 
 // We call into this library directly.
 class DllSwScale : public DllDynamic, public DllSwScaleInterface
@@ -116,7 +111,7 @@ public:
   // DLL faking.
   virtual bool ResolveExports() { return true; }
   virtual bool Load() {
-#if !defined(TARGET_DARWIN)
+#if !defined(TARGET_DARWIN) && !defined(USE_STATIC_FFMPEG)
     CLog::Log(LOGDEBUG, "DllSwScale: Using libswscale system library");
 #endif
     return true;

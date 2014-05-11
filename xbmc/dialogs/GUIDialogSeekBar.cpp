@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #include "GUIInfoManager.h"
 #include "utils/TimeUtils.h"
 #include "FileItem.h"
-#include "settings/GUISettings.h"
 #include "utils/SeekHandler.h"
 
 #define SEEK_BAR_DISPLAY_TIME 2000L
@@ -63,7 +62,7 @@ bool CGUIDialogSeekBar::OnMessage(CGUIMessage& message)
 
 void CGUIDialogSeekBar::FrameMove()
 {
-  if (!g_application.m_pPlayer)
+  if (!g_application.m_pPlayer->HasPlayer())
   {
     Close(true);
     return;

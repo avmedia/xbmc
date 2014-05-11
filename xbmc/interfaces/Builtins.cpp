@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include "dialogs/GUIDialogFileBrowser.h"
 #include "guilib/GUIKeyboardFactory.h"
 #include "guilib/Key.h"
+#include "guilib/StereoscopicsManager.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "dialogs/GUIDialogNumeric.h"
 #include "dialogs/GUIDialogProgress.h"
@@ -44,9 +45,13 @@
 #include "addons/AddonInstaller.h"
 #include "addons/AddonManager.h"
 #include "addons/PluginSource.h"
+#include "interfaces/generic/ScriptInvocationManager.h"
+#include "interfaces/AnnouncementManager.h"
+#include "network/NetworkServices.h"
 #include "utils/log.h"
 #include "storage/MediaManager.h"
 #include "utils/RssManager.h"
+#include "utils/JSONVariantParser.h"
 #include "PartyModeManager.h"
 #include "profiles/ProfilesManager.h"
 #include "settings/DisplaySettings.h"
@@ -79,10 +84,6 @@
 
 #endif
 
-#ifdef HAS_PYTHON
-#include "interfaces/python/XBPython.h"
-#endif
-
 #if defined(TARGET_DARWIN)
 #include "filesystem/SpecialProtocol.h"
 #include "osx/CocoaInterface.h"
@@ -93,7 +94,8 @@
 #endif
 
 #include <vector>
-#include "xbmc/settings/AdvancedSettings.h"
+#include "settings/AdvancedSettings.h"
+#include "settings/DisplaySettings.h"
 
 using namespace std;
 using namespace XFILE;
@@ -121,10 +123,12 @@ const BUILT_IN commands[] = {
   { "Suspend",                    false,  "Suspends the system" },
   { "InhibitIdleShutdown",        false,  "Inhibit idle shutdown" },
   { "AllowIdleShutdown",          false,  "Allow idle shutdown" },
+  { "ActivateScreensaver",        false,  "Activate Screensaver" },
   { "RestartApp",                 false,  "Restart XBMC" },
   { "Minimize",                   false,  "Minimize XBMC" },
   { "Reset",                      false,  "Reset the system (same as reboot)" },
   { "Mastermode",                 false,  "Control master mode" },
+  { "SetGUILanguage",             true,   "Set GUI Language" },
   { "ActivateWindow",             true,   "Activate the specified window" },
   { "ActivateWindowAndFocus",     true,   "Activate the specified window and sets focus to the specified id" },
   { "ReplaceWindowAndFocus",      true,   "Replaces the current window with the new one and sets focus to the specified id" },
@@ -137,6 +141,7 @@ const BUILT_IN commands[] = {
 #endif
   { "RunPlugin",                  true,   "Run the specified plugin" },
   { "RunAddon",                   true,   "Run the specified plugin/script" },
+  { "NotifyAll",                  true,   "Notify all connected clients" },
   { "Extract",                    true,   "Extracts the specified archive" },
   { "PlayMedia",                  true,   "Play the specified media file (or playlist)" },
   { "SlideShow",                  true,   "Run a slideshow from the specified directory" },
@@ -203,6 +208,9 @@ const BUILT_IN commands[] = {
   { "UpdateAddonRepos",           false,  "Check add-on repositories for updates" },
   { "UpdateLocalAddons",          false,  "Check for local add-on changes" },
   { "ToggleDPMS",                 false,  "Toggle DPMS mode manually"},
+  { "CECToggleState",             false,  "Toggle state of playing device via a CEC peripheral"},
+  { "CECActivateSource",          false,  "Wake up playing device via a CEC peripheral"},
+  { "CECStandby",                 false,  "Put playing device on standby via a CEC peripheral"},
   { "Weather.Refresh",            false,  "Force weather data refresh"},
   { "Weather.LocationNext",       false,  "Switch to next weather location"},
   { "Weather.LocationPrevious",   false,  "Switch to previous weather location"},
@@ -219,6 +227,7 @@ const BUILT_IN commands[] = {
 #if defined(TARGET_ANDROID)
   { "StartAndroidActivity",       true,   "Launch an Android native app with the given package name.  Optional parms (in order): intent, dataType, dataURI." },
 #endif
+  { "SetStereoMode",              true,   "Changes the stereo mode of the GUI. Params can be: toggle, next, previous, select, tomono or any of the supported stereomodes (off, split_vertical, split_horizontal, row_interleaved, hardware_based, anaglyph_cyan_red, anaglyph_green_magenta, monoscopic)" }
 };
 
 bool CBuiltins::HasCommand(const CStdString& execString)
@@ -228,7 +237,7 @@ bool CBuiltins::HasCommand(const CStdString& execString)
   CUtil::SplitExecFunction(execString, function, parameters);
   for (unsigned int i = 0; i < sizeof(commands)/sizeof(BUILT_IN); i++)
   {
-    if (function.CompareNoCase(commands[i].command) == 0 && (!commands[i].needsParameters || parameters.size()))
+    if (StringUtils::EqualsNoCase(function, commands[i].command) && (!commands[i].needsParameters || parameters.size()))
       return true;
   }
   return false;
@@ -236,7 +245,7 @@ bool CBuiltins::HasCommand(const CStdString& execString)
 
 void CBuiltins::GetHelp(CStdString &help)
 {
-  help.Empty();
+  help.clear();
   for (unsigned int i = 0; i < sizeof(commands)/sizeof(BUILT_IN); i++)
   {
     help += commands[i].command;
@@ -252,7 +261,7 @@ int CBuiltins::Execute(const CStdString& execString)
   CStdString execute;
   vector<CStdString> params;
   CUtil::SplitExecFunction(execString, execute, params);
-  execute.ToLower();
+  StringUtils::ToLower(execute);
   CStdString parameter = params.size() ? params[0] : "";
   CStdString strParameterCaseIntact = parameter;
 
@@ -289,6 +298,10 @@ int CBuiltins::Execute(const CStdString& execString)
     bool inhibit = (params.size() == 1 && params[0].Equals("true"));
     CApplicationMessenger::Get().InhibitIdleShutdown(inhibit);
   }
+  else if (execute.Equals("activatescreensaver"))
+  {
+    CApplicationMessenger::Get().ActivateScreensaver();
+  }
   else if (execute.Equals("minimize"))
   {
     CApplicationMessenger::Get().Minimize();
@@ -324,9 +337,44 @@ int CBuiltins::Execute(const CStdString& execString)
     CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
     g_windowManager.SendMessage(msg);
   }
+  else if (execute.Equals("setguilanguage"))
+  {
+    if (params.size())
+    {
+      CApplicationMessenger::Get().SetGUILanguage(params[0]);
+    }
+  }
   else if (execute.Equals("takescreenshot"))
   {
-    CScreenShot::TakeScreenshot();
+    if (params.size())
+    {
+      // get the parameters
+      CStdString strSaveToPath = params[0];
+      bool sync = false;
+      if (params.size() >= 2)
+        sync = params[1].Equals("sync");
+
+      if (!strSaveToPath.empty())
+      {
+        if (CDirectory::Exists(strSaveToPath))
+        {
+          CStdString file = CUtil::GetNextFilename(URIUtils::AddFileToFolder(strSaveToPath, "screenshot%03d.png"), 999);
+
+          if (!file.empty())
+          {
+            CScreenShot::TakeScreenshot(file, sync);
+          }
+          else
+          {
+            CLog::Log(LOGWARNING, "Too many screen shots or invalid folder %s", strSaveToPath.c_str());
+          }
+        }
+        else
+          CScreenShot::TakeScreenshot(strSaveToPath, sync);
+      }
+    }
+    else
+      CScreenShot::TakeScreenshot();
   }
   else if (execute.Equals("activatewindow") || execute.Equals("replacewindow"))
   {
@@ -344,10 +392,6 @@ int CBuiltins::Execute(const CStdString& execString)
     {
       // disable the screensaver
       g_application.WakeUpScreenSaverAndDPMS();
-#if defined(TARGET_DARWIN_IOS)
-      if (params[0].Equals("shutdownmenu"))
-        CBuiltins::Execute("Quit");
-#endif     
       g_windowManager.ActivateWindow(iWindow, params, !execute.Equals("activatewindow"));
     }
     else
@@ -373,10 +417,6 @@ int CBuiltins::Execute(const CStdString& execString)
     {
       // disable the screensaver
       g_application.WakeUpScreenSaverAndDPMS();
-#if defined(__APPLE__) && defined(__arm__)
-      if (params[0].Equals("shutdownmenu"))
-        CBuiltins::Execute("Quit");
-#endif
       vector<CStdString> dummy;
       g_windowManager.ActivateWindow(iWindow, dummy, !execute.Equals("activatewindowandfocus"));
 
@@ -399,8 +439,7 @@ int CBuiltins::Execute(const CStdString& execString)
   else if (execute.Equals("runscript") && params.size())
   {
 #if defined(TARGET_DARWIN_OSX)
-    if (URIUtils::GetExtension(strParameterCaseIntact) == ".applescript" ||
-        URIUtils::GetExtension(strParameterCaseIntact) == ".scpt")
+    if (URIUtils::HasExtension(strParameterCaseIntact, ".applescript|.scpt"))
     {
       CStdString osxPath = CSpecialProtocol::TranslatePath(strParameterCaseIntact);
       Cocoa_DoAppleScriptFile(osxPath.c_str());
@@ -408,8 +447,9 @@ int CBuiltins::Execute(const CStdString& execString)
     else
 #endif
     {
-#ifdef HAS_PYTHON
-      vector<CStdString> argv = params;
+      vector<string> argv;
+      for (vector<CStdString>::const_iterator param = params.begin(); param != params.end(); ++param)
+        argv.push_back(*param);
 
       vector<CStdString> path;
       //split the path up to find the filename
@@ -422,8 +462,7 @@ int CBuiltins::Execute(const CStdString& execString)
       if (CAddonMgr::Get().GetAddon(params[0], script))
         scriptpath = script->LibPath();
 
-      g_pythonParser.evalFile(scriptpath, argv,script);
-#endif
+      CScriptInvocationManager::Get().Execute(scriptpath, script, argv);
     }
   }
 #if defined(TARGET_DARWIN_OSX)
@@ -434,7 +473,6 @@ int CBuiltins::Execute(const CStdString& execString)
 #endif
   else if (execute.Equals("stopscript"))
   {
-#ifdef HAS_PYTHON
     CStdString scriptpath(params[0]);
 
     // Test to see if the param is an addon ID
@@ -442,8 +480,7 @@ int CBuiltins::Execute(const CStdString& execString)
     if (CAddonMgr::Get().GetAddon(params[0], script))
       scriptpath = script->LibPath();
 
-    g_pythonParser.StopScript(scriptpath);
-#endif
+    CScriptInvocationManager::Get().Stop(scriptpath);
   }
   else if (execute.Equals("system.exec"))
   {
@@ -471,16 +508,15 @@ int CBuiltins::Execute(const CStdString& execString)
     if (g_graphicsContext.IsValidResolution(res))
     {
       CDisplaySettings::Get().SetCurrentResolution(res, true);
-      g_graphicsContext.SetVideoResolution(res);
       g_application.ReloadSkin();
     }
   }
   else if (execute.Equals("extract") && params.size())
   {
-    // Detects if file is zip or zip then extracts
-    CStdString strDestDirect = "";
+    // Detects if file is zip or rar then extracts
+    CStdString strDestDirect;
     if (params.size() < 2)
-      URIUtils::GetDirectory(params[0],strDestDirect);
+      strDestDirect = URIUtils::GetDirectory(params[0]);
     else
       strDestDirect = params[1];
 
@@ -516,37 +552,67 @@ int CBuiltins::Execute(const CStdString& execString)
     if (params.size())
     {
       AddonPtr addon;
-      if (CAddonMgr::Get().GetAddon(params[0],addon) && addon)
+      CStdString cmd;
+      if (CAddonMgr::Get().GetAddon(params[0],addon,ADDON_PLUGIN))
       {
         PluginPtr plugin = boost::dynamic_pointer_cast<CPluginSource>(addon);
-        CStdString cmd;
-        if (plugin && addon->Type() == ADDON_PLUGIN)
+        CStdString addonid = params[0];
+        CStdString urlParameters;
+        CStdStringArray parameters;
+        if (params.size() == 2 &&
+           (StringUtils::StartsWith(params[1], "/") || StringUtils::StartsWith(params[1], "?")))
+          urlParameters = params[1];
+        else if (params.size() > 1)
         {
-          if (plugin->Provides(CPluginSource::VIDEO))
-            cmd.Format("ActivateWindow(Video,plugin://%s,return)",params[0]);
-          else if (plugin->Provides(CPluginSource::AUDIO))
-            cmd.Format("ActivateWindow(Music,plugin://%s,return)",params[0]);
-          else if (plugin->Provides(CPluginSource::EXECUTABLE))
-            cmd.Format("ActivateWindow(Programs,plugin://%s,return)",params[0]);
-          else if (plugin->Provides(CPluginSource::IMAGE))
-            cmd.Format("ActivateWindow(Pictures,plugin://%s,return)",params[0]);
-          else
-            // Pass the script name (params[0]) and all the parameters
-            // (params[1] ... params[x]) separated by a comma to RunPlugin
-            cmd.Format("RunPlugin(%s)", StringUtils::JoinString(params, ","));
+          parameters.insert(parameters.begin(), params.begin() + 1, params.end());
+          urlParameters = "?" + StringUtils::JoinString(parameters, "&");
         }
-        else if (addon->Type() >= ADDON_SCRIPT && addon->Type() <= ADDON_SCRIPT_LYRICS)
-          // Pass the script name (params[0]) and all the parameters
-          // (params[1] ... params[x]) separated by a comma to RunScript
-          cmd.Format("RunScript(%s)", StringUtils::JoinString(params, ","));
+        else
+        {
+          // Add '/' if addon is run without params (will be removed later so it's safe)
+          // Otherwise there are 2 entries for the same plugin in ViewModesX.db
+          urlParameters = "/";
+        }
 
-        return Execute(cmd);
+        if (plugin->Provides(CPluginSource::VIDEO))
+          cmd = StringUtils::Format("ActivateWindow(Videos,plugin://%s%s,return)", addonid.c_str(), urlParameters.c_str());
+        else if (plugin->Provides(CPluginSource::AUDIO))
+          cmd = StringUtils::Format("ActivateWindow(Music,plugin://%s%s,return)", addonid.c_str(), urlParameters.c_str());
+        else if (plugin->Provides(CPluginSource::EXECUTABLE))
+          cmd = StringUtils::Format("ActivateWindow(Programs,plugin://%s%s,return)", addonid.c_str(), urlParameters.c_str());
+        else if (plugin->Provides(CPluginSource::IMAGE))
+          cmd = StringUtils::Format("ActivateWindow(Pictures,plugin://%s%s,return)", addonid.c_str(), urlParameters.c_str());
+        else
+          // Pass the script name (params[0]) and all the parameters
+          // (params[1] ... params[x]) separated by a comma to RunPlugin
+          cmd = StringUtils::Format("RunPlugin(%s)", StringUtils::JoinString(params, ",").c_str());
       }
+      else if (CAddonMgr::Get().GetAddon(params[0], addon, ADDON_SCRIPT) ||
+               CAddonMgr::Get().GetAddon(params[0], addon, ADDON_SCRIPT_WEATHER) ||
+               CAddonMgr::Get().GetAddon(params[0], addon, ADDON_SCRIPT_LYRICS))
+        // Pass the script name (params[0]) and all the parameters
+        // (params[1] ... params[x]) separated by a comma to RunScript
+        cmd = StringUtils::Format("RunScript(%s)", StringUtils::JoinString(params, ",").c_str());
+
+      return Execute(cmd);
     }
     else
     {
       CLog::Log(LOGERROR, "XBMC.RunAddon called with no arguments.");
     }
+  }
+  else if (execute.Equals("notifyall"))
+  {
+    if (params.size() > 1)
+    {
+      CVariant data;
+      if (params.size() > 2)
+        data = CJSONVariantParser::Parse((const unsigned char *)params[2].c_str(), params[2].size());
+
+      ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::Other, params[0], params[1], data);
+    }
+    else
+      CLog::Log(LOGERROR, "XBMC.NotifyAll needs two parameters");
   }
   else if (execute.Equals("playmedia"))
   {
@@ -590,8 +656,8 @@ int CBuiltins::Execute(const CStdString& execString)
         // force the item to start at the beginning (m_lStartOffset is initialized to 0)
         askToResume = false;
       }
-      else if (params[i].Left(11).Equals("playoffset=")) {
-        playOffset = atoi(params[i].Mid(11)) - 1;
+      else if (StringUtils::StartsWithNoCase(params[i], "playoffset=")) {
+        playOffset = atoi(params[i].substr(11).c_str()) - 1;
         item.SetProperty("playlist_starting_track", playOffset);
       }
     }
@@ -607,16 +673,31 @@ int CBuiltins::Execute(const CStdString& execString)
     if (item.m_bIsFolder)
     {
       CFileItemList items;
-      CDirectory::GetDirectory(item.GetPath(),items,g_advancedSettings.m_videoExtensions);
-      int playlist = PLAYLIST_MUSIC;
+      CStdString extensions = g_advancedSettings.m_videoExtensions + "|" + g_advancedSettings.m_musicExtensions;
+      CDirectory::GetDirectory(item.GetPath(),items,extensions);
+      items.Sort(SortByLabel, SortOrderAscending);
+
+      bool containsMusic = false, containsVideo = false;
       for (int i = 0; i < items.Size(); i++)
       {
-        if (items[i]->IsVideo())
-        {
-          playlist = PLAYLIST_VIDEO;
+        bool isVideo = items[i]->IsVideo();
+        containsMusic |= !isVideo;
+        containsVideo |= isVideo;
+        
+        if (containsMusic && containsVideo)
           break;
+      }
+      
+      int playlist = containsVideo? PLAYLIST_VIDEO : PLAYLIST_MUSIC;;
+      if (containsMusic && containsVideo) //mixed content found in the folder
+      {
+        for (int i = items.Size() - 1; i >= 0; i--) //remove music entries
+        {
+          if (!items[i]->IsVideo())
+            items.Remove(i);
         }
       }
+      
       g_playlistPlayer.ClearPlaylist(playlist);
       g_playlistPlayer.Add(playlist, items);
       g_playlistPlayer.SetCurrentPlaylist(playlist);
@@ -635,6 +716,18 @@ int CBuiltins::Execute(const CStdString& execString)
         return false;
       }
     }
+  }
+  else if (execute.Equals("showPicture"))
+  {
+    if (!params.size())
+    {
+      CLog::Log(LOGERROR, "XBMC.ShowPicture called with empty parameter");
+      return -2;
+    }
+    CGUIMessage msg(GUI_MSG_SHOW_PICTURE, 0, 0);
+    msg.SetStringParam(params[0]);
+    CGUIWindow *pWindow = g_windowManager.GetWindow(WINDOW_SLIDESHOW);
+    if (pWindow) pWindow->OnMessage(msg);
   }
   else if (execute.Equals("slideShow") || execute.Equals("recursiveslideShow"))
   {
@@ -664,8 +757,8 @@ int CBuiltins::Execute(const CStdString& execString)
           flags |= 4;
         else if (params[i].Equals("pause"))
           flags |= 8;
-        else if (params[i].Left(11).Equals("beginslide="))
-          beginSlidePath = params[i].Mid(11);
+        else if (StringUtils::StartsWithNoCase(params[i], "beginslide="))
+          beginSlidePath = params[i].substr(11);
       }
     }
 
@@ -680,7 +773,7 @@ int CBuiltins::Execute(const CStdString& execString)
   else if (execute.Equals("reloadskin"))
   {
     //  Reload the skin
-    g_application.ReloadSkin();
+    g_application.ReloadSkin(!params.empty() && StringUtils::EqualsNoCase(params[0], "confirm"));
   }
   else if (execute.Equals("unloadskin"))
   {
@@ -702,10 +795,10 @@ int CBuiltins::Execute(const CStdString& execString)
     if (parameter.Equals("play"))
     { // play/pause
       // either resume playing, or pause
-      if (g_application.IsPlaying())
+      if (g_application.m_pPlayer->IsPlaying())
       {
-        if (g_application.GetPlaySpeed() != 1)
-          g_application.SetPlaySpeed(1);
+        if (g_application.m_pPlayer->GetPlaySpeed() != 1)
+          g_application.m_pPlayer->SetPlaySpeed(1, g_application.IsMutedInternal());
         else
           g_application.m_pPlayer->Pause();
       }
@@ -716,9 +809,9 @@ int CBuiltins::Execute(const CStdString& execString)
     }
     else if (parameter.Equals("rewind") || parameter.Equals("forward"))
     {
-      if (g_application.IsPlaying() && !g_application.m_pPlayer->IsPaused())
+      if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
       {
-        int iPlaySpeed = g_application.GetPlaySpeed();
+        int iPlaySpeed = g_application.m_pPlayer->GetPlaySpeed();
         if (parameter.Equals("rewind") && iPlaySpeed == 1) // Enables Rewinding
           iPlaySpeed *= -2;
         else if (parameter.Equals("rewind") && iPlaySpeed > 1) //goes down a notch if you're FFing
@@ -734,7 +827,7 @@ int CBuiltins::Execute(const CStdString& execString)
         if (iPlaySpeed > 32 || iPlaySpeed < -32)
           iPlaySpeed = 1;
 
-        g_application.SetPlaySpeed(iPlaySpeed);
+        g_application.m_pPlayer->SetPlaySpeed(iPlaySpeed, g_application.IsMutedInternal());
       }
     }
     else if (parameter.Equals("next"))
@@ -747,65 +840,66 @@ int CBuiltins::Execute(const CStdString& execString)
     }
     else if (parameter.Equals("bigskipbackward"))
     {
-      if (g_application.IsPlaying())
+      if (g_application.m_pPlayer->IsPlaying())
         g_application.m_pPlayer->Seek(false, true);
     }
     else if (parameter.Equals("bigskipforward"))
     {
-      if (g_application.IsPlaying())
+      if (g_application.m_pPlayer->IsPlaying())
         g_application.m_pPlayer->Seek(true, true);
     }
     else if (parameter.Equals("smallskipbackward"))
     {
-      if (g_application.IsPlaying())
+      if (g_application.m_pPlayer->IsPlaying())
         g_application.m_pPlayer->Seek(false, false);
     }
     else if (parameter.Equals("smallskipforward"))
     {
-      if (g_application.IsPlaying())
+      if (g_application.m_pPlayer->IsPlaying())
         g_application.m_pPlayer->Seek(true, false);
     }
-    else if (parameter.Left(14).Equals("seekpercentage"))
+    else if (StringUtils::StartsWithNoCase(parameter, "seekpercentage"))
     {
       CStdString offset = "";
-      float offsetpercent;
       if (parameter.size() == 14)
         CLog::Log(LOGERROR,"PlayerControl(seekpercentage(n)) called with no argument");
       else if (parameter.size() < 17) // arg must be at least "(N)"
-        CLog::Log(LOGERROR,"PlayerControl(seekpercentage(n)) called with invalid argument: \"%s\"", parameter.Mid(14).c_str());
+        CLog::Log(LOGERROR,"PlayerControl(seekpercentage(n)) called with invalid argument: \"%s\"", parameter.substr(14).c_str());
       else
       {
         // Don't bother checking the argument: an invalid arg will do seek(0)
-        offset = parameter.Mid(15).TrimRight(")");
-        offsetpercent = (float) atof(offset.c_str());
+        offset = parameter.substr(15);
+        StringUtils::TrimRight(offset, ")");
+        float offsetpercent = (float) atof(offset.c_str());
         if (offsetpercent < 0 || offsetpercent > 100)
           CLog::Log(LOGERROR,"PlayerControl(seekpercentage(n)) argument, %f, must be 0-100", offsetpercent);
-        else if (g_application.IsPlaying())
+        else if (g_application.m_pPlayer->IsPlaying())
           g_application.SeekPercentage(offsetpercent);
       }
     }
     else if( parameter.Equals("showvideomenu") )
     {
-      if( g_application.IsPlaying() && g_application.m_pPlayer )
+      if( g_application.m_pPlayer->IsPlaying() )
         g_application.m_pPlayer->OnAction(CAction(ACTION_SHOW_VIDEOMENU));
     }
     else if( parameter.Equals("record") )
     {
-      if( g_application.IsPlaying() && g_application.m_pPlayer && g_application.m_pPlayer->CanRecord())
+      if( g_application.m_pPlayer->IsPlaying() && g_application.m_pPlayer->CanRecord())
         g_application.m_pPlayer->Record(!g_application.m_pPlayer->IsRecording());
     }
-    else if (parameter.Left(9).Equals("partymode"))
+    else if (StringUtils::StartsWithNoCase(parameter, "partymode"))
     {
       CStdString strXspPath = "";
       //empty param=music, "music"=music, "video"=video, else xsp path
       PartyModeContext context = PARTYMODECONTEXT_MUSIC;
       if (parameter.size() > 9)
       {
-        if (parameter.Mid(10).Equals("video)"))
+        if (parameter.size() == 16 && StringUtils::EndsWithNoCase(parameter, "video)"))
           context = PARTYMODECONTEXT_VIDEO;
-        else if (!parameter.Mid(10).Equals("music)"))
+        else if (parameter.size() != 16 || !StringUtils::EndsWithNoCase(parameter, "music)"))
         {
-          strXspPath = parameter.Mid(10).TrimRight(")");
+          strXspPath = parameter.substr(10);
+          StringUtils::TrimRight(strXspPath, ")");
           context = PARTYMODECONTEXT_UNKNOWN;
         }
       }
@@ -835,11 +929,11 @@ int CBuiltins::Execute(const CStdString& execString)
       {
       case PLAYLIST_MUSIC:
         CMediaSettings::Get().SetMusicPlaylistShuffled(g_playlistPlayer.IsShuffled(iPlaylist));
-        g_settings.Save();
+        CSettings::Get().Save();
         break;
       case PLAYLIST_VIDEO:
         CMediaSettings::Get().SetVideoPlaylistShuffled(g_playlistPlayer.IsShuffled(iPlaylist));
-        g_settings.Save();
+        CSettings::Get().Save();
       }
 
       // send message
@@ -847,7 +941,7 @@ int CBuiltins::Execute(const CStdString& execString)
       g_windowManager.SendThreadMessage(msg);
 
     }
-    else if (parameter.Left(6).Equals("repeat"))
+    else if (StringUtils::StartsWithNoCase(parameter, "repeat"))
     {
       // get current playlist
       int iPlaylist = g_playlistPlayer.GetCurrentPlaylist();
@@ -879,11 +973,11 @@ int CBuiltins::Execute(const CStdString& execString)
       {
       case PLAYLIST_MUSIC:
         CMediaSettings::Get().SetMusicPlaylistRepeat(state == PLAYLIST::REPEAT_ALL);
-        g_settings.Save();
+        CSettings::Get().Save();
         break;
       case PLAYLIST_VIDEO:
         CMediaSettings::Get().SetVideoPlaylistRepeat(state == PLAYLIST::REPEAT_ALL);
-        g_settings.Save();
+        CSettings::Get().Save();
       }
 
       // send messages so now playing window can get updated
@@ -949,7 +1043,7 @@ int CBuiltins::Execute(const CStdString& execString)
     // play the desired offset
     int pos = atol(strPos.c_str());
     // playlist is already playing
-    if (g_application.IsPlaying())
+    if (g_application.m_pPlayer->IsPlaying())
       g_playlistPlayer.PlayNext(pos);
     // we start playing the 'other' playlist so we need to use play to initialize the player state
     else
@@ -971,7 +1065,7 @@ int CBuiltins::Execute(const CStdString& execString)
     float seconds = 0;
     if (params.size() > 2)
     {
-      if (params[2].Find(':') == -1)
+      if (params[2].find(':') == std::string::npos)
         seconds = static_cast<float>(atoi(params[2].c_str())*60);
       else
         seconds = (float)StringUtils::TimeStringToSeconds(params[2]);
@@ -979,7 +1073,7 @@ int CBuiltins::Execute(const CStdString& execString)
     else
     { // check if shutdown is specified in particular, and get the time for it
       CStdString strHeading;
-      if (parameter.CompareNoCase("shutdowntimer") == 0)
+      if (StringUtils::EqualsNoCase(parameter, "shutdowntimer"))
         strHeading = g_localizeStrings.Get(20145);
       else
         strHeading = g_localizeStrings.Get(13209);
@@ -994,9 +1088,9 @@ int CBuiltins::Execute(const CStdString& execString)
     for (unsigned int i = 3; i < params.size() ; i++)
     {
       // check "true" for backward comp
-      if (params[i].CompareNoCase("true") == 0 || params[i].CompareNoCase("silent") == 0)
+      if (StringUtils::EqualsNoCase(params[i], "true") || StringUtils::EqualsNoCase(params[i], "silent"))
         silent = true;
-      else if (params[i].CompareNoCase("loop") == 0)
+      else if (StringUtils::EqualsNoCase(params[i], "loop"))
         loop = true;
     }
 
@@ -1021,7 +1115,7 @@ int CBuiltins::Execute(const CStdString& execString)
   else if (execute.Equals("cancelalarm"))
   {
     bool silent = false;
-    if (params.size() > 1 && params[1].CompareNoCase("true") == 0)
+    if (params.size() > 1 && StringUtils::EqualsNoCase(params[1], "true"))
       silent = true;
     g_alarmClock.Stop(params[0],silent);
   }
@@ -1029,7 +1123,7 @@ int CBuiltins::Execute(const CStdString& execString)
   {
 #ifdef HAS_DVD_DRIVE
     bool restart = false;
-    if (params.size() > 0 && params[0].CompareNoCase("restart") == 0)
+    if (params.size() > 0 && StringUtils::EqualsNoCase(params[0], "restart"))
       restart = true;
     CAutorun::PlayDisc(g_mediaManager.GetDiscPath(), true, restart);
 #endif
@@ -1044,31 +1138,31 @@ int CBuiltins::Execute(const CStdString& execString)
   {
     int setting = CSkinSettings::Get().TranslateBool(parameter);
     CSkinSettings::Get().SetBool(setting, !CSkinSettings::Get().GetBool(setting));
-    g_settings.Save();
+    CSettings::Get().Save();
   }
   else if (execute.Equals("skin.setbool") && params.size())
   {
     if (params.size() > 1)
     {
       int string = CSkinSettings::Get().TranslateBool(params[0]);
-      CSkinSettings::Get().SetBool(string, params[1].CompareNoCase("true") == 0);
-      g_settings.Save();
+      CSkinSettings::Get().SetBool(string, StringUtils::EqualsNoCase(params[1], "true"));
+      CSettings::Get().Save();
       return 0;
     }
     // default is to set it to true
     int setting = CSkinSettings::Get().TranslateBool(params[0]);
     CSkinSettings::Get().SetBool(setting, true);
-    g_settings.Save();
+    CSettings::Get().Save();
   }
   else if (execute.Equals("skin.reset"))
   {
     CSkinSettings::Get().Reset(parameter);
-    g_settings.Save();
+    CSettings::Get().Save();
   }
   else if (execute.Equals("skin.resetsettings"))
   {
     CSkinSettings::Get().Reset();
-    g_settings.Save();
+    CSettings::Get().Save();
   }
   else if (execute.Equals("skin.theme"))
   {
@@ -1079,11 +1173,11 @@ int CBuiltins::Execute(const CStdString& execString)
     int iTheme = -1;
 
     // find current theme
-    if (!g_guiSettings.GetString("lookandfeel.skintheme").Equals("SKINDEFAULT"))
+    if (!StringUtils::EqualsNoCase(CSettings::Get().GetString("lookandfeel.skintheme"), "SKINDEFAULT"))
     {
       for (unsigned int i=0;i<vecTheme.size();++i)
       {
-        CStdString strTmpTheme(g_guiSettings.GetString("lookandfeel.skintheme"));
+        CStdString strTmpTheme(CSettings::Get().GetString("lookandfeel.skintheme"));
         URIUtils::RemoveExtension(strTmpTheme);
         if (vecTheme[i].Equals(strTmpTheme))
         {
@@ -1107,12 +1201,12 @@ int CBuiltins::Execute(const CStdString& execString)
     if (iTheme != -1 && iTheme < (int)vecTheme.size())
       strSkinTheme = vecTheme[iTheme];
 
-    g_guiSettings.SetString("lookandfeel.skintheme", strSkinTheme);
+    CSettings::Get().SetString("lookandfeel.skintheme", strSkinTheme);
     // also set the default color theme
     CStdString colorTheme(URIUtils::ReplaceExtension(strSkinTheme, ".xml"));
     if (colorTheme.Equals("Textures.xml"))
       colorTheme = "defaults.xml";
-    g_guiSettings.SetString("lookandfeel.skincolors", colorTheme);
+    CSettings::Get().SetString("lookandfeel.skincolors", colorTheme);
     g_application.ReloadSkin();
   }
   else if (execute.Equals("skin.setstring") || execute.Equals("skin.setimage") || execute.Equals("skin.setfile") ||
@@ -1126,7 +1220,7 @@ int CBuiltins::Execute(const CStdString& execString)
       if (execute.Equals("skin.setstring"))
       {
         CSkinSettings::Get().SetString(string, params[1]);
-        g_settings.Save();
+        CSettings::Get().Save();
         return 0;
       }
     }
@@ -1163,7 +1257,7 @@ int CBuiltins::Execute(const CStdString& execString)
       // if browsing for addons, required param[1] is addontype string, with optional param[2]
       // as contenttype string see IAddon.h & ADDON::TranslateXX
       CStdString strMask = (params.size() > 1) ? params[1] : "";
-      strMask.ToLower();
+      StringUtils::ToLower(strMask);
       ADDON::TYPE type;
       if ((type = TranslateType(strMask)) != ADDON_UNKNOWN)
       {
@@ -1173,7 +1267,7 @@ int CBuiltins::Execute(const CStdString& execString)
         url.SetFileName(strMask+"/");
         localShares.clear();
         CStdString content = (params.size() > 2) ? params[2] : "";
-        content.ToLower();
+        StringUtils::ToLower(content);
         url.SetPassword(content);
         CStdString strMask;
         if (type == ADDON_SCRIPT)
@@ -1181,7 +1275,7 @@ int CBuiltins::Execute(const CStdString& execString)
         CStdString replace;
         if (CGUIDialogFileBrowser::ShowAndGetFile(url.Get(), strMask, TranslateType(type, true), replace, true, true, true))
         {
-          if (replace.Mid(0,9).Equals("addons://"))
+          if (StringUtils::StartsWithNoCase(replace, "addons://"))
             CSkinSettings::Get().SetString(string, URIUtils::GetFileName(replace));
           else
             CSkinSettings::Get().SetString(string, replace);
@@ -1225,7 +1319,7 @@ int CBuiltins::Execute(const CStdString& execString)
       if (CGUIDialogFileBrowser::ShowAndGetDirectory(localShares, g_localizeStrings.Get(1031), value))
         CSkinSettings::Get().SetString(string, value);
     }
-    g_settings.Save();
+    CSettings::Get().Save();
   }
   else if (execute.Equals("skin.setaddon") && params.size() > 1)
   {
@@ -1241,15 +1335,15 @@ int CBuiltins::Execute(const CStdString& execString)
     if (types.size() > 0 && CGUIWindowAddonBrowser::SelectAddonID(types, result, true) == 1)
     {
       CSkinSettings::Get().SetString(string, result);
-      g_settings.Save();
+      CSettings::Get().Save();
     }
   }
   else if (execute.Equals("dialog.close") && params.size())
   {
     bool bForce = false;
-    if (params.size() > 1 && params[1].CompareNoCase("true") == 0)
+    if (params.size() > 1 && StringUtils::EqualsNoCase(params[1], "true"))
       bForce = true;
-    if (params[0].CompareNoCase("all") == 0)
+    if (StringUtils::EqualsNoCase(params[0], "all"))
     {
       g_windowManager.CloseDialogs(bForce);
     }
@@ -1282,8 +1376,8 @@ int CBuiltins::Execute(const CStdString& execString)
     CProfilesManager::Get().LoadMasterProfileForLogin();
     g_passwordManager.bMasterUser = false;
     g_windowManager.ActivateWindow(WINDOW_LOGIN_SCREEN);
-    if (!g_application.StartEventServer()) // event server could be needed in some situations
-      CGUIDialogKaiToast::QueueNotification("DefaultIconWarning.png", g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
+    if (!CNetworkServices::Get().StartEventServer()) // event server could be needed in some situations
+      CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
   }
   else if (execute.Equals("pagedown"))
   {
@@ -1345,6 +1439,8 @@ int CBuiltins::Execute(const CStdString& execString)
     CStdString path;
     VECSOURCES shares;
     g_mediaManager.GetLocalDrives(shares);
+    g_mediaManager.GetNetworkLocations(shares);
+    g_mediaManager.GetRemovableDrives(shares);
     bool singleFile;
     bool thumbs=false;
     bool actorThumbs=false;
@@ -1394,7 +1490,7 @@ int CBuiltins::Execute(const CStdString& execString)
 
     if (params.size() > 2)
       path=params[2];
-    if (singleFile || !path.IsEmpty() ||
+    if (singleFile || !path.empty() ||
         CGUIDialogFileBrowser::ShowAndGetDirectory(shares,
 				  g_localizeStrings.Get(661), path, true))
     {
@@ -1408,7 +1504,7 @@ int CBuiltins::Execute(const CStdString& execString)
       else
       {
         if (URIUtils::HasSlashAtEnd(path))
-          URIUtils::AddFileToFolder(path, "musicdb.xml", path);
+          path = URIUtils::AddFileToFolder(path, "musicdb.xml");
         CMusicDatabase musicdatabase;
         musicdatabase.Open();
         musicdatabase.ExportToXML(path, singleFile, thumbs, overwrite);
@@ -1432,7 +1528,7 @@ int CBuiltins::Execute(const CStdString& execString)
   {
     CGUIMessage message(GUI_MSG_NOTIFY_ALL, g_windowManager.GetActiveWindow(), 0, GUI_MSG_UPDATE, 0);
     message.SetStringParam(params[0]);
-    if (params.size() > 1 && params[1].CompareNoCase("replace") == 0)
+    if (params.size() > 1 && StringUtils::EqualsNoCase(params[1], "replace"))
       message.SetParam2(1); // reset the history
     g_windowManager.SendMessage(message);
   }
@@ -1572,6 +1668,18 @@ int CBuiltins::Execute(const CStdString& execString)
   {
     g_application.ToggleDPMS(true);
   }
+  else if (execute.Equals("cectogglestate"))
+  {
+    CApplicationMessenger::Get().CECToggleState();
+  }
+  else if (execute.Equals("cecactivatesource"))
+  {
+    CApplicationMessenger::Get().CECActivateSource();
+  }
+  else if (execute.Equals("cecstandby"))
+  {
+    CApplicationMessenger::Get().CECStandby();
+  }
 #if defined(HAS_LIRC) || defined(HAS_IRSERVERSUITE)
   else if (execute.Equals("lirc.stop"))
   {
@@ -1623,8 +1731,8 @@ int CBuiltins::Execute(const CStdString& execString)
   }
   else if (execute.Equals("toggledebug"))
   {
-    bool debug = g_guiSettings.GetBool("debug.showloginfo");
-    g_guiSettings.SetBool("debug.showloginfo", !debug);
+    bool debug = CSettings::Get().GetBool("debug.showloginfo");
+    CSettings::Get().SetBool("debug.showloginfo", !debug);
     g_advancedSettings.SetDebugMode(!debug);
   }
   else if (execute.Equals("startpvrmanager"))
@@ -1638,6 +1746,17 @@ int CBuiltins::Execute(const CStdString& execString)
   else if (execute.Equals("StartAndroidActivity") && params.size() > 0)
   {
     CApplicationMessenger::Get().StartAndroidActivity(params);
+  }
+  else if (execute.Equals("SetStereoMode") && !parameter.empty())
+  {
+    CAction action = CStereoscopicsManager::Get().ConvertActionCommandToAction(execute, parameter);
+    if (action.GetID() != ACTION_NONE)
+      CApplicationMessenger::Get().SendAction(action);
+    else
+    {
+      CLog::Log(LOGERROR,"Builtin 'SetStereoMode' called with unknown parameter: %s", parameter.c_str());
+      return -2;
+    }
   }
   else
     return -1;

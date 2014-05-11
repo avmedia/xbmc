@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include "NSFFileDirectory.h"
 #include "SIDFileDirectory.h"
 #include "ASAPFileDirectory.h"
+#include "UDFDirectory.h"
 #include "RSSDirectory.h"
 #include "cores/paplayer/ASAPCodec.h"
 #endif
@@ -47,6 +48,7 @@
 #include "ZipManager.h"
 #include "settings/AdvancedSettings.h"
 #include "FileItem.h"
+#include "utils/StringUtils.h"
 
 using namespace XFILE;
 using namespace PLAYLIST;
@@ -61,8 +63,11 @@ CFileDirectoryFactory::~CFileDirectoryFactory(void)
 // return NULL + set pItem->m_bIsFolder to remove it completely from list.
 IFileDirectory* CFileDirectoryFactory::Create(const CStdString& strPath, CFileItem* pItem, const CStdString& strMask)
 {
+  if (URIUtils::IsStack(strPath)) // disqualify stack as we need to work with each of the parts instead
+    return NULL;
+
   CStdString strExtension=URIUtils::GetExtension(strPath);
-  strExtension.MakeLower();
+  StringUtils::ToLower(strExtension);
 
 #ifdef HAS_FILESYSTEM
   if ((strExtension.Equals(".ogg") || strExtension.Equals(".oga")) && CFile::Exists(strPath))
@@ -113,6 +118,9 @@ IFileDirectory* CFileDirectoryFactory::Create(const CStdString& strPath, CFileIt
   if (pItem->IsRSS())
     return new CRSSDirectory();
 
+  if (pItem->IsDVDImage())
+    return new CUDFDirectory();
+
 #endif
 #if defined(TARGET_ANDROID)
   if (strExtension.Equals(".apk"))
@@ -124,7 +132,7 @@ IFileDirectory* CFileDirectoryFactory::Create(const CStdString& strPath, CFileIt
     CDirectory::GetDirectory(strUrl, items, strMask);
     if (items.Size() == 0) // no files
       pItem->m_bIsFolder = true;
-    else if (items.Size() == 1 && items[0]->m_idepth == 0)
+    else if (items.Size() == 1 && items[0]->m_idepth == 0 && !items[0]->m_bIsFolder)
     {
       // one STORED file - collapse it down
       *pItem = *items[0];
@@ -146,7 +154,7 @@ IFileDirectory* CFileDirectoryFactory::Create(const CStdString& strPath, CFileIt
     CDirectory::GetDirectory(strUrl, items, strMask);
     if (items.Size() == 0) // no files
       pItem->m_bIsFolder = true;
-    else if (items.Size() == 1 && items[0]->m_idepth == 0)
+    else if (items.Size() == 1 && items[0]->m_idepth == 0 && !items[0]->m_bIsFolder)
     {
       // one STORED file - collapse it down
       *pItem = *items[0];
@@ -163,26 +171,25 @@ IFileDirectory* CFileDirectoryFactory::Create(const CStdString& strPath, CFileIt
     CStdString strUrl;
     URIUtils::CreateArchivePath(strUrl, "rar", strPath, "");
 
-    vector<CStdString> tokens;
-    CUtil::Tokenize(strPath,tokens,".");
+    vector<std::string> tokens;
+    StringUtils::Tokenize(strPath,tokens,".");
     if (tokens.size() > 2)
     {
       if (strExtension.Equals(".001"))
       {
-        if (tokens[tokens.size()-2].Equals("ts")) // .ts.001 - treat as a movie file to scratch some users itch
+        if (StringUtils::EqualsNoCase(tokens[tokens.size()-2], "ts")) // .ts.001 - treat as a movie file to scratch some users itch
           return NULL;
       }
       CStdString token = tokens[tokens.size()-2];
-      if (token.Left(4).CompareNoCase("part") == 0) // only list '.part01.rar'
+      if (StringUtils::StartsWithNoCase(token, "part")) // only list '.part01.rar'
       {
         // need this crap to avoid making mistakes - yeyh for the new rar naming scheme :/
         struct __stat64 stat;
         int digits = token.size()-4;
-        CStdString strNumber, strFormat;
-        strFormat.Format("part%%0%ii",digits);
-        strNumber.Format(strFormat.c_str(),1);
-        CStdString strPath2=strPath;
-        strPath2.Replace(token,strNumber);
+        CStdString strFormat = StringUtils::Format("part%%0%ii", digits);
+        CStdString strNumber = StringUtils::Format(strFormat.c_str(), 1);
+        CStdString strPath2 = strPath;
+        StringUtils::Replace(strPath2,token,strNumber);
         if (atoi(token.substr(4).c_str()) > 1 && CFile::Stat(strPath2,&stat) == 0)
         {
           pItem->m_bIsFolder = true;
@@ -195,7 +202,7 @@ IFileDirectory* CFileDirectoryFactory::Create(const CStdString& strPath, CFileIt
     CDirectory::GetDirectory(strUrl, items, strMask);
     if (items.Size() == 0) // no files - hide this
       pItem->m_bIsFolder = true;
-    else if (items.Size() == 1 && items[0]->m_idepth == 0x30)
+    else if (items.Size() == 1 && items[0]->m_idepth == 0x30 && !items[0]->m_bIsFolder)
     {
       // one STORED file - collapse it down
       *pItem = *items[0];
@@ -224,7 +231,7 @@ IFileDirectory* CFileDirectoryFactory::Create(const CStdString& strPath, CFileIt
     IFileDirectory* pDir=new CSmartPlaylistDirectory;
     return pDir; // treat as directory
   }
-  if (g_advancedSettings.m_playlistAsFolders && CPlayListFactory::IsPlaylist(strPath))
+  if (CPlayListFactory::IsPlaylist(strPath))
   { // Playlist file
     // currently we only return the directory if it contains
     // more than one file.  Reason is that .pls and .m3u may be used

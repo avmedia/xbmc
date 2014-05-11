@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ static CVDisplayLinkRef displayLink = NULL;
 
 CGDirectDisplayID Cocoa_GetDisplayIDFromScreen(NSScreen *screen);
 
-int Cocoa_GL_GetCurrentDisplayID(void)
+uint32_t Cocoa_GL_GetCurrentDisplayID(void)
 {
   // Find which display we are on from the current context (default to main display)
   CGDirectDisplayID display_id = kCGDirectMainDisplay;
@@ -74,7 +74,7 @@ int Cocoa_GL_GetCurrentDisplayID(void)
     }
   }
   
-  return((int)display_id);
+  return((uint32_t)display_id);
 }
 
 bool Cocoa_CVDisplayLinkCreate(void *displayLinkcallback, void *displayLinkContext)
@@ -151,8 +151,9 @@ double Cocoa_GetCVDisplayLinkRefreshPeriod(void)
   }
   else
   {
+    
     CGDisplayModeRef display_mode;
-    display_mode = (CGDisplayModeRef)Cocoa_GL_GetCurrentDisplayID();
+    display_mode = CGDisplayCopyDisplayMode((CGDirectDisplayID)Cocoa_GL_GetCurrentDisplayID());
     fps = CGDisplayModeGetRefreshRate(display_mode);
     CGDisplayModeRelease(display_mode);
     if (fps <= 0.0)
@@ -256,8 +257,8 @@ char* Cocoa_MountPoint2DeviceName(char *path)
         break;
       }
     }
-    free(strDVDDevice);
   }
+  free(strDVDDevice);
   return path;
 }
 
@@ -373,21 +374,6 @@ void Cocoa_ShowMouse()
 }
 
 //---------------------------------------------------------------------------------
-bool Cocoa_HasVDADecoder()
-{
-  static int result = -1;
-
-  if (result == -1)
-  {
-    if (Cocoa_GetOSVersion() >= 0x1063)
-      result = (access(DLL_PATH_LIBVDADECODER, 0) == 0) ? 1:0;
-    else
-      result = 0;
-  }
-
-  return (result == 1);
-}
-
 bool Cocoa_GPUForDisplayIsNvidiaPureVideo3()
 {
   bool result = false;

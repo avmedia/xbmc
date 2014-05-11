@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 
 #include "APKFile.h"
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 
 #include <zip.h>
@@ -52,8 +53,6 @@ bool CAPKFile::Open(const CURL& url)
   m_url = url;
   CStdString path = url.GetFileName();
   CStdString host = url.GetHostName();
-  // host name might be encoded rfc1738.txt, decode it.
-  CURL::Decode(host);
 
   int zip_flags = 0, zip_error = 0;
   m_zip_archive = zip_open(host.c_str(), zip_flags, &zip_error);
@@ -208,8 +207,6 @@ int CAPKFile::Stat(const CURL& url, struct __stat64* buffer)
   //  we might be called without opening
   CStdString path = url.GetFileName();
   CStdString host = url.GetHostName();
-  // host name might be encoded rfc1738.txt, decode it.
-  CURL::Decode(host);
 
   struct zip *zip_archive;
   int zip_flags = 0, zip_error = 0;
@@ -251,7 +248,7 @@ int CAPKFile::Stat(const CURL& url, struct __stat64* buffer)
     for (int i = 0; i < numFiles; i++)
     {
       CStdString name = zip_get_name(zip_archive, i, zip_flags);
-      if (!name.IsEmpty() && name.Left(path.size()).Equals(path))
+      if (!name.empty() && StringUtils::StartsWith(name, path))
       {
         buffer->st_gid  = 0;
         buffer->st_mode = _S_IFDIR;

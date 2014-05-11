@@ -2,19 +2,23 @@
  * Many concepts and protocol specification in this code are taken
  * from Shairport, by James Laird.
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *      Copyright (C) 2011-2013 Team XBMC
+ *      http://xbmc.org
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2.1, or (at your option)
+ *  any later version.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
  */
 
 #include "network/Network.h"
@@ -43,7 +47,9 @@
 #include "GUIInfoManager.h"
 #include "guilib/GUIWindowManager.h"
 #include "utils/Variant.h"
+#include "utils/StringUtils.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/Settings.h"
 #include "utils/EndianSwap.h"
 #include "URL.h"
 #include "interfaces/AnnouncementManager.h"
@@ -51,16 +57,21 @@
 #include <map>
 #include <string>
 
+#define TMP_COVERART_PATH "special://temp/airtunes_album_thumb.jpg"
+
 using namespace XFILE;
 using namespace ANNOUNCEMENT;
 
-#if defined(TARGET_WINDOWS)
+#if defined(HAVE_LIBSHAIRPLAY)
 DllLibShairplay *CAirTunesServer::m_pLibShairplay = NULL;
 #else
 DllLibShairport *CAirTunesServer::m_pLibShairport = NULL;
 #endif
 CAirTunesServer *CAirTunesServer::ServerInstance = NULL;
 CStdString CAirTunesServer::m_macAddress;
+std::string CAirTunesServer::m_metadata[3];
+CCriticalSection CAirTunesServer::m_metadataLock;
+bool CAirTunesServer::m_streamStarted = false;
 
 //parse daap metadata - thx to project MythTV
 std::map<std::string, std::string> decodeDMAP(const char *buffer, unsigned int size)
@@ -82,38 +93,71 @@ std::map<std::string, std::string> decodeDMAP(const char *buffer, unsigned int s
   return result;
 }
 
+void CAirTunesServer::RefreshMetadata()
+{
+  CSingleLock lock(m_metadataLock);
+  MUSIC_INFO::CMusicInfoTag tag;
+  if (m_metadata[0].length())
+    tag.SetAlbum(m_metadata[0]);//album
+  if (m_metadata[1].length())
+    tag.SetTitle(m_metadata[1]);//title
+  if (m_metadata[2].length())
+    tag.SetArtist(m_metadata[2]);//artist
+  
+  CApplicationMessenger::Get().SetCurrentSongTag(tag);
+}
+
+void CAirTunesServer::RefreshCoverArt()
+{
+  CSingleLock lock(m_metadataLock);
+  //reset to empty before setting the new one
+  //else it won't get refreshed because the name didn't change
+  g_infoManager.SetCurrentAlbumThumb("");
+  //update the ui
+  g_infoManager.SetCurrentAlbumThumb(TMP_COVERART_PATH);
+  //update the ui
+  CGUIMessage msg(GUI_MSG_NOTIFY_ALL,0,0,GUI_MSG_REFRESH_THUMBS);
+  g_windowManager.SendThreadMessage(msg);
+}
+
 void CAirTunesServer::SetMetadataFromBuffer(const char *buffer, unsigned int size)
 {
-  MUSIC_INFO::CMusicInfoTag tag;
+
   std::map<std::string, std::string> metadata = decodeDMAP(buffer, size);
+  CSingleLock lock(m_metadataLock);
+
   if(metadata["asal"].length())
-    tag.SetAlbum(metadata["asal"]);//album
+    m_metadata[0] = metadata["asal"];//album
   if(metadata["minm"].length())    
-    tag.SetTitle(metadata["minm"]);//title
+    m_metadata[1] = metadata["minm"];//title
   if(metadata["asar"].length())    
-    tag.SetArtist(metadata["asar"]);//artist
-  CApplicationMessenger::Get().SetCurrentSongTag(tag);
+    m_metadata[2] = metadata["asar"];//artist
+  
+  RefreshMetadata();
 }
 
 void CAirTunesServer::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
 {
-  if ( (flag & Player) && strcmp(sender, "xbmc") == 0 && strcmp(message, "OnStop") == 0)
+  if ( (flag & Player) && strcmp(sender, "xbmc") == 0)
   {
-#ifdef HAS_AIRPLAY
-    CAirPlayServer::restoreVolume();
-#endif
+    if (strcmp(message, "OnPlay") == 0 && m_streamStarted)
+    {
+      RefreshMetadata();
+      RefreshCoverArt();
+    }
   }
 }
 
 void CAirTunesServer::SetCoverArtFromBuffer(const char *buffer, unsigned int size)
 {
   XFILE::CFile tmpFile;
-  const char *tmpFileName = "special://temp/airtunes_album_thumb.jpg";
 
   if(!size)
     return;
 
-  if (tmpFile.OpenForWrite(tmpFileName, true))
+  CSingleLock lock(m_metadataLock);
+  
+  if (tmpFile.OpenForWrite(TMP_COVERART_PATH, true))
   {
     int writtenBytes=0;
     writtenBytes = tmpFile.Write(buffer, size);
@@ -121,18 +165,12 @@ void CAirTunesServer::SetCoverArtFromBuffer(const char *buffer, unsigned int siz
 
     if(writtenBytes)
     {
-      //reset to empty before setting the new one
-      //else it won't get refreshed because the name didn't change
-      g_infoManager.SetCurrentAlbumThumb("");
-      g_infoManager.SetCurrentAlbumThumb(tmpFileName);
-      //update the ui
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL,0,0,GUI_MSG_REFRESH_THUMBS);
-      g_windowManager.SendThreadMessage(msg);
+      RefreshCoverArt();
     }
   }
 }
 
-#if defined(TARGET_WINDOWS)
+#if defined(HAVE_LIBSHAIRPLAY)
 #define RSA_KEY " \
 -----BEGIN RSA PRIVATE KEY-----\
 MIIEpQIBAAKCAQEA59dE8qLieItsH1WgjrcFRKj6eUWqi+bGLOX1HL3U3GhC/j0Qg90u3sG/1CUt\
@@ -168,6 +206,8 @@ void CAirTunesServer::AudioOutputFunctions::audio_set_coverart(void *cls, void *
   CAirTunesServer::SetCoverArtFromBuffer((char *)buffer, buflen);
 }
 
+char *session="XBMC-AirTunes";
+
 void* CAirTunesServer::AudioOutputFunctions::audio_init(void *cls, int bits, int channels, int samplerate)
 {
   XFILE::CPipeFile *pipe=(XFILE::CPipeFile *)cls;
@@ -191,13 +231,11 @@ void* CAirTunesServer::AudioOutputFunctions::audio_init(void *cls, int bits, int
   CFileItem item;
   item.SetPath(pipe->GetName());
   item.SetMimeType("audio/x-xbmc-pcm");
-
-  ThreadMessage tMsg2 = { TMSG_GUI_ACTIVATE_WINDOW, WINDOW_VISUALISATION, 0 };
-  CApplicationMessenger::Get().SendMessage(tMsg2, true);
+  m_streamStarted = true;
 
   CApplicationMessenger::Get().PlayFile(item);
 
-  return "XBMC-AirTunes";//session
+  return session;//session
 }
 
 void  CAirTunesServer::AudioOutputFunctions::audio_set_volume(void *cls, void *session, float volume)
@@ -207,7 +245,8 @@ void  CAirTunesServer::AudioOutputFunctions::audio_set_volume(void *cls, void *s
 #ifdef HAS_AIRPLAY
   CAirPlayServer::backupVolume();
 #endif
-  g_application.SetVolume(volPercent, false);//non-percent volume 0.0-1.0
+  if (CSettings::Get().GetBool("services.airplayvolumecontrol"))
+    g_application.SetVolume(volPercent, false);//non-percent volume 0.0-1.0
 }
 
 void  CAirTunesServer::AudioOutputFunctions::audio_process(void *cls, void *session, const void *buffer, int buflen)
@@ -255,9 +294,11 @@ void  CAirTunesServer::AudioOutputFunctions::audio_destroy(void *cls, void *sess
     CApplicationMessenger::Get().SendMessage(tMsg, true);
     CLog::Log(LOGDEBUG, "AIRTUNES: AirPlay not running - stopping player");
   }
+  
+  m_streamStarted = false;
 }
 
-void shairplay_log(int level, const char *msg)
+void shairplay_log(void *cls, int level, const char *msg)
 {
   int xbmcLevel = LOGINFO;
 
@@ -310,7 +351,8 @@ void  CAirTunesServer::AudioOutputFunctions::ao_set_volume(float volume)
 #ifdef HAS_AIRPLAY
   CAirPlayServer::backupVolume();
 #endif
-  g_application.SetVolume(volPercent, false);//non-percent volume 0.0-1.0
+  if (CSettings::Get().GetBool("services.airplayvolumecontrol"))
+    g_application.SetVolume(volPercent, false);//non-percent volume 0.0-1.0
 }
 
 
@@ -319,7 +361,7 @@ int CAirTunesServer::AudioOutputFunctions::ao_play(ao_device *device, char *outp
   if (!device)
     return 0;
 
-  /*if (num_bytes && g_application.m_pPlayer)
+  /*if (num_bytes && g_application.m_pPlayer->HasPlayer())
     g_application.m_pPlayer->SetCaching(CACHESTATE_NONE);*///TODO
 
   ao_device_xbmc* device_xbmc = (ao_device_xbmc*) device;
@@ -387,6 +429,8 @@ ao_device* CAirTunesServer::AudioOutputFunctions::ao_open_live(int driver_id, ao
   if (ao_get_option(option, "name"))
     item.GetMusicInfoTag()->SetTitle(ao_get_option(option, "name"));
 
+  m_streamStarted = true;
+
   CApplicationMessenger::Get().PlayFile(item);
 
   return (ao_device*) device;
@@ -415,6 +459,7 @@ int CAirTunesServer::AudioOutputFunctions::ao_close(ao_device *device)
   }
 
   delete device_xbmc;
+  m_streamStarted = false;
 
   return 0;
 }
@@ -504,7 +549,7 @@ bool CAirTunesServer::StartServer(int port, bool nonlocal, bool usePassword, con
   if (net)
   {
     m_macAddress = net->GetMacAddress();
-    m_macAddress.Replace(":","");
+    StringUtils::Replace(m_macAddress, ":","");
     while (m_macAddress.size() < 12)
     {
       m_macAddress = CStdString("0") + m_macAddress;
@@ -517,13 +562,13 @@ bool CAirTunesServer::StartServer(int port, bool nonlocal, bool usePassword, con
 
   if (!usePassword)
   {
-    pw.Empty();
+    pw.clear();
   }
 
   ServerInstance = new CAirTunesServer(port, nonlocal);
-  if (ServerInstance->Initialize(password))
+  if (ServerInstance->Initialize(pw))
   {
-#ifndef TARGET_WINDOWS
+#if !defined(HAVE_LIBSHAIRPLAY)
     ServerInstance->Create();
 #endif
     success = true;
@@ -531,8 +576,9 @@ bool CAirTunesServer::StartServer(int port, bool nonlocal, bool usePassword, con
 
   if (success)
   {
-    CStdString appName;
-    appName.Format("%s@%s", m_macAddress.c_str(), g_infoManager.GetLabel(SYSTEM_FRIENDLY_NAME).c_str());
+    CStdString appName = StringUtils::Format("%s@%s",
+                                             m_macAddress.c_str(),
+                                             g_infoManager.GetLabel(SYSTEM_FRIENDLY_NAME).c_str());
 
     std::vector<std::pair<std::string, std::string> > txt;
     txt.push_back(std::make_pair("txtvers",  "1"));
@@ -545,7 +591,7 @@ bool CAirTunesServer::StartServer(int port, bool nonlocal, bool usePassword, con
     txt.push_back(std::make_pair("sm",  "false"));
     txt.push_back(std::make_pair("ss",  "16"));
     txt.push_back(std::make_pair("sr",  "44100"));
-    txt.push_back(std::make_pair("pw",  "false"));
+    txt.push_back(std::make_pair("pw",  usePassword?"true":"false"));
     txt.push_back(std::make_pair("vn",  "3"));
     txt.push_back(std::make_pair("da",  "true"));
     txt.push_back(std::make_pair("vs",  "130.14"));
@@ -562,7 +608,7 @@ void CAirTunesServer::StopServer(bool bWait)
 {
   if (ServerInstance)
   {
-#if !defined(TARGET_WINDOWS)
+#if !defined(HAVE_LIBSHAIRPLAY)
     if (m_pLibShairport->IsLoaded())
     {
       m_pLibShairport->shairport_exit();
@@ -580,10 +626,18 @@ void CAirTunesServer::StopServer(bool bWait)
   }
 }
 
+ bool CAirTunesServer::IsRunning()
+ {
+   if (ServerInstance == NULL)
+     return false;
+
+   return ((CThread*)ServerInstance)->IsRunning();
+ }
+
 CAirTunesServer::CAirTunesServer(int port, bool nonlocal) : CThread("AirTunesServer")
 {
   m_port = port;
-#if defined(TARGET_WINDOWS)
+#if defined(HAVE_LIBSHAIRPLAY)
   m_pLibShairplay = new DllLibShairplay();
   m_pPipe         = new XFILE::CPipeFile;  
 #else
@@ -594,7 +648,7 @@ CAirTunesServer::CAirTunesServer(int port, bool nonlocal) : CThread("AirTunesSer
 
 CAirTunesServer::~CAirTunesServer()
 {
-#if defined(TARGET_WINDOWS)
+#if defined(HAVE_LIBSHAIRPLAY)
   if (m_pLibShairplay->IsLoaded())
   {
     m_pLibShairplay->Unload();
@@ -615,7 +669,7 @@ void CAirTunesServer::Process()
 {
   m_bStop = false;
 
-#if !defined(TARGET_WINDOWS)
+#if !defined(HAVE_LIBSHAIRPLAY)
   while (!m_bStop && m_pLibShairport->shairport_is_running())
   {
     m_pLibShairport->shairport_loop();
@@ -629,7 +683,7 @@ bool CAirTunesServer::Initialize(const CStdString &password)
 
   Deinitialize();
 
-#if defined(TARGET_WINDOWS)
+#if defined(HAVE_LIBSHAIRPLAY)
   if (m_pLibShairplay->Load())
   {
 
@@ -657,7 +711,7 @@ bool CAirTunesServer::Initialize(const CStdString &password)
         m_pLibShairplay->raop_set_log_level(m_pRaop, RAOP_LOG_DEBUG);
       }
 
-      m_pLibShairplay->raop_set_log_callback(m_pRaop, shairplay_log);
+      m_pLibShairplay->raop_set_log_callback(m_pRaop, shairplay_log, NULL);
 
       CNetworkInterface *net = g_application.getNetwork().GetFirstConnectedInterface();
 
@@ -677,9 +731,9 @@ bool CAirTunesServer::Initialize(const CStdString &password)
   CStdString pwStr;
   CStdString portStr;
 
-  hwStr.Format("--mac=%s", m_macAddress.c_str());
-  pwStr.Format("--password=%s",password.c_str());
-  portStr.Format("--server_port=%d",m_port);
+  hwStr = StringUtils::Format("--mac=%s", m_macAddress.c_str());
+  pwStr = StringUtils::Format("--password=%s",password.c_str());
+  portStr = StringUtils::Format("--server_port=%d",m_port);
 
   if (!password.empty())
   {
@@ -724,7 +778,7 @@ bool CAirTunesServer::Initialize(const CStdString &password)
 
 void CAirTunesServer::Deinitialize()
 {
-#if defined(TARGET_WINDOWS)
+#if defined(HAVE_LIBSHAIRPLAY)
   if (m_pLibShairplay && m_pLibShairplay->IsLoaded())
   {
     m_pLibShairplay->raop_stop(m_pRaop);

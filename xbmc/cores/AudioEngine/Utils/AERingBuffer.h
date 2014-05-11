@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -156,7 +156,7 @@ public:
     unsigned int space = GetReadSize();
 
     //want to read more than we have written?
-    if( space <= 0 )
+    if( space == 0 )
     {
 #ifdef AE_RING_BUFFER_DEBUG
       CLog::Log(LOGDEBUG, "AERingBuffer: Can't read from empty buffer.");

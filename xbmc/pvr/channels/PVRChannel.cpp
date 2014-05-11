@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #include "utils/log.h"
 #include "Util.h"
 #include "filesystem/File.h"
-#include "settings/GUISettings.h"
 #include "utils/StringUtils.h"
 #include "threads/SingleLock.h"
 
@@ -105,8 +104,8 @@ CPVRChannel::CPVRChannel(const PVR_CHANNEL &channel, unsigned int iClientId)
   m_bEPGCreated             = false;
   m_bChanged                = false;
 
-  if (m_strChannelName.IsEmpty())
-    m_strChannelName.Format("%s %d", g_localizeStrings.Get(19029), m_iUniqueId);
+  if (m_strChannelName.empty())
+    m_strChannelName = StringUtils::Format("%s %d", g_localizeStrings.Get(19029).c_str(), m_iUniqueId);
 
   UpdateEncryptionName();
 }
@@ -210,9 +209,9 @@ bool CPVRChannel::UpdateFromClient(const CPVRChannel &channel)
   SetClientChannelName(channel.ClientChannelName());
 
   CSingleLock lock(m_critSection);
-  if (m_strChannelName.IsEmpty())
+  if (m_strChannelName.empty())
     SetChannelName(channel.ClientChannelName());
-  if (m_strIconPath.IsEmpty()||(!m_strIconPath.Equals(channel.IconPath()) && !IsUserSetIcon()))
+  if (m_strIconPath.empty()||(!m_strIconPath.Equals(channel.IconPath()) && !IsUserSetIcon()))
     SetIconPath(channel.IconPath());
 
   return m_bChanged;
@@ -307,13 +306,10 @@ bool CPVRChannel::SetIconPath(const CStdString &strIconPath, bool bIsUserSetIcon
   if (m_strIconPath != strIconPath)
   {
     /* update the path */
-    m_strIconPath.Format("%s", strIconPath);
+    m_strIconPath = StringUtils::Format("%s", strIconPath.c_str());
     SetChanged();
     m_bChanged = true;
-
-    /* did the user change the icon? */
-    if (bIsUserSetIcon)
-      m_bIsUserSetIcon = !m_strIconPath.IsEmpty();
+    m_bIsUserSetIcon = bIsUserSetIcon && !m_strIconPath.empty();
 	  
     return true;
   }
@@ -325,8 +321,8 @@ bool CPVRChannel::SetChannelName(const CStdString &strChannelName)
 {
   CStdString strName(strChannelName);
 
-  if (strName.IsEmpty())
-    strName.Format(g_localizeStrings.Get(19085), ClientChannelNumber());
+  if (strName.empty())
+    strName = StringUtils::Format(g_localizeStrings.Get(19085).c_str(), ClientChannelNumber());
 
   CSingleLock lock(m_critSection);
   if (m_strChannelName != strName)
@@ -379,8 +375,8 @@ bool CPVRChannel::SetLastWatched(time_t iLastWatched)
 bool CPVRChannel::IsEmpty() const
 {
   CSingleLock lock(m_critSection);
-  return (m_strFileNameAndPath.IsEmpty() ||
-          m_strStreamURL.IsEmpty());
+  return (m_strFileNameAndPath.empty() ||
+          m_strStreamURL.empty());
 }
 
 /********** Client related channel methods **********/
@@ -443,7 +439,7 @@ bool CPVRChannel::SetClientChannelName(const CStdString &strClientChannelName)
   if (m_strClientChannelName != strClientChannelName)
   {
     /* update the client channel name */
-    m_strClientChannelName.Format("%s", strClientChannelName);
+    m_strClientChannelName = StringUtils::Format("%s", strClientChannelName.c_str());
     SetChanged();
     // this is not persisted, so don't update m_bChanged
 
@@ -460,7 +456,7 @@ bool CPVRChannel::SetInputFormat(const CStdString &strInputFormat)
   if (m_strInputFormat != strInputFormat)
   {
     /* update the input format */
-    m_strInputFormat.Format("%s", strInputFormat);
+    m_strInputFormat = StringUtils::Format("%s", strInputFormat.c_str());
     SetChanged();
     m_bChanged = true;
 
@@ -477,7 +473,7 @@ bool CPVRChannel::SetStreamURL(const CStdString &strStreamURL)
   if (m_strStreamURL != strStreamURL)
   {
     /* update the stream url */
-    m_strStreamURL.Format("%s", strStreamURL);
+    m_strStreamURL = StringUtils::Format("%s", strStreamURL.c_str());
     SetChanged();
     m_bChanged = true;
 
@@ -493,7 +489,7 @@ void CPVRChannel::UpdatePath(CPVRChannelGroupInternal* group, unsigned int iNewC
 
   CStdString strFileNameAndPath;
   CSingleLock lock(m_critSection);
-  strFileNameAndPath.Format("pvr://channels/%s/%s/%i.pvr", (m_bIsRadio ? "radio" : "tv"), group->GroupName().c_str(), iNewChannelGroupPosition);
+  strFileNameAndPath = StringUtils::Format("pvr://channels/%s/%s/%i.pvr", (m_bIsRadio ? "radio" : "tv"), group->GroupName().c_str(), iNewChannelGroupPosition);
   if (m_strFileNameAndPath != strFileNameAndPath)
   {
     m_strFileNameAndPath = strFileNameAndPath;
@@ -617,7 +613,7 @@ void CPVRChannel::UpdateEncryptionName(void)
     strName = "Griffin";
 
   if (m_iClientEncryptionSystem >= 0)
-    strName.AppendFormat(" (%04X)", m_iClientEncryptionSystem);
+    strName += StringUtils::Format(" (%04X)", m_iClientEncryptionSystem);
 
   m_strClientEncryptionName = strName;
 }
@@ -685,10 +681,10 @@ bool CPVRChannel::SetEPGScraper(const CStdString &strScraper)
 
   if (m_strEPGScraper != strScraper)
   {
-    bool bCleanEPG = !m_strEPGScraper.IsEmpty() || strScraper.IsEmpty();
+    bool bCleanEPG = !m_strEPGScraper.empty() || strScraper.empty();
 
     /* update the scraper name */
-    m_strEPGScraper.Format("%s", strScraper);
+    m_strEPGScraper = StringUtils::Format("%s", strScraper.c_str());
     SetChanged();
     m_bChanged = true;
 
@@ -708,10 +704,13 @@ void CPVRChannel::SetCachedChannelNumber(unsigned int iChannelNumber)
   m_iCachedChannelNumber = iChannelNumber;
 }
 
-void CPVRChannel::ToSortable(SortItem& sortable) const
+void CPVRChannel::ToSortable(SortItem& sortable, Field field) const
 {
-  CSingleLock lock(m_critSection);
-  sortable[FieldChannelName] = m_strChannelName;
+  if (field == FieldChannelName)
+  {
+    CSingleLock lock(m_critSection);
+    sortable[FieldChannelName] = m_strChannelName;
+  }
 }
 
 int CPVRChannel::ChannelID(void) const
@@ -749,6 +748,11 @@ bool CPVRChannel::IsUserSetIcon(void) const
 {
   CSingleLock lock(m_critSection);
   return m_bIsUserSetIcon;
+}
+
+bool CPVRChannel::IsIconExists() const
+{
+  return  CFile::Exists(IconPath());
 }
 
 CStdString CPVRChannel::ChannelName(void) const

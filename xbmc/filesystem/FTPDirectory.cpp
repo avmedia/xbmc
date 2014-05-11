@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ bool CFTPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items
   CURL url(strPath);
 
   CStdString path = url.GetFileName();
-  if( !path.IsEmpty() && !path.Right(1).Equals("/") )
+  if( !path.empty() && !StringUtils::EndsWith(path, "/") )
   {
     path += "/";
     url.SetFileName(path);
@@ -79,7 +79,7 @@ bool CFTPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items
       g_charsetConverter.unknownToUTF8(name);
 
       // convert got empty result, ignore it
-      if (name.IsEmpty())
+      if (name.empty())
         continue;
 
       if (serverNotUseUTF8 || name != parse.getName())

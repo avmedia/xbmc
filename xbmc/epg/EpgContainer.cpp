@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,8 @@
 #include "Application.h"
 #include "threads/SingleLock.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
+#include "settings/lib/Setting.h"
+#include "settings/Settings.h"
 #include "dialogs/GUIDialogExtendedProgressBar.h"
 #include "dialogs/GUIDialogProgress.h"
 #include "guilib/GUIWindowManager.h"
@@ -52,6 +53,7 @@ CEpgContainer::CEpgContainer(void) :
   m_iNextEpgId = 0;
   m_bPreventUpdates = false;
   m_updateEvent.Reset();
+  m_bStarted = false;
   m_bLoaded = false;
   m_bHasPendingUpdates = false;
 }
@@ -71,6 +73,12 @@ void CEpgContainer::Unload(void)
 {
   Stop();
   Clear(false);
+}
+
+bool CEpgContainer::IsStarted(void) const
+{
+  CSingleLock lock(m_critSection);
+  return m_bStarted;
 }
 
 unsigned int CEpgContainer::NextEpgId(void)
@@ -99,6 +107,7 @@ void CEpgContainer::Clear(bool bClearDb /* = false */)
     }
     m_epgs.clear();
     m_iNextEpgUpdate  = 0;
+    m_bStarted = false;
     m_bIsInitialising = true;
     m_iNextEpgId = 0;
   }
@@ -124,25 +133,34 @@ void CEpgContainer::Start(void)
 {
   Stop();
 
-  CSingleLock lock(m_critSection);
+  {
+    CSingleLock lock(m_critSection);
 
-  if (!m_database.IsOpen())
-    m_database.Open();
+    if (!m_database.IsOpen())
+      m_database.Open();
 
-  m_bIsInitialising = true;
-  m_bStop = false;
-  g_guiSettings.RegisterObserver(this);
-  LoadSettings();
+    m_bIsInitialising = true;
+    m_bStop = false;
+    LoadSettings();
 
-  m_iNextEpgUpdate  = 0;
-  m_iNextEpgActiveTagCheck = 0;
+    m_iNextEpgUpdate  = 0;
+    m_iNextEpgActiveTagCheck = 0;
+  }
 
   LoadFromDB();
-  CheckPlayingEvents();
 
-  Create();
-  SetPriority(-1);
-  CLog::Log(LOGNOTICE, "%s - EPG thread started", __FUNCTION__);
+  CSingleLock lock(m_critSection);
+  if (!m_bStop)
+  {
+    CheckPlayingEvents();
+
+    Create();
+    SetPriority(-1);
+
+    m_bStarted = true;
+
+    CLog::Log(LOGNOTICE, "%s - EPG thread started", __FUNCTION__);
+  }
 }
 
 bool CEpgContainer::Stop(void)
@@ -152,23 +170,33 @@ bool CEpgContainer::Stop(void)
   if (m_database.IsOpen())
     m_database.Close();
 
+  CSingleLock lock(m_critSection);
+  m_bStarted = false;
+
   return true;
 }
 
 void CEpgContainer::Notify(const Observable &obs, const ObservableMessage msg)
 {
-  /* settings were updated */
-  if (msg == ObservableMessageGuiSettings)
+  SetChanged();
+  NotifyObservers(msg);
+}
+
+void CEpgContainer::OnSettingChanged(const CSetting *setting)
+{
+  if (setting == NULL)
+    return;
+
+  const std::string &settingId = setting->GetId();
+  if (settingId == "epg.ignoredbforclient" || settingId == "epg.epgupdate" ||
+      settingId == "epg.daystodisplay")
     LoadSettings();
-  else
-  {
-    SetChanged();
-    NotifyObservers(msg);
-  }
 }
 
 void CEpgContainer::LoadFromDB(void)
 {
+  CSingleLock lock(m_critSection);
+
   if (m_bLoaded || m_bIgnoreDbForClient)
     return;
 
@@ -188,14 +216,17 @@ void CEpgContainer::LoadFromDB(void)
 
     for (map<unsigned int, CEpg *>::iterator it = m_epgs.begin(); it != m_epgs.end(); it++)
     {
+      if (m_bStop)
+        break;
       UpdateProgressDialog(++iCounter, m_epgs.size(), it->second->Name());
+      lock.Leave();
       it->second->Load();
+      lock.Enter();
     }
 
     CloseProgressDialog();
   }
 
-  CSingleLock lock(m_critSection);
   m_bLoaded = bLoaded;
 }
 
@@ -228,12 +259,6 @@ void CEpgContainer::Process(void)
   bool bUpdateEpg(true);
   bool bHasPendingUpdates(false);
 
-  if (!CPVRManager::Get().WaitUntilInitialised())
-  {
-    CLog::Log(LOGDEBUG, "EPG - %s - pvr manager failed to load - exiting", __FUNCTION__);
-    return;
-  }
-
   while (!m_bStop && !g_application.m_bStop)
   {
     CDateTime::GetCurrentDateTime().GetAsUTCDateTime().GetAsTime(iNow);
@@ -243,7 +268,7 @@ void CEpgContainer::Process(void)
     }
 
     /* update the EPG */
-    if (!InterruptUpdate() && bUpdateEpg && UpdateEPG())
+    if (!InterruptUpdate() && bUpdateEpg && g_PVRManager.EpgsCreated() && UpdateEPG())
       m_bIsInitialising = false;
 
     /* clean up old entries */
@@ -275,8 +300,6 @@ void CEpgContainer::Process(void)
 
     Sleep(1000);
   }
-
-  g_guiSettings.UnregisterObserver(this);
 }
 
 CEpg *CEpgContainer::GetById(int iEpgId) const
@@ -331,7 +354,6 @@ CEpg *CEpgContainer::CreateChannelEpg(CPVRChannelPtr channel)
     return NULL;
 
   WaitForUpdateFinish(true);
-  CSingleLock lock(m_critSection);
   LoadFromDB();
 
   CEpg *epg(NULL);
@@ -342,6 +364,8 @@ CEpg *CEpgContainer::CreateChannelEpg(CPVRChannelPtr channel)
   {
     channel->SetEpgID(NextEpgId());
     epg = new CEpg(channel, false);
+
+    CSingleLock lock(m_critSection);
     m_epgs.insert(make_pair((unsigned int)epg->EpgID(), epg));
     SetChanged();
     epg->RegisterObserver(this);
@@ -349,8 +373,11 @@ CEpg *CEpgContainer::CreateChannelEpg(CPVRChannelPtr channel)
 
   epg->SetChannel(channel);
 
-  m_bPreventUpdates = false;
-  CDateTime::GetCurrentDateTime().GetAsUTCDateTime().GetAsTime(m_iNextEpgUpdate);
+  {
+    CSingleLock lock(m_critSection);
+    m_bPreventUpdates = false;
+    CDateTime::GetCurrentDateTime().GetAsUTCDateTime().GetAsTime(m_iNextEpgUpdate);
+  }
 
   NotifyObservers(ObservableMessageEpgContainer);
 
@@ -359,9 +386,9 @@ CEpg *CEpgContainer::CreateChannelEpg(CPVRChannelPtr channel)
 
 bool CEpgContainer::LoadSettings(void)
 {
-  m_bIgnoreDbForClient = g_guiSettings.GetBool("epg.ignoredbforclient");
-  m_iUpdateTime        = g_guiSettings.GetInt ("epg.epgupdate") * 60;
-  m_iDisplayTime       = g_guiSettings.GetInt ("epg.daystodisplay") * 24 * 60 * 60;
+  m_bIgnoreDbForClient = CSettings::Get().GetBool("epg.ignoredbforclient");
+  m_iUpdateTime        = CSettings::Get().GetInt ("epg.epgupdate") * 60;
+  m_iDisplayTime       = CSettings::Get().GetInt ("epg.daystodisplay") * 24 * 60 * 60;
 
   return true;
 }
@@ -444,12 +471,10 @@ bool CEpgContainer::InterruptUpdate(void) const
   bool bReturn(false);
   CSingleLock lock(m_critSection);
   bReturn = g_application.m_bStop || m_bStop || m_bPreventUpdates;
-  lock.Leave();
 
   return bReturn ||
-    (g_guiSettings.GetBool("epg.preventupdateswhileplayingtv") &&
-     g_PVRManager.IsStarted() &&
-     g_PVRManager.IsPlaying());
+    (CSettings::Get().GetBool("epg.preventupdateswhileplayingtv") &&
+     g_application.m_pPlayer && g_application.m_pPlayer->IsPlaying());
 }
 
 void CEpgContainer::WaitForUpdateFinish(bool bInterrupt /* = true */)

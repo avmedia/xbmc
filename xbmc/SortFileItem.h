@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
-
-#include "utils/LabelFormatter.h"
 
 typedef enum {
   SORT_METHOD_NONE=0,
@@ -65,11 +63,3 @@ typedef enum {
   SORT_METHOD_DATE_TAKEN,
   SORT_METHOD_MAX
 } SORT_METHOD;
-
-typedef struct
-{
-  SORT_METHOD m_sortMethod;
-  int m_buttonLabel;
-  LABEL_MASKS m_labelMasks;
-} SORT_METHOD_DETAILS;
-

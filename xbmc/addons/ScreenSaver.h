@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ public:
   CScreenSaver(const cp_extension_t *ext) : ADDON::CAddonDll<DllScreenSaver, ScreenSaver, SCR_PROPS>(ext) {};
   CScreenSaver(const char *addonID);
   virtual ~CScreenSaver() {}
+  virtual AddonPtr Clone() const;
 
   // Things that MUST be supplied by the child classes
   bool CreateScreenSaver();

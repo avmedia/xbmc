@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ bool CPasswordManager::PromptToAuthenticateURL(CURL &url)
 void CPasswordManager::SaveAuthenticatedURL(const CURL &url, bool saveToProfile)
 {
   // don't store/save authenticated url if it doesn't contain username
-  if (url.GetUserName().IsEmpty())
+  if (url.GetUserName().empty())
     return;
 
   CSingleLock lock(m_critSection);
@@ -149,7 +149,7 @@ void CPasswordManager::Load()
 
 void CPasswordManager::Save() const
 {
-  if (!m_permanentCache.size())
+  if (m_permanentCache.empty())
     return;
 
   CXBMCTinyXML doc;

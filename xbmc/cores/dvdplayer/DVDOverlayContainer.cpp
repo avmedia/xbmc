@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -83,14 +83,12 @@ VecOverlaysIter CDVDOverlayContainer::Remove(VecOverlaysIter itOverlay)
 
 void CDVDOverlayContainer::CleanUp(double pts)
 {
-  CDVDOverlay* pOverlay = NULL;
-
   CSingleLock lock(*this);
 
   VecOverlaysIter it = m_overlays.begin();
   while (it != m_overlays.end())
   {
-    pOverlay = *it;
+    CDVDOverlay* pOverlay = *it;
 
     // never delete forced overlays, they are used in menu's
     // clear takes care of removing them
@@ -107,11 +105,10 @@ void CDVDOverlayContainer::CleanUp(double pts)
     {
       //Check for newer replacements
       VecOverlaysIter it2 = it;
-      CDVDOverlay* pOverlay2;
       bool bNewer = false;
       while (!bNewer && ++it2 != m_overlays.end())
       {
-        pOverlay2 = *it2;
+        CDVDOverlay* pOverlay2 = *it2;
         if (pOverlay2->bForced && pOverlay2->iPTSStartTime <= pts) bNewer = true;
       }
 
@@ -184,7 +181,7 @@ void CDVDOverlayContainer::UpdateOverlayInfo(CDVDInputStreamNavigator* pStream, 
 
       // make sure its a forced (menu) overlay
       // set menu spu color and alpha data if there is a valid menu overlay
-      if (pOverlaySpu->bForced && pStream->GetCurrentGroupId() == pOverlaySpu->iGroupId)
+      if (pOverlaySpu->bForced)
       {
         if(pOverlaySpu->Acquire()->Release() > 1)
         {

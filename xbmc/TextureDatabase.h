@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,8 +22,46 @@
 
 #include "dbwrappers/Database.h"
 #include "TextureCacheJob.h"
+#include "playlists/SmartPlayList.h"
 
-class CTextureDatabase : public CDatabase
+class CVariant;
+
+class CTextureRule : public CDatabaseQueryRule
+{
+public:
+  CTextureRule() {};
+  virtual ~CTextureRule() {};
+
+  static void GetAvailableFields(std::vector<std::string> &fieldList);
+protected:
+  virtual int                 TranslateField(const char *field) const;
+  virtual CStdString          TranslateField(int field) const;
+  virtual CStdString          GetField(int field, const CStdString& type) const;
+  virtual FIELD_TYPE          GetFieldType(int field) const;
+  virtual CStdString          FormatParameter(const CStdString &negate, const CStdString &oper, const CDatabase &db, const CStdString &type) const;
+};
+
+class CTextureUtils
+{
+public:
+  /*! \brief retrieve a wrapped URL for a image file
+   \param image name of the file
+   \param type signifies a special type of image (eg embedded video thumb, picture folder thumb)
+   \param options which options we need (eg size=thumb)
+   \return full wrapped URL of the image file
+   */
+  static CStdString GetWrappedImageURL(const CStdString &image, const CStdString &type = "", const CStdString &options = "");
+  static CStdString GetWrappedThumbURL(const CStdString &image);
+
+  /*! \brief Unwrap an image://<url_encoded_path> style URL
+   Such urls are used for art over the webserver or other users of the VFS
+   \param image url of the image
+   \return the unwrapped URL, or the original URL if unwrapping is inappropriate.
+   */
+  static CStdString UnwrapImageURL(const CStdString &image);
+};
+
+class CTextureDatabase : public CDatabase, public IDatabaseQueryRuleFactory
 {
 public:
   CTextureDatabase();
@@ -34,6 +72,7 @@ public:
   bool AddCachedTexture(const CStdString &originalURL, const CTextureDetails &details);
   bool SetCachedTextureValid(const CStdString &originalURL, bool updateable);
   bool ClearCachedTexture(const CStdString &originalURL, CStdString &cacheFile);
+  bool ClearCachedTexture(int textureID, CStdString &cacheFile);
   bool IncrementUseCount(const CTextureDetails &details);
 
   /*! \brief Invalidate a previously cached texture
@@ -71,6 +110,11 @@ public:
    */
   void ClearTextureForPath(const CStdString &url, const CStdString &type);
 
+  bool GetTextures(CVariant &items, const Filter &filter);
+
+  // rule creation
+  virtual CDatabaseQueryRule *CreateRule() const;
+  virtual CDatabaseQueryRuleCombination *CreateCombination() const;
 protected:
   /*! \brief retrieve a hash for the given url
    Computes a hash of the current url to use for lookups in the database
@@ -79,8 +123,9 @@ protected:
    */
   unsigned int GetURLHash(const CStdString &url) const;
 
-  virtual bool CreateTables();
-  virtual bool UpdateOldVersion(int version);
-  virtual int GetMinVersion() const { return 13; };
+  virtual void CreateTables();
+  virtual void CreateAnalytics();
+  virtual void UpdateTables(int version);
+  virtual int GetSchemaVersion() const { return 13; };
   const char *GetBaseDBName() const { return "Textures"; };
 };

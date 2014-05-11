@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -107,6 +107,10 @@ protected:
   volatile int      m_omx_decoder_state;
   sem_t             *m_omx_decoder_state_change;
   std::vector<omx_codec_capability> m_omx_decoder_capabilities;
+
+private:
+  COpenMax(const COpenMax& other);
+  COpenMax& operator=(const COpenMax&);
 };
 
 #endif

@@ -1,13 +1,12 @@
 # XBMC Media Center language file
-# XBMC-core v12.0
 msgid ""
 msgstr ""
-"Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
+"Project-Id-Version: XBMC Main\n"
 "Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: XBMC Translation Team\n"
-"Language-Team: Icelandic (http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/is/)\n"
+"Language-Team: Icelandic (http://www.transifex.com/projects/p/xbmc-main/language/is/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -44,7 +43,7 @@ msgstr "XBMC SVN"
 
 msgctxt "#7"
 msgid "File manager"
-msgstr "Skráarsýsl"
+msgstr "Skráasýsl"
 
 msgctxt "#8"
 msgid "Weather"
@@ -56,31 +55,31 @@ msgstr "xbmc media center"
 
 msgctxt "#11"
 msgid "Monday"
-msgstr "Mánudagur"
+msgstr "mánudagur"
 
 msgctxt "#12"
 msgid "Tuesday"
-msgstr "Þriðjudagur"
+msgstr "þriðjudagur"
 
 msgctxt "#13"
 msgid "Wednesday"
-msgstr "Miðvikudagur"
+msgstr "miðvikudagur"
 
 msgctxt "#14"
 msgid "Thursday"
-msgstr "Fimmtudagur"
+msgstr "fimmtudagur"
 
 msgctxt "#15"
 msgid "Friday"
-msgstr "Föstudagur"
+msgstr "föstudagur"
 
 msgctxt "#16"
 msgid "Saturday"
-msgstr "Laugardagur"
+msgstr "laugardagur"
 
 msgctxt "#17"
 msgid "Sunday"
-msgstr "Sunnudagur"
+msgstr "sunnudagur"
 
 msgctxt "#21"
 msgid "January"
@@ -132,31 +131,31 @@ msgstr "desember"
 
 msgctxt "#41"
 msgid "Mon"
-msgstr "Mán"
+msgstr "mán"
 
 msgctxt "#42"
 msgid "Tue"
-msgstr "Þri"
+msgstr "þri"
 
 msgctxt "#43"
 msgid "Wed"
-msgstr "Mið"
+msgstr "mið"
 
 msgctxt "#44"
 msgid "Thu"
-msgstr "Fim"
+msgstr "fim"
 
 msgctxt "#45"
 msgid "Fri"
-msgstr "Fös"
+msgstr "fös"
 
 msgctxt "#46"
 msgid "Sat"
-msgstr "Lau"
+msgstr "lau"
 
 msgctxt "#47"
 msgid "Sun"
-msgstr "Sun"
+msgstr "sun"
 
 msgctxt "#51"
 msgid "Jan"
@@ -273,6 +272,26 @@ msgstr "NNV"
 msgctxt "#87"
 msgid "VAR"
 msgstr "VAR"
+
+msgctxt "#88"
+msgid "South"
+msgstr "Suður"
+
+msgctxt "#89"
+msgid "North"
+msgstr "Norður"
+
+msgctxt "#90"
+msgid "West"
+msgstr "Vestur"
+
+msgctxt "#91"
+msgid "East"
+msgstr "Austur"
+
+msgctxt "#92"
+msgid "Variable"
+msgstr "Breytileg"
 
 msgctxt "#98"
 msgid "View: Auto"
@@ -550,6 +569,10 @@ msgctxt "#166"
 msgid "Skin"
 msgstr "Útlit"
 
+msgctxt "#167"
+msgid "Cancel file operations"
+msgstr "Hætta við skráaraðgerð"
+
 msgctxt "#169"
 msgid "Resolution"
 msgstr "Upplausn"
@@ -708,7 +731,7 @@ msgstr "Stækka"
 
 msgctxt "#217"
 msgid "Pixel ratio"
-msgstr "Teygja"
+msgstr "Skjápunktshlutfall"
 
 msgctxt "#218"
 msgid "DVD drive"
@@ -830,25 +853,17 @@ msgctxt "#249"
 msgid "Music"
 msgstr "Tónlist"
 
-msgctxt "#250"
-msgid "Visualization"
-msgstr "Myndskreyting"
-
 msgctxt "#251"
 msgid "Select destination directory"
 msgstr "Veldu ákvörðunarstað"
-
-msgctxt "#252"
-msgid "Output stereo to all speakers"
-msgstr "Senda í alla hátalara"
 
 msgctxt "#253"
 msgid "Number of channels"
 msgstr "Fjöldi rása"
 
 msgctxt "#254"
-msgid "- DTS capable receiver"
-msgstr "- DTS móttakari"
+msgid "DTS capable receiver"
+msgstr "Móttakari styður DTS"
 
 msgctxt "#255"
 msgid "CDDB"
@@ -987,8 +1002,8 @@ msgid "Font"
 msgstr "Leturgerð"
 
 msgctxt "#289"
-msgid "- Size"
-msgstr "- Stærð"
+msgid "Size"
+msgstr "Stærð"
 
 msgctxt "#290"
 msgid "Dynamic range compression"
@@ -1022,22 +1037,6 @@ msgctxt "#298"
 msgid "Bookmarks"
 msgstr "Bókamerki"
 
-msgctxt "#299"
-msgid "- AAC capable receiver"
-msgstr "- AAC móttakari"
-
-msgctxt "#300"
-msgid "- MP1 capable receiver"
-msgstr "- MP1 móttakari"
-
-msgctxt "#301"
-msgid "- MP2 capable receiver"
-msgstr "- MP2 móttakari"
-
-msgctxt "#302"
-msgid "- MP3 capable receiver"
-msgstr "- MP3 móttakari"
-
 msgctxt "#303"
 msgid "Delay"
 msgstr "Bið"
@@ -1057,10 +1056,6 @@ msgstr "Ekki önnur hver lína"
 msgctxt "#308"
 msgid "Original stream's language"
 msgstr "Upprunalegt tungumál straums"
-
-msgctxt "#309"
-msgid "User Interface language"
-msgstr "Tungumál notendaviðmóts"
 
 msgctxt "#312"
 msgid "(0=auto)"
@@ -1162,17 +1157,9 @@ msgctxt "#336"
 msgid "Framerate conversion"
 msgstr "Stilla rammafjölda"
 
-msgctxt "#337"
-msgid "Audio output"
-msgstr "Hljóðútgangur"
-
 msgctxt "#338"
-msgid "Analog"
-msgstr "Hliðrænt"
-
-msgctxt "#339"
-msgid "Optical/Coax"
-msgstr "Stafrænt"
+msgid "Fixed"
+msgstr "Fastur"
 
 msgctxt "#340"
 msgid "Various artists"
@@ -1197,22 +1184,6 @@ msgstr "Leikarar"
 msgctxt "#345"
 msgid "Year"
 msgstr "Ár"
-
-msgctxt "#346"
-msgid "Boost volume level on downmix"
-msgstr "Magna hljóðstyrk við endurblöndun"
-
-msgctxt "#347"
-msgid "- DTS-HD capable receiver"
-msgstr "- DTS-HD móttakari"
-
-msgctxt "#348"
-msgid "- Multichannel LPCM capable receiver"
-msgstr "- Multichannel LPCM móttakari"
-
-msgctxt "#349"
-msgid "- TrueHD capable receiver"
-msgstr "- TrueHD móttakari"
 
 msgctxt "#350"
 msgid "Programs"
@@ -1269,10 +1240,6 @@ msgstr "Myrkvun skjávara"
 msgctxt "#363"
 msgid "Sort by: File"
 msgstr "Raða eftir: Skrá"
-
-msgctxt "#364"
-msgid "- Dolby Digital (AC3) capable receiver"
-msgstr "- Dolby Digital (AC3) móttakari"
 
 msgctxt "#365"
 msgid "Sort by: Name"
@@ -1486,10 +1453,6 @@ msgctxt "#419"
 msgid "High"
 msgstr "Hátt"
 
-msgctxt "#420"
-msgid "HDMI"
-msgstr "HDMI"
-
 msgctxt "#422"
 msgid "Delete album info"
 msgstr "Eyða hljómplötuupplýsingum"
@@ -1542,6 +1505,14 @@ msgctxt "#434"
 msgid "From %s at %i %s"
 msgstr "Frá %s á %i %s"
 
+msgctxt "#435"
+msgid "No optical disc drive detected"
+msgstr "Ekkert diskadrif fannst"
+
+msgctxt "#436"
+msgid "You need an optical disc drive to play this video"
+msgstr "Þú þarft diskadrif til að spila þetta vídeó"
+
 msgctxt "#437"
 msgid "Removable disk"
 msgstr "Færanlegur diskur"
@@ -1553,10 +1524,6 @@ msgstr "Opna skrá"
 msgctxt "#439"
 msgid "Cache"
 msgstr "Biðminni"
-
-msgctxt "#440"
-msgid "Harddisk"
-msgstr "Harður diskur"
 
 msgctxt "#441"
 msgid "UDF"
@@ -1585,10 +1552,6 @@ msgstr "DVD"
 msgctxt "#447"
 msgid "Autorun media"
 msgstr "Sjálfkeyra"
-
-msgctxt "#448"
-msgid "LCD"
-msgstr "LCD"
 
 msgctxt "#449"
 msgid "Enabled"
@@ -1673,10 +1636,6 @@ msgstr "OSD staðsetning"
 msgctxt "#470"
 msgid "Credits"
 msgstr "Þakkir"
-
-msgctxt "#471"
-msgid "Modchip"
-msgstr "Mod kubbur"
 
 msgctxt "#474"
 msgid "Off"
@@ -1772,7 +1731,7 @@ msgstr "Get ekki tengst upplýsingaþjónustu"
 
 msgctxt "#500"
 msgid "Downloading album information failed"
-msgstr "Niðurhal hljómplötuupplýsinga brást"
+msgstr "Gat ekki sótt upplýsingar um hljómplötu"
 
 msgctxt "#501"
 msgid "Looking for album names..."
@@ -1797,10 +1756,6 @@ msgstr "Sæki upplýsingar frá skrám..."
 msgctxt "#507"
 msgid "Sort by: Usage"
 msgstr "Raða eftir: Notkun"
-
-msgctxt "#510"
-msgid "Enable visualizations"
-msgstr "Virkja myndskreytingu"
 
 msgctxt "#511"
 msgid "Enable video mode switching"
@@ -2054,6 +2009,10 @@ msgctxt "#576"
 msgid "Times played"
 msgstr "Sinnum spilað"
 
+msgctxt "#577"
+msgid "Date Taken"
+msgstr "Tekin dags"
+
 msgctxt "#580"
 msgid "Sort direction"
 msgstr "Raða í átt"
@@ -2194,6 +2153,10 @@ msgctxt "#625"
 msgid "All songs of"
 msgstr "Öll lög með"
 
+msgctxt "#626"
+msgid "In progress TV shows"
+msgstr "Í vinnslu sjónvarpsþættir"
+
 msgctxt "#629"
 msgid "View mode"
 msgstr "Tegund sjónarhorns"
@@ -2226,14 +2189,6 @@ msgctxt "#636"
 msgid "Custom"
 msgstr "Sérsnið"
 
-msgctxt "#637"
-msgid "Replay gain"
-msgstr "Jöfnun tónstyrks"
-
-msgctxt "#638"
-msgid "Replaygain volume adjustments"
-msgstr "Jöfnunarhamur tónstyrks"
-
 msgctxt "#639"
 msgid "Use track levels"
 msgstr "Nota laga stig"
@@ -2241,18 +2196,6 @@ msgstr "Nota laga stig"
 msgctxt "#640"
 msgid "Use album levels"
 msgstr "Nota hljómplötu stig"
-
-msgctxt "#641"
-msgid "PreAmp Level - Replay gained files"
-msgstr "Stig formagnara - Skrár með jöfnun tónstyrks"
-
-msgctxt "#642"
-msgid "PreAmp Level - Non replay gained files"
-msgstr "Stig formagnara - Skrár ekki með jöfnun tónstyrks"
-
-msgctxt "#643"
-msgid "Avoid clipping on replay gained files"
-msgstr "Ekki klippa á skrár með jöfnun tónstyrks"
 
 msgctxt "#644"
 msgid "Crop black bars"
@@ -2359,8 +2302,8 @@ msgid "Network"
 msgstr "Netkerfi"
 
 msgctxt "#706"
-msgid "- Server"
-msgstr "- Netþjónn"
+msgid "Server"
+msgstr "Þjónn"
 
 msgctxt "#708"
 msgid "Use an HTTP proxy server to access the internet"
@@ -2379,8 +2322,8 @@ msgid "HTTP proxy"
 msgstr "HTTP milliþjónn (Proxy)"
 
 msgctxt "#715"
-msgid "- Assignment"
-msgstr "- Úthlutað"
+msgid "Assignment"
+msgstr "Verkefni"
 
 msgctxt "#716"
 msgid "Automatic (DHCP)"
@@ -2391,20 +2334,12 @@ msgid "Manual (Static)"
 msgstr "Handvirkt (Föst)"
 
 msgctxt "#719"
-msgid "- IP address"
-msgstr "- IP tala"
-
-msgctxt "#720"
-msgid "- Netmask"
-msgstr "- Undirnetssía"
-
-msgctxt "#721"
-msgid "- Default gateway"
-msgstr "- Sjálfgefinn gátt"
+msgid "IP address"
+msgstr "IP tala"
 
 msgctxt "#722"
-msgid "- DNS server"
-msgstr "- DNS þjónn"
+msgid "DNS server"
+msgstr "DNS þjónn"
 
 msgctxt "#723"
 msgid "Save & restart"
@@ -2431,32 +2366,32 @@ msgid "FTP server"
 msgstr "FTP þjónn"
 
 msgctxt "#730"
-msgid "- Port"
-msgstr "- Gátt"
+msgid "Port"
+msgstr "Gátt"
 
 msgctxt "#732"
 msgid "Save & apply"
 msgstr "Vista og virkja"
 
 msgctxt "#733"
-msgid "- Password"
-msgstr "- Lykilorð"
+msgid "Password"
+msgstr "Lykilorð"
 
 msgctxt "#734"
 msgid "No pass"
 msgstr "Ekkert lykilorð"
 
 msgctxt "#735"
-msgid "- Character set"
-msgstr "- Stafasett"
+msgid "Character set"
+msgstr "Stafasett"
 
 msgctxt "#736"
-msgid "- Style"
-msgstr "- Stíll"
+msgid "Style"
+msgstr "Stíll"
 
 msgctxt "#737"
-msgid "- Colour"
-msgstr "- Litur"
+msgid "Colour"
+msgstr "Litur"
 
 msgctxt "#738"
 msgid "Normal"
@@ -2587,16 +2522,16 @@ msgid "Network interface"
 msgstr "Nettenging"
 
 msgctxt "#776"
-msgid "- Wireless network name (ESSID)"
-msgstr "- Þráðlaust net nafn (ESSID)"
+msgid "Wireless network name (ESSID)"
+msgstr "Þráðlaust net nafn (ESSID)"
 
 msgctxt "#777"
-msgid "- Wireless password"
-msgstr "- Þráðlaust lykilorð"
+msgid "Wireless password"
+msgstr "Þráðlaust lykilorð"
 
 msgctxt "#778"
-msgid "- Wireless security"
-msgstr "- Þráðlaust öryggi"
+msgid "Wireless security"
+msgstr "Þráðlaust öryggi"
 
 msgctxt "#779"
 msgid "Save and apply network interface settings"
@@ -2678,6 +2613,14 @@ msgctxt "#798"
 msgid "Internet access"
 msgstr "Internet aðgangur"
 
+msgctxt "#799"
+msgid "Library Update"
+msgstr "Uppfæra safn"
+
+msgctxt "#800"
+msgid "Music library needs to rescan tags from files."
+msgstr "Tónlistarsafnið þarf að endurlesa tög skránna"
+
 msgctxt "#850"
 msgid "Invalid port number entered"
 msgstr "Ógilt númer á gátt slegið inn"
@@ -2690,6 +2633,10 @@ msgctxt "#852"
 msgid "Valid port range is 1024-65535"
 msgstr "Gild gátt er á bilinu 1024-65535"
 
+msgctxt "#997"
+msgid "Add Pictures..."
+msgstr "Bæta við ljósmyndum..."
+
 msgctxt "#998"
 msgid "Add Music..."
 msgstr "Bæta við tónlist..."
@@ -2699,8 +2646,8 @@ msgid "Add Videos..."
 msgstr "Bæta við myndefni..."
 
 msgctxt "#1000"
-msgid "- Preview"
-msgstr "- Forsýna"
+msgid "Preview"
+msgstr "Forsýn"
 
 msgctxt "#1001"
 msgid "Unable to connect"
@@ -2870,10 +2817,6 @@ msgctxt "#1043"
 msgid "Program Add-ons"
 msgstr "Forritsviðbætur"
 
-msgctxt "#1044"
-msgid "Set plugin thumb"
-msgstr "Setja viðbótar smámynd"
-
 msgctxt "#1045"
 msgid "Add-on settings"
 msgstr "Stilling viðbóta"
@@ -2887,8 +2830,8 @@ msgid "Other..."
 msgstr "Annað..."
 
 msgctxt "#1048"
-msgid "- Username"
-msgstr "- Notandanafn"
+msgid "Username"
+msgstr "Notandanafn"
 
 msgctxt "#1049"
 msgid "Script settings"
@@ -2901,6 +2844,26 @@ msgstr "Smáskífur"
 msgctxt "#1051"
 msgid "Enter web address"
 msgstr "Sláðu inn veffang"
+
+msgctxt "#1181"
+msgid "HTTP"
+msgstr "HTTP"
+
+msgctxt "#1182"
+msgid "SOCKS4"
+msgstr "SOCKS4"
+
+msgctxt "#1183"
+msgid "SOCKS4A"
+msgstr "SOCKS4A"
+
+msgctxt "#1184"
+msgid "SOCKS5"
+msgstr "SOKCS5"
+
+msgctxt "#1185"
+msgid "SOCKS5 with remote dns resolving"
+msgstr "SOCKS5 með dns utanhúss"
 
 msgctxt "#1200"
 msgid "SMB client"
@@ -3039,12 +3002,20 @@ msgid "Device name"
 msgstr "Nafn tækis"
 
 msgctxt "#1272"
-msgid "- Use password protection"
-msgstr "- Nota lykilorð"
+msgid "Use password protection"
+msgstr "Vernda lykilorð"
 
 msgctxt "#1273"
 msgid "AirPlay"
 msgstr "AirPlay"
+
+msgctxt "#1274"
+msgid "AirTunes"
+msgstr "AirTunes"
+
+msgctxt "#1275"
+msgid "Filter %s"
+msgstr "Sía %s"
 
 msgctxt "#1300"
 msgid "Custom audio device"
@@ -3122,6 +3093,10 @@ msgctxt "#1412"
 msgid "windy"
 msgstr "vindasamt"
 
+msgctxt "#1413"
+msgid "Patches"
+msgstr "Plástrar"
+
 msgctxt "#1414"
 msgid "Thunderstorm"
 msgstr "Þrumuveður"
@@ -3142,6 +3117,10 @@ msgctxt "#1418"
 msgid "Thunderstorms"
 msgstr "Þrumuveður"
 
+msgctxt "#1419"
+msgid "Shallow"
+msgstr "Grunn"
+
 msgctxt "#1420"
 msgid "Moderate"
 msgstr "Hóflegt"
@@ -3158,9 +3137,69 @@ msgctxt "#1423"
 msgid "Mist"
 msgstr "Mistur"
 
+msgctxt "#1424"
+msgid "Overcast"
+msgstr "Skýjahula"
+
+msgctxt "#1426"
+msgid "Hail"
+msgstr "Hagl"
+
+msgctxt "#1427"
+msgid "Smoke"
+msgstr "Reykur"
+
+msgctxt "#1428"
+msgid "Volcanic"
+msgstr "Eldfjalla"
+
+msgctxt "#1429"
+msgid "Ash"
+msgstr "Aska"
+
+msgctxt "#1430"
+msgid "Widespread"
+msgstr "Víðaáttumikil"
+
+msgctxt "#1431"
+msgid "Dust"
+msgstr "Ryk"
+
+msgctxt "#1432"
+msgid "Sand"
+msgstr "Sandur"
+
+msgctxt "#1433"
+msgid "Spray"
+msgstr "Úði"
+
+msgctxt "#1435"
+msgid "Sandstorm"
+msgstr "Sandstormur"
+
 msgctxt "#1438"
 msgid "Small"
 msgstr "Lítið"
+
+msgctxt "#1439"
+msgid "and"
+msgstr "og"
+
+msgctxt "#1440"
+msgid "Sleet"
+msgstr "Slydda"
+
+msgctxt "#1441"
+msgid "with"
+msgstr "með"
+
+msgctxt "#1443"
+msgid "of"
+msgstr "af"
+
+msgctxt "#1445"
+msgid "Cloud"
+msgstr "Ský"
 
 msgctxt "#1446"
 msgid "Unknown"
@@ -3178,6 +3217,10 @@ msgctxt "#2050"
 msgid "Runtime"
 msgstr "Lengd"
 
+msgctxt "#2080"
+msgid "Empty list"
+msgstr "Tómur listi"
+
 msgctxt "#2100"
 msgid "Script failed! : %s"
 msgstr "Skrifta mistókst! : %s"
@@ -3185,10 +3228,6 @@ msgstr "Skrifta mistókst! : %s"
 msgctxt "#2101"
 msgid "Newer version needed - See log"
 msgstr "Þarfnast nýrrar útgáfu - Skoðaðu atburðaskrá"
-
-msgctxt "#4501"
-msgid "Enable LCD/VFD"
-msgstr "Virkja LCD/VFD"
 
 msgctxt "#10000"
 msgid "Home"
@@ -3294,17 +3333,65 @@ msgctxt "#10034"
 msgid "Settings - Profiles"
 msgstr "Stillingar - Notendur"
 
-msgctxt "#10040"
-msgid "Addon browser"
-msgstr "Viðbóta viðmót"
+msgctxt "#10035"
+msgid "Reset"
+msgstr "Endurstilla"
 
-msgctxt "#10100"
-msgid "Yes/No dialog"
-msgstr "Já/Nei melding"
+msgctxt "#10037"
+msgid "Standard"
+msgstr "Venjulegt"
 
-msgctxt "#10101"
-msgid "Progress dialog"
-msgstr "Vinnslumelding"
+msgctxt "#10043"
+msgid "Help"
+msgstr "Hjálp"
+
+msgctxt "#10044"
+msgid "No help available"
+msgstr "Engin hjálp í boði"
+
+msgctxt "#10126"
+msgid "File browser"
+msgstr "Skráarvafri"
+
+msgctxt "#10128"
+msgid "Network setup"
+msgstr "Uppsetning netkerfis"
+
+msgctxt "#10129"
+msgid "Media source"
+msgstr "Uppspretta"
+
+msgctxt "#10130"
+msgid "Profile settings"
+msgstr "Notandastillingar"
+
+msgctxt "#10131"
+msgid "Lock settings"
+msgstr "Læsa stillingum"
+
+msgctxt "#10134"
+msgid "Favourites"
+msgstr "Uppáhalds"
+
+msgctxt "#10135"
+msgid "Songs/Info"
+msgstr "Söngvar/Upplýsingar"
+
+msgctxt "#10136"
+msgid "Smart playlist editor"
+msgstr "Snjallur spilunarlistaritill"
+
+msgctxt "#10139"
+msgid "Pictures/Info"
+msgstr "Myndir/upplýsingar"
+
+msgctxt "#10140"
+msgid "Add-on settings"
+msgstr "Stilling viðbóta"
+
+msgctxt "#10146"
+msgid "Add-ons/Info"
+msgstr "Viðbætur/upplýsingar"
 
 msgctxt "#10210"
 msgid "Looking for subtitles..."
@@ -3394,17 +3481,9 @@ msgctxt "#10524"
 msgid "Movie info"
 msgstr "Kvikmyndaupplýsingar"
 
-msgctxt "#12000"
-msgid "Select dialog"
-msgstr "Valskilti"
-
 msgctxt "#12001"
 msgid "Music/Info"
 msgstr "Tónlist/upplýsingar"
-
-msgctxt "#12002"
-msgid "Dialog OK"
-msgstr "Gluggi í lagi"
 
 msgctxt "#12003"
 msgid "Videos/Info"
@@ -3417,14 +3496,6 @@ msgstr "Skriftur/Uppl."
 msgctxt "#12005"
 msgid "Fullscreen video"
 msgstr "Heilskjásmynd"
-
-msgctxt "#12006"
-msgid "Audio visualization"
-msgstr "Myndskreyting"
-
-msgctxt "#12008"
-msgid "File stacking dialog"
-msgstr "Skjalaröðunarskilti"
 
 msgctxt "#12009"
 msgid "Rebuild index..."
@@ -3582,17 +3653,21 @@ msgctxt "#12346"
 msgid "Password retry limit exceeded."
 msgstr "Fjöldi ágiskana á lykilorð er uppurinn."
 
-msgctxt "#12347"
-msgid "The system will now shut off."
-msgstr "Kerfið mun núna slökkva á sér."
-
 msgctxt "#12348"
 msgid "Item locked"
 msgstr "Atriði læst"
 
+msgctxt "#12352"
+msgid "No downloading is needed."
+msgstr "Ekki er þörf á að sækja gögn."
+
 msgctxt "#12353"
 msgid "Reactivate lock"
 msgstr "Setja læsingu á"
+
+msgctxt "#12354"
+msgid "Would you like to update it now?"
+msgstr "Viltu uppfæra núna?"
 
 msgctxt "#12356"
 msgid "Change lock"
@@ -3625,6 +3700,10 @@ msgstr "Vinsamlega sláðu inn aðal kóða"
 msgctxt "#12373"
 msgid "Settings & file manager"
 msgstr "Stillingar og  skráarsýsl"
+
+msgctxt "#12376"
+msgid "Set as default for all videos"
+msgstr "Setja sem sjálfgefið fyrir öll vídeó"
 
 msgctxt "#12377"
 msgid "This will reset any previously saved values"
@@ -3738,10 +3817,6 @@ msgctxt "#13013"
 msgid "Reboot"
 msgstr "Endurræsa"
 
-msgctxt "#13014"
-msgid "Minimize"
-msgstr "Minnka"
-
 msgctxt "#13015"
 msgid "Power button action"
 msgstr "Aðgerð straumrofa"
@@ -3810,10 +3885,6 @@ msgctxt "#13110"
 msgid "Save resolution?"
 msgstr "Vista upplausn?"
 
-msgctxt "#13111"
-msgid "Would you like to keep this resolution?"
-msgstr "Viltu nota þessa upplausn?"
-
 msgctxt "#13112"
 msgid "High quality upscaling"
 msgstr "Hágæða stækkun í hugbúnaði"
@@ -3853,10 +3924,6 @@ msgstr "VDPAU"
 msgctxt "#13121"
 msgid "VDPAU HQ Upscaling level"
 msgstr "VDPAU HQ stækkunargildi"
-
-msgctxt "#13122"
-msgid "VDPAU Studio level color conversion"
-msgstr "VDPAU Studio litabreytingargildi"
 
 msgctxt "#13130"
 msgid "Blank other displays"
@@ -3909,10 +3976,6 @@ msgstr "Gátt"
 msgctxt "#13161"
 msgid "Primary DNS"
 msgstr "Aðal DNS"
-
-msgctxt "#13162"
-msgid "Initialize failed"
-msgstr "Frumstilling mistókst"
 
 msgctxt "#13170"
 msgid "Never"
@@ -4090,10 +4153,6 @@ msgctxt "#13302"
 msgid "Fan speed override"
 msgstr "Fastur viftuhraði"
 
-msgctxt "#13303"
-msgid "- Fonts"
-msgstr "- Leturgerðir"
-
 msgctxt "#13304"
 msgid "Enable flipping bi-directional strings"
 msgstr "Snúa margstefnu texta"
@@ -4153,10 +4212,6 @@ msgstr "Horfa á myndasýningu"
 msgctxt "#13318"
 msgid "Recursive slideshow"
 msgstr "Endurkvæm myndasýning"
-
-msgctxt "#13319"
-msgid "Randomize"
-msgstr "Handahófskennt"
 
 msgctxt "#13320"
 msgid "Stereo"
@@ -4267,8 +4322,8 @@ msgid "Scan for new content"
 msgstr "Leita að nýju innihaldi"
 
 msgctxt "#13350"
-msgid "Now playing..."
-msgstr "Í spilun..."
+msgid "Current playlist"
+msgstr "Núgildandi lagalisti"
 
 msgctxt "#13351"
 msgid "Album information"
@@ -4370,21 +4425,9 @@ msgctxt "#13388"
 msgid "Preset"
 msgstr "Forstilling"
 
-msgctxt "#13389"
-msgid "There are no presets available\nfor this visualization"
-msgstr "Það eru ekki til neinar forstillingar\nfyrir þessa myndskreytingu"
-
-msgctxt "#13390"
-msgid "There are no settings available\nfor this visualization"
-msgstr "Það eru ekki til neinar stillingar\nfyrir þessa myndskreytingu"
-
 msgctxt "#13391"
 msgid "Eject/Load"
 msgstr "Disk út/inn"
-
-msgctxt "#13392"
-msgid "Use visualization if playing audio"
-msgstr "Nota myndskreytingu við tónlist"
 
 msgctxt "#13393"
 msgid "Calculate size"
@@ -4468,7 +4511,7 @@ msgstr "Spila hér"
 
 msgctxt "#13413"
 msgid "Downloading"
-msgstr "Niðurhala"
+msgstr "Sæki"
 
 msgctxt "#13414"
 msgid "Include artists who appear only on compilations"
@@ -4546,6 +4589,10 @@ msgctxt "#13432"
 msgid "Allow hardware acceleration (VideoToolbox)"
 msgstr "Leyfa vélbúnaðarhröðun (VideoToolbox)"
 
+msgctxt "#13455"
+msgid "Software"
+msgstr "Hugbúnaður"
+
 msgctxt "#13500"
 msgid "A/V sync method"
 msgstr "A/V samstillingaraðferð"
@@ -4561,10 +4608,6 @@ msgstr "Myndklukka (Sleppa/Afrita hljóð)"
 msgctxt "#13503"
 msgid "Video clock (Resample audio)"
 msgstr "Myndklukka (Endurblanda hljóð)"
-
-msgctxt "#13504"
-msgid "Maximum resample amount (%)"
-msgstr "Hámark endurblöndunar (%)"
 
 msgctxt "#13505"
 msgid "Resample quality"
@@ -4638,10 +4681,6 @@ msgctxt "#13620"
 msgid "Apple Remote Error"
 msgstr "Villa í Apple fjarstýringu"
 
-msgctxt "#13621"
-msgid "Apple Remote support could be enabled."
-msgstr "Ekki er hægt að virkja stuðning við Apple fjarstýringu."
-
 msgctxt "#14000"
 msgid "Stack"
 msgstr "Stafla"
@@ -4652,11 +4691,11 @@ msgstr "Ekki stafla"
 
 msgctxt "#14003"
 msgid "Downloading playlist file..."
-msgstr "Hala niður spilunarlista..."
+msgstr "Sæki spilunarlista..."
 
 msgctxt "#14004"
 msgid "Downloading streams list..."
-msgstr "Hala niður streymi lista..."
+msgstr "Sæki streymi lista..."
 
 msgctxt "#14005"
 msgid "Parsing streams list..."
@@ -4664,11 +4703,11 @@ msgstr "Þátta streymi lista..."
 
 msgctxt "#14006"
 msgid "Downloading streams list failed"
-msgstr "Niðurhölun streymilista mistókst"
+msgstr "Mistókst að sækja streymilista"
 
 msgctxt "#14007"
 msgid "Downloading playlist file failed"
-msgstr "Niðurhölun spilunarlista mistókst"
+msgstr "Mistókst að sækja spilunarlista"
 
 msgctxt "#14009"
 msgid "Games directory"
@@ -4734,41 +4773,17 @@ msgctxt "#14024"
 msgid "Enter the nearest large town"
 msgstr "Sláðu inn nálæga stóra borg"
 
-msgctxt "#14025"
-msgid "Video/Audio/DVD cache - Harddisk"
-msgstr "Myndefni/Hljóð/DVD flýtiminni - Harður diskur"
-
 msgctxt "#14026"
 msgid "Video cache - DVD-ROM"
 msgstr "Myndefni flýtiminni - DVD-ROM"
-
-msgctxt "#14027"
-msgid "- Local Network"
-msgstr "- Staðarnet"
-
-msgctxt "#14028"
-msgid "- Internet"
-msgstr "- Internet"
 
 msgctxt "#14030"
 msgid "Audio cache - DVD-ROM"
 msgstr "Hljóð flýtiminni - DVD-ROM"
 
-msgctxt "#14031"
-msgid "- Local Network"
-msgstr "- Staðarnet"
-
-msgctxt "#14032"
-msgid "- Internet"
-msgstr "- Internet"
-
 msgctxt "#14034"
 msgid "DVD cache - DVD-ROM"
 msgstr "DVD flýtiminni - DVD-ROM"
-
-msgctxt "#14035"
-msgid "- Local Network"
-msgstr "- Staðarnet"
 
 msgctxt "#14036"
 msgid "Services"
@@ -4918,10 +4933,6 @@ msgctxt "#14077"
 msgid "Remove from favourites"
 msgstr "Fjarlægja úr uppáhalds"
 
-msgctxt "#14078"
-msgid "- Colours"
-msgstr "- Litir"
-
 msgctxt "#14079"
 msgid "Timezone country"
 msgstr "Tímabelti lands"
@@ -4998,6 +5009,10 @@ msgctxt "#14098"
 msgid "Play"
 msgstr "Spila"
 
+msgctxt "#15014"
+msgid "Keep"
+msgstr "Halda"
+
 msgctxt "#15015"
 msgid "Remove"
 msgstr "Fjarlægja"
@@ -5050,10 +5065,6 @@ msgctxt "#15109"
 msgid "Skin default"
 msgstr "Sjálfgildi útlits"
 
-msgctxt "#15111"
-msgid "- Theme"
-msgstr "- Þema"
-
 msgctxt "#15112"
 msgid "Default theme"
 msgstr "Sjálfgilt Þema"
@@ -5061,30 +5072,6 @@ msgstr "Sjálfgilt Þema"
 msgctxt "#15200"
 msgid "Last.fm"
 msgstr "Last.fm"
-
-msgctxt "#15201"
-msgid "Submit songs to Last.fm"
-msgstr "Senda lög á Last.fm"
-
-msgctxt "#15202"
-msgid "Last.fm username"
-msgstr "Last.fm notandanafn"
-
-msgctxt "#15203"
-msgid "Last.fm password"
-msgstr "Last.fm lykilorð"
-
-msgctxt "#15204"
-msgid "Unable to handshake: sleeping..."
-msgstr "Get ekki tengst með handabandi: bíða..."
-
-msgctxt "#15205"
-msgid "Please update XBMC"
-msgstr "Vinsamlegast uppfærðu XBMC"
-
-msgctxt "#15206"
-msgid "Bad authorization: Check username and password"
-msgstr "Rangt auðkenni: Athugaðu notandanafn og lykilorð"
 
 msgctxt "#15207"
 msgid "Connected"
@@ -5094,29 +5081,9 @@ msgctxt "#15208"
 msgid "Not connected"
 msgstr "Ekki tengdur"
 
-msgctxt "#15209"
-msgid "Submit interval %i"
-msgstr "Sendi Millibil %i"
-
-msgctxt "#15210"
-msgid "Cached %i songs"
-msgstr "Skyndivistaði %i Lög"
-
-msgctxt "#15211"
-msgid "Submitting..."
-msgstr "Sendi..."
-
-msgctxt "#15212"
-msgid "Submitting in %i secs"
-msgstr "Sendi eftir %i sek"
-
 msgctxt "#15213"
 msgid "Play using..."
 msgstr "Spila Með..."
-
-msgctxt "#15214"
-msgid "Use smoothed A/V synchronization"
-msgstr "Nota fína Hljóð/Mynd samstillingu"
 
 msgctxt "#15215"
 msgid "Hide file names in thumbs view"
@@ -5125,218 +5092,6 @@ msgstr "Fela skráarnöfn í smámynda sjónarhorni"
 msgctxt "#15216"
 msgid "Play in party mode"
 msgstr "Spila í partýham"
-
-msgctxt "#15217"
-msgid "Submit songs to Libre.fm"
-msgstr "Senda lög á Libre.fm"
-
-msgctxt "#15218"
-msgid "Libre.fm username"
-msgstr "Libre.fm notandanafn"
-
-msgctxt "#15219"
-msgid "Libre.fm password"
-msgstr "Libre.fm lykilorð"
-
-msgctxt "#15220"
-msgid "Libre.fm"
-msgstr "Libre.fm"
-
-msgctxt "#15221"
-msgid "Song submission"
-msgstr "Senda lög"
-
-msgctxt "#15250"
-msgid "Submit Last.fm radio to Last.fm"
-msgstr "Senda Last.fm útvarp til Last.fm"
-
-msgctxt "#15251"
-msgid "Connecting to Last.fm..."
-msgstr "Tengist við Last.fm..."
-
-msgctxt "#15252"
-msgid "Selecting station..."
-msgstr "Vel stöð..."
-
-msgctxt "#15253"
-msgid "Search similar artists..."
-msgstr "Leita að svipuðum listamönnum..."
-
-msgctxt "#15254"
-msgid "Search similar tags..."
-msgstr "Leita að svipuðum tögum..."
-
-msgctxt "#15255"
-msgid "Your profile (%name%)"
-msgstr "Þinn notandi (%name%)"
-
-msgctxt "#15256"
-msgid "Overall top tags"
-msgstr "Hæstu tegundir"
-
-msgctxt "#15257"
-msgid "Top artists for tag %name%"
-msgstr "Hæstu tónlistarmenn fyrir tegundir %name%"
-
-msgctxt "#15258"
-msgid "Top albums for tag %name%"
-msgstr "Hæstu hljómplötur fyrir tegundir %name%"
-
-msgctxt "#15259"
-msgid "Top tracks for tag %name%"
-msgstr "Hæstu lög fyrir tegundir %name%"
-
-msgctxt "#15260"
-msgid "Listen to tag %name% Last.fm radio"
-msgstr "Hlusta á merki %name% last.fm útvarp"
-
-msgctxt "#15261"
-msgid "Similar artists as %name%"
-msgstr "Áþekkir tónlistarmenn og %name%"
-
-msgctxt "#15262"
-msgid "Top %name% albums"
-msgstr "Bestu %name% hljómlötur"
-
-msgctxt "#15263"
-msgid "Top %name% tracks"
-msgstr "Bestu %name% lög"
-
-msgctxt "#15264"
-msgid "Top %name% tags"
-msgstr "Bestu %name% tegundir"
-
-msgctxt "#15265"
-msgid "Biggest fans of %name%"
-msgstr "Mestu aðdáendur %name%"
-
-msgctxt "#15266"
-msgid "Listen to %name% fans Last.fm radio"
-msgstr "Hlusta á %name% aðdáendur Last.fm útvarp"
-
-msgctxt "#15267"
-msgid "Listen to %name% similar artists Last.fm radio"
-msgstr "Hlusta á %name% samskonar tónlistarmenn Last.fm útvarp"
-
-msgctxt "#15268"
-msgid "Top artists for user %name%"
-msgstr "Bestu tónlistarmenn fyrir notanda %name%"
-
-msgctxt "#15269"
-msgid "Top albums for user %name%"
-msgstr "Bestu hljómlpötur fyrir notanda %name%"
-
-msgctxt "#15270"
-msgid "Top tracks for user %name%"
-msgstr "Bestu lög fyrir notanda %name%"
-
-msgctxt "#15271"
-msgid "Friends of user %name%"
-msgstr "Vinir notanda %name%"
-
-msgctxt "#15272"
-msgid "Neighbours of user %name%"
-msgstr "Nágrannar notanda %name%"
-
-msgctxt "#15273"
-msgid "Weekly artist chart for %name%"
-msgstr "Vikulegur listamanna listi fyrir %name%"
-
-msgctxt "#15274"
-msgid "Weekly album chart for %name%"
-msgstr "Vikulegur hljómplötu listi fyrir %name%"
-
-msgctxt "#15275"
-msgid "Weekly track chart for %name%"
-msgstr "Vikulegur laga listi fyrir %name%"
-
-msgctxt "#15276"
-msgid "Listen to %name%'s neighbours Last.fm radio"
-msgstr "Hlusta á nágranna %name%' Last.fm útvarp"
-
-msgctxt "#15277"
-msgid "Listen to %name%'s personal Last.fm radio"
-msgstr "Hlusta á einkalista %name%' Last.fm útvarp"
-
-msgctxt "#15278"
-msgid "Listen to %name%'s mix Last.fm radio"
-msgstr "Hlusta á uppháhalds lög %name%'s Last.fm útvarp"
-
-msgctxt "#15279"
-msgid "Retrieving list from Last.fm..."
-msgstr "Næ í lista frá Last.fm..."
-
-msgctxt "#15280"
-msgid "Can't retrieve list from Last.fm..."
-msgstr "Get ekki náð í lista frá Last.fm..."
-
-msgctxt "#15281"
-msgid "Enter an artist name to find related ones"
-msgstr "Sláðu inn nafn listamanns til að finna tengda aðila"
-
-msgctxt "#15282"
-msgid "Enter a tag name to find similar ones"
-msgstr "Sláðu inn tegund til að finna tengdar tegundir"
-
-msgctxt "#15283"
-msgid "Tracks recently listened by %name%"
-msgstr "Lög sem %name% hefur nýlega hlustað á"
-
-msgctxt "#15284"
-msgid "Listen to %name%'s recommendations Last.fm radio"
-msgstr "Hlusta á það sem %name%'s mælir með á Last.fm"
-
-msgctxt "#15285"
-msgid "Top tags for user %name%"
-msgstr "Topp merki fyrir notanda %name%"
-
-msgctxt "#15287"
-msgid "Do you want to add the current track to your loved tracks?"
-msgstr "Viltju setja núverandi lag í uppáhalds lögin?"
-
-msgctxt "#15288"
-msgid "Do you want to ban the current track?"
-msgstr "Viltu banna núverandi lag?"
-
-msgctxt "#15289"
-msgid "Added to your loved tracks: '%s'."
-msgstr "Bætt við í uppáhaldslög: '%s'."
-
-msgctxt "#15290"
-msgid "Could not add '%s' to your loved tracks."
-msgstr "Gat ekki bætt '%s' í uppáhaldslög."
-
-msgctxt "#15291"
-msgid "Banned: '%s'."
-msgstr "Bannað: '%s'."
-
-msgctxt "#15292"
-msgid "Could not ban '%s'."
-msgstr "Gat ekki bannað '%s'."
-
-msgctxt "#15293"
-msgid "Tracks recently loved by %name%"
-msgstr "Nýleg uppáhaldslög %name%"
-
-msgctxt "#15294"
-msgid "Tracks recently banned by %name%"
-msgstr "Nýlega bönnuð af %name%"
-
-msgctxt "#15295"
-msgid "Remove from loved tracks"
-msgstr "Fjarlægja úr uppáhaldslögum"
-
-msgctxt "#15296"
-msgid "Un-ban"
-msgstr "Leyfa"
-
-msgctxt "#15297"
-msgid "Do you want to remove this track from your loved tracks?"
-msgstr "Viltu fjarlægja þetta lag úr uppáhaldslista?"
-
-msgctxt "#15298"
-msgid "Do you want to un-ban this track?"
-msgstr "Viltu hætta við að banna þetta lag?"
 
 msgctxt "#15300"
 msgid "Path not found or invalid"
@@ -5438,6 +5193,10 @@ msgctxt "#16022"
 msgid "Bob (inverted)"
 msgstr "Bob (Umsnúinn)"
 
+msgctxt "#16024"
+msgid "Cancelling..."
+msgstr "Hætti við......"
+
 msgctxt "#16025"
 msgid "Enter the artist name"
 msgstr "Sláðu inn nafn listamanns"
@@ -5465,10 +5224,6 @@ msgstr "Hætt við partí ham."
 msgctxt "#16031"
 msgid "No matching songs in the library."
 msgstr "Engin samsvarandi lög í lagasafni."
-
-msgctxt "#16032"
-msgid "Could not initialize database."
-msgstr "Gat ekki frumstillt gagnagrunn."
 
 msgctxt "#16033"
 msgid "Could not open database."
@@ -5618,10 +5373,6 @@ msgctxt "#16314"
 msgid "Inverse Telecine"
 msgstr "Inverse Telecine"
 
-msgctxt "#16315"
-msgid "Lanczos3 optimized"
-msgstr "Lanczos3 optimized"
-
 msgctxt "#16316"
 msgid "Auto"
 msgstr "Sjálfvirkt"
@@ -5649,10 +5400,6 @@ msgstr "DXVA Best"
 msgctxt "#16322"
 msgid "Spline36"
 msgstr "Spline36"
-
-msgctxt "#16323"
-msgid "Spline36 optimized"
-msgstr "Spline36 optimized"
 
 msgctxt "#16324"
 msgid "Software Blend"
@@ -5729,6 +5476,10 @@ msgstr "Núna"
 msgctxt "#19031"
 msgid "Next"
 msgstr "Næst"
+
+msgctxt "#19032"
+msgid "Timeline"
+msgstr "Tímalína"
 
 msgctxt "#19033"
 msgid "Information"
@@ -5817,6 +5568,26 @@ msgstr "Dagur:"
 msgctxt "#19080"
 msgid "Begin:"
 msgstr "Byrja:"
+
+msgctxt "#19083"
+msgid "Lifetime (days):"
+msgstr "Líftími (dagar):"
+
+msgctxt "#19097"
+msgid "Enter the name for the recording"
+msgstr "Gefðu upptökunni nafn"
+
+msgctxt "#19098"
+msgid "Warning"
+msgstr "Athugið"
+
+msgctxt "#19099"
+msgid "Service"
+msgstr "Þjónusta"
+
+msgctxt "#19102"
+msgid "Please switch to another channel."
+msgstr "Vinsamlegast skiptu yfir á aðra stöð."
 
 msgctxt "#19114"
 msgid "Version"
@@ -5937,6 +5708,10 @@ msgstr "Læsa rás"
 msgctxt "#19258"
 msgid "Unlock channel"
 msgstr "Opna rás"
+
+msgctxt "#19607"
+msgid "Fashion"
+msgstr "Hamur"
 
 msgctxt "#19635"
 msgid "Languages"
@@ -6222,14 +5997,6 @@ msgctxt "#20085"
 msgid "Show system info"
 msgstr "Sýna kerfisupplýsingar"
 
-msgctxt "#20086"
-msgid "Show available disc space C: E: F:"
-msgstr "Sýna laust diskpláss C: E: F:"
-
-msgctxt "#20087"
-msgid "Show available disc space E: F: G:"
-msgstr "Sýna laust diskpláss E: F: G:"
-
 msgctxt "#20088"
 msgid "Weather info"
 msgstr "Veður"
@@ -6315,8 +6082,8 @@ msgid "Root"
 msgstr "Rót"
 
 msgctxt "#20109"
-msgid "- Zoom"
-msgstr "- Stækkun"
+msgid "Zoom"
+msgstr "Þysja"
 
 msgctxt "#20110"
 msgid "UPnP settings"
@@ -6668,7 +6435,7 @@ msgstr "Fann engan listamann!"
 
 msgctxt "#20199"
 msgid "Downloading artist info failed"
-msgstr "Niðurhal á upplýsingum um listamann mistókst"
+msgstr "Misstókst að sækja upplýsingar um listamann"
 
 msgctxt "#20250"
 msgid "Party on! (videos)"
@@ -6750,17 +6517,9 @@ msgctxt "#20309"
 msgid "Make new folder"
 msgstr "Búa til nýja möppu"
 
-msgctxt "#20310"
-msgid "Dim LCD on playback"
-msgstr "Deyfa LCD við spilun"
-
 msgctxt "#20311"
 msgid "Unknown or onboard (protected)"
 msgstr "Óþekktur eða á borði (varinn)"
-
-msgctxt "#20312"
-msgid "Dim LCD on paused"
-msgstr "Deyfa LCD við hlé"
 
 msgctxt "#20314"
 msgid "Videos - Library"
@@ -6781,10 +6540,6 @@ msgstr "Endurstilla tækjastillingu"
 msgctxt "#20326"
 msgid "This will reset the calibration values for %s"
 msgstr "Þetta endurstillir tækjastillingu fyrir %s"
-
-msgctxt "#20327"
-msgid "to it's default values."
-msgstr "á sín upprunalegu gildi."
 
 msgctxt "#20328"
 msgid "Browse for destination"
@@ -7002,10 +6757,6 @@ msgctxt "#20381"
 msgid "Specials"
 msgstr "Sérþættir"
 
-msgctxt "#20382"
-msgid "Automatically grab season thumbs"
-msgstr "Ná sjálfkrafa í þáttaraðarsmámynd"
-
 msgctxt "#20383"
 msgid "Selected folder contains a single video"
 msgstr "Mappa inniheldur eina myndskrá"
@@ -7084,7 +6835,7 @@ msgstr "Spila tónlistarmyndband"
 
 msgctxt "#20402"
 msgid "Download actor thumbnails when adding to library"
-msgstr "Hlaða niður smámyndum fyrir leikara þegar bætt er við í safn"
+msgstr "Sækja smámyndir leikara þegar bætt er við í safn"
 
 msgctxt "#20403"
 msgid "Set actor thumb"
@@ -7104,11 +6855,11 @@ msgstr "Stillingar skrapara"
 
 msgctxt "#20408"
 msgid "Downloading music video information"
-msgstr "Sæki upplýsingar fyrir tónlistarmyndband"
+msgstr "Sæki upplýsingar um tónlistarmyndband"
 
 msgctxt "#20409"
 msgid "Downloading TV show information"
-msgstr "Sæki upplýsingar fyrir sjónvarpsþáttaröð"
+msgstr "Sæki upplýsingar um sjónvarpsþáttaröð"
 
 msgctxt "#20410"
 msgid "Trailer"
@@ -7118,17 +6869,9 @@ msgctxt "#20411"
 msgid "Flatten"
 msgstr "Fletja"
 
-msgctxt "#20412"
-msgid "Flatten TV shows"
-msgstr "Fletja út sjónvarpsþætti"
-
 msgctxt "#20413"
 msgid "Get fanart"
 msgstr "Ná í aðdáendamyndir"
-
-msgctxt "#20414"
-msgid "Show Fanart in video and music libraries"
-msgstr "Sýna aðdáendamyndir í tónlistar- og myndbandasafni"
 
 msgctxt "#20415"
 msgid "Scanning for new content"
@@ -7256,7 +6999,7 @@ msgstr "Hunsa og endurnýja frá Internetinu?"
 
 msgctxt "#20448"
 msgid "Could not download information"
-msgstr "Gat ekki niðurhalið upplýsingum"
+msgstr "Gat ekki sótt upplýsingar"
 
 msgctxt "#20449"
 msgid "Unable to connect to remote server"
@@ -7342,10 +7085,6 @@ msgctxt "#21365"
 msgid "Remove media share"
 msgstr "Fjarlægja samnýtingu"
 
-msgctxt "#21366"
-msgid "Subtitle folder"
-msgstr "Mappa fyrir þýðingartexta"
-
 msgctxt "#21367"
 msgid "Movie & alternate subtitle directory"
 msgstr "Kvikmynda og auka mappa fyrir þýðingartexta"
@@ -7353,10 +7092,6 @@ msgstr "Kvikmynda og auka mappa fyrir þýðingartexta"
 msgctxt "#21368"
 msgid "Override ASS/SSA subtitles fonts"
 msgstr "Hunsa leturgerð ASS/SSA þýðingartexta"
-
-msgctxt "#21369"
-msgid "Enable mouse and Touch Screen support"
-msgstr "Virkja stuðning við mús og snertiskjá"
 
 msgctxt "#21370"
 msgid "Play navigation sounds during media playback"
@@ -7543,8 +7278,8 @@ msgid "Default music video scraper"
 msgstr "Sjálfgefin tónlistarmyndbandaskafa"
 
 msgctxt "#21417"
-msgid "- Settings"
-msgstr "- Stillingar"
+msgid "Settings"
+msgstr "Stillingar"
 
 msgctxt "#21418"
 msgid "Multilingual"
@@ -7675,8 +7410,8 @@ msgid "Remote control sends keyboard presses"
 msgstr "Fjarstýring sendir lyklaborðsáslætti"
 
 msgctxt "#21450"
-msgid "- Edit"
-msgstr "- Breyta"
+msgid "Edit"
+msgstr "Breyta"
 
 msgctxt "#21451"
 msgid "Internet connection required."
@@ -7697,10 +7432,6 @@ msgstr "Skyndiminni fullt"
 msgctxt "#21455"
 msgid "Cache filled before reaching required amount for continous playback"
 msgstr "Skyndiminni fylltist áður en tókst að ná í nauðsynlegt magn fyrir áframhaldandi spilun"
-
-msgctxt "#21460"
-msgid "Subtitle location"
-msgstr "Staðsetning þýðingartexta"
 
 msgctxt "#21461"
 msgid "Fixed"
@@ -7926,10 +7657,6 @@ msgctxt "#21877"
 msgid "Date created"
 msgstr "Búinn til"
 
-msgctxt "#21878"
-msgid "Copyright flag"
-msgstr "Höfundarréttarmerki"
-
 msgctxt "#21879"
 msgid "Country code"
 msgstr "Landsnúmer"
@@ -7956,11 +7683,11 @@ msgstr "Leita að upplýsingum fyrir alla tónlistarmenn"
 
 msgctxt "#21885"
 msgid "Downloading album information"
-msgstr "Hleð niður upplýsingum um hljómplötu"
+msgstr "Sæki upplýsingar um hljómplötu"
 
 msgctxt "#21886"
 msgid "Downloading artist information"
-msgstr "Hleð niður upplýsingum um listamann"
+msgstr "Sæki upplýsingar um listamann"
 
 msgctxt "#21887"
 msgid "Biography"
@@ -8025,10 +7752,6 @@ msgstr "Uppfæra safn við ræsingu"
 msgctxt "#22001"
 msgid "Hide progress of library updates"
 msgstr "Uppfæra alltaf safn í bakgrunni"
-
-msgctxt "#22002"
-msgid "- DNS suffix"
-msgstr "- DNS viðskeyti"
 
 msgctxt "#22003"
 msgid "%2.3fs"
@@ -8102,10 +7825,6 @@ msgctxt "#22020"
 msgid "Guide"
 msgstr "Leiðsagnarsíða"
 
-msgctxt "#22021"
-msgid "Allowed error in aspect ratio to minimize black bars"
-msgstr "Leyfð skekkja í hlutfalli til að minnka svartar súlur"
-
 msgctxt "#22022"
 msgid "Show video files in listings"
 msgstr "Taka myndbandaskrár með í lista"
@@ -8123,16 +7842,8 @@ msgid "Font"
 msgstr "Leturgerð"
 
 msgctxt "#22031"
-msgid "- Size"
-msgstr "- Stærð"
-
-msgctxt "#22032"
-msgid "- Colours"
-msgstr "- Litir"
-
-msgctxt "#22033"
-msgid "- Charset"
-msgstr "- Stafasett"
+msgid "Size"
+msgstr "Stærð"
 
 msgctxt "#22034"
 msgid "Export karaoke titles as HTML"
@@ -8262,10 +7973,6 @@ msgctxt "#24009"
 msgid "Script"
 msgstr "Skrifta"
 
-msgctxt "#24010"
-msgid "Visualization"
-msgstr "Myndskreyting"
-
 msgctxt "#24011"
 msgid "Add-on repository"
 msgstr "Viðbótarsafn"
@@ -8311,6 +8018,10 @@ msgid "Enable"
 msgstr "Virkja viðbót"
 
 msgctxt "#24023"
+msgid "Disabled"
+msgstr "Óvirkt"
+
+msgctxt "#24024"
 msgid "Add-on disabled"
 msgstr "Viðbót óvirk"
 
@@ -8321,6 +8032,10 @@ msgstr "Veðurþjónusta"
 msgctxt "#24028"
 msgid "Weather.com (standard)"
 msgstr "Weather.com (sjálfgefið)"
+
+msgctxt "#24029"
+msgid "Service for weather information"
+msgstr "Þjónusta fyrir veður upplýsingar"
 
 msgctxt "#24030"
 msgid "This Add-on can not be configured"
@@ -8372,27 +8087,15 @@ msgstr "Setja inn frá zip skrá"
 
 msgctxt "#24042"
 msgid "Downloading %i%%"
-msgstr "Niðurhaa %i%%"
+msgstr "Sæki %i%%"
 
 msgctxt "#24043"
 msgid "Available Updates"
 msgstr "Fáanlegar uppfærslur"
 
-msgctxt "#24044"
-msgid "Dependencies not met"
-msgstr "Kröfur voru ekki uppfylltar"
-
 msgctxt "#24045"
 msgid "Add-on does not have the correct structure"
 msgstr "Viðbót er ekki rétt uppsett"
-
-msgctxt "#24046"
-msgid "%s is used by the following installed add-on(s)"
-msgstr "%s er notað af eftirfarandi viðbótum"
-
-msgctxt "#24047"
-msgid "This add-on cannot be uninstalled"
-msgstr "Ekki er hægt að taka þessa viðbót út"
 
 msgctxt "#24048"
 msgid "Rollback"
@@ -8448,11 +8151,11 @@ msgstr "Viðbót uppfærð"
 
 msgctxt "#24066"
 msgid "Cancel Add-on download?"
-msgstr "Hætta við að niðurhala viðbót?"
+msgstr "Hætta við að sækja viðbót?"
 
 msgctxt "#24067"
 msgid "Currently downloading Add-ons"
-msgstr "Er að niðurhala viðbótum"
+msgstr "Er að sækja viðbætur"
 
 msgctxt "#24068"
 msgid "Update available"
@@ -8510,10 +8213,6 @@ msgctxt "#24095"
 msgid "(blacklisted)"
 msgstr "(á bannlista)"
 
-msgctxt "#24096"
-msgid "Add-on has been marked as broken in repository."
-msgstr "Viðbót hefur verið merkt sem biluð í safni."
-
 msgctxt "#24097"
 msgid "Would you like to disable it on your system?"
 msgstr "Viltu slökkva á henni á þínu kerfi?"
@@ -8528,11 +8227,27 @@ msgstr "Viltu skipta yfir á þetta útlit?"
 
 msgctxt "#24100"
 msgid "To use this feature you must download an Add-on:"
-msgstr "Til að nota þetta þarftu að hala niður viðbót:"
+msgstr "Til að nota þetta þarftu að sækja viðbót:"
 
 msgctxt "#24101"
 msgid "Would you like to download this Add-on?"
-msgstr "Viltu hala niður þessari viðbót?"
+msgstr "Viltu sækja þessa viðbót?"
+
+msgctxt "#24110"
+msgid "Downloading subtitles ..."
+msgstr "Sæki þýðingartexta ..."
+
+msgctxt "#24111"
+msgid "Languages to download subtitles for"
+msgstr "Sækja þýðingartexta fyrir tungumál"
+
+msgctxt "#24113"
+msgid "Failed to download subtitle"
+msgstr "Gat ekki sótt þýðingartexta"
+
+msgctxt "#24121"
+msgid "Enter search string"
+msgstr "Sláðu inn leitarstreng"
 
 msgctxt "#25000"
 msgid "Notifications"
@@ -8545,10 +8260,6 @@ msgstr "Fela útlend"
 msgctxt "#25002"
 msgid "Select from all titles ..."
 msgstr "Velja úr öllum titlum ..."
-
-msgctxt "#25003"
-msgid "Show bluray menus"
-msgstr "Sýna bluray valmyndir"
 
 msgctxt "#25004"
 msgid "Play main title: %d"
@@ -8584,15 +8295,15 @@ msgstr "Straumur"
 
 msgctxt "#33003"
 msgid "Download"
-msgstr "Hala niður"
+msgstr "Sækja"
 
 msgctxt "#33004"
 msgid "Download & play"
-msgstr "Niðurhala og spila"
+msgstr "Sækja og spila"
 
 msgctxt "#33005"
 msgid "Download & save"
-msgstr "Niðurhala og vista"
+msgstr "Sækja og vista"
 
 msgctxt "#33006"
 msgid "Today"
@@ -8612,7 +8323,7 @@ msgstr "Afritun"
 
 msgctxt "#33010"
 msgid "Set download directory"
-msgstr "Velja niðurhalsmöppu"
+msgstr "Velja möppu fyrir sótt gögn"
 
 msgctxt "#33011"
 msgid "Search duration"
@@ -8637,10 +8348,6 @@ msgstr "Spyrja um niðurhal áður en myndband er spilað"
 msgctxt "#33016"
 msgid "Clips"
 msgstr "Úrklippur"
-
-msgctxt "#33017"
-msgid "Restart plugin to enable"
-msgstr "Endurræstu viðbót til að gera virkt"
 
 msgctxt "#33018"
 msgid "Tonight"
@@ -8907,8 +8614,8 @@ msgid "Flac"
 msgstr "Flac"
 
 msgctxt "#34100"
-msgid "Speaker Configuration"
-msgstr "Stillingar hátalara"
+msgid "Number of channels"
+msgstr "Fjöldi rása"
 
 msgctxt "#34101"
 msgid "2.0"
@@ -8974,10 +8681,6 @@ msgctxt "#34202"
 msgid "Can't find a previous item to play"
 msgstr "Finn ekki fyrri hlut til að spila"
 
-msgctxt "#34300"
-msgid "Failed to start zeroconf"
-msgstr "Gat ekki ræst zeroconf"
-
 msgctxt "#34301"
 msgid "Is Apple's Bonjour Service installed? See log for more info."
 msgstr "Er Apple Bonjour þjónusta uppsett? Athugaðu atburðaskrá fyrir meiri upplýsingar."
@@ -8989,10 +8692,6 @@ msgstr "Skjábirting"
 msgctxt "#34401"
 msgid "Failed to init video filters/scalers, falling back to bilinear scaling"
 msgstr "Gat ekki frumstillt skjá síur/kvarða, fer til baka í tvílínulega kvörðun"
-
-msgctxt "#34402"
-msgid "Failed to initialize audio device"
-msgstr "Gat ekki frumstillt hljóðkerfi"
 
 msgctxt "#34403"
 msgid "Check your audiosettings"
@@ -9009,10 +8708,6 @@ msgstr "Tæki"
 msgctxt "#35001"
 msgid "Generic HID device"
 msgstr "Almennt HID tæki"
-
-msgctxt "#35002"
-msgid "Generic network adapter"
-msgstr "Almennt netkort"
 
 msgctxt "#35003"
 msgid "Generic disk"
@@ -9062,10 +8757,6 @@ msgctxt "#35504"
 msgid "Product ID"
 msgstr "Auðkenni vöru"
 
-msgctxt "#36000"
-msgid "Pulse-Eight CEC adapter"
-msgstr "Pulse-Eight CEC tengispjald"
-
 msgctxt "#36001"
 msgid "Pulse-Eight Nyxboard"
 msgstr "Pulse-Eight Nyxboard"
@@ -9086,10 +8777,6 @@ msgctxt "#36005"
 msgid "Enable switch side commands"
 msgstr "Virkja að skipta á milli hliðarskipana"
 
-msgctxt "#36006"
-msgid "Could not open the adapter"
-msgstr "Gat ekki opnað tengispjald"
-
 msgctxt "#36007"
 msgid "Devices to power on when starting XBMC"
 msgstr "Kveikja á sjónvarpinu þegar XBMC er ræst"
@@ -9106,10 +8793,6 @@ msgctxt "#36011"
 msgid "Could not detect the CEC com port. Set it up manually."
 msgstr "Fann ekki CEC gátt. Settu það upp handvirkt."
 
-msgctxt "#36012"
-msgid "Could not initialise the CEC adapter. Please check your settings."
-msgstr "Fann ekki CEC tengispjald."
-
 msgctxt "#36015"
 msgid "HDMI port number"
 msgstr "HDMI gátt"
@@ -9117,10 +8800,6 @@ msgstr "HDMI gátt"
 msgctxt "#36016"
 msgid "Connected"
 msgstr "Tengdur"
-
-msgctxt "#36017"
-msgid "Could not initialise the CEC adapter: libCEC was not found on your system."
-msgstr "Fann tengispjald, en libcec er ekki tiltækt"
 
 msgctxt "#36018"
 msgid "Use the TV's language setting"
@@ -9141,3 +8820,15 @@ msgstr "Alltaf"
 msgctxt "#36037"
 msgid "TV"
 msgstr "Sjónvarp"
+
+msgctxt "#36393"
+msgid "Folder used to save screenshots taken within XBMC."
+msgstr "Mappa sem notuð er til þess að vista skjáskot sem tekin eru í XBMC."
+
+msgctxt "#36426"
+msgid "Switch to channel"
+msgstr "Skipta yfir á rás"
+
+msgctxt "#36428"
+msgid "Record"
+msgstr "Taka upp"

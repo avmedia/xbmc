@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 #include "threads/SystemClock.h"
 #include "CacheStrategy.h"
-#ifdef _LINUX
+#ifdef TARGET_POSIX
 #include "PlatformInclude.h"
 #endif
 #include "Util.h"
@@ -28,7 +28,7 @@
 #include "threads/SingleLock.h"
 #include "utils/TimeUtils.h"
 #include "SpecialProtocol.h"
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include "PlatformDefs.h" //for PRIdS, PRId64
 #endif
 
@@ -200,9 +200,6 @@ int64_t CSimpleFileCache::WaitForData(unsigned int iMinAvail, unsigned int iMill
 
 int64_t CSimpleFileCache::Seek(int64_t iFilePosition)
 {
-
-  CLog::Log(LOGDEBUG,"CSimpleFileCache::Seek, seeking to %"PRId64, iFilePosition);
-
   int64_t iTarget = iFilePosition - m_nStartPosition;
 
   if (iTarget < 0)
@@ -212,9 +209,10 @@ int64_t CSimpleFileCache::Seek(int64_t iFilePosition)
   }
 
   int64_t nDiff = iTarget - m_nWritePosition;
-  if ( nDiff > 500000 || (nDiff > 0 && WaitForData((unsigned int)(iTarget - m_nReadPosition), 5000) == CACHE_RC_TIMEOUT)  ) {
-    CLog::Log(LOGWARNING,"%s - attempt to seek past read data (seek to %"PRId64". max: %"PRId64". reset read pointer. (%"PRId64")", __FUNCTION__, iTarget, m_nWritePosition, iFilePosition);
-    return  CACHE_RC_ERROR;
+  if (nDiff > 500000 || (nDiff > 0 && WaitForData((unsigned int)(iTarget - m_nReadPosition), 5000) == CACHE_RC_TIMEOUT))
+  {
+    CLog::Log(LOGDEBUG,"CSimpleFileCache::Seek - Attempt to seek past read data");
+    return CACHE_RC_ERROR;
   }
 
   LARGE_INTEGER pos;
@@ -229,9 +227,16 @@ int64_t CSimpleFileCache::Seek(int64_t iFilePosition)
   return iFilePosition;
 }
 
-void CSimpleFileCache::Reset(int64_t iSourcePosition)
+void CSimpleFileCache::Reset(int64_t iSourcePosition, bool clearAnyway)
 {
   LARGE_INTEGER pos;
+  if (!clearAnyway && IsCachedPosition(iSourcePosition))
+  {
+    pos.QuadPart = m_nReadPosition = iSourcePosition - m_nStartPosition;
+    SetFilePointerEx(m_hCacheFileRead, pos, NULL, FILE_BEGIN);
+    return;
+  }
+
   pos.QuadPart = 0;
 
   SetFilePointerEx(m_hCacheFileWrite, pos, NULL, FILE_BEGIN);
@@ -245,5 +250,143 @@ void CSimpleFileCache::EndOfInput()
 {
   CCacheStrategy::EndOfInput();
   m_hDataAvailEvent->Set();
+}
+
+int64_t CSimpleFileCache::CachedDataEndPosIfSeekTo(int64_t iFilePosition)
+{
+  if (iFilePosition >= m_nStartPosition && iFilePosition <= m_nStartPosition + m_nWritePosition)
+    return m_nStartPosition + m_nWritePosition;
+  return iFilePosition;
+}
+
+int64_t CSimpleFileCache::CachedDataEndPos()
+{
+  return m_nStartPosition + m_nWritePosition;
+}
+
+bool CSimpleFileCache::IsCachedPosition(int64_t iFilePosition)
+{
+  return iFilePosition >= m_nStartPosition && iFilePosition <= m_nStartPosition + m_nWritePosition;
+}
+
+CCacheStrategy *CSimpleFileCache::CreateNew()
+{
+  return new CSimpleFileCache();
+}
+
+
+CSimpleDoubleCache::CSimpleDoubleCache(CCacheStrategy *impl)
+{
+  assert(NULL != impl);
+  m_pCache = impl;
+  m_pCacheOld = NULL;
+}
+
+CSimpleDoubleCache::~CSimpleDoubleCache()
+{
+  delete m_pCache;
+  delete m_pCacheOld;
+}
+
+int CSimpleDoubleCache::Open()
+{
+  return m_pCache->Open();
+}
+
+void CSimpleDoubleCache::Close()
+{
+  m_pCache->Close();
+  if (m_pCacheOld)
+  {
+    delete m_pCacheOld;
+    m_pCacheOld = NULL;
+  }
+}
+
+int CSimpleDoubleCache::WriteToCache(const char *pBuffer, size_t iSize)
+{
+  return m_pCache->WriteToCache(pBuffer, iSize);
+}
+
+int CSimpleDoubleCache::ReadFromCache(char *pBuffer, size_t iMaxSize)
+{
+  return m_pCache->ReadFromCache(pBuffer, iMaxSize);
+}
+
+int64_t CSimpleDoubleCache::WaitForData(unsigned int iMinAvail, unsigned int iMillis)
+{
+  return m_pCache->WaitForData(iMinAvail, iMillis);
+}
+
+int64_t CSimpleDoubleCache::Seek(int64_t iFilePosition)
+{
+  return m_pCache->Seek(iFilePosition);
+}
+
+void CSimpleDoubleCache::Reset(int64_t iSourcePosition, bool clearAnyway)
+{
+  if (!clearAnyway && m_pCache->IsCachedPosition(iSourcePosition)
+      && (!m_pCacheOld || !m_pCacheOld->IsCachedPosition(iSourcePosition)
+          || m_pCache->CachedDataEndPos() >= m_pCacheOld->CachedDataEndPos()))
+  {
+    m_pCache->Reset(iSourcePosition, clearAnyway);
+    return;
+  }
+  if (!m_pCacheOld)
+  {
+    CCacheStrategy *pCacheNew = m_pCache->CreateNew();
+    if (pCacheNew->Open() != CACHE_RC_OK)
+    {
+      delete pCacheNew;
+      m_pCache->Reset(iSourcePosition, clearAnyway);
+      return;
+    }
+    pCacheNew->Reset(iSourcePosition, clearAnyway);
+    m_pCacheOld = m_pCache;
+    m_pCache = pCacheNew;
+    return;
+  }
+  m_pCacheOld->Reset(iSourcePosition, clearAnyway);
+  CCacheStrategy *tmp = m_pCacheOld;
+  m_pCacheOld = m_pCache;
+  m_pCache = tmp;
+}
+
+void CSimpleDoubleCache::EndOfInput()
+{
+  m_pCache->EndOfInput();
+}
+
+bool CSimpleDoubleCache::IsEndOfInput()
+{
+  return m_pCache->IsEndOfInput();
+}
+
+void CSimpleDoubleCache::ClearEndOfInput()
+{
+  m_pCache->ClearEndOfInput();
+}
+
+int64_t CSimpleDoubleCache::CachedDataEndPos()
+{
+  return m_pCache->CachedDataEndPos();
+}
+
+int64_t CSimpleDoubleCache::CachedDataEndPosIfSeekTo(int64_t iFilePosition)
+{
+  int64_t ret = m_pCache->CachedDataEndPosIfSeekTo(iFilePosition);
+  if (m_pCacheOld)
+    return std::max(ret, m_pCacheOld->CachedDataEndPosIfSeekTo(iFilePosition));
+  return ret;
+}
+
+bool CSimpleDoubleCache::IsCachedPosition(int64_t iFilePosition)
+{
+  return m_pCache->IsCachedPosition(iFilePosition) || (m_pCacheOld && m_pCacheOld->IsCachedPosition(iFilePosition));
+}
+
+CCacheStrategy *CSimpleDoubleCache::CreateNew()
+{
+  return new CSimpleDoubleCache(m_pCache->CreateNew());
 }
 

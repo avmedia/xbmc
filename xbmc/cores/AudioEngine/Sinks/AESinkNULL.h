@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  */
 
 #include "system.h"
-
+#include "threads/Thread.h"
 #include "cores/AudioEngine/Interfaces/AESink.h"
 
 class CAESinkNULL : public CThread, public IAESink
@@ -33,12 +33,10 @@ public:
 
   virtual bool Initialize(AEAudioFormat &format, std::string &device);
   virtual void Deinitialize();
-  virtual bool IsCompatible(const AEAudioFormat format, const std::string &device);
 
   virtual double       GetDelay        ();
-  virtual double       GetCacheTime    ();
   virtual double       GetCacheTotal   ();
-  virtual unsigned int AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio);
+  virtual unsigned int AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio, bool blocking = false);
   virtual void         Drain           ();
 
   static void          EnumerateDevices(AEDeviceList &devices, bool passthrough);

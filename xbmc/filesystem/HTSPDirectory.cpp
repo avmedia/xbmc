@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,12 +22,13 @@
 #include "HTSPDirectory.h"
 #include "URL.h"
 #include "FileItem.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "guilib/LocalizeStrings.h"
 #include "cores/dvdplayer/DVDInputStreams/DVDInputStreamHTSP.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 #include "utils/TimeUtils.h"
+#include "utils/StringUtils.h"
 
 extern "C" {
 #include "libhts/htsmsg.h"
@@ -42,7 +43,9 @@ struct SSession
   SSession()
   {
     session = NULL;
+    port    = 0;
     refs    = 0;
+    last    = 0;
   }
 
   std::string            hostname;
@@ -168,7 +171,7 @@ bool CHTSPDirectorySession::Open(const CURL& url)
     return false;
   }
 
-  if(!url.GetUserName().IsEmpty())
+  if(!url.GetUserName().empty())
     m_session.Auth(url.GetUserName(), url.GetPassWord());
 
   if(!m_session.SendEnableAsync())
@@ -384,22 +387,14 @@ bool CHTSPDirectory::GetChannels( const CURL &base
     CHTSPSession::ParseItem(it->second, tag, event, *item);
     item->m_bIsFolder = false;
     item->SetLabel(item->m_strTitle);
-    item->m_strTitle.Format("%d", it->second.num);
+    item->m_strTitle = StringUtils::Format("%d", it->second.num);
 
     items.Add(item);
   }
 
-  items.AddSortMethod(SORT_METHOD_TRACKNUM, 554, LABEL_MASKS("%K[ - %B]", "%Z", "%L", ""));
-
-  if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
-    items.AddSortMethod(SORT_METHOD_ALBUM_IGNORE_THE, 558,   LABEL_MASKS("%B", "%Z", "%L", ""));
-  else
-    items.AddSortMethod(SORT_METHOD_ALBUM,            558,   LABEL_MASKS("%B", "%Z", "%L", ""));
-
-  if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
-    items.AddSortMethod(SORT_METHOD_LABEL_IGNORE_THE, 551, LABEL_MASKS("%Z", "%B", "%L", ""));
-  else
-    items.AddSortMethod(SORT_METHOD_LABEL,            551, LABEL_MASKS("%Z", "%B", "%L", ""));
+  items.AddSortMethod(SortByTrackNumber,   554, LABEL_MASKS("%K[ - %B]", "%Z", "%L", ""));
+  items.AddSortMethod(SortByAlbum,         558, LABEL_MASKS("%B", "%Z", "%L", ""), CSettings::Get().GetBool("filelists.ignorethewhensorting") ? SortAttributeIgnoreArticle : SortAttributeNone);
+  items.AddSortMethod(SortByLabel,         551, LABEL_MASKS("%Z", "%B", "%L", ""), CSettings::Get().GetBool("filelists.ignorethewhensorting") ? SortAttributeIgnoreArticle : SortAttributeNone);
 
   items.SetContent("livetv");
 
@@ -411,7 +406,9 @@ bool CHTSPDirectory::GetTag(const CURL &base, CFileItemList &items)
 {
   CURL url(base);
 
-  int id = atoi(url.GetFileName().Mid(5));
+  int id = 0;
+  if (url.GetFileName().size() >= 5)
+    id = atoi(url.GetFileName().substr(5).c_str());
 
   SChannels channels = m_session->GetChannels(id);
   if(channels.empty())
@@ -430,7 +427,7 @@ bool CHTSPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &item
     return false;
 
 
-  if(url.GetFileName().IsEmpty())
+  if(url.GetFileName().empty())
   {
     CFileItemPtr item;
 
@@ -445,8 +442,8 @@ bool CHTSPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &item
     CStdString filename, label;
     for(STags::iterator it = tags.begin(); it != tags.end(); it++)
     {
-      filename.Format("tags/%d/", it->second.id);
-      label.Format("Tag: %s", it->second.name);
+      filename = StringUtils::Format("tags/%d/", it->second.id);
+      label = StringUtils::Format("Tag: %s", it->second.name.c_str());
 
       item.reset(new CFileItem("", true));
       url.SetFileName(filename);
@@ -459,7 +456,7 @@ bool CHTSPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &item
 
     return true;
   }
-  else if(url.GetFileName().Left(5) == "tags/")
+  else if (StringUtils::StartsWith(url.GetFileName(), "tags/"))
     return GetTag(url, items);
   return false;
 }

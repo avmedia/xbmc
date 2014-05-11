@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,16 +43,21 @@ CPluginSource::CPluginSource(const cp_extension_t *ext)
   if (ext)
   {
     provides = CAddonMgr::Get().GetExtValue(ext->configuration, "provides");
-    if (!provides.IsEmpty())
+    if (!provides.empty())
       Props().extrainfo.insert(make_pair("provides", provides));
   }
   SetProvides(provides);
 }
 
+AddonPtr CPluginSource::Clone() const
+{
+  return AddonPtr(new CPluginSource(*this));
+}
+
 void CPluginSource::SetProvides(const CStdString &content)
 {
   vector<CStdString> provides;
-  if (!content.IsEmpty())
+  if (!content.empty())
   {
     StringUtils::SplitString(content, " ", provides);
     for (unsigned int i = 0; i < provides.size(); ++i)

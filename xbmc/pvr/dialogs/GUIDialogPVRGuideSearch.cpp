@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "guilib/GUIRadioButtonControl.h"
 #include "guilib/GUISpinControlEx.h"
 #include "guilib/GUIWindowManager.h"
+#include "utils/StringUtils.h"
 
 #include "addons/include/xbmc_pvr_types.h"
 #include "pvr/PVRManager.h"
@@ -150,7 +151,7 @@ void CGUIDialogPVRGuideSearch::UpdateDurationSpin(void)
   for (int i = 1; i < 12*60/5; i++)
   {
     CStdString string;
-    string.Format(g_localizeStrings.Get(14044), i*5);
+    string = StringUtils::Format(g_localizeStrings.Get(14044), i*5);
     pSpin->AddLabel(string, i*5);
   }
   pSpin->SetValue(m_searchFilter->m_iMinimumDuration);
@@ -165,7 +166,7 @@ void CGUIDialogPVRGuideSearch::UpdateDurationSpin(void)
   for (int i = 1; i < 12*60/5; i++)
   {
     CStdString string;
-    string.Format(g_localizeStrings.Get(14044),i*5);
+    string = StringUtils::Format(g_localizeStrings.Get(14044), i*5);
     pSpin->AddLabel(string, i*5);
   }
   pSpin->SetValue(m_searchFilter->m_iMaximumDuration);
@@ -177,13 +178,6 @@ bool CGUIDialogPVRGuideSearch::OnMessage(CGUIMessage& message)
 
   switch (message.GetMessage())
   {
-    case GUI_MSG_WINDOW_INIT:
-    {
-      m_bConfirmed = false;
-      m_bCanceled = false;
-    }
-    break;
-
     case GUI_MSG_CLICKED:
     {
       int iControl = message.GetSenderId();
@@ -221,6 +215,14 @@ bool CGUIDialogPVRGuideSearch::OnMessage(CGUIMessage& message)
   }
 
   return false;
+}
+
+void CGUIDialogPVRGuideSearch::OnInitWindow()
+{
+  CGUIDialog::OnInitWindow();
+
+  m_bConfirmed = false;
+  m_bCanceled = false;
 }
 
 void CGUIDialogPVRGuideSearch::OnWindowLoaded()

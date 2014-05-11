@@ -1,23 +1,23 @@
 /*
 *      Copyright (C) 2005-2013 Team XBMC
-*      http://www.xbmc.org
-*
-*  This Program is free software; you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; either version 2, or (at your option)
-*  any later version.
-*
-*  This Program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with XBMC; see the file COPYING.  If not, see
-*  <http://www.gnu.org/licenses/>.
-*
-*  Parts of this code taken from Guido Vollbeding <http://sylvana.net/jpegcrop/exif_orientation.html>
-*
+ *      http://xbmc.org
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ *  Parts of this code taken from Guido Vollbeding <http://sylvana.net/jpegcrop/exif_orientation.html>
+ *
 */
 
 #include "lib/libexif/libexif.h"
@@ -27,7 +27,7 @@
 #include "utils/log.h"
 #include "XBTF.h"
 #include "JpegIO.h"
-
+#include "utils/StringUtils.h"
 #include <setjmp.h>
 
 #define EXIF_TAG_ORIENTATION    0x0112
@@ -288,12 +288,16 @@ bool CJpegIO::Open(const CStdString &texturePath, unsigned int minx, unsigned in
       if (!free_space)
       { // (re)alloc
         m_inputBuffSize += chunksize;
-        m_inputBuff = (unsigned char *)realloc(m_inputBuff, m_inputBuffSize);
-        if (!m_inputBuff)
+        unsigned char* new_buf = (unsigned char *)realloc(m_inputBuff, m_inputBuffSize);
+        if (!new_buf)
         {
           CLog::Log(LOGERROR, "%s unable to allocate buffer of size %u", __FUNCTION__, m_inputBuffSize);
+          free(m_inputBuff);
           return false;
         }
+        else
+          m_inputBuff = new_buf;
+
         free_space = chunksize;
         chunksize = std::min(chunksize*2, maxchunksize);
       }
@@ -370,8 +374,9 @@ bool CJpegIO::Read(unsigned char* buffer, unsigned int bufSize, unsigned int min
     m_cinfo.scale_denom = 8;
     m_cinfo.out_color_space = JCS_RGB;
     unsigned int maxtexsize = g_Windowing.GetMaxTextureSize();
-    for (m_cinfo.scale_num = 1; m_cinfo.scale_num <= 8; m_cinfo.scale_num++)
+    for (unsigned int scale = 1; scale <= 8; scale++)
     {
+      m_cinfo.scale_num = scale;
       jpeg_calc_output_dimensions(&m_cinfo);
       if ((m_cinfo.output_width > maxtexsize) || (m_cinfo.output_height > maxtexsize))
       {
@@ -490,7 +495,7 @@ bool CJpegIO::CreateThumbnailFromSurface(unsigned char* buffer, unsigned int wid
   long unsigned int outBufSize = width * height;
   unsigned char* result;
   unsigned char* src = buffer;
-  unsigned char* rgbbuf, *src2, *dst2;
+  unsigned char* rgbbuf;
 
   if(buffer == NULL)
   {
@@ -516,8 +521,8 @@ bool CJpegIO::CreateThumbnailFromSurface(unsigned char* buffer, unsigned int wid
     unsigned char* dst = rgbbuf;
     for (unsigned int y = 0; y < height; y++)
     {
-      dst2 = dst;
-      src2 = src;
+      unsigned char* dst2 = dst;
+      unsigned char* src2 = src;
       for (unsigned int x = 0; x < width; x++, src2 += 4)
       {
         *dst2++ = src2[2];
@@ -589,8 +594,7 @@ bool CJpegIO::CreateThumbnailFromSurface(unsigned char* buffer, unsigned int wid
 // override libjpeg's error function to avoid an exit() call
 void CJpegIO::jpeg_error_exit(j_common_ptr cinfo)
 {
-  CStdString msg;
-  msg.Format("Error %i: %s",cinfo->err->msg_code, cinfo->err->jpeg_message_table[cinfo->err->msg_code]);
+  CStdString msg = StringUtils::Format("Error %i: %s",cinfo->err->msg_code, cinfo->err->jpeg_message_table[cinfo->err->msg_code]);
   CLog::Log(LOGWARNING, "JpegIO: %s", msg.c_str());
 
   my_error_mgr *myerr = (my_error_mgr*)cinfo->err;
@@ -720,10 +724,7 @@ unsigned int CJpegIO::GetExifOrientation(unsigned char* exif_data, unsigned int 
     orientation = exif_data[offset+8];
   }
   if (orientation > 8)
-  {
     orientation = 0;
-    return 0;
-  }
 
   return orientation;//done
 }
@@ -742,7 +743,7 @@ bool CJpegIO::CreateThumbnailFromSurface(unsigned char* bufferin, unsigned int w
   JSAMPROW row_pointer[1];
   long unsigned int outBufSize = width * height;
   unsigned char* src = bufferin;
-  unsigned char* rgbbuf, *src2, *dst2;
+  unsigned char* rgbbuf;
 
   if(bufferin == NULL)
   {
@@ -768,8 +769,9 @@ bool CJpegIO::CreateThumbnailFromSurface(unsigned char* bufferin, unsigned int w
     unsigned char* dst = rgbbuf;
     for (unsigned int y = 0; y < height; y++)
     {
-      dst2 = dst;
-      src2 = src;
+
+      unsigned char* dst2 = dst;
+      unsigned char* src2 = src;
       for (unsigned int x = 0; x < width; x++, src2 += 4)
       {
         *dst2++ = src2[2];

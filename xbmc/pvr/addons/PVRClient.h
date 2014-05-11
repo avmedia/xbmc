@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -156,8 +156,9 @@ namespace PVR
     /*!
      * @brief Call one of the menu hooks of this client.
      * @param hook The hook to call.
+     * @param item The selected file item for which the hook was called.
      */
-    void CallMenuHook(const PVR_MENUHOOK &hook);
+    void CallMenuHook(const PVR_MENUHOOK &hook, const CFileItem *item);
 
     //@}
     /** @name PVR EPG methods */
@@ -509,6 +510,21 @@ namespace PVR
     //@}
 
     static const char *ToString(const PVR_ERROR error);
+
+    /*!
+     * @brief actual playing time
+     */
+    time_t GetPlayingTime() const;
+
+    /*!
+     * @brief time of oldest packet in timeshift buffer
+     */
+    time_t GetBufferTimeStart() const;
+
+    /*!
+     * @brief time of latest packet in timeshift buffer
+     */
+    time_t GetBufferTimeEnd() const;
 
   private:
     /*!

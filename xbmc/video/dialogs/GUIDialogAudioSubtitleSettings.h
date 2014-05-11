@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ protected:
   float m_volume;
   int m_audioStream;
   int m_subtitleStream;
-  int m_outputmode;
+  bool m_outputmode;
   bool m_subtitleVisible;
   Features m_audioCaps;
   Features m_subCaps;

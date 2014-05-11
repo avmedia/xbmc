@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -95,6 +95,7 @@ public:
 
   CVariant &operator=(const CVariant &rhs);
   bool operator==(const CVariant &rhs) const;
+  bool operator!=(const CVariant &rhs) const { return !(*this == rhs); }
 
   void push_back(const CVariant &variant);
   void append(const CVariant &variant);

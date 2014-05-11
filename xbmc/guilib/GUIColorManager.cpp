@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "utils/XBMCTinyXML.h"
+#include "utils/StringUtils.h"
 
 CGUIColorManager g_colorManager;
 
@@ -52,18 +53,19 @@ void CGUIColorManager::Load(const CStdString &colorFile)
     LoadXML(xmlDoc);
 
   // first load the default color map if it exists
-  CStdString path, basePath;
-  URIUtils::AddFileToFolder(g_SkinInfo->Path(), "colors", basePath);
-  URIUtils::AddFileToFolder(basePath, "defaults.xml", path);
+  CStdString basePath = URIUtils::AddFileToFolder(g_SkinInfo->Path(), "colors");
+  CStdString path = URIUtils::AddFileToFolder(basePath, "defaults.xml");
 
   if (xmlDoc.LoadFile(CSpecialProtocol::TranslatePathConvertCase(path)))
     LoadXML(xmlDoc);
 
   // now the color map requested
-  if (colorFile.CompareNoCase("SKINDEFAULT") == 0)
+  if (StringUtils::EqualsNoCase(colorFile, "SKINDEFAULT"))
     return; // nothing to do
 
-  URIUtils::AddFileToFolder(basePath, colorFile, path);
+  path = URIUtils::AddFileToFolder(basePath, colorFile);
+  if (!URIUtils::HasExtension(path))
+    path += ".xml";
   CLog::Log(LOGINFO, "Loading colors from %s", path.c_str());
 
   if (xmlDoc.LoadFile(path))
@@ -106,7 +108,7 @@ color_t CGUIColorManager::GetColor(const CStdString &color) const
 {
   // look in our color map
   CStdString trimmed(color);
-  trimmed.TrimLeft("= ");
+  StringUtils::TrimLeft(trimmed, "= ");
   icColor it = m_colors.find(trimmed);
   if (it != m_colors.end())
     return (*it).second;

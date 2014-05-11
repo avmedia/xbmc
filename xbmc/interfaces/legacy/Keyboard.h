@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -34,16 +33,16 @@ namespace XBMCAddon
     XBMCCOMMONS_STANDARD_EXCEPTION(KeyboardException);
 
     /**
-     * Keyboard class.
-     * 
-     * Keyboard([default, heading, hidden]) -- Creates a new Keyboard object with default text
-     *                                 heading and hidden input flag if supplied.
-     * 
-     * default        : [opt] string - default text entry.
-     * heading        : [opt] string - keyboard heading.
-     * hidden         : [opt] boolean - True for hidden text entry.
-     * 
-     * example:
+     * Keyboard class.\n
+     * \n
+     * Keyboard([default, heading, hidden]) -- Creates a new Keyboard object with default text\n
+     *                                 heading and hidden input flag if supplied.\n
+     * \n
+     * default        : [opt] string - default text entry.\n
+     * heading        : [opt] string - keyboard heading.\n
+     * hidden         : [opt] boolean - True for hidden text entry.\n
+     * \n
+     * example:\n
      *   - kb = xbmc.Keyboard('default', 'heading', True)
      *   - kb.setDefault('password') # optional
      *   - kb.setHeading('Enter password') # optional
@@ -55,20 +54,22 @@ namespace XBMCAddon
     class Keyboard : public AddonClass
     {
     public:
+#ifndef SWIG
       String strDefault;
       String strHeading;
       bool bHidden;
       String strText;
       bool bConfirmed;
+#endif
 
       Keyboard(const String& line = emptyString, const String& heading = emptyString, bool hidden = false);
       virtual ~Keyboard();
 
       /**
-       * doModal([autoclose]) -- Show keyboard and wait for user action.
-       * 
-       * autoclose      : [opt] integer - milliseconds to autoclose dialog. (default=do not autoclose)
-       * 
+       * doModal([autoclose]) -- Show keyboard and wait for user action.\n
+       * \n
+       * autoclose      : [opt] integer - milliseconds to autoclose dialog. (default=do not autoclose)\n
+       * \n
        * example:
        *   - kb.doModal(30000)
        */
@@ -76,19 +77,19 @@ namespace XBMCAddon
 
       // setDefault() Method
       /**
-       * setDefault(default) -- Set the default text entry.
-       * 
-       * default        : string - default text entry.
-       * 
+       * setDefault(default) -- Set the default text entry.\n
+       * \n
+       * default        : string - default text entry.\n
+       * \n
        * example:
        *   - kb.setDefault('password')
        */
       void setDefault(const String& line = emptyString);
 
       /**
-       * setHiddenInput(hidden) -- Allows hidden text entry.
-       * 
-       * hidden        : boolean - True for hidden text entry.
+       * setHiddenInput(hidden) -- Allows hidden text entry.\n
+       * \n
+       * hidden        : boolean - True for hidden text entry.\n
        * example:
        *   - kb.setHiddenInput(True)
        */
@@ -96,10 +97,10 @@ namespace XBMCAddon
 
       // setHeading() Method
       /**
-       * setHeading(heading) -- Set the keyboard heading.
-       * 
-       * heading        : string - keyboard heading.
-       * 
+       * setHeading(heading) -- Set the keyboard heading.\n
+       * \n
+       * heading        : string - keyboard heading.\n
+       * \n
        * example:
        *   - kb.setHeading('Enter password')
        */
@@ -107,11 +108,11 @@ namespace XBMCAddon
 
       // getText() Method
       /**
-       * getText() -- Returns the user input as a string.
-       * 
-       * *Note, This will always return the text entry even if you cancel the keyboard.
-       *        Use the isConfirmed() method to check if user cancelled the keyboard.
-       * 
+       * getText() -- Returns the user input as a string.\n
+       * \n
+       * *Note, This will always return the text entry even if you cancel the keyboard.\n
+       *        Use the isConfirmed() method to check if user cancelled the keyboard.\n
+       * \n
        * example:
        *   - text = kb.getText()
        */
@@ -119,13 +120,12 @@ namespace XBMCAddon
 
       // isConfirmed() Method
       /**
-       * isConfirmed() -- Returns False if the user cancelled the input.
-       * 
+       * isConfirmed() -- Returns False if the user cancelled the input.\n
+       * \n
        * example:
        *   - if (kb.isConfirmed()):
        */
       bool isConfirmed();
-
     };
   }
 }

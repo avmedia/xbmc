@@ -1,27 +1,28 @@
 /*
-*      Copyright (C) 2005-2013 Team XBMC
-*      http://www.xbmc.org
-*
-*  This Program is free software; you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; either version 2, or (at your option)
-*  any later version.
-*
-*  This Program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with XBMC; see the file COPYING.  If not, see
-*  <http://www.gnu.org/licenses/>.
-*
-*/
+ *      Copyright (C) 2005-2013 Team XBMC
+ *      http://xbmc.org
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ */
 
 
 #include "WinSystemWin32DX.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "guilib/gui3d.h"
+#include "utils/CharsetConverter.h"
 
 #ifdef HAS_DX
 
@@ -38,14 +39,12 @@ CWinSystemWin32DX::~CWinSystemWin32DX()
 
 bool CWinSystemWin32DX::UseWindowedDX(bool fullScreen)
 {
-  return (g_guiSettings.GetBool("videoscreen.fakefullscreen") || !fullScreen);
+  return (CSettings::Get().GetBool("videoscreen.fakefullscreen") || !fullScreen);
 }
 
 bool CWinSystemWin32DX::CreateNewWindow(CStdString name, bool fullScreen, RESOLUTION_INFO& res, PHANDLE_EVENT_FUNC userFunction)
 {
-  CWinSystemWin32::CreateNewWindow(name, fullScreen, res, userFunction);
-
-  if(m_hWnd == NULL)
+  if(!CWinSystemWin32::CreateNewWindow(name, fullScreen, res, userFunction))
     return false;
 
   SetFocusWnd(m_hWnd);
@@ -96,6 +95,31 @@ bool CWinSystemWin32DX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, boo
   CRenderSystemDX::ResetRenderSystem(res.iWidth, res.iHeight, fullScreen, res.fRefreshRate);
 
   return true;
+}
+
+std::string CWinSystemWin32DX::GetClipboardText(void)
+{
+  CStdStringW unicode_text;
+  CStdStringA utf8_text;
+
+  if (OpenClipboard(NULL))
+  {
+    HGLOBAL hglb = GetClipboardData(CF_UNICODETEXT);
+    if (hglb != NULL)
+    {
+      LPWSTR lpwstr = (LPWSTR) GlobalLock(hglb);
+      if (lpwstr != NULL)
+      {
+        unicode_text = lpwstr;
+        GlobalUnlock(hglb);
+      }
+    }
+    CloseClipboard();
+  }
+
+  g_charsetConverter.wToUTF8(unicode_text, utf8_text);
+
+  return utf8_text;
 }
 
 #endif

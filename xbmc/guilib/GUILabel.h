@@ -7,7 +7,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ public:
     changed |= selectedColor.Update();
     changed |= disabledColor.Update();
     changed |= focusedColor.Update();
+    changed |= invalidColor.Update();
 
     return changed;
   };
@@ -61,6 +62,7 @@ public:
   CGUIInfoColor selectedColor;
   CGUIInfoColor disabledColor;
   CGUIInfoColor focusedColor;
+  CGUIInfoColor invalidColor;
   uint32_t align;
   float offsetX;
   float offsetY;
@@ -83,7 +85,8 @@ public:
   enum COLOR { COLOR_TEXT = 0,
                COLOR_SELECTED,
                COLOR_FOCUSED,
-               COLOR_DISABLED };
+               COLOR_DISABLED,
+               COLOR_INVALID };
   
   /*! \brief allowed overflow handling techniques for labels, as defined by the skin
    */
@@ -115,17 +118,25 @@ public:
   /*! \brief Set the text to be displayed in the label
    Updates the label control and recomputes final position and size
    \param text CStdString to set as this labels text
-   \sa SetTextW
+   \sa SetTextW, SetStyledText
    */
   bool SetText(const CStdString &label);
 
   /*! \brief Set the text to be displayed in the label
    Updates the label control and recomputes final position and size
    \param text CStdStringW to set as this labels text
-   \sa SetText
+   \sa SetText, SetStyledText
    */
   bool SetTextW(const CStdStringW &label);
-  
+
+  /*! \brief Set styled text to be displayed in the label
+   Updates the label control and recomputes final position and size
+   \param text styled text to set.
+   \param colors colors referenced in the styled text.
+   \sa SetText, SetTextW
+   */
+  bool SetStyledText(const vecText &text, const vecColors &colors);
+
   /*! \brief Set the color to use for the label
    Sets the color to be used for this label.  Takes effect at the next render
    \param color color to be used for the label

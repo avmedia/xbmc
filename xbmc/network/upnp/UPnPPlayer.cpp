@@ -1,20 +1,23 @@
 /*
-* Copyright (c) 2006 elupus (Joakim Plate)
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ *      Copyright (c) 2006 elupus (Joakim Plate)
+ *      Copyright (C) 2006-2013 Team XBMC
+ *      http://xbmc.org
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ */
 
 #include "UPnPPlayer.h"
 #include "UPnP.h"
@@ -34,6 +37,8 @@
 #include "Application.h"
 #include "dialogs/GUIDialogBusy.h"
 #include "guilib/GUIWindowManager.h"
+#include "guilib/Key.h"
+#include "dialogs/GUIDialogYesNo.h"
 
 
 NPT_SET_LOCAL_LOGGER("xbmc.upnp.player")
@@ -158,12 +163,16 @@ CUPnPPlayer::CUPnPPlayer(IPlayerCallback& callback, const char* uuid)
 , m_control(NULL)
 , m_delegate(NULL)
 , m_started(false)
+, m_stopremote(false)
 {
   m_control  = CUPnP::GetInstance()->m_MediaController;
 
   PLT_DeviceDataReference device;
   if(NPT_SUCCEEDED(m_control->FindRenderer(uuid, device)))
+  {
     m_delegate = new CUPnPPlayerController(m_control, device, callback);
+    CUPnP::RegisterUserdata(m_delegate);
+  }
   else
     CLog::Log(LOGERROR, "UPNP: CUPnPPlayer couldn't find device as %s", uuid);
 }
@@ -171,6 +180,7 @@ CUPnPPlayer::CUPnPPlayer(IPlayerCallback& callback, const char* uuid)
 CUPnPPlayer::~CUPnPPlayer()
 {
   CloseFile();
+  CUPnP::UnregisterUserdata(m_delegate);
   delete m_delegate;
 }
 
@@ -200,67 +210,86 @@ static NPT_Result WaitOnEvent(CEvent& event, XbmcThreads::EndTime& timeout, CGUI
   return NPT_FAILURE;
 }
 
-bool CUPnPPlayer::OpenFile(const CFileItem& file, const CPlayerOptions& options)
+int CUPnPPlayer::PlayFile(const CFileItem& file, const CPlayerOptions& options, CGUIDialogBusy*& dialog, XbmcThreads::EndTime& timeout)
 {
   CFileItem item(file);
   NPT_Reference<CThumbLoader> thumb_loader;
   NPT_Reference<PLT_MediaObject> obj;
   NPT_String path(file.GetPath().c_str());
   NPT_String tmp, resource;
-  XbmcThreads::EndTime timeout;
-  CGUIDialogBusy* dialog = NULL;
+  EMediaControllerQuirks quirks = EMEDIACONTROLLERQUIRKS_NONE;
 
   NPT_CHECK_POINTER_LABEL_SEVERE(m_delegate, failed);
 
-  timeout.Set(10000);
+  if (file.IsVideoDb())
+    thumb_loader = NPT_Reference<CThumbLoader>(new CVideoThumbLoader());
+  else if (item.IsMusicDb())
+    thumb_loader = NPT_Reference<CThumbLoader>(new CMusicThumbLoader());
 
-  /* if no path we want to attach to a already playing player */
-  if(path != "") {
-    if (file.IsVideoDb())
-      thumb_loader = NPT_Reference<CThumbLoader>(new CVideoThumbLoader());
-    else if (item.IsMusicDb())
-      thumb_loader = NPT_Reference<CThumbLoader>(new CMusicThumbLoader());
+  obj = BuildObject(item, path, false, thumb_loader, NULL, CUPnP::GetServer());
+  if(obj.IsNull()) goto failed;
 
-    obj = BuildObject(item, path, false, thumb_loader, NULL, CUPnP::GetServer());
-    if(obj.IsNull()) goto failed;
+  NPT_CHECK_LABEL_SEVERE(PLT_Didl::ToDidl(*obj, "", tmp), failed);
+  tmp.Insert(didl_header, 0);
+  tmp.Append(didl_footer);
 
-    NPT_CHECK_LABEL_SEVERE(PLT_Didl::ToDidl(*obj, "", tmp), failed);
-    tmp.Insert(didl_header, 0);
-    tmp.Append(didl_footer);
+  quirks = GetMediaControllerQuirks(m_delegate->m_device.AsPointer());
+  if (quirks & EMEDIACONTROLLERQUIRKS_X_MKV)
+  {
+    for (NPT_Cardinal i=0; i< obj->m_Resources.GetItemCount(); i++) {
+      if (obj->m_Resources[i].m_ProtocolInfo.GetContentType().Compare("video/x-matroska") == 0) {
+        NPT_String protocolInfo = obj->m_Resources[i].m_ProtocolInfo.ToString();
+        protocolInfo.Replace(":video/x-matroska:", ":video/x-mkv:");
+        obj->m_Resources[i].m_ProtocolInfo = PLT_ProtocolInfo(protocolInfo);
+      }
+    }
+  }
 
-    /* The resource uri's are stored in the Didl. We must choose the best resource
-     * for the playback device */
-    NPT_Cardinal res_index;
-    NPT_CHECK_LABEL_SEVERE(m_control->FindBestResource(m_delegate->m_device, *obj, res_index), failed);
+  /* The resource uri's are stored in the Didl. We must choose the best resource
+   * for the playback device */
+  NPT_Cardinal res_index;
+  NPT_CHECK_LABEL_SEVERE(m_control->FindBestResource(m_delegate->m_device, *obj, res_index), failed);
 
+  // get the transport info to evaluate the TransportState to be able to
+  // determine whether we first need to call Stop()
+  timeout.Set(timeout.GetInitialTimeoutValue());
+  NPT_CHECK_LABEL_SEVERE(m_control->GetTransportInfo(m_delegate->m_device
+                                                     , m_delegate->m_instance
+                                                     , m_delegate), failed);
+  NPT_CHECK_LABEL_SEVERE(WaitOnEvent(m_delegate->m_traevnt, timeout, dialog), failed);
 
-    /* dlna specifies that a return code of 705 should be returned
-     * if TRANSPORT_STATE is not STOPPED or NO_MEDIA_PRESENT */
+  if (m_delegate->m_trainfo.cur_transport_state != "NO_MEDIA_PRESENT" &&
+      m_delegate->m_trainfo.cur_transport_state != "STOPPED")
+  {
+    timeout.Set(timeout.GetInitialTimeoutValue());
     NPT_CHECK_LABEL_SEVERE(m_control->Stop(m_delegate->m_device
                                            , m_delegate->m_instance
                                            , m_delegate), failed);
     NPT_CHECK_LABEL_SEVERE(WaitOnEvent(m_delegate->m_resevent, timeout, dialog), failed);
     NPT_CHECK_LABEL_SEVERE(m_delegate->m_resstatus, failed);
-
-
-    NPT_CHECK_LABEL_SEVERE(m_control->SetAVTransportURI(m_delegate->m_device
-                                                      , m_delegate->m_instance
-                                                      , obj->m_Resources[res_index].m_Uri
-                                                      , (const char*)tmp
-                                                      , m_delegate), failed);
-    NPT_CHECK_LABEL_SEVERE(WaitOnEvent(m_delegate->m_resevent, timeout, dialog), failed);
-    NPT_CHECK_LABEL_SEVERE(m_delegate->m_resstatus, failed);
-
-    NPT_CHECK_LABEL_SEVERE(m_control->Play(m_delegate->m_device
-                                         , m_delegate->m_instance
-                                         , "1"
-                                         , m_delegate), failed);
-    NPT_CHECK_LABEL_SEVERE(WaitOnEvent(m_delegate->m_resevent, timeout, dialog), failed);
-    NPT_CHECK_LABEL_SEVERE(m_delegate->m_resstatus, failed);
   }
 
 
+  timeout.Set(timeout.GetInitialTimeoutValue());
+  NPT_CHECK_LABEL_SEVERE(m_control->SetAVTransportURI(m_delegate->m_device
+                                                    , m_delegate->m_instance
+                                                    , obj->m_Resources[res_index].m_Uri
+                                                    , (const char*)tmp
+                                                    , m_delegate), failed);
+  NPT_CHECK_LABEL_SEVERE(WaitOnEvent(m_delegate->m_resevent, timeout, dialog), failed);
+  NPT_CHECK_LABEL_SEVERE(m_delegate->m_resstatus, failed);
+
+  timeout.Set(timeout.GetInitialTimeoutValue());
+  NPT_CHECK_LABEL_SEVERE(m_control->Play(m_delegate->m_device
+                                       , m_delegate->m_instance
+                                       , "1"
+                                       , m_delegate), failed);
+  NPT_CHECK_LABEL_SEVERE(WaitOnEvent(m_delegate->m_resevent, timeout, dialog), failed);
+  NPT_CHECK_LABEL_SEVERE(m_delegate->m_resstatus, failed);
+
+
   /* wait for PLAYING state */
+  timeout.Set(timeout.GetInitialTimeoutValue());
   do {
     NPT_CHECK_LABEL_SEVERE(m_control->GetTransportInfo(m_delegate->m_device
                                                      , m_delegate->m_instance
@@ -294,6 +323,36 @@ bool CUPnPPlayer::OpenFile(const CFileItem& file, const CPlayerOptions& options)
                                     , m_delegate), failed);
   }
 
+  return NPT_SUCCESS;
+failed:
+  return NPT_FAILURE;
+}
+
+bool CUPnPPlayer::OpenFile(const CFileItem& file, const CPlayerOptions& options)
+{
+  CGUIDialogBusy* dialog = NULL;
+  XbmcThreads::EndTime timeout(10000);
+
+  /* if no path we want to attach to a already playing player */
+  if(file.GetPath() == "")
+  {
+    NPT_CHECK_LABEL_SEVERE(m_control->GetTransportInfo(m_delegate->m_device
+                                                     , m_delegate->m_instance
+                                                     , m_delegate), failed);
+
+    NPT_CHECK_LABEL_SEVERE(WaitOnEvent(m_delegate->m_traevnt, timeout, dialog), failed);
+
+    /* make sure the attached player is actually playing */
+    { CSingleLock lock(m_delegate->m_section);
+      if(m_delegate->m_trainfo.cur_transport_state != "PLAYING"
+      && m_delegate->m_trainfo.cur_transport_state != "PAUSED_PLAYBACK")
+        goto failed;
+    }
+  }
+  else
+    NPT_CHECK_LABEL_SEVERE(PlayFile(file, options, dialog, timeout), failed);
+
+  m_stopremote = true;
   m_started = true;
   m_callback.OnPlayBackStarted();
   NPT_CHECK_LABEL_SEVERE(m_control->GetPositionInfo(m_delegate->m_device
@@ -350,15 +409,24 @@ failed:
   return false;
 }
 
-bool CUPnPPlayer::CloseFile()
+bool CUPnPPlayer::CloseFile(bool reopen)
 {
   NPT_CHECK_POINTER_LABEL_SEVERE(m_delegate, failed);
-  NPT_CHECK_LABEL(m_control->Stop(m_delegate->m_device
-                                , m_delegate->m_instance
-                                , m_delegate), failed);
-  if(!m_delegate->m_resevent.WaitMSec(10000)) goto failed;
-  NPT_CHECK_LABEL(m_delegate->m_resstatus, failed);
-  m_callback.OnPlayBackStopped();
+  if(m_stopremote)
+  {
+    NPT_CHECK_LABEL(m_control->Stop(m_delegate->m_device
+                                  , m_delegate->m_instance
+                                  , m_delegate), failed);
+    if(!m_delegate->m_resevent.WaitMSec(10000)) goto failed;
+    NPT_CHECK_LABEL(m_delegate->m_resstatus, failed);
+  }
+
+  if(m_started)
+  {
+    m_started = false;
+    m_callback.OnPlayBackStopped();
+  }
+
   return true;
 failed:
   CLog::Log(LOGERROR, "UPNP: CUPnPPlayer::CloseFile - unable to stop playback");
@@ -387,7 +455,7 @@ void CUPnPPlayer::SeekTime(__int64 ms)
 {
   NPT_CHECK_LABEL(m_control->Seek(m_delegate->m_device
                                 , m_delegate->m_instance
-                                , "REL_TIME", PLT_Didl::FormatTimeStamp(ms / 1000)
+                                , "REL_TIME", PLT_Didl::FormatTimeStamp((NPT_UInt32)(ms / 1000))
                                 , m_delegate), failed);
 
   g_infoManager.SetDisplayAfterSeek();
@@ -412,7 +480,7 @@ void CUPnPPlayer::SeekPercentage(float percent)
     SeekTime((int64_t)(tot * percent / 100));
 }
 
-void CUPnPPlayer::Seek(bool bPlus, bool bLargeStep)
+void CUPnPPlayer::Seek(bool bPlus, bool bLargeStep, bool bChapterOverride)
 {
 }
 
@@ -501,5 +569,23 @@ CStdString CUPnPPlayer::GetPlayingTitle()
 {
   return "";
 };
+
+bool CUPnPPlayer::OnAction(const CAction &action)
+{
+  switch (action.GetID())
+  {
+    case ACTION_STOP:
+      if(IsPlaying())
+      {
+        if(CGUIDialogYesNo::ShowAndGetInput(37022, 37023, 0, 0)) /* stop on remote system */
+          m_stopremote = true;
+        else
+          m_stopremote = false;
+        return false; /* let normal code handle the action */
+      }
+    default:
+      return false;
+  }
+}
 
 } /* namespace UPNP */

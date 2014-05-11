@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,15 +19,20 @@
  *
  */
 
+#include <map>
+#include <set>
 #include <vector>
 
 #include "guilib/Resolution.h"
-#include "settings/ISubSettings.h"
+#include "settings/lib/ISettingCallback.h"
+#include "settings/lib/ISubSettings.h"
 #include "threads/CriticalSection.h"
+#include "utils/Observer.h"
 
 class TiXmlNode;
 
-class CDisplaySettings : public ISubSettings
+class CDisplaySettings : public ISettingCallback, public ISubSettings,
+                         public Observable
 {
 public:
   static CDisplaySettings& Get();
@@ -35,6 +40,9 @@ public:
   virtual bool Load(const TiXmlNode *settings);
   virtual bool Save(TiXmlNode *settings) const;
   virtual void Clear();
+
+  virtual bool OnSettingChanging(const CSetting *setting);
+  virtual bool OnSettingUpdate(CSetting* &setting, const char *oldSettingId, const TiXmlNode *oldSettingNode);
 
   /*!
    \brief Returns the currently active resolution
@@ -80,13 +88,27 @@ public:
   bool IsNonLinearStretched() const { return m_nonLinearStretched; }
   void SetNonLinearStretched(bool nonLinearStretch) { m_nonLinearStretched = nonLinearStretch; }
 
+  static void SettingOptionsRefreshChangeDelaysFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+  static void SettingOptionsRefreshRatesFiller(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current);
+  static void SettingOptionsResolutionsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+  static void SettingOptionsScreensFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+  static void SettingOptionsVerticalSyncsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+  static void SettingOptionsStereoscopicModesFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+  static void SettingOptionsPreferredStereoscopicViewModesFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+
 protected:
   CDisplaySettings();
   CDisplaySettings(const CDisplaySettings&);
-  CDisplaySettings const& operator=(CDisplaySettings const&);
+  CDisplaySettings& operator=(CDisplaySettings const&);
   virtual ~CDisplaySettings();
 
-  RESOLUTION GetResolutionFromString(const std::string &strResolution) const;
+  DisplayMode GetCurrentDisplayMode() const;
+
+  static RESOLUTION GetResolutionFromString(const std::string &strResolution);
+  static std::string GetStringFromResolution(RESOLUTION resolution, float refreshrate = 0.0f);
+  static RESOLUTION GetResolutionForScreen();
+
+  static RESOLUTION FindBestMatchingResolution(const std::map<RESOLUTION, RESOLUTION_INFO> &resolutionInfos, int screen, int width, int height, float refreshrate, unsigned int flags);
 
 private:
   // holds the real gui resolution
@@ -100,5 +122,7 @@ private:
   float m_pixelRatio;         // current pixel ratio
   float m_verticalShift;      // current vertical shift
   bool  m_nonLinearStretched;   // current non-linear stretch
+
+  bool m_resolutionChangeAborted;
   CCriticalSection m_critical;
 };

@@ -10,7 +10,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -63,11 +63,10 @@ public:
   COrigin()
   {
     x = y = 0;
-    condition = 0;
   };
   float x;
   float y;
-  unsigned int condition;
+  INFO::InfoPtr condition;
 };
 
 /*!
@@ -231,7 +230,7 @@ protected:
   typedef std::map<int, SELECTED_EVENT> MAPCONTROLSELECTEDEVENTS;
   MAPCONTROLSELECTEDEVENTS m_mapSelectedEvents;
 
-  void LoadControl(TiXmlElement* pControl, CGUIControlGroup *pGroup);
+  void LoadControl(TiXmlElement* pControl, CGUIControlGroup *pGroup, const CRect &rect);
 
 //#ifdef PRE_SKIN_VERSION_9_10_COMPATIBILITY
   void ChangeButtonToEdit(int id, bool singleLabel = false);
@@ -267,10 +266,7 @@ protected:
   bool m_animationsEnabled;
   struct icompare
   {
-    bool operator()(const CStdString &s1, const CStdString &s2) const
-    {
-      return s1.CompareNoCase(s2) < 0;
-    }
+    bool operator()(const CStdString &s1, const CStdString &s2) const;
   };
 
   CGUIAction m_loadActions;
@@ -284,7 +280,7 @@ protected:
 
 private:
   std::map<CStdString, CVariant, icompare> m_mapProperties;
-  std::map<int, bool> m_xmlIncludeConditions; ///< \brief used to store conditions used to resolve includes for this window
+  std::map<INFO::InfoPtr, bool> m_xmlIncludeConditions; ///< \brief used to store conditions used to resolve includes for this window
 };
 
 #endif

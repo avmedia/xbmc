@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -117,6 +117,9 @@ bool IsSwizzledFormat(XB_D3DFORMAT format)
 // Currently only works for 32bit and 8bit textures, with power of 2 width and height
 void Unswizzle(const void *src, unsigned int depth, unsigned int width, unsigned int height, void *dest)
 {
+  if (height == 0 || width == 0)
+    return;
+
   for (UINT y = 0; y < height; y++)
   {
     UINT sy = 0;

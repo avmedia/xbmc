@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,12 +20,13 @@
  *
  */
 
+#include <map>
+
+#include "cores/AudioEngine/Interfaces/AESound.h"
+#include "settings/lib/ISettingCallback.h"
 #include "threads/CriticalSection.h"
 #include "utils/log.h"
 #include "utils/StdString.h"
-#include "cores/AudioEngine/Interfaces/AESound.h"
-
-#include <map>
 
 // forward definitions
 class CAction;
@@ -34,7 +35,7 @@ class IAESound;
 
 enum WINDOW_SOUND { SOUND_INIT = 0, SOUND_DEINIT };
 
-class CGUIAudioManager
+class CGUIAudioManager : public ISettingCallback
 {
   class CWindowSounds
   {
@@ -54,6 +55,8 @@ public:
   CGUIAudioManager();
   ~CGUIAudioManager();
 
+  virtual void OnSettingChanged(const CSetting *setting);
+
   void Initialize();
   void DeInitialize();
 
@@ -63,7 +66,7 @@ public:
 
   void PlayActionSound(const CAction& action);
   void PlayWindowSound(int id, WINDOW_SOUND event);
-  void PlayPythonSound(const CStdString& strFileName);
+  void PlayPythonSound(const CStdString& strFileName, bool useCached = true);
 
   void Enable(bool bEnable);
   void SetVolume(float level);
@@ -86,6 +89,7 @@ private:
 
   IAESound* LoadSound(const CStdString &filename);
   void      FreeSound(IAESound *sound);
+  void      FreeSoundAllUsage(IAESound *sound);
   IAESound* LoadWindowSound(TiXmlNode* pWindowNode, const CStdString& strIdentifier);
 };
 

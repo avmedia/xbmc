@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -65,6 +65,7 @@ void CPosixMountProvider::GetDrives(VECSOURCES &drives)
             || strcmp(fs, "ext2") == 0 || strcmp(fs, "ext3") == 0
             || strcmp(fs, "reiserfs") == 0 || strcmp(fs, "xfs") == 0
             || strcmp(fs, "ntfs-3g") == 0 || strcmp(fs, "iso9660") == 0
+            || strcmp(fs, "exfat") == 0
             || strcmp(fs, "fusefs") == 0 || strcmp(fs, "hfs") == 0)
           accepted = true;
 
@@ -96,7 +97,7 @@ std::vector<CStdString> CPosixMountProvider::GetDiskUsage()
 
 #if defined(TARGET_DARWIN)
   FILE* pipe = popen("df -hT ufs,cd9660,hfs,udf", "r");
-#elif defined(__FreeBSD__)
+#elif defined(TARGET_FREEBSD)
   FILE* pipe = popen("df -h -t ufs,cd9660,hfs,udf,zfs", "r");
 #else
   FILE* pipe = popen("df -h", "r");
@@ -124,6 +125,19 @@ std::vector<CStdString> CPosixMountProvider::GetDiskUsage()
   }
 
   return result;
+}
+
+bool CPosixMountProvider::Eject(CStdString mountpath)
+{
+  // just go ahead and try to umount the disk
+  // if it does umount, life is good, if not, no loss.
+  std::string cmd = "umount \"" + mountpath + "\"";
+  int status = system(cmd.c_str());
+
+  if (status == 0)
+    return true;
+
+  return false;
 }
 
 bool CPosixMountProvider::PumpDriveChangeEvents(IStorageEventsCallback *callback)

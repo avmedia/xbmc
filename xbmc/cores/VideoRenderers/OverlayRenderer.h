@@ -1,8 +1,7 @@
 /*
- *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
- *
  *      Initial code sponsored by: Voddler Inc (voddler.com)
+ *      Copyright (C) 2005-2013 Team XBMC
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +22,7 @@
 #pragma once
 
 #include "threads/CriticalSection.h"
+#include "BaseRenderer.h"
 
 #include <vector>
 
@@ -65,6 +65,7 @@ namespace OVERLAY {
 
     enum EPosition
     { POSITION_ABSOLUTE
+    , POSITION_ABSOLUTE_SCREEN
     , POSITION_RELATIVE
     } m_pos;
 
@@ -92,12 +93,12 @@ namespace OVERLAY {
      CRenderer();
     ~CRenderer();
 
-    void AddOverlay(CDVDOverlay* o, double pts);
-    void AddOverlay(COverlay*    o, double pts);
+    void AddOverlay(CDVDOverlay* o, double pts, int index);
+    void AddOverlay(COverlay*    o, double pts, int index);
     void AddCleanup(COverlay*    o);
-    void Flip();
-    void Render();
+    void Render(int idx);
     void Flush();
+    void Release(int idx);
 
   protected:
 
@@ -125,9 +126,7 @@ namespace OVERLAY {
     void      Release(SElementV& list);
 
     CCriticalSection m_section;
-    SElementV        m_buffers[2];
-    int              m_decode;
-    int              m_render;
+    SElementV        m_buffers[NUM_BUFFERS];
 
     COverlayV        m_cleanup;
   };

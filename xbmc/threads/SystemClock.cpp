@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #else
 #include <time.h>
 #endif
+#include "SystemClock.h"
 
 namespace XbmcThreads
 {
@@ -52,4 +53,5 @@ namespace XbmcThreads
     }
     return (unsigned int)(now_time - start_time);
   }
+  const unsigned int EndTime::InfiniteValue = std::numeric_limits<unsigned int>::max();
 }

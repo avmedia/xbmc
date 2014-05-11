@@ -34,7 +34,7 @@
 #include "system.h" // for Sleep(), OutputDebugString() and GetLastError()
 #include "utils/URIUtils.h"
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #pragma comment(lib, "sqlite3.lib")
 #endif
 
@@ -81,17 +81,17 @@ int callback(void* res_ptr,int ncol, char** reslt,char** cols)
 
 static int busy_callback(void*, int busyCount)
 {
-	Sleep(100);
-	OutputDebugString("SQLite collision\n");
-	return 1;
+  Sleep(100);
+  OutputDebugString("SQLite collision\n");
+  return 1;
 }
 
 //************* SqliteDatabase implementation ***************
 
 SqliteDatabase::SqliteDatabase() {
 
-  active = false;	
-  _in_transaction = false;		// for transaction
+  active = false;  
+  _in_transaction = false;    // for transaction
 
   error = "Unknown database error";//S_NO_CONNECTION;
   host = "localhost";
@@ -107,7 +107,7 @@ SqliteDatabase::~SqliteDatabase() {
 
 
 Dataset* SqliteDatabase::CreateDataset() const {
-	return new SqliteDataset((SqliteDatabase*)this); 
+  return new SqliteDataset((SqliteDatabase*)this); 
 }
 
 void SqliteDatabase::setHostName(const char *newHost) {
@@ -211,8 +211,7 @@ int SqliteDatabase::connect(bool create) {
 
   //CLog::Log(LOGDEBUG, "Connecting to sqlite:%s:%s", host.c_str(), db.c_str());
 
-  CStdString db_fullpath;
-  URIUtils::AddFileToFolder(host, db, db_fullpath);
+  CStdString db_fullpath = URIUtils::AddFileToFolder(host, db);
 
   try
   {
@@ -312,6 +311,48 @@ int SqliteDatabase::copy(const char *backup_name) {
     throw DbErrors("Can't copy database. (%d)", rc);
 
   return rc;
+}
+
+int SqliteDatabase::drop_analytics(void) {
+  // SqliteDatabase::copy used a full database copy, so we have a new version
+  // with all the analytics stuff. We should clean database from everything but data
+  if (active == false)
+    throw DbErrors("Can't drop extras database: no active connection...");
+
+  char sqlcmd[4096];
+  result_set res;
+
+  CLog::Log(LOGDEBUG, "Cleaning indexes from database %s at %s", db.c_str(), host.c_str());
+  sprintf(sqlcmd, "SELECT name FROM sqlite_master WHERE type == 'index'");
+  if ((last_err = sqlite3_exec(conn, sqlcmd, &callback, &res, NULL)) != SQLITE_OK) return DB_UNEXPECTED_RESULT;
+
+  for (size_t i=0; i < res.records.size(); i++) {
+    sprintf(sqlcmd,"DROP INDEX '%s'", res.records[i]->at(0).get_asString().c_str());
+    if ((last_err = sqlite3_exec(conn, sqlcmd, NULL, NULL, NULL) != SQLITE_OK)) return DB_UNEXPECTED_RESULT;
+  }
+  res.clear();
+
+  CLog::Log(LOGDEBUG, "Cleaning views from database %s at %s", db.c_str(), host.c_str());
+  sprintf(sqlcmd, "SELECT name FROM sqlite_master WHERE type == 'view'");
+  if ((last_err = sqlite3_exec(conn, sqlcmd, &callback, &res, NULL)) != SQLITE_OK) return DB_UNEXPECTED_RESULT;
+
+  for (size_t i=0; i < res.records.size(); i++) {
+    sprintf(sqlcmd,"DROP VIEW '%s'", res.records[i]->at(0).get_asString().c_str());
+    if ((last_err = sqlite3_exec(conn, sqlcmd, NULL, NULL, NULL) != SQLITE_OK)) return DB_UNEXPECTED_RESULT;
+  }
+  res.clear();
+
+  CLog::Log(LOGDEBUG, "Cleaning triggers from database %s at %s", db.c_str(), host.c_str());
+  sprintf(sqlcmd, "SELECT name FROM sqlite_master WHERE type == 'trigger'");
+  if ((last_err = sqlite3_exec(conn, sqlcmd, &callback, &res, NULL)) != SQLITE_OK) return DB_UNEXPECTED_RESULT;
+
+  for (size_t i=0; i < res.records.size(); i++) {
+    sprintf(sqlcmd,"DROP TRIGGER '%s'", res.records[i]->at(0).get_asString().c_str());
+    if ((last_err = sqlite3_exec(conn, sqlcmd, NULL, NULL, NULL) != SQLITE_OK)) return DB_UNEXPECTED_RESULT;
+  }
+  // res would be cleared on destruct
+
+  return DB_COMMAND_OK;
 }
 
 int SqliteDatabase::drop() {
@@ -452,19 +493,19 @@ void SqliteDataset::make_query(StringList &_sql) {
 
 
   for (list<string>::iterator i =_sql.begin(); i!=_sql.end(); i++) {
-	query = *i;
-	char* err=NULL; 
-	Dataset::parse_sql(query);
-	if (db->setErr(sqlite3_exec(this->handle(),query.c_str(),NULL,NULL,&err),query.c_str())!=SQLITE_OK) {
-	  throw DbErrors(db->getErrorMsg());
-	}
+  query = *i;
+  char* err=NULL; 
+  Dataset::parse_sql(query);
+  if (db->setErr(sqlite3_exec(this->handle(),query.c_str(),NULL,NULL,&err),query.c_str())!=SQLITE_OK) {
+    throw DbErrors(db->getErrorMsg());
+  }
   } // end of for
 
 
   if (db->in_transaction() && autocommit) db->commit_transaction();
 
   active = true;
-  ds_state = dsSelect;		
+  ds_state = dsSelect;    
   if (autorefresh)
     refresh();
 
@@ -589,7 +630,7 @@ int SqliteDataset::exec(const string &sql) {
 }
 
 int SqliteDataset::exec() {
-	return exec(sql);
+  return exec(sql);
 }
 
 const void* SqliteDataset::getExecRes() {
@@ -666,8 +707,8 @@ bool SqliteDataset::query(const string &q){
 }
 
 void SqliteDataset::open(const string &sql) {
-	set_select_sql(sql);
-	open();
+  set_select_sql(sql);
+  open();
 }
 
 void SqliteDataset::open() {
@@ -753,7 +794,7 @@ bool SqliteDataset::seek(int pos) {
   if (ds_state == dsSelect) {
     Dataset::seek(pos);
     fill_fields();
-    return true;	
+    return true;  
     }
   return false;
 }

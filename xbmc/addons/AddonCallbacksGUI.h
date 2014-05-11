@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -146,7 +146,6 @@ public:
 protected:
   virtual void     Update();
   virtual void     GetContextButtons(int itemNumber, CContextButtons &buttons);
-  void             ClearAddonStrings();
   void             SetupShares();
 
   bool (*CBOnInit)(GUIHANDLE cbhdl);

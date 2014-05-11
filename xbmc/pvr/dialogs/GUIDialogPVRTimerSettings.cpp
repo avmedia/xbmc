@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,12 +21,13 @@
 #include "GUIDialogPVRTimerSettings.h"
 #include "guilib/GUIKeyboardFactory.h"
 #include "dialogs/GUIDialogNumeric.h"
-#include "settings/GUISettings.h"
 #include "guilib/LocalizeStrings.h"
+#include "utils/StringUtils.h"
 
 #include "pvr/PVRManager.h"
 #include "pvr/timers/PVRTimerInfoTag.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
+#include "pvr/addons/PVRClient.h"
 
 using namespace std;
 using namespace PVR;
@@ -48,26 +49,41 @@ CGUIDialogPVRTimerSettings::CGUIDialogPVRTimerSettings(void)
   : CGUIDialogSettings(WINDOW_DIALOG_PVR_TIMER_SETTING, "DialogPVRTimerSettings.xml")
 {
   m_cancelled = true;
-  m_tmp_day   = 11;
+  m_tmp_day = 11;
+  m_bTimerActive = false;
+  m_tmp_iFirstDay = 0;
+  m_timerItem = NULL;
   m_loadType = LOAD_EVERY_TIME;
 }
 
 void CGUIDialogPVRTimerSettings::AddChannelNames(CFileItemList &channelsList, SETTINGSTRINGS &channelNames, bool bRadio)
 {
+  int entry = 0;
+  int timerChannelID;
   g_PVRChannelGroups->GetGroupAll(bRadio)->GetMembers(channelsList);
 
   channelNames.push_back("0 dummy");
+  m_channelEntries.insert(std::make_pair(std::make_pair(bRadio, entry++), PVR_VIRTUAL_CHANNEL_UID));
+
+  if (m_timerItem->GetPVRTimerInfoTag()->ChannelTag())
+    timerChannelID = m_timerItem->GetPVRTimerInfoTag()->ChannelTag()->ChannelID();
+  else
+    timerChannelID = PVR_VIRTUAL_CHANNEL_UID;
+
   for (int i = 0; i < channelsList.Size(); i++)
   {
     CStdString string;
     CFileItemPtr item = channelsList[i];
     const CPVRChannel *channel = item->GetPVRChannelInfoTag();
-    string.Format("%i %s", channel->ChannelNumber(), channel->ChannelName().c_str());
+    string = StringUtils::Format("%i %s", channel->ChannelNumber(), channel->ChannelName().c_str());
     channelNames.push_back(string);
+    if (channel->ChannelID() == timerChannelID)
+      m_selectedChannelEntry = entry;
+    m_channelEntries.insert(std::make_pair(std::make_pair(bRadio, entry++), channel->ChannelID()));
   }
 
   int iControl = bRadio ? CONTROL_TMR_CHNAME_RADIO : CONTROL_TMR_CHNAME_TV;
-  AddSpin(iControl, 19078, &m_timerItem->GetPVRTimerInfoTag()->m_iChannelNumber, channelNames.size(), channelNames);
+  AddSpin(iControl, 19078, &m_selectedChannelEntry, channelNames.size(), channelNames);
   EnableSettings(iControl, m_timerItem->GetPVRTimerInfoTag()->m_bIsRadio == bRadio);
 }
 
@@ -136,6 +152,8 @@ void CGUIDialogPVRTimerSettings::CreateSettings()
 
   // clear out any old settings
   m_settings.clear();
+  m_selectedChannelEntry = 0;
+  m_channelEntries.clear();
 
   // create our settings controls
   m_bTimerActive = tag->IsActive();
@@ -251,18 +269,30 @@ void CGUIDialogPVRTimerSettings::OnSettingChanged(SettingInfo &setting)
   {
     if (setting.id == CONTROL_TMR_RADIO)
     {
+      m_selectedChannelEntry = 0;
+      UpdateSetting(CONTROL_TMR_CHNAME_TV);
       EnableSettings(CONTROL_TMR_CHNAME_TV, !tag->m_bIsRadio);
+      UpdateSetting(CONTROL_TMR_CHNAME_RADIO);
       EnableSettings(CONTROL_TMR_CHNAME_RADIO, tag->m_bIsRadio);
     }
 
-    CFileItemPtr channel = g_PVRChannelGroups->GetGroupAll(tag->m_bIsRadio)->GetByChannelNumber(tag->m_iChannelNumber);
-    if (channel && channel->HasPVRChannelInfoTag())
+    std::map<std::pair<bool, int>, int>::iterator itc = m_channelEntries.find(std::make_pair(tag->m_bIsRadio, m_selectedChannelEntry));
+    if (itc != m_channelEntries.end())
     {
-      tag->m_iClientChannelUid = channel->GetPVRChannelInfoTag()->UniqueID();
-      tag->m_iClientId         = channel->GetPVRChannelInfoTag()->ClientID();
-      tag->m_bIsRadio          = channel->GetPVRChannelInfoTag()->IsRadio();
-      tag->m_iChannelNumber    = channel->GetPVRChannelInfoTag()->ChannelNumber();
-
+      CPVRChannelPtr channel =  g_PVRChannelGroups->GetChannelById(itc->second);
+      if (channel)
+      {
+        tag->m_iClientChannelUid = channel->UniqueID();
+        tag->m_iClientId         = channel->ClientID();
+        tag->m_bIsRadio          = channel->IsRadio();
+        tag->m_iChannelNumber    = channel->ChannelNumber();
+      }
+      else
+      {
+        tag->m_iClientChannelUid = PVR_VIRTUAL_CHANNEL_UID;
+        tag->m_iClientId         = PVR_VIRTUAL_CLIENT_ID;
+        tag->m_iChannelNumber    = 0;
+      }
       // Update channel pointer from above values
       tag->UpdateChannel();
     }
@@ -285,7 +315,13 @@ void CGUIDialogPVRTimerSettings::OnSettingChanged(SettingInfo &setting)
       m_tmp_diff = 365;
 
     CDateTime newStart = timestart + CDateTimeSpan(m_tmp_day-11-m_tmp_diff, 0, 0, 0);
-    CDateTime newEnd = timestop  + CDateTimeSpan(m_tmp_day-11-m_tmp_diff, 0, 0, 0);
+    CDateTime newEnd = timestop + CDateTimeSpan(m_tmp_day-11-m_tmp_diff, 0, 0, 0);
+
+    /* add a day to end time if end time is before start time */
+    // TODO this should be removed after separate end date control was added
+    if (newEnd < newStart)
+      newEnd += CDateTimeSpan(1, 0, 0, 0);
+
     tag->SetStartFromLocalTime(newStart);
     tag->SetEndFromLocalTime(newEnd);
 
@@ -321,12 +357,19 @@ void CGUIDialogPVRTimerSettings::OnSettingChanged(SettingInfo &setting)
     if (CGUIDialogNumeric::ShowAndGetTime(timerEndTime, g_localizeStrings.Get(14066)))
     {
       CDateTime timestop = timerEndTime;
-      int start_day       = tag->EndAsLocalTime().GetDay();
-      int start_month     = tag->EndAsLocalTime().GetMonth();
-      int start_year      = tag->EndAsLocalTime().GetYear();
+      // TODO add separate end date control to schedule a show with more then 24 hours
+      int start_day       = tag->StartAsLocalTime().GetDay();
+      int start_month     = tag->StartAsLocalTime().GetMonth();
+      int start_year      = tag->StartAsLocalTime().GetYear();
       int start_hour      = timestop.GetHour();
       int start_minute    = timestop.GetMinute();
       CDateTime newEnd(start_year, start_month, start_day, start_hour, start_minute, 0);
+      
+      /* add a day to end time if end time is before start time */
+      // TODO this should be removed after separate end date control was added
+      if (newEnd < tag->StartAsLocalTime())
+        newEnd += CDateTimeSpan(1, 0, 0, 0);
+
       tag->SetEndFromLocalTime(newEnd);
 
       timerEndTimeStr = tag->EndAsLocalTime().GetAsLocalizedTime("", false);
@@ -365,7 +408,7 @@ void CGUIDialogPVRTimerSettings::OnOkay()
   CPVRTimerInfoTag* tag = m_timerItem->GetPVRTimerInfoTag();
 
   // Set the timer's title to the channel name if it's 'New Timer' or empty
-  if (tag->m_strTitle == g_localizeStrings.Get(19056) || tag->m_strTitle.IsEmpty())
+  if (tag->m_strTitle == g_localizeStrings.Get(19056) || tag->m_strTitle.empty())
   {
     CPVRChannelPtr channel = g_PVRChannelGroups->GetByUniqueID(tag->m_iClientChannelUid, tag->m_iClientId);
     if (channel)

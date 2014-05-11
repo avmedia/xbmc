@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,27 +21,24 @@
 #include "GUIViewStatePrograms.h"
 #include "FileItem.h"
 #include "view/ViewState.h"
-#include "settings/GUISettings.h"
 #include "settings/MediaSourceSettings.h"
 #include "filesystem/Directory.h"
 #include "guilib/LocalizeStrings.h"
 #include "guilib/WindowIDs.h"
+#include "settings/Settings.h"
 #include "view/ViewStateSettings.h"
 
 using namespace XFILE;
-using namespace ADDON;
 
 CGUIViewStateWindowPrograms::CGUIViewStateWindowPrograms(const CFileItemList& items) : CGUIViewState(items)
 {
-  if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
-    AddSortMethod(SORT_METHOD_LABEL_IGNORE_THE, 551, LABEL_MASKS("%K", "%I", "%L", ""));  // Titel, Size | Foldername, empty
-  else
-    AddSortMethod(SORT_METHOD_LABEL, 551, LABEL_MASKS("%K", "%I", "%L", ""));  // Titel, Size | Foldername, empty
-  
-  CViewState *viewState = CViewStateSettings::Get().Get("programs");
-  SetSortMethod(viewState->m_sortMethod);
+  AddSortMethod(SortByLabel, 551, LABEL_MASKS("%K", "%I", "%L", ""),  // Titel, Size | Foldername, empty
+    CSettings::Get().GetBool("filelists.ignorethewhensorting") ? SortAttributeIgnoreArticle : SortAttributeNone);
+
+  const CViewState *viewState = CViewStateSettings::Get().Get("programs");
+  SetSortMethod(viewState->m_sortDescription);
   SetViewAsControl(viewState->m_viewMode);
-  SetSortOrder(viewState->m_sortOrder);
+  SetSortOrder(viewState->m_sortDescription.sortOrder);
 
   LoadViewState(items.GetPath(), WINDOW_PROGRAMS);
 }

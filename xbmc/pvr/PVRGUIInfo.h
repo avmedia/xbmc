@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
  */
 
 #include "threads/CriticalSection.h"
+#include "threads/SystemClock.h"
 #include "utils/Observer.h"
 #include "threads/Thread.h"
 #include "addons/include/xbmc_pvr_types.h"
@@ -124,6 +125,9 @@ namespace PVR
     void CharInfoBackendRecordings(CStdString &strValue) const;
     void CharInfoPlayingClientName(CStdString &strValue) const;
     void CharInfoEncryption(CStdString &strValue) const;
+    void CharInfoService(CStdString &strValue) const;
+    void CharInfoMux(CStdString &strValue) const;
+    void CharInfoProvider(CStdString &strValue) const;
 
     /** @name GUIInfoManager data */
     //@{
@@ -163,7 +167,7 @@ namespace PVR
     unsigned int                    m_iAddonInfoToggleCurrent;
     unsigned int                    m_iTimerInfoToggleStart;
     unsigned int                    m_iTimerInfoToggleCurrent;
-    unsigned int                    m_iToggleShowInfo;
+    XbmcThreads::EndTime            m_ToggleShowInfo;
     EPG::CEpgInfoTag *              m_playingEpgTag;
 
     CCriticalSection                m_critSection;

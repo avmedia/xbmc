@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- This file contains the mappings for a Microsoft Xbox 360 Controller to actions within XBMC    -->
 <!-- The drivers for Linux and Windows do not always match. Mappings for Win32 will be presented   -->
 <!-- first, with Linux alts second.                                                                -->
@@ -81,6 +82,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -131,6 +133,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="1">Select</button>
       <button id="2">Back</button>
       <button id="3">ContextMenu</button>
@@ -172,6 +175,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -190,6 +194,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="8">XBMC.Skin.ToggleSetting(HomeViewToggle)</button>
     </joystick>
   </Home>
@@ -203,6 +208,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -221,6 +227,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="6">Highlight</button>
     </joystick>
   </MyFiles>
@@ -234,6 +241,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -252,6 +260,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="5">Delete</button>
     </joystick>
   </MyMusicPlaylist>
@@ -269,6 +278,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -296,8 +306,8 @@
       <button id="7">SmallStepBack</button>
       <button id="8">Info</button>
       <button id="10">AudioNextLanguage</button>
-      <button id="11">BigStepForward</button>
-      <button id="12">BigStepBack</button>
+      <button id="11">ChapterOrBigStepForward</button>
+      <button id="12">ChapterOrBigStepBack</button>
       <button id="13">StepBack</button>
       <button id="14">StepForward</button>
       <!-- D-pad does what you'd expect. Triggers fast forward and rewind. Left stick scans forward and back. -->
@@ -317,6 +327,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="1">Pause</button>
       <button id="2">Stop</button>
       <button id="3">OSD</button>
@@ -329,8 +340,8 @@
       <button id="11">AudioNextLanguage</button>  <!-- right stick -->
       <button id="12">StepBack</button>
       <button id="13">StepForward</button>
-      <button id="14">BigStepForward</button>
-      <button id="15">BigStepBack</button>
+      <button id="14">ChapterOrBigStepForward</button>
+      <button id="15">ChapterOrBigStepBack</button>
       <axis id="6" limit="-1">AnalogRewind</axis>
       <axis id="6" limit="+1">AnalogFastForward</axis>
       <hat id="1" position="up">BigStepForward</hat>
@@ -349,6 +360,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -374,6 +386,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="12">PreviousChannelGroup</button>
       <button id="13">NextChannelGroup</button>
       <button id="14">ChannelUp</button>
@@ -394,6 +407,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -416,6 +430,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">Close</button>
       <button id="3">OSD</button>
       <button id="8">Close</button>
@@ -433,6 +448,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -453,6 +469,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="3">Close</button>
       <button id="10">Close</button>
       <button id="11">Close</button>
@@ -468,6 +485,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -501,6 +519,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="1">Pause</button>
       <button id="2">Stop</button>
       <button id="3">XBMC.ActivateWindow(MusicOSD)</button>
@@ -529,6 +548,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -548,6 +568,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="3">Close</button>
       <button id="6">Info</button>
     </joystick>
@@ -562,6 +583,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -580,6 +602,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">Close</button>
     </joystick>
   </VisualisationSettings>
@@ -593,6 +616,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -611,6 +635,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">Close</button>
     </joystick>
   </VisualisationPresetList>
@@ -624,6 +649,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -658,6 +684,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="1">Pause</button>
       <button id="2">Stop</button>
       <button id="4">ZoomNormal</button>
@@ -687,6 +714,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -707,6 +735,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="3">ResetCalibration</button>
       <button id="5">NextResolution</button>
       <button id="6">NextCalibration</button>
@@ -722,6 +751,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -742,6 +772,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="3">ResetCalibration</button>
       <button id="5">NextResolution</button>
       <button id="6">NextCalibration</button>
@@ -757,6 +788,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -775,6 +807,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="3">Close</button>
     </joystick>
   </VideoOSD>
@@ -788,6 +821,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -809,6 +843,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">Stop</button>
       <button id="3">OSD</button>
       <button id="5">AspectRatio</button>
@@ -825,6 +860,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -844,6 +880,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="5">AspectRatio</button>
       <button id="3">Close</button>
     </joystick>
@@ -858,6 +895,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -877,6 +915,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="5">AspectRatio</button>
       <button id="3">Close</button>
     </joystick>
@@ -891,6 +930,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -909,6 +949,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="5">Delete</button>
     </joystick>
   </VideoBookmarks>
@@ -926,6 +967,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -944,6 +986,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="5">Delete</button>
     </joystick>
   </MyVideoPlaylist>
@@ -957,6 +1000,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -980,6 +1024,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">BackSpace</button>
       <button id="4">Symbols</button>
       <button id="5">Shift</button>
@@ -998,6 +1043,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1017,6 +1063,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">Close</button>
       <button id="3">Close</button>
     </joystick>
@@ -1031,6 +1078,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1049,6 +1097,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="3">Info</button>
     </joystick>
   </Scripts>
@@ -1062,6 +1111,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1080,6 +1130,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">PreviousMenu</button>
     </joystick>
   </Settings>
@@ -1093,6 +1144,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1111,6 +1163,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">Close</button>
     </joystick>
   </AddonInformation>
@@ -1124,6 +1177,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1142,6 +1196,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">Close</button>
     </joystick>
   </AddonSettings>
@@ -1155,6 +1210,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1173,6 +1229,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">Close</button>
     </joystick>
   </TextViewer>
@@ -1186,6 +1243,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1205,6 +1263,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">PreviousMenu</button>
       <button id="10">PreviousMenu</button>
     </joystick>
@@ -1219,6 +1278,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1237,6 +1297,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">PreviousMenu</button>
     </joystick>
   </submenu>
@@ -1250,6 +1311,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1268,6 +1330,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">Close</button>
     </joystick>
   </MusicInformation>
@@ -1281,6 +1344,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1299,6 +1363,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">Close</button>
     </joystick>
   </MovieInformation>
@@ -1312,6 +1377,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1331,6 +1397,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">BackSpace</button>
       <button id="10">Enter</button>
     </joystick>
@@ -1345,6 +1412,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1363,6 +1431,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="11">Stop</button>
     </joystick>
   </GamepadInput>
@@ -1376,6 +1445,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1395,6 +1465,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">PreviousMenu</button>
       <button id="11">Close</button>
     </joystick>
@@ -1409,6 +1480,7 @@
       <altname>Controller (Xbox 360 Wireless Receiver for Windows)</altname>
       <altname>Controller (Xbox wireless receiver for windows)</altname>
       <altname>Controller (XBOX360 GAMEPAD)</altname>
+      <altname>Controller (Batarang wired controller (XBOX))</altname>
       <altname>Wireless Gamepad F710 (Controller)</altname>
       <altname>XBOX 360 For Windows</altname>
       <altname>XBOX 360 For Windows (Controller)</altname>
@@ -1428,6 +1500,7 @@
       <altname>Pelican 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Pelican PL-3601 'TSZ' Wired Xbox 360 Controller</altname>
       <altname>Xbox 360 Wireless Receiver</altname>
+      <altname>Xbox 360 Wireless Receiver (XBOX)</altname>
       <button id="2">PreviousMenu</button>
       <button id="11">Close</button>
     </joystick>

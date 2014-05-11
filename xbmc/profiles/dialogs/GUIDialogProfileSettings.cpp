@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@
 #include "filesystem/File.h"
 #include "FileItem.h"
 #include "settings/Settings.h"
-#include "settings/GUISettings.h"
 #include "guilib/LocalizeStrings.h"
 #include "TextureCache.h"
 
@@ -83,7 +82,7 @@ void CGUIDialogProfileSettings::SetupPage()
   SET_CONTROL_LABEL(1001,m_strDirectory);
   CGUIImage *pImage = (CGUIImage*)GetControl(2);
   if (pImage)
-    pImage->SetFileName(!m_strThumb.IsEmpty() ? m_strThumb : m_strDefaultImage);
+    pImage->SetFileName(!m_strThumb.empty() ? m_strThumb : m_strDefaultImage);
 }
 
 void CGUIDialogProfileSettings::CreateSettings()
@@ -155,7 +154,7 @@ void CGUIDialogProfileSettings::OnSettingChanged(SettingInfo &setting)
     VECSOURCES shares;
     g_mediaManager.GetLocalDrives(shares);
     CFileItemList items;
-    if (!m_strThumb.IsEmpty())
+    if (!m_strThumb.empty())
     {
       CFileItemPtr item(new CFileItem("thumb://Current", false));
       item->SetArt("thumb", m_strThumb);
@@ -177,7 +176,7 @@ void CGUIDialogProfileSettings::OnSettingChanged(SettingInfo &setting)
       {
         pImage->SetFileName("");
         pImage->SetInvalid();
-        pImage->SetFileName(!m_strThumb.IsEmpty() ? m_strThumb : m_strDefaultImage);
+        pImage->SetFileName(!m_strThumb.empty() ? m_strThumb : m_strDefaultImage);
       }
     }
   }
@@ -227,7 +226,7 @@ bool CGUIDialogProfileSettings::OnProfilePath(CStdString &dir, bool isDefault)
   share.strPath = "special://masterprofile/profiles/";
   shares.push_back(share);
   CStdString strDirectory;
-  if (dir.IsEmpty())
+  if (dir.empty())
     strDirectory = share.strPath;
   else
     strDirectory = URIUtils::AddFileToFolder("special://masterprofile/", dir);
@@ -260,20 +259,20 @@ bool CGUIDialogProfileSettings::ShowForProfile(unsigned int iProfile, bool first
 
   if (!profile)
   { // defaults
-    dialog->m_strName.Empty();
+    dialog->m_strName.clear();
     dialog->m_iDbMode = 2;
     dialog->m_iSourcesMode = 2;
     dialog->m_locks = CProfile::CLock();
 
     bool bLock = CProfilesManager::Get().GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE && !g_passwordManager.bMasterUser;
     dialog->m_locks.addonManager = bLock;
-    dialog->m_locks.settings = bLock;
+    dialog->m_locks.settings = (bLock) ? LOCK_LEVEL::ALL : LOCK_LEVEL::NONE;
     dialog->m_locks.files = bLock;
 
-    dialog->m_strDirectory.Empty();
-    dialog->m_strThumb.Empty();
+    dialog->m_strDirectory.clear();
+    dialog->m_strThumb.clear();
     // prompt for a name
-    if (!CGUIKeyboardFactory::ShowAndGetInput(dialog->m_strName,g_localizeStrings.Get(20093),false) || dialog->m_strName.IsEmpty())
+    if (!CGUIKeyboardFactory::ShowAndGetInput(dialog->m_strName,g_localizeStrings.Get(20093),false) || dialog->m_strName.empty())
       return false;
     // create a default path
     CStdString defaultDir = URIUtils::AddFileToFolder("profiles",CUtil::MakeLegalFileName(dialog->m_strName));
@@ -283,7 +282,7 @@ bool CGUIDialogProfileSettings::ShowForProfile(unsigned int iProfile, bool first
     CStdString userDir = defaultDir;
     if (dialog->OnProfilePath(userDir, false)) // can't be the master user
     {
-      if (userDir.Left(defaultDir.GetLength()) != defaultDir) // user chose a different folder
+      if (!StringUtils::StartsWith(userDir, defaultDir)) // user chose a different folder
         CDirectory::Remove(URIUtils::AddFileToFolder("special://masterprofile/", defaultDir));
     }
     dialog->m_strDirectory = userDir;
@@ -308,7 +307,7 @@ bool CGUIDialogProfileSettings::ShowForProfile(unsigned int iProfile, bool first
   {
     if (iProfile >= CProfilesManager::Get().GetNumberOfProfiles())
     {
-      if (dialog->m_strName.IsEmpty() || dialog->m_strDirectory.IsEmpty())
+      if (dialog->m_strName.empty() || dialog->m_strDirectory.empty())
         return false;
       /*CStdString strLabel;
       strLabel.Format(g_localizeStrings.Get(20047),dialog->m_strName);
@@ -330,22 +329,14 @@ bool CGUIDialogProfileSettings::ShowForProfile(unsigned int iProfile, bool first
 
       if (!bExists)
       {
-        // save new profile guisettings
+        // copy masterprofile guisettings to new profile guisettings
+        // If the user selects 'start fresh', do nothing as a fresh
+        // guisettings.xml will be created on first profile use.
         if (CGUIDialogYesNo::ShowAndGetInput(20058,20048,20102,20022,20044,20064))
         {
           CFile::Cache(URIUtils::AddFileToFolder("special://masterprofile/","guisettings.xml"),
                        URIUtils::AddFileToFolder("special://masterprofile/",
                                               dialog->m_strDirectory+"/guisettings.xml"));
-        }
-        else
-        {
-          // create some new settings
-          CGUISettings localSettings;
-          localSettings.Initialize();
-          CStdString path = URIUtils::AddFileToFolder("special://masterprofile/", dialog->m_strDirectory);
-          path = URIUtils::AddFileToFolder(path, "guisettings.xml");
-          CSettings settings;
-          settings.SaveSettings(path, &localSettings);
         }
       }
 
@@ -358,6 +349,8 @@ bool CGUIDialogProfileSettings::ShowForProfile(unsigned int iProfile, bool first
       if (!bExists)
       {
         if ((dialog->m_iSourcesMode & 2) == 2)
+          // prompt user to copy masterprofile's sources.xml file
+          // If 'start fresh' (no) is selected, do nothing.
           if (CGUIDialogYesNo::ShowAndGetInput(20058,20071,20102,20022,20044,20064))
           {
             CFile::Cache(URIUtils::AddFileToFolder("special://masterprofile/","sources.xml"),

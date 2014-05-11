@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ namespace XFILE
   class CFileCache : public IFile, public CThread
   {
   public:
-    CFileCache();
+    CFileCache(bool useDoubleCache=false);
     CFileCache(CCacheStrategy *pCache, bool bDeleteCache=true);
     virtual ~CFileCache();
 
@@ -59,6 +59,7 @@ namespace XFILE
     IFile *GetFileImp();
 
     virtual CStdString GetContent();
+    virtual std::string GetContentCharset(void);
 
   private:
     CCacheStrategy *m_pCache;

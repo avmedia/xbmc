@@ -2,6 +2,7 @@
 
 MAKECLEAN=0
 MAKEFLAGS=""
+BGPROCESSFILE=$2
 
 if [ "$1" = "clean" ]
 then
@@ -63,7 +64,7 @@ echo "***** Building libdvdnav *****"
       --disable-shared \
       --enable-static \
       --extra-cflags="-D_XBMC -DNDEBUG -I`pwd`/../includes" \
-      --with-dvdread-config="`pwd`/../libdvdread/obj/dvdread-config" \
+      --with-dvdread-config="`pwd`/../dvdread-config" \
       --disable-debug
 mkdir -p ../includes/dvdnav
 cp ../libdvdnav/src/dvdnav/*.h ../includes/dvdnav
@@ -80,3 +81,5 @@ strip -S obj/libdvdnav.dll
 cd ..
 cp libdvdnav/obj/libdvdnav.dll /xbmc/system/players/dvdplayer/
 echo "***** Done *****"
+#remove the bgprocessfile for signaling the process end
+rm $BGPROCESSFILE

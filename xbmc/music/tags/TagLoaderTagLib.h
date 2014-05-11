@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,13 +14,11 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
-#undef byte
 #include <taglib/aifffile.h>
 #include <taglib/apefile.h>
 #include <taglib/asffile.h>
@@ -37,6 +35,7 @@
 #include <taglib/s3mfile.h>
 #include <taglib/trueaudiofile.h>
 #include <taglib/vorbisfile.h>
+#include <taglib/wavfile.h>
 #include <taglib/wavpackfile.h>
 #include <taglib/xmfile.h>
 
@@ -44,6 +43,7 @@
 #include <taglib/xiphcomment.h>
 #include <taglib/mp4tag.h>
 #include "TagLibVFSStream.h"
+#include "ImusicInfoTagLoader.h"
 
 namespace MUSIC_INFO
 {
@@ -51,12 +51,14 @@ namespace MUSIC_INFO
   class EmbeddedArt;
 };
 
-class CTagLoaderTagLib
+class CTagLoaderTagLib : public MUSIC_INFO::IMusicInfoTagLoader
 {
 public:
   CTagLoaderTagLib();
   virtual ~CTagLoaderTagLib();
-  virtual bool                   Load(const std::string& strFileName, MUSIC_INFO::CMusicInfoTag& tag, MUSIC_INFO::EmbeddedArt *art = NULL);
+  virtual bool                   Load(const CStdString& strFileName, MUSIC_INFO::CMusicInfoTag& tag, MUSIC_INFO::EmbeddedArt *art = NULL);
+
+  bool                           Load(const CStdString& strFileName, MUSIC_INFO::CMusicInfoTag& tag, const CStdString& fallbackFileExtension, MUSIC_INFO::EmbeddedArt *art = NULL);
 private:
   bool                           Open(const std::string& strFileName, bool readOnly);
   const std::vector<std::string> GetASFStringList(const TagLib::List<TagLib::ASF::Attribute>& list);

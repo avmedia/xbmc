@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,18 +18,18 @@
  *
  */
 
-#if (defined HAVE_CONFIG_H) && (!defined WIN32)
+#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
   #include "config.h"
 #endif
 
 #if defined(HAVE_VIDEOTOOLBOXDECODER)
-#include "GUISettings.h"
 #include "DVDClock.h"
 #include "DVDStreamInfo.h"
 #include "DVDCodecUtils.h"
 #include "DVDVideoCodecVideoToolBox.h"
 #include "lib/DllSwScale.h"
 #include "lib/DllAvFormat.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/TimeUtils.h"
 #include "osx/DarwinUtils.h"
@@ -538,7 +538,7 @@ quicktime_esds_t* quicktime_set_esds(DllAvFormat *av_format_ctx, const uint8_t *
   esds->esid            = 0;
   esds->stream_priority = 0;      // 16 ? 0x1f
   
-  esds->objectTypeId    = 32;     // 32 = CODEC_ID_MPEG4, 33 = CODEC_ID_H264
+  esds->objectTypeId    = 32;     // 32 = AV_CODEC_ID_MPEG4, 33 = AV_CODEC_ID_H264
   // the following fields is made of 6 bits to identify the streamtype (4 for video, 5 for audio)
   // plus 1 bit to indicate upstream and 1 bit set to 1 (reserved)
   esds->streamType      = 0x11;
@@ -1058,7 +1058,7 @@ CDVDVideoCodecVideoToolBox::~CDVDVideoCodecVideoToolBox()
 
 bool CDVDVideoCodecVideoToolBox::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
-  if (g_guiSettings.GetBool("videoplayer.usevideotoolbox") && !hints.software)
+  if (CSettings::Get().GetBool("videoplayer.usevideotoolbox") && !hints.software)
   {
     m_dllAvUtil = new DllAvUtil;
     m_dllAvFormat = new DllAvFormat;
@@ -1097,7 +1097,7 @@ bool CDVDVideoCodecVideoToolBox::Open(CDVDStreamInfo &hints, CDVDCodecOptions &o
     
     switch (hints.codec)
     {
-      case CODEC_ID_MPEG4:
+      case AV_CODEC_ID_MPEG4:
         if (extrasize)
         {
           AVIOContext *pb;
@@ -1129,12 +1129,12 @@ bool CDVDVideoCodecVideoToolBox::Open(CDVDStreamInfo &hints, CDVDCodecOptions &o
         m_pFormatName = "vtb-mpeg4";
       break;
 
-      case CODEC_ID_MPEG2VIDEO:
+      case AV_CODEC_ID_MPEG2VIDEO:
         m_fmt_desc = CreateFormatDescription(kVTFormatMPEG2Video, width, height);
         m_pFormatName = "vtb-mpeg2";
       break;
 
-      case CODEC_ID_H264:
+      case AV_CODEC_ID_H264:
         if (extrasize < 7 || extradata == NULL)
         {
           //m_fmt_desc = CreateFormatDescription(kVTFormatH264, width, height);
@@ -1332,7 +1332,7 @@ void CDVDVideoCodecVideoToolBox::SetDropState(bool bDrop)
   m_DropPictures = bDrop;
 }
 
-int CDVDVideoCodecVideoToolBox::Decode(BYTE* pData, int iSize, double dts, double pts)
+int CDVDVideoCodecVideoToolBox::Decode(uint8_t* pData, int iSize, double dts, double pts)
 {
   if (pData)
   {

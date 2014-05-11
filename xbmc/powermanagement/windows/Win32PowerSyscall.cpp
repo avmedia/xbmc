@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
  */
 
 #include "Win32PowerSyscall.h"
-#ifdef _WIN32
+#include "powermanagement/PowerManager.h"
+#ifdef TARGET_WINDOWS
 #include "WIN32Util.h"
 
 bool CWin32PowerSyscall::m_OnResume = false;

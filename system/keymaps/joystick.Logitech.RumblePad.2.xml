@@ -1,7 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <keymap>
   <global>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="1">FullScreen</button>
       <button id="2">Select</button>
       <button id="3">Back</button>
@@ -28,6 +30,7 @@
   <Home>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="3">XBMC.ActivateWindow(Favourites)</button>
     </joystick>
   </Home>
@@ -35,6 +38,7 @@
   <MyMusicFiles>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="4">Queue</button>
     </joystick>
   </MyMusicFiles>
@@ -42,6 +46,7 @@
   <MyMusicLibrary>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="4">Queue</button>
     </joystick>
   </MyMusicLibrary>
@@ -49,6 +54,7 @@
   <FullscreenVideo>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="2">Pause</button>
       <button id="3">Stop</button>
       <button id="4">AspectRatio</button>
@@ -58,14 +64,15 @@
 
       <hat    id="1" position="left">StepBack</hat>
       <hat    id="1" position="right">StepForward</hat>
-      <hat    id="1" position="up">BigStepForward</hat>
-      <hat    id="1" position="down">BigStepBack</hat>
+      <hat    id="1" position="up">ChapterOrBigStepForward</hat>
+      <hat    id="1" position="down">ChapterOrBigStepBack</hat>
     </joystick>
   </FullscreenVideo>
 
   <FullscreenLiveTV>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <hat    id="1" position="left">PreviousChannelGroup</hat>
       <hat    id="1" position="right">NextChannelGroup</hat>
       <hat    id="1" position="up">ChannelUp</hat>
@@ -76,6 +83,7 @@
   <Visualisation>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="2">Pause</button>
       <button id="3">Stop</button>
       <button id="4">XBMC.ActivateWindow(VisualisationPresetList)</button>
@@ -93,6 +101,7 @@
   <SlideShow>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="1">ZoomNormal</button>
       <button id="2">Pause</button>
       <button id="3">Stop</button>
@@ -108,6 +117,7 @@
   <ScreenCalibration>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="2">NextCalibration</button>
     </joystick>
   </ScreenCalibration>
@@ -115,6 +125,7 @@
   <MyVideoLibrary>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="4">Queue</button>
       <button id="5">Info</button>
     </joystick>
@@ -123,6 +134,7 @@
   <MyVideoFiles>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="4">Queue</button>
       <button id="5">Info</button>
     </joystick>
@@ -131,6 +143,7 @@
   <VirtualKeyboard>
     <joystick name="Logitech Logitech Cordless RumblePad 2">
       <altname>Logitech Cordless RumblePad 2</altname>
+      <altname>Logitech RumblePad 2 USB</altname>
       <button id="1">Symbols</button>
       <button id="3">BackSpace</button>
       <button id="4">Shift</button>

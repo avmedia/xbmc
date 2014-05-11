@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,9 +22,11 @@
 #include "URL.h"
 #include "dialogs/GUIDialogOK.h"
 #include "guilib/LocalizeStrings.h"
+#include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
 #include "pvr/PVRManager.h"
+#include "utils/StringUtils.h"
 
 using namespace PVR;
 
@@ -173,7 +175,7 @@ bool CPVRChannelGroupsContainer::GetDirectory(const CStdString& strPath, CFileIt
   {
     return GetGroupsDirectory(&results, true);
   }
-  else if (fileName.Left(12) == "channels/tv/")
+  else if (StringUtils::StartsWith(fileName, "channels/tv/"))
   {
     CStdString strGroupName(fileName.substr(12));
     URIUtils::RemoveSlashAtEnd(strGroupName);
@@ -181,10 +183,10 @@ bool CPVRChannelGroupsContainer::GetDirectory(const CStdString& strPath, CFileIt
     if (!group)
       group = GetGroupAllTV();
     if (group)
-      group->GetMembers(results, !fileName.Right(7).Equals(".hidden"));
+      group->GetMembers(results, !StringUtils::EndsWithNoCase(fileName, ".hidden"));
     return true;
   }
-  else if (fileName.Left(15) == "channels/radio/")
+  else if (StringUtils::StartsWith(fileName, "channels/radio/"))
   {
     CStdString strGroupName(fileName.substr(15));
     URIUtils::RemoveSlashAtEnd(strGroupName);
@@ -192,7 +194,7 @@ bool CPVRChannelGroupsContainer::GetDirectory(const CStdString& strPath, CFileIt
     if (!group)
       group = GetGroupAllRadio();
     if (group)
-      group->GetMembers(results, !fileName.Right(7).Equals(".hidden"));
+      group->GetMembers(results, !StringUtils::EndsWithNoCase(fileName, ".hidden"));
     return true;
   }
 
@@ -281,4 +283,24 @@ CFileItemPtr CPVRChannelGroupsContainer::GetLastPlayedChannel(void) const
 bool CPVRChannelGroupsContainer::CreateChannel(const CPVRChannel &channel)
 {
   return GetGroupAll(channel.IsRadio())->AddNewChannel(channel);
+}
+
+
+bool CPVRChannelGroupsContainer::CreateChannelEpgs(void)
+{
+  return m_groupsRadio->CreateChannelEpgs() &&
+         m_groupsTV->CreateChannelEpgs();
+}
+
+CPVRChannelGroupPtr CPVRChannelGroupsContainer::GetPreviousPlayedGroup(void)
+{
+  CSingleLock lock(m_critSection);
+  return m_lastPlayedGroups[0];
+}
+
+void CPVRChannelGroupsContainer::SetLastPlayedGroup(CPVRChannelGroupPtr group)
+{
+  CSingleLock lock(m_critSection);
+  m_lastPlayedGroups[0] = m_lastPlayedGroups[1];
+  m_lastPlayedGroups[1] = group;
 }

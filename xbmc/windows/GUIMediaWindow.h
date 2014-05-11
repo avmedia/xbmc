@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "filesystem/VirtualDirectory.h"
 #include "filesystem/DirectoryHistory.h"
 #include "view/GUIViewControl.h"
+#include "view/GUIViewState.h"
 #include "dialogs/GUIDialogContextMenu.h"
 #include "playlists/SmartPlayList.h"
 
@@ -72,7 +73,7 @@ protected:
   /*! \brief Retrieves the items from the given path and updates the list
    \param strDirectory The path to the directory to get the items from
    \param updateFilterPath Whether to update the filter path in m_strFilterPath or not
-   \return true if the list was sucessfully updated otherwise false
+   \return true if the list was successfully updated otherwise false
    \sa GetDirectory
    \sa m_vecItems
    \sa m_strFilterPath
@@ -103,6 +104,7 @@ protected:
    \return true if the given path can contain a "filter" parameter otherwise false
    */
   virtual bool CanContainFilter(const CStdString &strDirectory) const { return false; }
+  virtual void UpdateFilterPath(const CStdString &strDirector, const CFileItemList &items, bool updateFilterPath);
   virtual bool Filter(bool advanced = true);
 
   /* \brief Called on response to a GUI_MSG_FILTER_ITEMS message

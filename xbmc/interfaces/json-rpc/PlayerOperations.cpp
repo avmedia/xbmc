@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "cores/IPlayer.h"
+#include "settings/MediaSettings.h"
 
 using namespace JSONRPC;
 using namespace PLAYLIST;
@@ -110,33 +111,40 @@ JSONRPC_STATUS CPlayerOperations::GetItem(const CStdString &method, ITransportLa
     case Audio:
     {
       fileItem = CFileItemPtr(new CFileItem(g_application.CurrentFileItem()));
-      if (fileItem->GetLabel().empty())
+      if (IsPVRChannel())
       {
-        if (IsPVRChannel())
+        CPVRChannelPtr currentChannel;
+        if (g_PVRManager.GetCurrentChannel(currentChannel) && currentChannel.get() != NULL)
+          fileItem = CFileItemPtr(new CFileItem(*currentChannel.get()));
+      }
+      else if (player == Video)
+      {
+        if (!CVideoLibrary::FillFileItem(g_application.CurrentFile(), fileItem, parameterObject))
         {
-          CPVRChannelPtr currentChannel;
-          if (g_PVRManager.GetCurrentChannel(currentChannel) && currentChannel.get() != NULL)
-            fileItem = CFileItemPtr(new CFileItem(*currentChannel.get()));
-        }
-        else if (player == Video)
-        {
-          if (!CVideoLibrary::FillFileItem(g_application.CurrentFile(), fileItem, parameterObject))
+          const CVideoInfoTag *currentVideoTag = g_infoManager.GetCurrentMovieTag();
+          if (currentVideoTag != NULL)
           {
-            const CVideoInfoTag *currentVideoTag = g_infoManager.GetCurrentMovieTag();
-            if (currentVideoTag != NULL)
-              fileItem = CFileItemPtr(new CFileItem(*currentVideoTag));
-            fileItem->SetPath(g_application.CurrentFileItem().GetPath());
+            CStdString originalLabel = fileItem->GetLabel();
+            fileItem->SetFromVideoInfoTag(*currentVideoTag);
+            if (fileItem->GetLabel().empty())
+              fileItem->SetLabel(originalLabel);
           }
+          fileItem->SetPath(g_application.CurrentFileItem().GetPath());
         }
-        else
+      }
+      else
+      {
+        if (!CAudioLibrary::FillFileItem(g_application.CurrentFile(), fileItem, parameterObject))
         {
-          if (!CAudioLibrary::FillFileItem(g_application.CurrentFile(), fileItem, parameterObject))
+          const MUSIC_INFO::CMusicInfoTag *currentMusicTag = g_infoManager.GetCurrentSongTag();
+          if (currentMusicTag != NULL)
           {
-            const MUSIC_INFO::CMusicInfoTag *currentMusicTag = g_infoManager.GetCurrentSongTag();
-            if (currentMusicTag != NULL)
-              fileItem = CFileItemPtr(new CFileItem(*currentMusicTag));
-            fileItem->SetPath(g_application.CurrentFileItem().GetPath());
+            CStdString originalLabel = fileItem->GetLabel();
+            fileItem = CFileItemPtr(new CFileItem(*currentMusicTag));
+            if (fileItem->GetLabel().empty())
+              fileItem->SetLabel(originalLabel);
           }
+          fileItem->SetPath(g_application.CurrentFileItem().GetPath());
         }
       }
 
@@ -225,7 +233,7 @@ JSONRPC_STATUS CPlayerOperations::PlayPause(const CStdString &method, ITransport
   {
     case Video:
     case Audio:
-      if (g_application.m_pPlayer && !g_application.m_pPlayer->CanPause())
+      if (!g_application.m_pPlayer->CanPause())
         return FailedToExecute;
       
       if (parameterObject["play"].isString())
@@ -234,15 +242,15 @@ JSONRPC_STATUS CPlayerOperations::PlayPause(const CStdString &method, ITransport
       {
         if (parameterObject["play"].asBoolean())
         {
-          if (g_application.IsPaused())
+          if (g_application.m_pPlayer->IsPausedPlayback())
             CApplicationMessenger::Get().MediaPause();
-          else if (g_application.GetPlaySpeed() != 1)
-            g_application.SetPlaySpeed(1);
+          else if (g_application.m_pPlayer->GetPlaySpeed() != 1)
+            g_application.m_pPlayer->SetPlaySpeed(1, g_application.IsMutedInternal());
         }
-        else if (!g_application.IsPaused())
+        else if (!g_application.m_pPlayer->IsPausedPlayback())
           CApplicationMessenger::Get().MediaPause();
       }
-      result["speed"] = g_application.IsPaused() ? 0 : g_application.GetPlaySpeed();
+      result["speed"] = g_application.m_pPlayer->IsPausedPlayback() ? 0 : g_application.m_pPlayer->GetPlaySpeed();
       return OK;
 
     case Picture:
@@ -285,27 +293,25 @@ JSONRPC_STATUS CPlayerOperations::Stop(const CStdString &method, ITransportLayer
 
 JSONRPC_STATUS CPlayerOperations::SetSpeed(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
-  int speed;
   switch (GetPlayer(parameterObject["playerid"]))
   {
     case Video:
     case Audio:
       if (parameterObject["speed"].isInteger())
       {
-        speed = (int)parameterObject["speed"].asInteger();
+        int speed = (int)parameterObject["speed"].asInteger();
         if (speed != 0)
         {
           // If the player is paused we first need to unpause
-          if (g_application.IsPaused())
+          if (g_application.m_pPlayer->IsPausedPlayback())
             g_application.m_pPlayer->Pause();
-          g_application.SetPlaySpeed(speed);
+          g_application.m_pPlayer->SetPlaySpeed(speed, g_application.IsMutedInternal());
         }
         else
           g_application.m_pPlayer->Pause();
       }
       else if (parameterObject["speed"].isString())
       {
-        speed = g_application.GetPlaySpeed();
         if (parameterObject["speed"].asString().compare("increment") == 0)
           CBuiltins::Execute("playercontrol(forward)");
         else
@@ -314,7 +320,7 @@ JSONRPC_STATUS CPlayerOperations::SetSpeed(const CStdString &method, ITransportL
       else
         return InvalidParams;
 
-      result["speed"] = g_application.IsPaused() ? 0 : g_application.GetPlaySpeed();
+      result["speed"] = g_application.m_pPlayer->IsPausedPlayback() ? 0 : g_application.m_pPlayer->GetPlaySpeed();
       return OK;
 
     case Picture:
@@ -331,7 +337,7 @@ JSONRPC_STATUS CPlayerOperations::Seek(const CStdString &method, ITransportLayer
   {
     case Video:
     case Audio:
-      if (g_application.m_pPlayer && !g_application.m_pPlayer->CanSeek())
+      if (!g_application.m_pPlayer->CanSeek())
         return FailedToExecute;
       
       if (parameterObject["value"].isObject())
@@ -707,7 +713,6 @@ JSONRPC_STATUS CPlayerOperations::SetRepeat(const CStdString &method, ITransport
       if (parameterObject["repeat"].asString() == "cycle")
       {
         REPEAT_STATE repeatPrev = g_playlistPlayer.GetRepeat(playlistid);
-        repeat = repeatPrev;
         if (repeatPrev == REPEAT_NONE)
           repeat = REPEAT_ALL;
         else if (repeatPrev == REPEAT_ALL)
@@ -789,7 +794,7 @@ JSONRPC_STATUS CPlayerOperations::SetAudioStream(const CStdString &method, ITran
   switch (GetPlayer(parameterObject["playerid"]))
   {
     case Video:
-      if (g_application.m_pPlayer)
+      if (g_application.m_pPlayer->HasPlayer())
       {
         int index = -1;
         if (parameterObject["stream"].isString())
@@ -836,7 +841,7 @@ JSONRPC_STATUS CPlayerOperations::SetSubtitle(const CStdString &method, ITranspo
   switch (GetPlayer(parameterObject["playerid"]))
   {
     case Video:
-      if (g_application.m_pPlayer)
+      if (g_application.m_pPlayer->HasPlayer())
       {
         int index = -1;
         if (parameterObject["subtitle"].isString())
@@ -896,9 +901,9 @@ int CPlayerOperations::GetActivePlayers()
 {
   int activePlayers = 0;
 
-  if (g_application.IsPlayingVideo() || g_PVRManager.IsPlayingTV() || g_PVRManager.IsPlayingRecording())
+  if (g_application.m_pPlayer->IsPlayingVideo() || g_PVRManager.IsPlayingTV() || g_PVRManager.IsPlayingRecording())
     activePlayers |= Video;
-  if (g_application.IsPlayingAudio() || g_PVRManager.IsPlayingRadio())
+  if (g_application.m_pPlayer->IsPlayingAudio() || g_PVRManager.IsPlayingRadio())
     activePlayers |= Audio;
   if (g_windowManager.IsWindowActive(WINDOW_SLIDESHOW))
     activePlayers |= Picture;
@@ -961,7 +966,7 @@ int CPlayerOperations::GetPlaylist(PlayerType player)
   }
 }
 
-JSONRPC_STATUS CPlayerOperations::StartSlideshow(const std::string path, bool recursive, bool random)
+JSONRPC_STATUS CPlayerOperations::StartSlideshow(const std::string& path, bool recursive, bool random)
 {
   int flags = 0;
   if (recursive)
@@ -1046,7 +1051,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     {
       case Video:
       case Audio:
-        result = g_application.IsPaused() ? 0 : g_application.GetPlaySpeed();
+        result = g_application.m_pPlayer->IsPausedPlayback() ? 0 : g_application.m_pPlayer->GetPlaySpeed();
         break;
 
       case Picture:
@@ -1249,10 +1254,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     {
       case Video:
       case Audio:
-        if (g_application.m_pPlayer)
-          result = g_application.m_pPlayer->CanSeek();
-        else
-          result = false;
+        result = g_application.m_pPlayer->CanSeek();
         break;
 
       case Picture:
@@ -1357,7 +1359,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     {
       case Video:
       case Audio:
-        if (g_application.m_pPlayer)
+        if (g_application.m_pPlayer->HasPlayer())
         {
           result = CVariant(CVariant::VariantTypeObject);
           int index = g_application.m_pPlayer->GetAudioStream();
@@ -1390,7 +1392,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     switch (player)
     {
       case Video:
-        if (g_application.m_pPlayer)
+        if (g_application.m_pPlayer->HasPlayer())
         {
           for (int index = 0; index < g_application.m_pPlayer->GetAudioStreamCount(); index++)
           {
@@ -1421,8 +1423,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     switch (player)
     {
       case Video:
-        if (g_application.m_pPlayer)
-          result = g_application.m_pPlayer->GetSubtitleVisible();
+        result = g_application.m_pPlayer->GetSubtitleVisible();
         break;
         
       case Audio:
@@ -1437,10 +1438,10 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     switch (player)
     {
       case Video:
-        if (g_application.m_pPlayer)
+        if (g_application.m_pPlayer->HasPlayer())
         {
           result = CVariant(CVariant::VariantTypeObject);
-          int index = g_application.m_pPlayer->GetSubtitle();
+          int index = CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream;
           if (index >= 0)
           {
             SPlayerSubtitleStreamInfo info;
@@ -1468,7 +1469,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     switch (player)
     {
       case Video:
-        if (g_application.m_pPlayer)
+        if (g_application.m_pPlayer->HasPlayer())
         {
           for (int index = 0; index < g_application.m_pPlayer->GetSubtitleCount(); index++)
           {

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- This file contains the mapping of keys (gamepad, remote, and keyboard) to actions within XBMC -->
 <!-- The <global> section is a fall through - they will only be used if the button is not          -->
 <!-- used in the current window's section.  Note that there is only handling                       -->
@@ -232,8 +233,8 @@
       <l>NextSubtitle</l>
       <left>StepBack</left>
       <right>StepForward</right>
-      <up>BigStepForward</up>
-      <down>BigStepBack</down>
+      <up>ChapterOrBigStepForward</up>
+      <down>ChapterOrBigStepBack</down>
       <a>AudioDelay</a>
       <escape>Fullscreen</escape>
       <c>Playlist</c>
@@ -481,6 +482,8 @@
   <Favourites>
     <keyboard>
       <backspace>Close</backspace>
+      <u>MoveItemUp</u>
+      <d>MoveItemDown</d>
     </keyboard>
   </Favourites>
   <NumericInput>

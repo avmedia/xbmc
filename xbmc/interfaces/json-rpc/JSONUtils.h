@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,11 +23,13 @@
 #include <stdlib.h>
 
 #include "JSONRPCUtils.h"
+#include "XBDateTime.h"
 #include "utils/SortUtils.h"
 #include "interfaces/IAnnouncer.h"
 #include "playlists/SmartPlayList.h"
 #include "utils/JSONVariantWriter.h"
 #include "utils/JSONVariantParser.h"
+#include "utils/StringUtils.h"
 
 namespace JSONRPC
 {
@@ -90,8 +92,8 @@ namespace JSONRPC
     {
       CStdString method = parameterObject["sort"]["method"].asString();
       CStdString order = parameterObject["sort"]["order"].asString();
-      method.ToLower();
-      order.ToLower();
+      StringUtils::ToLower(method);
+      StringUtils::ToLower(order);
 
       sortAttributes = SortAttributeNone;
       if (parameterObject["sort"]["ignorearticle"].asBoolean())
@@ -516,6 +518,28 @@ namespace JSONRPC
       stringArray.clear();
       for (CVariant::const_iterator_array it = jsonStringArray.begin_array(); it != jsonStringArray.end_array(); it++)
         stringArray.push_back(it->asString());
+    }
+
+    static void SetFromDBDate(const CVariant &jsonDate, CDateTime &date)
+    {
+      if (!jsonDate.isString())
+        return;
+
+      if (jsonDate.empty())
+        date.Reset();
+      else
+        date.SetFromDBDate(jsonDate.asString());
+    }
+
+    static void SetFromDBDateTime(const CVariant &jsonDate, CDateTime &date)
+    {
+      if (!jsonDate.isString())
+        return;
+
+      if (jsonDate.empty())
+        date.Reset();
+      else
+        date.SetFromDBDateTime(jsonDate.asString());
     }
 
     static bool GetXspFiltering(const CStdString &type, const CVariant &filter, CStdString &xsp)

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -113,6 +113,7 @@ const CGFloat timeFadeSecs                    = 2.0;
     [_internalWindow setBackgroundColor:[UIColor blackColor]];
     [_internalWindow setScreen:[UIScreen mainScreen]];
     [_internalWindow makeKeyAndVisible];
+    [_internalWindow setRootViewController:self];
 
     [self setWantsFullScreenLayout:YES];
 
@@ -336,6 +337,20 @@ const CGFloat timeFadeSecs                    = 2.0;
   [super dealloc];  
 }
 //--------------------------------------------------------------
+// - iOS6 rotation API - will be called on iOS7 runtime!--------
+- (NSUInteger)supportedInterfaceOrientations
+{
+  // mask defines available as of ios6 sdk
+  //return UIInterfaceOrientationMaskAll;
+  return (1 << UIInterfaceOrientationLandscapeLeft) | (1 << UIInterfaceOrientationLandscapeRight) |
+  (1 << UIInterfaceOrientationPortraitUpsideDown) | (1 << UIInterfaceOrientationPortrait);
+}
+- (BOOL)shouldAutorotate
+{
+  _startup = false;
+  return [self shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)[[UIDevice currentDevice] orientation]];
+}
+// - old rotation API will be called on iOS6 and lower - removed in iOS7
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 { 
   if(_startup)
@@ -371,4 +386,5 @@ const CGFloat timeFadeSecs                    = 2.0;
     }
   }
 }
+//--------------------------------------------------------------
 @end

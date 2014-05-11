@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
 #include "utils/log.h"
 #include "GUIInfoManager.h"
 #include "system.h"
+#include "GitRevision.h"
+#include "utils/StringUtils.h"
 
 using namespace JSONRPC;
 
@@ -109,7 +111,7 @@ JSONRPC_STATUS CApplicationOperations::Quit(const CStdString &method, ITransport
 JSONRPC_STATUS CApplicationOperations::GetPropertyValue(const CStdString &property, CVariant &result)
 {
   if (property.Equals("volume"))
-    result = g_application.GetVolume();
+    result = (int)g_application.GetVolume();
   else if (property.Equals("muted"))
     result = g_application.IsMuted();
   else if (property.Equals("name"))
@@ -119,15 +121,14 @@ JSONRPC_STATUS CApplicationOperations::GetPropertyValue(const CStdString &proper
     result = CVariant(CVariant::VariantTypeObject);
     result["major"] = VERSION_MAJOR;
     result["minor"] = VERSION_MINOR;
-#ifdef GIT_REV
-    result["revision"] = GIT_REV;
-#endif
+    if (GetXbmcGitRevision())
+      result["revision"] = GetXbmcGitRevision();
     CStdString tag(VERSION_TAG);
-    if (tag.ToLower().Equals("-pre"))
+    if (StringUtils::EqualsNoCase(tag, "-pre"))
       result["tag"] = "alpha";
-    else if (tag.ToLower().Left(5).Equals("-beta"))
+    else if (StringUtils::StartsWithNoCase(tag, "-beta"))
       result["tag"] = "beta";
-    else if (tag.ToLower().Left(3).Equals("-rc"))
+    else if (StringUtils::StartsWithNoCase(tag, "-rc"))
       result["tag"] = "releasecandidate";
     else if (tag.empty())
       result["tag"] = "stable";

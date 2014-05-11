@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -256,9 +256,9 @@ void CAddonCallbacksPVR::PVRRecording(void *addonData, const char *strName, cons
 
   CStdString strLine1;
   if (bOnOff)
-    strLine1.Format(g_localizeStrings.Get(19197), client->Name());
+    strLine1 = StringUtils::Format(g_localizeStrings.Get(19197), client->Name().c_str());
   else
-    strLine1.Format(g_localizeStrings.Get(19198), client->Name());
+    strLine1 = StringUtils::Format(g_localizeStrings.Get(19198), client->Name().c_str());
 
   CStdString strLine2;
   if (strName)

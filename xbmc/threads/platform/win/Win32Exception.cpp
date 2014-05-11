@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@
 #include "Util.h"
 #include "WIN32Util.h"
 #include "utils/StringUtils.h"
+#include "utils/CharsetConverter.h"
+#include "utils/URIUtils.h"
 
 #define LOG if(logger) logger->Log
 
@@ -114,18 +116,20 @@ bool win32_exception::write_minidump(EXCEPTION_POINTERS* pEp)
 {
   // Create the dump file where the xbmc.exe resides
   bool returncode = false;
-  CStdString dumpFileName;
+  std::string dumpFileName;
+  CStdStringW dumpFileNameW;
   SYSTEMTIME stLocalTime;
   GetLocalTime(&stLocalTime);
 
-  dumpFileName.Format("xbmc_crashlog-%s-%04d%02d%02d-%02d%02d%02d.dmp",
+  dumpFileName = StringUtils::Format("xbmc_crashlog-%s-%04d%02d%02d-%02d%02d%02d.dmp",
                       mVersion.c_str(),
                       stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay,
                       stLocalTime.wHour, stLocalTime.wMinute, stLocalTime.wSecond);
 
-  dumpFileName.Format("%s\\%s", CWIN32Util::GetProfilePath().c_str(), CUtil::MakeLegalFileName(dumpFileName));
+  dumpFileName = CWIN32Util::SmbToUnc(URIUtils::AddFileToFolder(CWIN32Util::GetProfilePath(), CUtil::MakeLegalFileName(dumpFileName)));
 
-  HANDLE hDumpFile = CreateFile(dumpFileName.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+  g_charsetConverter.utf8ToW(dumpFileName, dumpFileNameW, false);
+  HANDLE hDumpFile = CreateFileW(dumpFileNameW.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
 
   if (hDumpFile == INVALID_HANDLE_VALUE)
   {
@@ -186,6 +190,7 @@ bool win32_exception::write_stacktrace(EXCEPTION_POINTERS* pEp)
   #define STACKWALK_MAX_NAMELEN 1024
 
   std::string dumpFileName, strOutput;
+  CStdStringW dumpFileNameW;
   CHAR cTemp[STACKWALK_MAX_NAMELEN];
   DWORD dwBytes;
   SYSTEMTIME stLocalTime;
@@ -221,9 +226,10 @@ bool win32_exception::write_stacktrace(EXCEPTION_POINTERS* pEp)
                                       stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay,
                                       stLocalTime.wHour, stLocalTime.wMinute, stLocalTime.wSecond);
 
-  dumpFileName = StringUtils::Format("%s\\%s", CWIN32Util::GetProfilePath().c_str(), CUtil::MakeLegalFileName(dumpFileName));
+  dumpFileName = CWIN32Util::SmbToUnc(URIUtils::AddFileToFolder(CWIN32Util::GetProfilePath(), CUtil::MakeLegalFileName(dumpFileName)));
 
-  HANDLE hDumpFile = CreateFile(dumpFileName.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+  g_charsetConverter.utf8ToW(dumpFileName, dumpFileNameW, false);
+  HANDLE hDumpFile = CreateFileW(dumpFileNameW.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
 
   if (hDumpFile == INVALID_HANDLE_VALUE)
   {
@@ -304,7 +310,7 @@ cleanup:
 }
 
 access_violation::access_violation(EXCEPTION_POINTERS* info) :
-  win32_exception(info,"access_voilation"), mAccessType(Invalid), mBadAddress(0)
+  win32_exception(info,"access_violation"), mAccessType(Invalid), mBadAddress(0)
 {
   switch(info->ExceptionRecord->ExceptionInformation[0])
   {

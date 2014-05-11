@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,25 +31,10 @@ class CDVDInputStream;
 #pragma warning(disable:4244)
 #endif
 
-#if (defined HAVE_CONFIG_H) && (!defined WIN32)
+#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
   #include "config.h"
 #endif
-#ifndef _LINUX
-// enum CodecID; // auto defined when neccesary
-#include <libavcodec/avcodec.h>
-#else
-extern "C" {
-#if (defined USE_EXTERNAL_FFMPEG)
-  #if (defined HAVE_LIBAVCODEC_AVCODEC_H)
-    #include <libavcodec/avcodec.h>
-  #elif (defined HAVE_FFMPEG_AVCODEC_H)
-    #include <ffmpeg/avcodec.h>
-  #endif
-#else
-  #include "libavcodec/avcodec.h"
-#endif
-}
-#endif
+#include "DllAvCodec.h"
 
 #ifndef __GNUC__
 #pragma warning(pop)
@@ -88,10 +73,10 @@ public:
   {
     iId = 0;
     iPhysicalId = 0;
-    codec = (CodecID)0; // CODEC_ID_NONE
+    codec = (AVCodecID)0; // AV_CODEC_ID_NONE
     codec_fourcc = 0;
     profile = FF_PROFILE_UNKNOWN;
-    level = 0;
+    level = FF_LEVEL_UNKNOWN;
     type = STREAM_NONE;
     source = STREAM_SOURCE_NONE;
     iDuration = 0;
@@ -102,9 +87,13 @@ public:
     disabled = false;
     changes = 0;
     flags = FLAG_NONE;
+    orig_type = 0;
   }
 
-  virtual ~CDemuxStream() {}
+  virtual ~CDemuxStream()
+  {
+    delete [] ExtraData;
+  }
 
   virtual void GetStreamInfo(std::string& strInfo)
   {
@@ -118,7 +107,7 @@ public:
 
   int iId;         // most of the time starting from 0
   int iPhysicalId; // id
-  CodecID codec;
+  AVCodecID codec;
   unsigned int codec_fourcc; // if available
   int profile; // encoder profile of the stream reported by the decoder. used to qualify hw decoders.
   int level;   // encoder level of the stream reported by the decoder. used to qualify hw decoders.
@@ -127,13 +116,15 @@ public:
 
   int iDuration; // in mseconds
   void* pPrivate; // private pointer for the demuxer
-  void* ExtraData; // extra data for codec to use
+  uint8_t*     ExtraData; // extra data for codec to use
   unsigned int ExtraSize; // size of extra data
 
   char language[4]; // ISO 639 3-letter language code (empty string if undefined)
   bool disabled; // set when stream is disabled. (when no decoder exists)
 
   int  changes; // increment on change which player may need to know about
+
+  int orig_type; // type of original source
 
   enum EFlags
   { FLAG_NONE     = 0x0000 
@@ -154,6 +145,8 @@ public:
   {
     iFpsScale = 0;
     iFpsRate = 0;
+    irFpsScale = 0;
+    irFpsRate = 0;
     iHeight = 0;
     iWidth = 0;
     fAspect = 0.0;
@@ -171,6 +164,8 @@ public:
   virtual ~CDemuxStreamVideo() {}
   int iFpsScale; // scale of 1000 and a rate of 29970 will result in 29.97 fps
   int iFpsRate;
+  int irFpsScale;
+  int irFpsRate;
   int iHeight; // height of the stream reported by the demuxer
   int iWidth; // width of the stream reported by the demuxer
   float fAspect; // display aspect of stream
@@ -179,6 +174,7 @@ public:
   bool bForcedAspect; // aspect is forced from container
   int iOrientation; // orientation of the video in degress counter clockwise
   int iBitsPerPixel;
+  std::string stereo_mode; // expected stereo mode
 #ifdef HAS_DS_PLAYER
   int iCodecTag;
 #endif

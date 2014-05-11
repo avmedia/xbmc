@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,21 +25,21 @@
 //
 #include <sys/types.h>
 #include <sys/stat.h>
-#if !defined(__ANDROID__)
+#if !defined(TARGET_ANDROID)
 #include <sys/statvfs.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include "win32-dirent.h"
 #else
 #include <dirent.h>
 #endif
 #include <dlfcn.h>
 
-#if defined(TARGET_DARWIN) || defined(__FreeBSD__) || defined(__ANDROID__)
+#if defined(TARGET_DARWIN) || defined(TARGET_FREEBSD) || defined(TARGET_ANDROID)
 typedef off_t     __off_t;
 typedef int64_t   off64_t;
 typedef off64_t   __off64_t;
@@ -50,7 +50,7 @@ typedef fpos_t    fpos64_t;
 #endif
 #endif
 
-#ifdef _LINUX
+#ifdef TARGET_POSIX
 #define _stat stat
 #endif
 
@@ -405,6 +405,11 @@ int __wrap__stat(const char *path, struct _stat *buffer)
   return dll_stat(path, buffer);
 }
 
+int __wrap_stat(const char *path, struct _stat *buffer)
+{
+  return dll_stat(path, buffer);
+}
+
 int __wrap___xstat64(int __ver, const char *__filename, struct stat64 *__stat_buf)
 {
   return dll_stat64(__filename, __stat_buf);
@@ -447,7 +452,7 @@ int __wrap_setvbuf(FILE *stream, char *buf, int type, size_t size)
 
 struct mntent *__wrap_getmntent(FILE *fp)
 {
-#ifdef _LINUX
+#ifdef TARGET_POSIX
   return dll_getmntent(fp);
 #endif
   return NULL;

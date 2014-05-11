@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
+
 #include "system.h"
 #include "OverlayRenderer.h"
 #include "OverlayRendererUtil.h"
@@ -24,6 +25,8 @@
 #include "cores/dvdplayer/DVDCodecs/Overlay/DVDOverlaySpu.h"
 #include "cores/dvdplayer/DVDCodecs/Overlay/DVDOverlaySSA.h"
 #include "windowing/WindowingFactory.h"
+#include "guilib/GraphicContext.h"
+#include "settings/Settings.h"
 
 namespace OVERLAY {
 
@@ -195,15 +198,15 @@ bool convert_quad(ASS_Image* images, SQuads& quads)
     if((img->color & 0xff) == 0xff || img->w == 0 || img->h == 0)
       continue;
 
-    quads.size_x += img->w;
+    quads.size_x += img->w + 1;
     quads.count++;
   }
 
   if (quads.count == 0)
     return false;
 
-  while(quads.size_x > (int)g_Windowing.GetMaxTextureSize())
-    quads.size_x /= 2;
+  if (quads.size_x > (int)g_Windowing.GetMaxTextureSize())
+    quads.size_x = g_Windowing.GetMaxTextureSize();
 
   int curr_x = 0;
   int curr_y = 0;
@@ -292,6 +295,20 @@ bool convert_quad(ASS_Image* images, SQuads& quads)
     data   += img->w + 1;
   }
   return true;
+}
+
+int GetStereoscopicDepth()
+{
+  int depth = 0;
+
+  if(g_graphicsContext.GetStereoMode() != RENDER_STEREO_MODE_MONO
+  && g_graphicsContext.GetStereoMode() != RENDER_STEREO_MODE_OFF)
+  {
+    depth  = CSettings::Get().GetInt("subtitles.stereoscopicdepth");
+    depth *= (g_graphicsContext.GetStereoView() == RENDER_STEREO_VIEW_LEFT ? 1 : -1);
+  }
+
+  return depth;
 }
 
 }

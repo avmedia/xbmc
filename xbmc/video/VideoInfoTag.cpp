@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,12 +21,11 @@
 #include "VideoInfoTag.h"
 #include "utils/XMLUtils.h"
 #include "guilib/LocalizeStrings.h"
-#include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
-#include "TextureCache.h"
+#include "TextureDatabase.h"
 #include "filesystem/File.h"
 
 #include <sstream>
@@ -105,11 +104,11 @@ bool CVideoInfoTag::Save(TiXmlNode *node, const CStdString &tag, bool savePathIn
   if (!movie) return false;
 
   XMLUtils::SetString(movie, "title", m_strTitle);
-  if (!m_strOriginalTitle.IsEmpty())
+  if (!m_strOriginalTitle.empty())
     XMLUtils::SetString(movie, "originaltitle", m_strOriginalTitle);
-  if (!m_strShowTitle.IsEmpty())
+  if (!m_strShowTitle.empty())
     XMLUtils::SetString(movie, "showtitle", m_strShowTitle);
-  if (!m_strSortTitle.IsEmpty())
+  if (!m_strSortTitle.empty())
     XMLUtils::SetString(movie, "sorttitle", m_strSortTitle);
   XMLUtils::SetFloat(movie, "rating", m_fRating);
   XMLUtils::SetFloat(movie, "epbookmark", m_fEpBookmark);
@@ -159,7 +158,7 @@ bool CVideoInfoTag::Save(TiXmlNode *node, const CStdString &tag, bool savePathIn
     XMLUtils::SetString(movie, "filenameandpath", m_strFileNameAndPath);
     XMLUtils::SetString(movie, "basepath", m_basePath);
   }
-  if (!m_strEpisodeGuide.IsEmpty())
+  if (!m_strEpisodeGuide.empty())
   {
     CXBMCTinyXML doc;
     doc.Parse(m_strEpisodeGuide);
@@ -196,6 +195,7 @@ bool CVideoInfoTag::Save(TiXmlNode *node, const CStdString &tag, bool savePathIn
       XMLUtils::SetInt(&stream, "width", m_streamDetails.GetVideoWidth(iStream));
       XMLUtils::SetInt(&stream, "height", m_streamDetails.GetVideoHeight(iStream));
       XMLUtils::SetInt(&stream, "durationinseconds", m_streamDetails.GetVideoDuration(iStream));
+      XMLUtils::SetString(&stream, "stereomode", m_streamDetails.GetStereoMode(iStream));
       streamdetails.InsertEndChild(stream);
     }
     for (int iStream=1; iStream<=m_streamDetails.GetAudioStreamCount(); iStream++)
@@ -222,18 +222,10 @@ bool CVideoInfoTag::Save(TiXmlNode *node, const CStdString &tag, bool savePathIn
     // add a <actor> tag
     TiXmlElement cast("actor");
     TiXmlNode *node = movie->InsertEndChild(cast);
-    TiXmlElement actor("name");
-    TiXmlNode *actorNode = node->InsertEndChild(actor);
-    TiXmlText name(it->strName);
-    actorNode->InsertEndChild(name);
-    TiXmlElement role("role");
-    TiXmlNode *roleNode = node->InsertEndChild(role);
-    TiXmlText character(it->strRole);
-    roleNode->InsertEndChild(character);
-    TiXmlElement thumb("thumb");
-    TiXmlNode *thumbNode = node->InsertEndChild(thumb);
-    TiXmlText th(it->thumbUrl.GetFirstThumb().m_url);
-    thumbNode->InsertEndChild(th);
+    XMLUtils::SetString(node, "name", it->strName);
+    XMLUtils::SetString(node, "role", it->strRole);
+    XMLUtils::SetInt(node, "order", it->order);
+    XMLUtils::SetString(node, "thumb", it->thumbUrl.GetFirstThumb().m_url);
   }
   XMLUtils::SetStringArray(movie, "artist", m_artist);
   XMLUtils::SetStringArray(movie, "showlink", m_showLink);
@@ -243,7 +235,7 @@ bool CVideoInfoTag::Save(TiXmlNode *node, const CStdString &tag, bool savePathIn
   XMLUtils::SetFloat(&resume, "total", (float)m_resumePoint.totalTimeInSeconds);
   movie->InsertEndChild(resume);
 
-  XMLUtils::SetString(movie, "dateadded", m_dateAdded.GetAsDBDateTime());
+  XMLUtils::SetDateTime(movie, "dateadded", m_dateAdded);
 
   if (additionalNode)
     movie->InsertEndChild(*additionalNode);
@@ -285,6 +277,7 @@ void CVideoInfoTag::Archive(CArchive& ar)
     {
       ar << m_cast[i].strName;
       ar << m_cast[i].strRole;
+      ar << m_cast[i].order;
       ar << m_cast[i].thumb;
       ar << m_cast[i].thumbUrl.m_xml;
     }
@@ -344,9 +337,7 @@ void CVideoInfoTag::Archive(CArchive& ar)
     ar >> m_strPlot;
     ar >> m_strPictureURL.m_spoof;
     ar >> m_strPictureURL.m_xml;
-    m_strPictureURL.Parse();
     ar >> m_fanart.m_xml;
-    m_fanart.Unpack();
     ar >> m_strTitle;
     ar >> m_strSortTitle;
     ar >> m_strVotes;
@@ -354,11 +345,13 @@ void CVideoInfoTag::Archive(CArchive& ar)
     ar >> m_strTrailer;
     int iCastSize;
     ar >> iCastSize;
+    m_cast.reserve(iCastSize);
     for (int i=0;i<iCastSize;++i)
     {
       SActorInfo info;
       ar >> info.strName;
       ar >> info.strRole;
+      ar >> info.order;
       ar >> info.thumb;
       CStdString strXml;
       ar >> strXml;
@@ -434,8 +427,9 @@ void CVideoInfoTag::Serialize(CVariant& value) const
     CVariant actor;
     actor["name"] = m_cast[i].strName;
     actor["role"] = m_cast[i].strRole;
-    if (!m_cast[i].thumb.IsEmpty())
-      actor["thumbnail"] = CTextureCache::GetWrappedImageURL(m_cast[i].thumb);
+    actor["order"] = m_cast[i].order;
+    if (!m_cast[i].thumb.empty())
+      actor["thumbnail"] = CTextureUtils::GetWrappedImageURL(m_cast[i].thumb);
     value["cast"].push_back(actor);
   }
   value["set"] = m_strSet;
@@ -480,57 +474,76 @@ void CVideoInfoTag::Serialize(CVariant& value) const
   value["seasonid"] = m_iIdSeason;
 }
 
-void CVideoInfoTag::ToSortable(SortItem& sortable)
+void CVideoInfoTag::ToSortable(SortItem& sortable, Field field) const
 {
-  sortable[FieldDirector] = m_director;
-  sortable[FieldWriter] = m_writingCredits;
-  sortable[FieldGenre] = m_genre;
-  sortable[FieldCountry] = m_country;
-  sortable[FieldTagline] = m_strTagLine;
-  sortable[FieldPlotOutline] = m_strPlotOutline;
-  sortable[FieldPlot] = m_strPlot;
-  sortable[FieldTitle] = m_strTitle;
-  sortable[FieldVotes] = m_strVotes;
-  sortable[FieldStudio] = m_studio;
-  sortable[FieldTrailer] = m_strTrailer;
-  sortable[FieldSet] = m_strSet;
-  sortable[FieldTime] = GetDuration();
-  sortable[FieldFilename] = m_strFile;
-  sortable[FieldMPAA] = m_strMPAARating;
-  sortable[FieldPath] = m_strFileNameAndPath;
-  sortable[FieldSortTitle] = m_strSortTitle;
-  sortable[FieldTvShowStatus] = m_strStatus;
-  sortable[FieldProductionCode] = m_strProductionCode;
-  sortable[FieldAirDate] = m_firstAired.IsValid() ? m_firstAired.GetAsDBDate() : (m_premiered.IsValid() ? m_premiered.GetAsDBDate() : StringUtils::EmptyString);
-  sortable[FieldTvShowTitle] = m_strShowTitle;
-  sortable[FieldAlbum] = m_strAlbum;
-  sortable[FieldArtist] = m_artist;
-  sortable[FieldPlaycount] = m_playCount;
-  sortable[FieldLastPlayed] = m_lastPlayed.IsValid() ? m_lastPlayed.GetAsDBDateTime() : StringUtils::EmptyString;
-  sortable[FieldTop250] = m_iTop250;
-  sortable[FieldYear] = m_iYear;
-  sortable[FieldSeason] = m_iSeason;
-  sortable[FieldEpisodeNumber] = m_iEpisode;
-  sortable[FieldEpisodeNumberSpecialSort] = m_iSpecialSortEpisode;
-  sortable[FieldSeasonSpecialSort] = m_iSpecialSortSeason;
-  sortable[FieldRating] = m_fRating;
-  sortable[FieldId] = m_iDbId;
-  sortable[FieldTrackNumber] = m_iTrack;
-  sortable[FieldTag] = m_tags;
+  switch (field)
+  {
+  case FieldDirector:                 sortable[FieldDirector] = m_director; break;
+  case FieldWriter:                   sortable[FieldWriter] = m_writingCredits; break;
+  case FieldGenre:                    sortable[FieldGenre] = m_genre; break;
+  case FieldCountry:                  sortable[FieldCountry] = m_country; break;
+  case FieldTagline:                  sortable[FieldTagline] = m_strTagLine; break;
+  case FieldPlotOutline:              sortable[FieldPlotOutline] = m_strPlotOutline; break;
+  case FieldPlot:                     sortable[FieldPlot] = m_strPlot; break;
+  case FieldTitle:
+  {
+    // make sure not to overwrite an existing path with an empty one
+    std::string title = m_strTitle;
+    if (!title.empty() || sortable.find(FieldTitle) == sortable.end())
+      sortable[FieldTitle] = title;
+    break;
+  }
+  case FieldVotes:                    sortable[FieldVotes] = m_strVotes; break;
+  case FieldStudio:                   sortable[FieldStudio] = m_studio; break;
+  case FieldTrailer:                  sortable[FieldTrailer] = m_strTrailer; break;
+  case FieldSet:                      sortable[FieldSet] = m_strSet; break;
+  case FieldTime:                     sortable[FieldTime] = GetDuration(); break;
+  case FieldFilename:                 sortable[FieldFilename] = m_strFile; break;
+  case FieldMPAA:                     sortable[FieldMPAA] = m_strMPAARating; break;
+  case FieldPath:
+  {
+    // make sure not to overwrite an existing path with an empty one
+    std::string path = GetPath();
+    if (!path.empty() || sortable.find(FieldPath) == sortable.end())
+      sortable[FieldPath] = path;
+    break;
+  }
+  case FieldSortTitle:                sortable[FieldSortTitle] = m_strSortTitle; break;
+  case FieldTvShowStatus:             sortable[FieldTvShowStatus] = m_strStatus; break;
+  case FieldProductionCode:           sortable[FieldProductionCode] = m_strProductionCode; break;
+  case FieldAirDate:                  sortable[FieldAirDate] = m_firstAired.IsValid() ? m_firstAired.GetAsDBDate() : (m_premiered.IsValid() ? m_premiered.GetAsDBDate() : StringUtils::EmptyString); break;
+  case FieldTvShowTitle:              sortable[FieldTvShowTitle] = m_strShowTitle; break;
+  case FieldAlbum:                    sortable[FieldAlbum] = m_strAlbum; break;
+  case FieldArtist:                   sortable[FieldArtist] = m_artist; break;
+  case FieldPlaycount:                sortable[FieldPlaycount] = m_playCount; break;
+  case FieldLastPlayed:               sortable[FieldLastPlayed] = m_lastPlayed.IsValid() ? m_lastPlayed.GetAsDBDateTime() : StringUtils::EmptyString; break;
+  case FieldTop250:                   sortable[FieldTop250] = m_iTop250; break;
+  case FieldYear:                     sortable[FieldYear] = m_iYear; break;
+  case FieldSeason:                   sortable[FieldSeason] = m_iSeason; break;
+  case FieldEpisodeNumber:            sortable[FieldEpisodeNumber] = m_iEpisode; break;
+  case FieldEpisodeNumberSpecialSort: sortable[FieldEpisodeNumberSpecialSort] = m_iSpecialSortEpisode; break;
+  case FieldSeasonSpecialSort:        sortable[FieldSeasonSpecialSort] = m_iSpecialSortSeason; break;
+  case FieldRating:                   sortable[FieldRating] = m_fRating; break;
+  case FieldId:                       sortable[FieldId] = m_iDbId; break;
+  case FieldTrackNumber:              sortable[FieldTrackNumber] = m_iTrack; break;
+  case FieldTag:                      sortable[FieldTag] = m_tags; break;
 
-  sortable[FieldVideoResolution] = m_streamDetails.GetVideoHeight();
-  sortable[FieldVideoAspectRatio] = m_streamDetails.GetVideoAspect();
-  sortable[FieldVideoCodec] = m_streamDetails.GetVideoCodec();
-  
-  sortable[FieldAudioChannels] = m_streamDetails.GetAudioChannels();
-  sortable[FieldAudioCodec] = m_streamDetails.GetAudioCodec();
-  sortable[FieldAudioLanguage] = m_streamDetails.GetAudioLanguage();
-  
-  sortable[FieldSubtitleLanguage] = m_streamDetails.GetSubtitleLanguage();
+  case FieldVideoResolution:          sortable[FieldVideoResolution] = m_streamDetails.GetVideoHeight(); break;
+  case FieldVideoAspectRatio:         sortable[FieldVideoAspectRatio] = m_streamDetails.GetVideoAspect(); break;
+  case FieldVideoCodec:               sortable[FieldVideoCodec] = m_streamDetails.GetVideoCodec(); break;
+  case FieldStereoMode:               sortable[FieldStereoMode] = m_streamDetails.GetStereoMode(); break;
 
-  sortable[FieldInProgress] = m_resumePoint.IsPartWay();
-  sortable[FieldDateAdded] = m_dateAdded.IsValid() ? m_dateAdded.GetAsDBDateTime() : StringUtils::EmptyString;
-  sortable[FieldMediaType] = DatabaseUtils::MediaTypeFromString(m_type);
+  case FieldAudioChannels:            sortable[FieldAudioChannels] = m_streamDetails.GetAudioChannels(); break;
+  case FieldAudioCodec:               sortable[FieldAudioCodec] = m_streamDetails.GetAudioCodec(); break;
+  case FieldAudioLanguage:            sortable[FieldAudioLanguage] = m_streamDetails.GetAudioLanguage(); break;
+
+  case FieldSubtitleLanguage:         sortable[FieldSubtitleLanguage] = m_streamDetails.GetSubtitleLanguage(); break;
+
+  case FieldInProgress:               sortable[FieldInProgress] = m_resumePoint.IsPartWay(); break;
+  case FieldDateAdded:                sortable[FieldDateAdded] = m_dateAdded.IsValid() ? m_dateAdded.GetAsDBDateTime() : StringUtils::EmptyString; break;
+  case FieldMediaType:                sortable[FieldMediaType] = DatabaseUtils::MediaTypeFromString(m_type); break;
+  default: break;
+  }
 }
 
 const CStdString CVideoInfoTag::GetCast(bool bIncludeRole /*= false*/) const
@@ -539,13 +552,13 @@ const CStdString CVideoInfoTag::GetCast(bool bIncludeRole /*= false*/) const
   for (iCast it = m_cast.begin(); it != m_cast.end(); ++it)
   {
     CStdString character;
-    if (it->strRole.IsEmpty() || !bIncludeRole)
-      character.Format("%s\n", it->strName.c_str());
+    if (it->strRole.empty() || !bIncludeRole)
+      character = StringUtils::Format("%s\n", it->strName.c_str());
     else
-      character.Format("%s %s %s\n", it->strName.c_str(), g_localizeStrings.Get(20347).c_str(), it->strRole.c_str());
+      character = StringUtils::Format("%s %s %s\n", it->strName.c_str(), g_localizeStrings.Get(20347).c_str(), it->strRole.c_str());
     strLabel += character;
   }
-  return strLabel.TrimRight("\n");
+  return StringUtils::TrimRight(strLabel, "\n");
 }
 
 void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
@@ -581,7 +594,7 @@ void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
   XMLUtils::GetString(movie, "plot", m_strPlot);
   XMLUtils::GetString(movie, "tagline", m_strTagLine);
   CStdString runtime;
-  if (XMLUtils::GetString(movie, "runtime", runtime))
+  if (XMLUtils::GetString(movie, "runtime", runtime) && !runtime.empty())
     m_duration = GetDurationFromMinuteString(runtime);
   XMLUtils::GetString(movie, "mpaa", m_strMPAARating);
   XMLUtils::GetInt(movie, "playcount", m_playCount);
@@ -640,9 +653,8 @@ void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
     {
       SActorInfo info;
       info.strName = actor->FirstChild()->Value();
-      const TiXmlNode *roleNode = node->FirstChild("role");
-      if (roleNode && roleNode->FirstChild())
-        info.strRole = roleNode->FirstChild()->Value();
+      XMLUtils::GetString(node, "role", info.strRole);
+      XMLUtils::GetInt(node, "order", info.order);
       const TiXmlElement* thumb = node->FirstChildElement("thumb");
       while (thumb)
       {
@@ -697,8 +709,8 @@ void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
         XMLUtils::GetString(nodeDetail, "codec", p->m_strCodec);
         XMLUtils::GetString(nodeDetail, "language", p->m_strLanguage);
         XMLUtils::GetInt(nodeDetail, "channels", p->m_iChannels);
-        p->m_strCodec.MakeLower();
-        p->m_strLanguage.MakeLower();
+        StringUtils::ToLower(p->m_strCodec);
+        StringUtils::ToLower(p->m_strLanguage);
         m_streamDetails.AddStream(p);
       }
       nodeDetail = NULL;
@@ -710,7 +722,9 @@ void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
         XMLUtils::GetInt(nodeDetail, "width", p->m_iWidth);
         XMLUtils::GetInt(nodeDetail, "height", p->m_iHeight);
         XMLUtils::GetInt(nodeDetail, "durationinseconds", p->m_iDuration);
-        p->m_strCodec.MakeLower();
+        XMLUtils::GetString(nodeDetail, "stereomode", p->m_strStereoMode);
+        StringUtils::ToLower(p->m_strCodec);
+        StringUtils::ToLower(p->m_strStereoMode);
         m_streamDetails.AddStream(p);
       }
       nodeDetail = NULL;
@@ -718,7 +732,7 @@ void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
       {
         CStreamDetailSubtitle *p = new CStreamDetailSubtitle();
         XMLUtils::GetString(nodeDetail, "language", p->m_strLanguage);
-        p->m_strLanguage.MakeLower();
+        StringUtils::ToLower(p->m_strLanguage);
         m_streamDetails.AddStream(p);
       }
     }
@@ -763,10 +777,7 @@ void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
     XMLUtils::GetDouble(resume, "total", m_resumePoint.totalTimeInSeconds);
   }
 
-  // dateAdded
-  CStdString dateAdded;
-  XMLUtils::GetString(movie, "dateadded", dateAdded);
-  m_dateAdded.SetFromDBDateTime(dateAdded);
+  XMLUtils::GetDateTime(movie, "dateadded", m_dateAdded);
 }
 
 bool CVideoInfoTag::HasStreamDetails() const
@@ -776,9 +787,9 @@ bool CVideoInfoTag::HasStreamDetails() const
 
 bool CVideoInfoTag::IsEmpty() const
 {
-  return (m_strTitle.IsEmpty() &&
-          m_strFile.IsEmpty() &&
-          m_strPath.IsEmpty());
+  return (m_strTitle.empty() &&
+          m_strFile.empty() &&
+          m_strPath.empty());
 }
 
 unsigned int CVideoInfoTag::GetDuration() const

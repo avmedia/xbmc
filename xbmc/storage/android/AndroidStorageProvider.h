@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 class CAndroidStorageProvider : public IStorageProvider
 {
 public:
-  CAndroidStorageProvider() { }
+  CAndroidStorageProvider();
   virtual ~CAndroidStorageProvider() { }
 
   virtual void Initialize() { }
@@ -38,4 +38,8 @@ public:
   virtual std::vector<CStdString> GetDiskUsage();
 
   virtual bool PumpDriveChangeEvents(IStorageEventsCallback *callback);
+
+private:
+  std::string unescape(const std::string& str);
+  unsigned int m_removableLength;
 };

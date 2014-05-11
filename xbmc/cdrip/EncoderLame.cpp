@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@
  */
 
 #include "EncoderLame.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 extern "C" FILE *fopen_utf8(const char *_Filename, const char *_Mode);
 #else
 #define fopen_utf8 fopen
@@ -54,9 +54,9 @@ bool CEncoderLame::Init(const char* strFile, int iInChannels, int iInRate, int i
   }
 
   // setup parmaters, see lame.h for possibilities
-  if (g_guiSettings.GetInt("audiocds.quality") == CDDARIP_QUALITY_CBR)
+  if (CSettings::Get().GetInt("audiocds.quality") == CDDARIP_QUALITY_CBR)
   {
-    int bitrate = g_guiSettings.GetInt("audiocds.bitrate");
+    int bitrate = CSettings::Get().GetInt("audiocds.bitrate");
     // use cbr and specified bitrate from settings
     CLog::Log(LOGDEBUG, "Lame setting CBR bitrate %d", bitrate);
     m_dll.lame_set_brate(m_pGlobalFlags, bitrate);
@@ -65,7 +65,7 @@ bool CEncoderLame::Init(const char* strFile, int iInChannels, int iInRate, int i
   {
     // use presets (VBR)
     int preset;
-    switch (g_guiSettings.GetInt("audiocds.quality"))
+    switch (CSettings::Get().GetInt("audiocds.quality"))
     {
     case CDDARIP_QUALITY_MEDIUM:
       preset = MEDIUM;

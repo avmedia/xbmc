@@ -12,9 +12,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    You should have received a copy of the GNU General Public License
+    along with XBMC; see the file COPYING.  If not, see
+    <http://www.gnu.org/licenses/>.
 
     Sam Lantinga
     slouken@libsdl.org
@@ -188,6 +188,8 @@ typedef enum {
   XBMCVK_LAUNCH_APP2         = 0xC1,
   XBMCVK_LAUNCH_FILE_BROWSER = 0xC2,
   XBMCVK_LAUNCH_MEDIA_CENTER = 0xC3,
+  XBMCVK_MEDIA_REWIND        = 0xC4,
+  XBMCVK_MEDIA_FASTFORWARD   = 0xC5,
 
   XBMCVK_LCONTROL       = 0xD0,
   XBMCVK_RCONTROL       = 0xD1,

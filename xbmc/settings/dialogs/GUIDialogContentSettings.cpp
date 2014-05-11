@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 
 #include "GUIDialogContentSettings.h"
 #include "addons/GUIDialogAddonSettings.h"
-#include "settings/GUISettings.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/Key.h"
 #include "addons/IAddon.h"
@@ -45,6 +44,12 @@ CGUIDialogContentSettings::CGUIDialogContentSettings(void)
   : CGUIDialogSettings(WINDOW_DIALOG_CONTENT_SETTINGS, "DialogContentSettings.xml"), m_origContent(CONTENT_NONE)
 {
   m_bNeedSave = false;
+  m_bShowScanSettings = false;
+  m_bScanRecursive = false;
+  m_bUseDirNames = false;
+  m_bSingleItem = false;
+  m_bExclude = false;
+  m_bNoUpdate = false;
   m_content = CONTENT_NONE;
   m_vecItems = new CFileItemList;
 }
@@ -87,11 +92,11 @@ bool CGUIDialogContentSettings::OnMessage(CGUIMessage &message)
       g_windowManager.SendMessage(msg);
       int iSelected = msg.GetParam1();
       if (iSelected == m_vecItems->Size() - 1)
-      { // Get More... item.
+      { // Get More... item, path 'addons://more/<content>'
         // This is tricky - ideally we want to completely save the state of this dialog,
         // close it while linking to the addon manager, then reopen it on return.
         // For now, we just close the dialog + send the GetPath() to open the addons window
-        CStdString content = m_vecItems->Get(iSelected)->GetPath().Mid(14);
+        CStdString content = m_vecItems->Get(iSelected)->GetPath().substr(14);
         OnCancel();
         Close();
         CBuiltins::Execute("ActivateWindow(AddonBrowser,addons://all/xbmc.metadata.scraper." + content + ",return)");
@@ -281,7 +286,7 @@ void CGUIDialogContentSettings::FillContentTypes(const CONTENT_TYPE &content)
     bool isDefault = ((*it)->ID() == defaultID);
     map<CONTENT_TYPE,VECADDONS>::iterator iter=m_scrapers.find(content);
 
-    AddonPtr scraper = (*it)->Clone((*it));
+    AddonPtr scraper = (*it)->Clone();
 
     if (m_scraper && m_scraper->ID() == (*it)->ID())
     { // don't overwrite preconfigured scraper
@@ -396,7 +401,7 @@ bool CGUIDialogContentSettings::Show(ADDON::ScraperPtr& scraper, VIDEO::SScanSet
     dialog->m_scraper = scraper;
     // toast selected but disabled scrapers
     if (!scraper->Enabled())
-      CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Error, g_localizeStrings.Get(24023), scraper->Name(), 2000, true);
+      CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Error, g_localizeStrings.Get(24024), scraper->Name(), 2000, true);
   }
 
   dialog->m_bScanRecursive = (settings.recurse > 0 && !settings.parent_name) || (settings.recurse > 1 && settings.parent_name);

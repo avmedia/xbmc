@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ CGUIFontTTFGL::~CGUIFontTTFGL(void)
 
 void CGUIFontTTFGL::Begin()
 {
-  if (m_nestedBeginCount == 0)
+  if (m_nestedBeginCount == 0 && m_texture != NULL)
   {
     if (!m_bTextureLoaded)
     {
@@ -146,8 +146,12 @@ void CGUIFontTTFGL::End()
   glDrawArrays(GL_QUADS, 0, m_vertex_count);
   glPopClientAttrib();
 
+  glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
   glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
 #else
   // GLES 2.0 version. Cannot draw quads. Convert to triangles.
   GLint posLoc  = g_Windowing.GUIShaderGetPos();
@@ -203,7 +207,11 @@ CBaseTexture* CGUIFontTTFGL::ReallocTexture(unsigned int& newHeight)
     return NULL;
   }
   m_textureHeight = newTexture->GetHeight();
+  m_textureScaleY = 1.0f / m_textureHeight;
   m_textureWidth = newTexture->GetWidth();
+  m_textureScaleX = 1.0f / m_textureWidth;
+  if (m_textureHeight < newHeight)
+    CLog::Log(LOGWARNING, "%s: allocated new texture with height of %d, requested %d", __FUNCTION__, m_textureHeight, newHeight);
 
   memset(newTexture->GetPixels(), 0, m_textureHeight * newTexture->GetPitch());
   if (m_texture)

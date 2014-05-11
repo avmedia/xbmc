@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -104,8 +104,8 @@ namespace XFILE
     CmdExtract* m_pExtract;
     CRarFileExtractThread* m_pExtractThread;
 #endif
-    byte* m_szBuffer;
-    byte* m_szStartOfBuffer;
+    uint8_t* m_szBuffer;
+    uint8_t* m_szStartOfBuffer;
     int64_t m_iDataInBuffer;
     int64_t m_iBufferStart;
   };

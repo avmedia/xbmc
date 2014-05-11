@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,32 +19,29 @@
  *
  */
 
-#include "Interfaces/AESink.h"
 #include <stdint.h>
 #include <dsound.h>
-#include "../Utils/AEDeviceInfo.h"
+#include "cores/AudioEngine/Interfaces/AESink.h"
+#include "cores/AudioEngine/Utils/AEDeviceInfo.h"
 
 #include "threads/CriticalSection.h"
 
 class CAESinkDirectSound : public IAESink
 {
 public:
-  virtual const char *GetName() { return "DirectSound"; }
+  virtual const char *GetName() { return "DIRECTSOUND"; }
 
   CAESinkDirectSound();
   virtual ~CAESinkDirectSound();
 
   virtual bool Initialize  (AEAudioFormat &format, std::string &device);
   virtual void Deinitialize();
-  virtual bool IsCompatible(const AEAudioFormat format, const std::string &device);
 
   virtual void         Stop               ();
+  virtual void         Drain              ();
   virtual double       GetDelay           ();
-  virtual double       GetCacheTime       ();
   virtual double       GetCacheTotal      ();
-  virtual unsigned int AddPackets         (uint8_t *data, unsigned int frames, bool hasAudio);
-  virtual bool         SoftSuspend        ();
-  virtual bool         SoftResume         ();
+  virtual unsigned int AddPackets         (uint8_t *data, unsigned int frames, bool hasAudio, bool blocking = false);
   static  std::string  GetDefaultDevice   ();
   static  void         EnumerateDevicesEx (AEDeviceInfoList &deviceInfoList, bool force = false);
 private:

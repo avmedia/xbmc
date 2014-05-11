@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,9 @@ public:
   int AddAddon(const ADDON::AddonPtr& item, int idRepo);
   bool GetAddon(const CStdString& addonID, ADDON::AddonPtr& addon);
   bool GetAddons(ADDON::VECADDONS& addons);
-  bool GetAddon(int id, ADDON::AddonPtr& addon);
+
+  /*! \brief grab the (largest) add-on version for an add-on */
+  ADDON::AddonVersion GetAddonVersion(const std::string &id);
 
   /*! \brief Grab the repository from which a given addon came
    \param addonID - the id of the addon in question
@@ -45,7 +47,7 @@ public:
   int AddRepository(const CStdString& id, const ADDON::VECADDONS& addons, const CStdString& checksum);
   void DeleteRepository(const CStdString& id);
   void DeleteRepository(int id);
-  int GetRepoChecksum(const CStdString& id, CStdString& checksum);
+  int GetRepoChecksum(const std::string& id, std::string& checksum);
   bool GetRepository(const CStdString& id, ADDON::VECADDONS& addons);
   bool GetRepository(int id, ADDON::VECADDONS& addons);
   bool SetRepoTimestamp(const CStdString& id, const CStdString& timestamp);
@@ -106,10 +108,66 @@ public:
   bool RemoveAddonFromBlacklist(const CStdString& addonID,
                                 const CStdString& version);
 
+  /*! \brief Store an addon's package filename and that file's hash for future verification
+      \param  addonID         id of the addon we're adding a package for
+      \param  packageFileName filename of the package
+      \param  hash            MD5 checksum of the package
+      \return Whether or not the info successfully made it into the DB.
+      \sa GetPackageHash, RemovePackage
+  */
+  bool AddPackage(const CStdString& addonID,
+                  const CStdString& packageFileName,
+                  const CStdString& hash);
+  /*! \brief Query the MD5 checksum of the given given addon's given package
+      \param  addonID         id of the addon we're who's package we're querying
+      \param  packageFileName filename of the package
+      \param  hash            return the MD5 checksum of the package
+      \return Whether or not we found a hash for the given addon's given package
+      \sa AddPackage, RemovePackage
+  */
+  bool GetPackageHash(const CStdString& addonID,
+                      const CStdString& packageFileName,
+                      CStdString&       hash);
+  /*! \brief Remove a package's info from the database
+      \param  packageFileName filename of the package
+      \return Whether or not we succeeded in removing the package
+      \sa AddPackage, GetPackageHash
+  */
+  bool RemovePackage(const CStdString& packageFileName);
 protected:
-  virtual bool CreateTables();
-  virtual bool UpdateOldVersion(int version);
-  virtual int GetMinVersion() const { return 15; }
+  virtual void CreateTables();
+  virtual void CreateAnalytics();
+  virtual void UpdateTables(int version);
+  virtual int GetMinSchemaVersion() const { return 15; }
+  virtual int GetSchemaVersion() const { return 16; }
   const char *GetBaseDBName() const { return "Addons"; }
+
+  bool GetAddon(int id, ADDON::AddonPtr& addon);
+
+  /* keep in sync with the select in GetAddon */
+  enum _AddonFields
+  {
+    addon_id=0,
+    addon_type,
+    addon_name,
+    addon_summary,
+    addon_description,
+    addon_stars,
+    addon_path,
+    addon_addonID,
+    addon_icon,
+    addon_version,
+    addon_changelog,
+    addon_fanart,
+    addon_author,
+    addon_disclaimer,
+    addon_minversion,
+    broken_reason,
+    addonextra_key,
+    addonextra_value,
+    dependencies_addon,
+    dependencies_version,
+    dependencies_optional
+  } AddonFields;
 };
 

@@ -1,13 +1,12 @@
 # XBMC Media Center language file
-# XBMC-core v12.0
 msgid ""
 msgstr ""
-"Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
+"Project-Id-Version: XBMC Main\n"
 "Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: XBMC Translation Team\n"
-"Language-Team: Hebrew (http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/he/)\n"
+"Language-Team: Hebrew (http://www.transifex.com/projects/p/xbmc-main/language/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -24,7 +23,7 @@ msgstr "תמונות"
 
 msgctxt "#2"
 msgid "Music"
-msgstr "מוסיקה"
+msgstr "מוזיקה"
 
 msgctxt "#3"
 msgid "Videos"
@@ -32,7 +31,7 @@ msgstr "וידאו"
 
 msgctxt "#4"
 msgid "TV-Guide"
-msgstr "מדריך תוכניות"
+msgstr "מדריך טלוויזיה"
 
 msgctxt "#5"
 msgid "Settings"
@@ -76,7 +75,7 @@ msgstr "יום שישי"
 
 msgctxt "#16"
 msgid "Saturday"
-msgstr "יום שבת"
+msgstr "שבת"
 
 msgctxt "#17"
 msgid "Sunday"
@@ -316,11 +315,11 @@ msgstr "סרוק"
 
 msgctxt "#103"
 msgid "Sort by: Name"
-msgstr "מיין לפי : שם"
+msgstr "מיון לפי: שם"
 
 msgctxt "#104"
 msgid "Sort by: Date"
-msgstr "מיין לפי : תאריך"
+msgstr "מיון לפי: תאריך"
 
 msgctxt "#105"
 msgid "Sort by: Size"
@@ -340,11 +339,11 @@ msgstr "מצגת"
 
 msgctxt "#109"
 msgid "Create thumbs"
-msgstr "צור תמונות ממוזערות"
+msgstr "יצירת תמונות ממוזערות"
 
 msgctxt "#110"
 msgid "Create thumbnails"
-msgstr "צור תמונות ממוזערות"
+msgstr "יצירת תמונות ממוזערות"
 
 msgctxt "#111"
 msgid "Shortcuts"
@@ -356,7 +355,7 @@ msgstr "מושהה"
 
 msgctxt "#113"
 msgid "Update failed"
-msgstr "עדכון נכשל"
+msgstr "העדכון נכשל"
 
 msgctxt "#114"
 msgid "Installation failed"
@@ -364,47 +363,47 @@ msgstr "ההתקנה נכשלה"
 
 msgctxt "#115"
 msgid "Copy"
-msgstr "העתק"
+msgstr "העתקה"
 
 msgctxt "#116"
 msgid "Move"
-msgstr "העבר"
+msgstr "העברה"
 
 msgctxt "#117"
 msgid "Delete"
-msgstr "מחק"
+msgstr "מחיקה"
 
 msgctxt "#118"
 msgid "Rename"
-msgstr "שנה שם"
+msgstr "שינוי שם"
 
 msgctxt "#119"
 msgid "New folder"
-msgstr "תיקיה חדשה"
+msgstr "תיקייה חדשה"
 
 msgctxt "#120"
 msgid "Confirm file copy"
-msgstr "אשר העתקת קובץ"
+msgstr "אישור העתקת קובץ"
 
 msgctxt "#121"
 msgid "Confirm file move"
-msgstr "אשר העברת קובץ"
+msgstr "אישור העברת קובץ"
 
 msgctxt "#122"
 msgid "Confirm file delete?"
-msgstr "אשר מחיקת קובץ"
+msgstr "לאשר את מחיקת הקובץ?"
 
 msgctxt "#123"
 msgid "Copy these files?"
-msgstr "?להעתיק קבצים אלו"
+msgstr "האם להעתיק קבצים אלו?"
 
 msgctxt "#124"
 msgid "Move these files?"
-msgstr "?להעביר קבצים אלו"
+msgstr "האם להעביר קבצים אלו?"
 
 msgctxt "#125"
 msgid "Delete these files? - Deleting files cannot be undone!"
-msgstr "למחוק קבצים אלה? - !קבצים לאחר מחיקה אינם ניתנים לשיחזור"
+msgstr "האם למחוק קבצים אלו? - לא ניתן לשחזר קבצים לאחר שנמחקו!"
 
 msgctxt "#126"
 msgid "Status"
@@ -428,7 +427,7 @@ msgstr "פרטי מערכת"
 
 msgctxt "#131"
 msgid "Display"
-msgstr "מסך"
+msgstr "צג"
 
 msgctxt "#132"
 msgid "Albums"
@@ -452,7 +451,7 @@ msgstr "רשימות ניגון"
 
 msgctxt "#137"
 msgid "Search"
-msgstr "חפש"
+msgstr "חיפוש"
 
 msgctxt "#138"
 msgid "System Information"
@@ -480,7 +479,7 @@ msgstr "נוכחי:"
 
 msgctxt "#144"
 msgid "Build:"
-msgstr "גירסה:"
+msgstr "גרסה:"
 
 msgctxt "#145"
 msgid "Network:"
@@ -492,7 +491,7 @@ msgstr "סוג:"
 
 msgctxt "#147"
 msgid "Static"
-msgstr "סטאטי"
+msgstr "קבועה"
 
 msgctxt "#148"
 msgid "DHCP"
@@ -500,23 +499,23 @@ msgstr "DHCP"
 
 msgctxt "#149"
 msgid "MAC address"
-msgstr "MAC"
+msgstr "כתובת MAC"
 
 msgctxt "#150"
 msgid "IP address"
-msgstr "IP"
+msgstr "כתובת IP"
 
 msgctxt "#151"
 msgid "Link:"
-msgstr "Link:"
+msgstr "קישוריות:"
 
 msgctxt "#152"
 msgid "Half duplex"
-msgstr "Half duplex"
+msgstr "דו־כיוונית לסירוגין"
 
 msgctxt "#153"
 msgid "Full duplex"
-msgstr "Full duplex"
+msgstr "דו־כיוונית מלאה"
 
 msgctxt "#154"
 msgid "Storage"
@@ -552,7 +551,7 @@ msgstr "לא זמין"
 
 msgctxt "#162"
 msgid "Tray open"
-msgstr "מגש פתוח"
+msgstr "מגש בחוץ"
 
 msgctxt "#163"
 msgid "Reading"
@@ -574,13 +573,21 @@ msgctxt "#167"
 msgid "Cancel file operations"
 msgstr "ביטול פעולות קבצים"
 
+msgctxt "#168"
+msgid "%s- %s"
+msgstr "%s- %s"
+
 msgctxt "#169"
 msgid "Resolution"
 msgstr "רזולוציה"
 
 msgctxt "#170"
 msgid "Adjust display refresh rate to match video"
-msgstr "התאם את קצב רענון המסך לוידאו"
+msgstr "התאמת קצב רענון התצוגה לווידאו"
+
+msgctxt "#171"
+msgid "Sort title"
+msgstr "מיין כותרת"
 
 msgctxt "#172"
 msgid "Release date"
@@ -588,11 +595,11 @@ msgstr "תאריך הפצה"
 
 msgctxt "#173"
 msgid "Display 4:3 videos as"
-msgstr "הצג וידאו 4:3 כמו"
+msgstr "הצגת וידאו ביחס 4:3 בתור"
 
 msgctxt "#175"
 msgid "Moods"
-msgstr "מצבים"
+msgstr "מצבי רוח"
 
 msgctxt "#176"
 msgid "Styles"
@@ -636,39 +643,39 @@ msgstr "!לא נמצאו אלבומים"
 
 msgctxt "#188"
 msgid "Select all"
-msgstr "בחר הכל"
+msgstr "בחירת הכול"
 
 msgctxt "#189"
 msgid "Scanning media info"
-msgstr "סורק פרטי מערכת"
+msgstr "פרטי המערכת נסרקים"
 
 msgctxt "#190"
 msgid "Save"
-msgstr "שמור"
+msgstr "שמירה"
 
 msgctxt "#191"
 msgid "Shuffle"
-msgstr "ערבב"
+msgstr "ערבוב"
 
 msgctxt "#192"
 msgid "Clear"
-msgstr "נקה"
+msgstr "פינוי"
 
 msgctxt "#193"
 msgid "Scan"
-msgstr "סרוק"
+msgstr "סריקה"
 
 msgctxt "#194"
 msgid "Searching..."
-msgstr "...מחפש"
+msgstr "בהליכי חיפוש..."
 
 msgctxt "#195"
 msgid "No info found!"
-msgstr "!לא נמצאו פרטים"
+msgstr "לא נמצאו פרטים!‏"
 
 msgctxt "#196"
 msgid "Select movie:"
-msgstr ":בחר סרט"
+msgstr "בחירת סרט:‏"
 
 msgctxt "#197"
 msgid "Querying %s info"
@@ -676,7 +683,7 @@ msgstr "%s מחפש פרטים"
 
 msgctxt "#198"
 msgid "Loading movie details"
-msgstr "טוען פרטים אודות הסרט"
+msgstr "פרטי הסרט נטענים"
 
 msgctxt "#199"
 msgid "Web interface"
@@ -684,7 +691,7 @@ msgstr "ממשק אינטרנט"
 
 msgctxt "#202"
 msgid "Tagline"
-msgstr "מילות מפתח"
+msgstr "סלוגן"
 
 msgctxt "#203"
 msgid "Plot outline"
@@ -772,7 +779,7 @@ msgstr "חפש את שמות רצועות הדיסק ב freedb.org"
 
 msgctxt "#228"
 msgid "Shuffle playlist on load"
-msgstr "רשימת השמעה אקראית בעת הטעינה"
+msgstr "רשימת השמעה מעורבבת בעת הטעינה"
 
 msgctxt "#229"
 msgid "HDD spindown time"
@@ -855,7 +862,7 @@ msgid "Music"
 msgstr "מוסיקה"
 
 msgctxt "#250"
-msgid "Visualization"
+msgid "Visualisation"
 msgstr "חיזוי"
 
 msgctxt "#251"
@@ -863,16 +870,16 @@ msgid "Select destination directory"
 msgstr "בחר ספרית יעד"
 
 msgctxt "#252"
-msgid "Output stereo to all speakers"
-msgstr "- פלט סטריאו לכל הרמקולים"
+msgid "Stereo upmix"
+msgstr "Stereo upmix"
 
 msgctxt "#253"
 msgid "Number of channels"
 msgstr "מספר ערוצים"
 
 msgctxt "#254"
-msgid "- DTS capable receiver"
-msgstr "- DTS נתמך ע\"י הרסיבר"
+msgid "DTS capable receiver"
+msgstr "מקלט עם תמיכה ב־DTS"
 
 msgctxt "#255"
 msgid "CDDB"
@@ -900,7 +907,7 @@ msgstr "Shoutcast"
 
 msgctxt "#261"
 msgid "Waiting for start..."
-msgstr "....ממתין להתחלה"
+msgstr "ממתין להתחלה..."
 
 msgctxt "#262"
 msgid "Scripts output"
@@ -1011,7 +1018,7 @@ msgid "Font"
 msgstr "פונט"
 
 msgctxt "#289"
-msgid "- Size"
+msgid "Size"
 msgstr "גודל"
 
 msgctxt "#290"
@@ -1046,21 +1053,17 @@ msgctxt "#298"
 msgid "Bookmarks"
 msgstr "סימניות"
 
-msgctxt "#299"
-msgid "- AAC capable receiver"
-msgstr "- AAC נתמך ע\"י הרסיבר"
-
 msgctxt "#300"
-msgid "- MP1 capable receiver"
-msgstr "- MP1 נתמך ע\"י הרסיבר"
+msgid "MP1 capable receiver"
+msgstr "מקלט עם תמיכה ב־MP1"
 
 msgctxt "#301"
-msgid "- MP2 capable receiver"
-msgstr "- MP2 נתמך ע\"י הרסיבר"
+msgid "MP2 capable receiver"
+msgstr "מקלט עם תמיכה ב־MP2"
 
 msgctxt "#302"
-msgid "- MP3 capable receiver"
-msgstr "- MP3 נתמך ע\"י הרסיבר"
+msgid "MP3 capable receiver"
+msgstr "מקלט עם תמיכה ב־MP3"
 
 msgctxt "#303"
 msgid "Delay"
@@ -1083,7 +1086,7 @@ msgid "Original stream's language"
 msgstr "שפת שידור מקורית"
 
 msgctxt "#309"
-msgid "User Interface language"
+msgid "User interface language"
 msgstr "שפת ממשק משתמש"
 
 msgctxt "#312"
@@ -1096,7 +1099,7 @@ msgstr "מנקה מסד נתונים"
 
 msgctxt "#314"
 msgid "Preparing..."
-msgstr "...מתכונן"
+msgstr "מתכונן..."
 
 msgctxt "#315"
 msgid "Database error"
@@ -1104,7 +1107,7 @@ msgstr "שגיאת מסד נתונים"
 
 msgctxt "#316"
 msgid "Searching songs..."
-msgstr "...מחפש שירים"
+msgstr "מחפש שירים..."
 
 msgctxt "#317"
 msgid "Cleaned database successfully"
@@ -1112,7 +1115,7 @@ msgstr "ניקוי הושלם בהצלחה"
 
 msgctxt "#318"
 msgid "Cleaning songs..."
-msgstr "...מנקה שירים"
+msgstr "מנקה שירים..."
 
 msgctxt "#319"
 msgid "Error cleaning songs"
@@ -1120,7 +1123,7 @@ msgstr "שגיאה בניקוי שירים"
 
 msgctxt "#320"
 msgid "Cleaning artists..."
-msgstr "...ניקוי אמנים"
+msgstr "ניקוי אמנים..."
 
 msgctxt "#321"
 msgid "Error cleaning artists"
@@ -1128,7 +1131,7 @@ msgstr "שגיאה בניקוי אמנים"
 
 msgctxt "#322"
 msgid "Cleaning genres..."
-msgstr "...ניקוי סגנונות"
+msgstr "ניקוי סגנונות..."
 
 msgctxt "#323"
 msgid "Error cleaning genres"
@@ -1136,7 +1139,7 @@ msgstr "שגיאה בניקוי סגנונות"
 
 msgctxt "#324"
 msgid "Cleaning paths..."
-msgstr "...ניקוי נתיבים"
+msgstr "ניקוי נתיבים..."
 
 msgctxt "#325"
 msgid "Error cleaning paths"
@@ -1144,7 +1147,7 @@ msgstr "שגיאה בניקוי נתיבים"
 
 msgctxt "#326"
 msgid "Cleaning albums..."
-msgstr "...ניקוי אלבומים"
+msgstr "ניקוי אלבומים..."
 
 msgctxt "#327"
 msgid "Error cleaning albums"
@@ -1152,7 +1155,7 @@ msgstr "שגיאה בניקוי אלבומים"
 
 msgctxt "#328"
 msgid "Writing changes..."
-msgstr "...כותב שינויים"
+msgstr "כותב שינויים..."
 
 msgctxt "#329"
 msgid "Error writing changes"
@@ -1160,11 +1163,11 @@ msgstr "שגיאה בכתיבת שינויים"
 
 msgctxt "#330"
 msgid "This may take some time..."
-msgstr "...פעולה זו עשויה לקחת זמן"
+msgstr "פעולה זו עשויה לקחת זמן..."
 
 msgctxt "#331"
 msgid "Compressing database..."
-msgstr "...דוחס נתונים"
+msgstr "דוחס נתונים..."
 
 msgctxt "#332"
 msgid "Error compressing database"
@@ -1187,16 +1190,16 @@ msgid "Framerate conversion"
 msgstr "המרת קצב פריימים"
 
 msgctxt "#337"
-msgid "Audio output"
-msgstr "פלט אודיו"
+msgid "Output configuration"
+msgstr "הגדרות פלט"
 
 msgctxt "#338"
-msgid "Analog"
-msgstr "אנלוגי"
+msgid "Fixed"
+msgstr "מקובע"
 
 msgctxt "#339"
-msgid "Optical/Coax"
-msgstr "דיגיטאלי"
+msgid "Optimized"
+msgstr "מיטבי"
 
 msgctxt "#340"
 msgid "Various artists"
@@ -1222,21 +1225,17 @@ msgctxt "#345"
 msgid "Year"
 msgstr "שנה"
 
-msgctxt "#346"
-msgid "Boost volume level on downmix"
-msgstr "הגבר קול ב downmix"
-
 msgctxt "#347"
-msgid "- DTS-HD capable receiver"
-msgstr "- DTS-HD נתמך ע\"י הרסיבר"
+msgid "DTS-HD capable receiver"
+msgstr "מקלט עם תמיכה ב־DTS-HD"
 
 msgctxt "#348"
-msgid "- Multichannel LPCM capable receiver"
-msgstr "- LPCM רב ערוצי נתמך ע\"י הרסיבר"
+msgid "Enable passthrough"
+msgstr "הפעל passthrough"
 
 msgctxt "#349"
-msgid "- TrueHD capable receiver"
-msgstr "- TrueHD נתמך ע\"י הרסיבר"
+msgid "TrueHD capable receiver"
+msgstr "מקלט עם תמיכה ב־TrueHD"
 
 msgctxt "#350"
 msgid "Programs"
@@ -1295,8 +1294,8 @@ msgid "Sort by: File"
 msgstr "סדר לפי : קובץ"
 
 msgctxt "#364"
-msgid "- Dolby Digital (AC3) capable receiver"
-msgstr "- Dolby Digital (AC3) נתמך ע\"י הרסיבר"
+msgid "Dolby Digital (AC3) capable receiver"
+msgstr "מקלט עם תמיכה ב־Dolby Digital (AC3)‎"
 
 msgctxt "#365"
 msgid "Sort by: Name"
@@ -1492,7 +1491,7 @@ msgstr "אין סקירות עבור אלבום זה"
 
 msgctxt "#415"
 msgid "Downloading thumbnail..."
-msgstr "...מוריד תמונות ממוזערות"
+msgstr "מוריד תמונות ממוזערות..."
 
 msgctxt "#416"
 msgid "Not available"
@@ -1511,8 +1510,12 @@ msgid "High"
 msgstr "גבוה"
 
 msgctxt "#420"
-msgid "HDMI"
-msgstr "HDMI"
+msgid "Best Match"
+msgstr "המתאים ביותר"
+
+msgctxt "#421"
+msgid "Keep audio device alive"
+msgstr "השאר התקן אודיו פעיל"
 
 msgctxt "#422"
 msgid "Delete album info"
@@ -1587,8 +1590,8 @@ msgid "Cache"
 msgstr "זכרון מטמון"
 
 msgctxt "#440"
-msgid "Harddisk"
-msgstr "כונן קשיח"
+msgid "Hard disk"
+msgstr "דיסק קשיח"
 
 msgctxt "#441"
 msgid "UDF"
@@ -1617,10 +1620,6 @@ msgstr "DVD"
 msgctxt "#447"
 msgid "Autorun media"
 msgstr "נגן אוטומטית"
-
-msgctxt "#448"
-msgid "LCD"
-msgstr "LCD"
 
 msgctxt "#449"
 msgid "Enabled"
@@ -1657,6 +1656,10 @@ msgstr "מצב"
 msgctxt "#457"
 msgid "Switch view"
 msgstr "החלף תצוגה"
+
+msgctxt "#458"
+msgid "Limit sampling rate (kHz)"
+msgstr "הגבל קצב דגימה (kHz)"
 
 msgctxt "#459"
 msgid "Subs"
@@ -1705,10 +1708,6 @@ msgstr "מיקום תפריט"
 msgctxt "#470"
 msgid "Credits"
 msgstr "תודות"
-
-msgctxt "#471"
-msgid "Modchip"
-msgstr "Modchip"
 
 msgctxt "#474"
 msgid "Off"
@@ -1831,8 +1830,8 @@ msgid "Sort by: Usage"
 msgstr "מיין לפי : שימוש"
 
 msgctxt "#510"
-msgid "Enable visualizations"
-msgstr "אפשר חיזוי"
+msgid "Enable visualisations"
+msgstr "הפעל חיזוי"
 
 msgctxt "#511"
 msgid "Enable video mode switching"
@@ -1864,7 +1863,7 @@ msgstr "הפעל"
 
 msgctxt "#519"
 msgid "Launch in..."
-msgstr "...הפעל ב"
+msgstr "הפעל ב..."
 
 msgctxt "#521"
 msgid "Compilations"
@@ -2086,6 +2085,10 @@ msgctxt "#576"
 msgid "Times played"
 msgstr "פעמים שנוגן"
 
+msgctxt "#577"
+msgid "Date Taken"
+msgstr "תאריך ההקלטה"
+
 msgctxt "#580"
 msgid "Sort direction"
 msgstr "כיוון מיון"
@@ -2180,7 +2183,7 @@ msgstr "קצב ביטים קבוע"
 
 msgctxt "#605"
 msgid "Ripping..."
-msgstr "...מעתיק"
+msgstr "מעתיק..."
 
 msgctxt "#607"
 msgid "To:"
@@ -2210,6 +2213,10 @@ msgctxt "#613"
 msgid "Sample rate"
 msgstr "קצב דגימה"
 
+msgctxt "#614"
+msgid "Virtual folder"
+msgstr "תיקיה וירטואלית"
+
 msgctxt "#620"
 msgid "Audio CDs"
 msgstr "דיסק אודיו"
@@ -2236,7 +2243,7 @@ msgstr "כל השירים של"
 
 msgctxt "#626"
 msgid "In progress TV shows"
-msgstr "תוכניות בהתקדמות"
+msgstr "סדרות בהתקדמות"
 
 msgctxt "#629"
 msgid "View mode"
@@ -2270,14 +2277,6 @@ msgctxt "#636"
 msgid "Custom"
 msgstr "מותאם אישי"
 
-msgctxt "#637"
-msgid "Replay gain"
-msgstr "תיקון עוצמת הקול"
-
-msgctxt "#638"
-msgid "Replaygain volume adjustments"
-msgstr "התאמות תיקון עוצמת הקול"
-
 msgctxt "#639"
 msgid "Use track levels"
 msgstr "השתמש בעוצמת הרצועה"
@@ -2285,18 +2284,6 @@ msgstr "השתמש בעוצמת הרצועה"
 msgctxt "#640"
 msgid "Use album levels"
 msgstr "השתמש בעוצמת האלבום"
-
-msgctxt "#641"
-msgid "PreAmp Level - Replay gained files"
-msgstr "עוצמת PreAmp  - תיקון עוצמת קבצים"
-
-msgctxt "#642"
-msgid "PreAmp Level - Non replay gained files"
-msgstr "עוצמת PreAmp - ללא תיקון עוצמת קבצים"
-
-msgctxt "#643"
-msgid "Avoid clipping on replay gained files"
-msgstr "המנע מחיתוך קבצים מתוקני עוצמה"
 
 msgctxt "#644"
 msgid "Crop black bars"
@@ -2386,6 +2373,14 @@ msgctxt "#665"
 msgid "Compression level"
 msgstr "רמת דחיסה"
 
+msgctxt "#666"
+msgid "Verbose logging..."
+msgstr "רישום מפורט..."
+
+msgctxt "#667"
+msgid "Enable Dolby Digital transcoding"
+msgstr "הפעל Dolby Digital transcoding"
+
 msgctxt "#700"
 msgid "Cleaning up library"
 msgstr "מנקה מסד נתונים"
@@ -2403,8 +2398,8 @@ msgid "Network"
 msgstr "רשת"
 
 msgctxt "#706"
-msgid "- Server"
-msgstr "- שרת"
+msgid "Server"
+msgstr "שרת"
 
 msgctxt "#708"
 msgid "Use an HTTP proxy server to access the internet"
@@ -2423,8 +2418,8 @@ msgid "HTTP proxy"
 msgstr "HTTP פרוקסי"
 
 msgctxt "#715"
-msgid "- Assignment"
-msgstr "השמת כתובת"
+msgid "Assignment"
+msgstr "הקצאה"
 
 msgctxt "#716"
 msgid "Automatic (DHCP)"
@@ -2435,20 +2430,20 @@ msgid "Manual (Static)"
 msgstr "ידנית (סטטית)"
 
 msgctxt "#719"
-msgid "- IP address"
-msgstr "- IP address"
+msgid "IP address"
+msgstr "כתובת IP"
 
 msgctxt "#720"
-msgid "- Netmask"
-msgstr "- Netmask"
+msgid "Netmask"
+msgstr "מסכת רשת"
 
 msgctxt "#721"
-msgid "- Default gateway"
-msgstr "- Default gateway"
+msgid "Default gateway"
+msgstr "שער הגישה כבררת המחדל"
 
 msgctxt "#722"
-msgid "- DNS server"
-msgstr "- DNS server"
+msgid "DNS server"
+msgstr "שרת DNS"
 
 msgctxt "#723"
 msgid "Save & restart"
@@ -2475,32 +2470,32 @@ msgid "FTP server"
 msgstr "שרת FTP"
 
 msgctxt "#730"
-msgid "- Port"
-msgstr "- פורט"
+msgid "Port"
+msgstr "פתחה"
 
 msgctxt "#732"
 msgid "Save & apply"
 msgstr "שמור והפעל"
 
 msgctxt "#733"
-msgid "- Password"
-msgstr "- סיסמא"
+msgid "Password"
+msgstr "ססמה"
 
 msgctxt "#734"
 msgid "No pass"
 msgstr "ללא סיסמא"
 
 msgctxt "#735"
-msgid "- Character set"
-msgstr "ערכת התווים -"
+msgid "Character set"
+msgstr "קידוד"
 
 msgctxt "#736"
-msgid "- Style"
-msgstr "סגנון -"
+msgid "Style"
+msgstr "סגנון"
 
 msgctxt "#737"
-msgid "- Colour"
-msgstr "צבע -"
+msgid "Colour"
+msgstr "צבע"
 
 msgctxt "#738"
 msgid "Normal"
@@ -2631,16 +2626,16 @@ msgid "Network interface"
 msgstr "ממשק רשת"
 
 msgctxt "#776"
-msgid "- Wireless network name (ESSID)"
-msgstr "- שם רשת אלחוטית (ESSID)"
+msgid "Wireless network name (ESSID)"
+msgstr "שרת הרשת האלחוטית (ESSID)"
 
 msgctxt "#777"
-msgid "- Wireless password"
-msgstr "- סיסמאת רשת אלחוטית"
+msgid "Wireless password"
+msgstr "ססמה לרשת האלחוטית"
 
 msgctxt "#778"
-msgid "- Wireless security"
-msgstr "- אבטחת רשת אלחוטית"
+msgid "Wireless security"
+msgstr "אבטחה אלחוטית"
 
 msgctxt "#779"
 msgid "Save and apply network interface settings"
@@ -2727,8 +2722,8 @@ msgid "Library Update"
 msgstr "עדכון ספריה"
 
 msgctxt "#800"
-msgid "Music library needs to rescan art from tags"
-msgstr "ספריית המוזיקה זקוקה לסרוק שנית את אמנות מהתגיות"
+msgid "Music library needs to rescan tags from files."
+msgstr "על ספריית המוזיקה לסרוק מחדש תגיות מהקבצים."
 
 msgctxt "#801"
 msgid "Would you like to scan now?"
@@ -2746,6 +2741,10 @@ msgctxt "#852"
 msgid "Valid port range is 1024-65535"
 msgstr "טווח פורט תקין הוא 1024-65535"
 
+msgctxt "#997"
+msgid "Add Pictures..."
+msgstr "הוספת תמונות..."
+
 msgctxt "#998"
 msgid "Add Music..."
 msgstr "הוסף מוזיקה..."
@@ -2755,8 +2754,8 @@ msgid "Add Videos..."
 msgstr "הוסף וידאו..."
 
 msgctxt "#1000"
-msgid "- Preview"
-msgstr "- תצוגה מקדימה"
+msgid "Preview"
+msgstr "תצוגה מקדימה"
 
 msgctxt "#1001"
 msgid "Unable to connect"
@@ -2927,8 +2926,8 @@ msgid "Program Add-ons"
 msgstr "הרחבות תוכנות"
 
 msgctxt "#1044"
-msgid "Set plugin thumb"
-msgstr "הגדר תמונה ממוזערת להרחבה"
+msgid "Set plug-in thumb"
+msgstr "הגדר תמונה ממוזערת לתוסף"
 
 msgctxt "#1045"
 msgid "Add-on settings"
@@ -2943,8 +2942,8 @@ msgid "Other..."
 msgstr "אחר..."
 
 msgctxt "#1048"
-msgid "- Username"
-msgstr "- שם משתמש"
+msgid "Username"
+msgstr "שם משתמש"
 
 msgctxt "#1049"
 msgid "Script settings"
@@ -2957,6 +2956,30 @@ msgstr "סינגלים"
 msgctxt "#1051"
 msgid "Enter web address"
 msgstr "הזן כתובת אינטרנט"
+
+msgctxt "#1180"
+msgid "Proxy type"
+msgstr "סוג המתווך"
+
+msgctxt "#1181"
+msgid "HTTP"
+msgstr "HTTP"
+
+msgctxt "#1182"
+msgid "SOCKS4"
+msgstr "SOCKS4"
+
+msgctxt "#1183"
+msgid "SOCKS4A"
+msgstr "SOCKS4A"
+
+msgctxt "#1184"
+msgid "SOCKS5"
+msgstr "SOCKS5"
+
+msgctxt "#1185"
+msgid "SOCKS5 with remote dns resolving"
+msgstr "SOCKS5 עם פתירת שמות מתחם (DNS) מרוחקת"
 
 msgctxt "#1200"
 msgid "SMB client"
@@ -3086,6 +3109,10 @@ msgctxt "#1260"
 msgid "Announce these services to other systems via Zeroconf"
 msgstr "הכרז על שירותים אלו למערכות אחרות דרך Zeroconf"
 
+msgctxt "#1269"
+msgid "Allow volume control"
+msgstr "אפשר שליטת עוצמת קול"
+
 msgctxt "#1270"
 msgid "Allow XBMC to receive AirPlay content"
 msgstr "אפשר ל-XBMC לקבל תכני AirPlay"
@@ -3095,12 +3122,16 @@ msgid "Device name"
 msgstr "שם התקן"
 
 msgctxt "#1272"
-msgid "- Use password protection"
-msgstr "- השתמש בהגנת סיסמא"
+msgid "Use password protection"
+msgstr "שימוש בהגנה בססמה"
 
 msgctxt "#1273"
 msgid "AirPlay"
 msgstr "AirPlay"
+
+msgctxt "#1274"
+msgid "AirTunes"
+msgstr "AirTunes"
 
 msgctxt "#1275"
 msgid "Filter %s"
@@ -3354,10 +3385,6 @@ msgctxt "#2101"
 msgid "Newer version needed - See log"
 msgstr "יש צורך בגרסא חדשה - עיין בלוג"
 
-msgctxt "#4501"
-msgid "Enable LCD/VFD"
-msgstr "הפעל LCD/VFD"
-
 msgctxt "#10000"
 msgid "Home"
 msgstr "בית"
@@ -3462,17 +3489,109 @@ msgctxt "#10034"
 msgid "Settings - Profiles"
 msgstr "הגדרות - פרופילים"
 
+msgctxt "#10035"
+msgid "Reset"
+msgstr "איפוס"
+
+msgctxt "#10036"
+msgid "Basic"
+msgstr "בסיסי"
+
+msgctxt "#10037"
+msgid "Standard"
+msgstr "סטנדרטי"
+
+msgctxt "#10038"
+msgid "Advanced"
+msgstr "מתקדם"
+
+msgctxt "#10039"
+msgid "Expert"
+msgstr "מומחה"
+
 msgctxt "#10040"
-msgid "Addon browser"
-msgstr "דפדפן הרחבות"
+msgid "Add-on browser"
+msgstr "דפדפן הרחבה"
+
+msgctxt "#10041"
+msgid "Reset above settings to default"
+msgstr "אפס הגדרות במסך זה לברירת מחדל"
+
+msgctxt "#10042"
+msgid "Are you sure you want to reset the settings in this category?"
+msgstr "האם לאפס את ההגדרות בקטגוריה זו?"
+
+msgctxt "#10043"
+msgid "Help"
+msgstr "עזרה"
+
+msgctxt "#10044"
+msgid "No help available"
+msgstr "אין עזרה זמינה"
+
+msgctxt "#10046"
+msgid "No categories available"
+msgstr "אין קטגוריות זמינות"
 
 msgctxt "#10100"
-msgid "Yes/No dialog"
-msgstr "דיאלוג לא/כן"
+msgid "Yes/No dialogue"
+msgstr "דיאלוג כן/לא"
 
 msgctxt "#10101"
-msgid "Progress dialog"
+msgid "Progress dialogue"
 msgstr "דיאלוג התקדמות"
+
+msgctxt "#10126"
+msgid "File browser"
+msgstr "סייר הקבצים"
+
+msgctxt "#10128"
+msgid "Network setup"
+msgstr "הגדרת רשת"
+
+msgctxt "#10129"
+msgid "Media source"
+msgstr "מקור מדיה"
+
+msgctxt "#10130"
+msgid "Profile settings"
+msgstr "הגדרות הפרופיל"
+
+msgctxt "#10131"
+msgid "Lock settings"
+msgstr "הגדרות נעילה"
+
+msgctxt "#10132"
+msgid "Content settings"
+msgstr "הגדרות תוכן"
+
+msgctxt "#10134"
+msgid "Favourites"
+msgstr "מועדפים"
+
+msgctxt "#10135"
+msgid "Songs/Info"
+msgstr "שירים/פרטים"
+
+msgctxt "#10136"
+msgid "Smart playlist editor"
+msgstr "עורך רשימות השמעה חכמות"
+
+msgctxt "#10137"
+msgid "Smart playlist rule editor"
+msgstr "עורך כללים לרשימות השמעה חכמות"
+
+msgctxt "#10139"
+msgid "Pictures/Info"
+msgstr "תמונות/פרטים"
+
+msgctxt "#10140"
+msgid "Add-on settings"
+msgstr "הגדרות תוספים"
+
+msgctxt "#10146"
+msgid "Add-ons/Info"
+msgstr "תוספים/פרטים"
 
 msgctxt "#10210"
 msgid "Looking for subtitles..."
@@ -3563,15 +3682,15 @@ msgid "Movie info"
 msgstr "פרטי סרט"
 
 msgctxt "#12000"
-msgid "Select dialog"
-msgstr "בחר דיאלוג"
+msgid "Select dialogue"
+msgstr "דיאלוג בחירה"
 
 msgctxt "#12001"
 msgid "Music/Info"
 msgstr "מוסיקה/פרטים"
 
 msgctxt "#12002"
-msgid "Dialog OK"
+msgid "Dialogue OK"
 msgstr "דיאלוג אישור"
 
 msgctxt "#12003"
@@ -3587,11 +3706,11 @@ msgid "Fullscreen video"
 msgstr "וידאו במסך מלא"
 
 msgctxt "#12006"
-msgid "Audio visualization"
+msgid "Audio visualisation"
 msgstr "חיזוי אודיו"
 
 msgctxt "#12008"
-msgid "File stacking dialog"
+msgid "File stacking dialogue"
 msgstr "דיאלוג ערימת קבצים"
 
 msgctxt "#12009"
@@ -3751,8 +3870,8 @@ msgid "Password retry limit exceeded."
 msgstr "נסיונות כניסה כושלים רבים מדי."
 
 msgctxt "#12347"
-msgid "The system will now shut off."
-msgstr "המערכת כעת תכבה."
+msgid "The system will now power down."
+msgstr "המערכת תכבה כעת."
 
 msgctxt "#12348"
 msgid "Item locked"
@@ -3931,7 +4050,7 @@ msgid "Reboot"
 msgstr "הפעלה מחדש"
 
 msgctxt "#13014"
-msgid "Minimize"
+msgid "Minimise"
 msgstr "מזער"
 
 msgctxt "#13015"
@@ -3974,6 +4093,50 @@ msgctxt "#13025"
 msgid "Joystick unplugged"
 msgstr "ג'ויסטיק נותק"
 
+msgctxt "#13026"
+msgid "Try to wake remote servers on access"
+msgstr "לנסות להעיר את השרתים המרוחקים בעת הגישה אליהם"
+
+msgctxt "#13027"
+msgid "Wake on Lan (%s)"
+msgstr "להעיר דרך הרשת - Wake on LAN‏ (%s)"
+
+msgctxt "#13028"
+msgid "Waiting for network to connect..."
+msgstr "בהמתנה לחיבור הרשת..."
+
+msgctxt "#13029"
+msgid "Failed to execute Wake on Lan!"
+msgstr "ההפעלה דרך הרשת (Wake on LAN) נכשלה!"
+
+msgctxt "#13030"
+msgid "Waiting for server to wake up..."
+msgstr "בהמתנה להפעלת השרת..."
+
+msgctxt "#13031"
+msgid "Extended wait for server to wake up..."
+msgstr "המתנה מורחבת להפעלת השרת..."
+
+msgctxt "#13032"
+msgid "Waiting for services to launch..."
+msgstr "בהמתנה לטעינת השירותים..."
+
+msgctxt "#13033"
+msgid "MAC Discovery"
+msgstr "גילוי MAC"
+
+msgctxt "#13034"
+msgid "Updated for %s"
+msgstr "מעודכן עבור %s"
+
+msgctxt "#13035"
+msgid "Found for %s"
+msgstr "נמצא עבור %s"
+
+msgctxt "#13036"
+msgid "Failed for %s"
+msgstr "נכשל עבור %s"
+
 msgctxt "#13050"
 msgid "Running low on battery"
 msgstr "רץ על סוללה חלשה"
@@ -4011,8 +4174,8 @@ msgid "Save resolution?"
 msgstr "לשמור רזולוציה?"
 
 msgctxt "#13111"
-msgid "Would you like to keep this resolution?"
-msgstr "האם תרצה לשמור את הרזולוציה הזו?"
+msgid "Would you like to keep this change?"
+msgstr "האם לשמור שינויים?"
 
 msgctxt "#13112"
 msgid "High quality upscaling"
@@ -4054,9 +4217,9 @@ msgctxt "#13121"
 msgid "VDPAU HQ Upscaling level"
 msgstr "VDPAU HQ Upscaling level"
 
-msgctxt "#13122"
-msgid "VDPAU Studio level color conversion"
-msgstr "VDPAU Studio level color conversion"
+msgctxt "#13123"
+msgid "Keep skin?"
+msgstr "להישאר עם המעטפת ?"
 
 msgctxt "#13130"
 msgid "Blank other displays"
@@ -4111,7 +4274,7 @@ msgid "Primary DNS"
 msgstr "DNS ראשי"
 
 msgctxt "#13162"
-msgid "Initialize failed"
+msgid "Initialise failed"
 msgstr "אתחול נכשל"
 
 msgctxt "#13170"
@@ -4295,8 +4458,8 @@ msgid "Fan speed override"
 msgstr "בקרת מהירות מאורר"
 
 msgctxt "#13303"
-msgid "- Fonts"
-msgstr "- פונטים"
+msgid "Fonts"
+msgstr "גופנים"
 
 msgctxt "#13304"
 msgid "Enable flipping bi-directional strings"
@@ -4359,7 +4522,7 @@ msgid "Recursive slideshow"
 msgstr "מצגת תמונות רקורסיבית"
 
 msgctxt "#13319"
-msgid "Randomize"
+msgid "Randomise"
 msgstr "אקראי"
 
 msgctxt "#13320"
@@ -4471,8 +4634,8 @@ msgid "Scan for new content"
 msgstr "סרוק לתוכן חדש"
 
 msgctxt "#13350"
-msgid "Now playing..."
-msgstr "מנגן כעת..."
+msgid "Current playlist"
+msgstr "רשימת השמעה נוכחית"
 
 msgctxt "#13351"
 msgid "Album information"
@@ -4575,20 +4738,20 @@ msgid "Preset"
 msgstr "קביעון"
 
 msgctxt "#13389"
-msgid "There are no presets available\nfor this visualization"
-msgstr "אין קביעונים לחיזוי זה"
+msgid "There are no presets available\nfor this visualisation"
+msgstr "אין קביעונים קיימים\nעבור חיזוי זה"
 
 msgctxt "#13390"
-msgid "There are no settings available\nfor this visualization"
-msgstr "אין הגדרות לחיזוי זה"
+msgid "There are no settings available\nfor this visualisation"
+msgstr "אין הגדרות קיימות\nעבור חיזוי זה"
 
 msgctxt "#13391"
 msgid "Eject/Load"
 msgstr "הוצאה/טעינה"
 
 msgctxt "#13392"
-msgid "Use visualization if playing audio"
-msgstr "השתמש בחיזוי בזמן נגינת אודיו"
+msgid "Use visualisation if playing audio"
+msgstr "השתמש בחיזוי בניגון אודיו"
 
 msgctxt "#13393"
 msgid "Calculate size"
@@ -4758,6 +4921,78 @@ msgctxt "#13434"
 msgid "Play only this"
 msgstr "נגן רק את זה"
 
+msgctxt "#13435"
+msgid "Enable HQ Scalers for scalings above"
+msgstr "הפעל סרגלי מידה HQ עבור השינויים למעלה"
+
+msgctxt "#13436"
+msgid "Allow hardware acceleration (libstagefright)"
+msgstr "אפשר תאוצת חומרה (libstagefright)"
+
+msgctxt "#13438"
+msgid "Allow hardware acceleration (amcodec)"
+msgstr "אפשר האצת חומרה (amcodec)"
+
+msgctxt "#13439"
+msgid "Allow hardware acceleration (MediaCodec)"
+msgstr "אפשר האצת חומרה (MediaCodec)"
+
+msgctxt "#13441"
+msgid "Use Mpeg-2 VDPAU"
+msgstr "השתמש ב- Mpeg-2 VDPAU"
+
+msgctxt "#13442"
+msgid "Enable this option to use hardware acceleration for Mpeg-(1/2) codecs. If disabled the CPU will be used instead. Older Radeon Cards tend to segfault with this enabled."
+msgstr "הפעל אפשרות זו כדי להשתמש בתאוצת חומרה עבור מקודדים Mpeg-(1/2). אם מבוטל יעשה שימוש במעבד במקום. כרטיסי Radeon ישנים לא מתפקדים כראוי כשאפשרות זו מופעלת."
+
+msgctxt "#13443"
+msgid "Use Mpeg-4 VDPAU"
+msgstr "השתמש ב- Mpeg-4 VDPAU"
+
+msgctxt "#13444"
+msgid "Enable this option to use hardware acceleration for the Mpeg-4 codec. If disabled the CPU will be used instead. Some ION Hardware has problems with this being enabled by default."
+msgstr "הפעל אפשרות זו כדי להשתמש בתאוצת חומרה עבור מקודד Mpeg-4. אם מבוטל יעשה שימוש במעבד במקום. חלק חומרת IOS חווים בעיות כשאפשרות זו מופעלת."
+
+msgctxt "#13445"
+msgid "Use VC-1 VDPAU"
+msgstr "השתמש ב- VC-1 VDPAU"
+
+msgctxt "#13446"
+msgid "Enable this option to use hardware acceleration for VC-1 based codecs. If disabled the CPU will be used instead. AMD Hardware with VDPAU cannot decode VC-1 Simple."
+msgstr "הפעל אפשרות זו כדי להשתמש בתאוצת חומרה עבור מקודדים מבוססי VC-1. אם מבוטל יעשה שימוש במעבד במקום. חומרת AMD עם VDPAU אינם יכולים לקודד VC-1."
+
+msgctxt "#13447"
+msgid "Use Mpeg-2 VAAPI"
+msgstr "השתמש ב- Mpeg-2 VAAPI"
+
+msgctxt "#13448"
+msgid "Enable this option to use hardware acceleration for Mpeg-(1/2) codecs. If disabled the CPU will be used instead. Some Mpeg-2 Videos might have green artifacts."
+msgstr "הפעל אפשרות זו כדי להשתמש בתאוצת חומרה עבור מקודדים Mpeg-(1/2). אם מבוטל יעשה שימוש במעבד במקום. ישנם סרטי Mpeg-2 אשר מופיעים בהם סימנים ירוקים."
+
+msgctxt "#13449"
+msgid "Use Mpeg-4 VAAPI"
+msgstr "השתמש ב- Mpeg-4 VAAPI"
+
+msgctxt "#13450"
+msgid "Enable this option to use hardware acceleration for the Mpeg-4 codec. If disabled the CPU will be used instead."
+msgstr "הפעל אפשרות זו כדי להשתמש בתאוצת חומרה עבור מקודדי Mpeg-4. אם מבוטל יעשה שימוש במעבד במקום."
+
+msgctxt "#13451"
+msgid "Use VC-1 VAAPI"
+msgstr "השתמש ב- VC-1 VAAPI"
+
+msgctxt "#13452"
+msgid "Enable this option to use hardware acceleration for VC-1 based codecs. If disabled the CPU will be used instead. Especially VC-1 Interlaced fails hard on Intel hardware."
+msgstr "הפעל אפשרות זו כדי להשתמש בתאוצת חומרה עבור מקודדים מבוססי VC-1. אם מבוטל יעשה שימוש במעבד במקום. בחומרת אינטל תהיה בעיה עם VC-1 Interlaced."
+
+msgctxt "#13455"
+msgid "Software"
+msgstr "תוכנתי"
+
+msgctxt "#13456"
+msgid "Hardware accelerated"
+msgstr "באמצעות האצת חומרה"
+
 msgctxt "#13500"
 msgid "A/V sync method"
 msgstr "שיטת סינכרון ניגון למסך"
@@ -4773,10 +5008,6 @@ msgstr "שעון וידאו (Drop/Dupe audio)"
 msgctxt "#13503"
 msgid "Video clock (Resample audio)"
 msgstr "שעון וידאו"
-
-msgctxt "#13504"
-msgid "Maximum resample amount (%)"
-msgstr "כמות דגימה מקסימלית (%)"
 
 msgctxt "#13505"
 msgid "Resample quality"
@@ -4822,6 +5053,10 @@ msgctxt "#13515"
 msgid "No art"
 msgstr "מספר תמונה"
 
+msgctxt "#13516"
+msgid "Add art"
+msgstr "הוסף תמונה"
+
 msgctxt "#13550"
 msgid "Pause during refresh rate change"
 msgstr "עצור בזמן שינוי קצב רענון"
@@ -4837,6 +5072,14 @@ msgstr "%.1f שניה"
 msgctxt "#13553"
 msgid "%.1f Seconds"
 msgstr "%.1f שניות"
+
+msgctxt "#13554"
+msgid "%d Minute"
+msgstr "%d דקה"
+
+msgctxt "#13555"
+msgid "%d Minutes"
+msgstr "%d דקות"
 
 msgctxt "#13600"
 msgid "Apple remote"
@@ -4871,8 +5114,8 @@ msgid "Apple Remote Error"
 msgstr "שגיאת שלט Apple"
 
 msgctxt "#13621"
-msgid "Apple Remote support could be enabled."
-msgstr "יש אפשרות להפעיל תמיכה בשלט Apple"
+msgid "Apple Remote support could not be enabled."
+msgstr "תמיכת Apple Remote אינה יכולה להיות פעילה"
 
 msgctxt "#14000"
 msgid "Stack"
@@ -4966,41 +5209,21 @@ msgctxt "#14024"
 msgid "Enter the nearest large town"
 msgstr "הזן את העיר הגדולה הקרובה"
 
-msgctxt "#14025"
-msgid "Video/Audio/DVD cache - Harddisk"
-msgstr "מטמון וידאו/אודיו/DVD - דיסק קשיח"
-
 msgctxt "#14026"
 msgid "Video cache - DVD-ROM"
 msgstr "מטמון וידאו - DVD-ROM"
 
-msgctxt "#14027"
-msgid "- Local Network"
-msgstr "- רשת מקומית"
-
-msgctxt "#14028"
-msgid "- Internet"
-msgstr "- אינטרנט"
-
 msgctxt "#14030"
 msgid "Audio cache - DVD-ROM"
 msgstr "מטמון אודיו - DVD-ROM"
-
-msgctxt "#14031"
-msgid "- Local Network"
-msgstr "- רשמת מקומית"
-
-msgctxt "#14032"
-msgid "- Internet"
-msgstr "- אינטרנט"
 
 msgctxt "#14034"
 msgid "DVD cache - DVD-ROM"
 msgstr "מטמון DVD - DVD-ROM"
 
 msgctxt "#14035"
-msgid "- Local Network"
-msgstr "- רשת מקומית"
+msgid "Local Network"
+msgstr "רשת מקומית"
 
 msgctxt "#14036"
 msgid "Services"
@@ -5151,8 +5374,8 @@ msgid "Remove from favourites"
 msgstr "הסר ממועדפים"
 
 msgctxt "#14078"
-msgid "- Colours"
-msgstr "- צבעים"
+msgid "Colours"
+msgstr "צבעים"
 
 msgctxt "#14079"
 msgid "Timezone country"
@@ -5238,6 +5461,18 @@ msgctxt "#14100"
 msgid "Stop ripping CD"
 msgstr "עצור העתקת דיסק"
 
+msgctxt "#14101"
+msgid "Acceleration"
+msgstr "האצה"
+
+msgctxt "#15012"
+msgid "Unavailable source"
+msgstr "מקור לא זמין"
+
+msgctxt "#15014"
+msgid "Keep"
+msgstr "שמור"
+
 msgctxt "#15015"
 msgid "Remove"
 msgstr "הסר"
@@ -5291,8 +5526,8 @@ msgid "Skin default"
 msgstr "ברירת מחדל של המעטפת"
 
 msgctxt "#15111"
-msgid "- Theme"
-msgstr "- ערכת נושא"
+msgid "Theme"
+msgstr "ערכת נושא"
 
 msgctxt "#15112"
 msgid "Default theme"
@@ -5302,30 +5537,6 @@ msgctxt "#15200"
 msgid "Last.fm"
 msgstr "LastFM"
 
-msgctxt "#15201"
-msgid "Submit songs to Last.fm"
-msgstr "שלח שירים לשירות LastFM"
-
-msgctxt "#15202"
-msgid "Last.fm username"
-msgstr "LastFM משתמש"
-
-msgctxt "#15203"
-msgid "Last.fm password"
-msgstr "LastFM סיסמא"
-
-msgctxt "#15204"
-msgid "Unable to handshake: sleeping..."
-msgstr "לחיצת ידיים נכשלה: שינה..."
-
-msgctxt "#15205"
-msgid "Please update XBMC"
-msgstr "XBMC אנא עדכן"
-
-msgctxt "#15206"
-msgid "Bad authorization: Check username and password"
-msgstr "הרשאה שגויה: בדוק שם ומשתמש וסיסמא"
-
 msgctxt "#15207"
 msgid "Connected"
 msgstr "מחובר"
@@ -5334,29 +5545,9 @@ msgctxt "#15208"
 msgid "Not connected"
 msgstr "לא מחובר"
 
-msgctxt "#15209"
-msgid "Submit interval %i"
-msgstr "השהיית שליחה %i"
-
-msgctxt "#15210"
-msgid "Cached %i songs"
-msgstr "אגר %i שירים"
-
-msgctxt "#15211"
-msgid "Submitting..."
-msgstr "שולח..."
-
-msgctxt "#15212"
-msgid "Submitting in %i secs"
-msgstr "שולח בעוד %i שניות"
-
 msgctxt "#15213"
 msgid "Play using..."
 msgstr "נגן באמצעות..."
-
-msgctxt "#15214"
-msgid "Use smoothed A/V synchronization"
-msgstr "השתמש בסנכרון A/V חלק"
 
 msgctxt "#15215"
 msgid "Hide file names in thumbs view"
@@ -5365,218 +5556,6 @@ msgstr "הסתר שמות קבצים בתצוגת תמונות ממוזערות"
 msgctxt "#15216"
 msgid "Play in party mode"
 msgstr "נגן במצב מסיבה"
-
-msgctxt "#15217"
-msgid "Submit songs to Libre.fm"
-msgstr "שלח שירים לשירות Libre.fm"
-
-msgctxt "#15218"
-msgid "Libre.fm username"
-msgstr "Libre.fm משתמש"
-
-msgctxt "#15219"
-msgid "Libre.fm password"
-msgstr "Libre.fm סיסמא"
-
-msgctxt "#15220"
-msgid "Libre.fm"
-msgstr "Libre.fm"
-
-msgctxt "#15221"
-msgid "Song submission"
-msgstr "הגשת שיר"
-
-msgctxt "#15250"
-msgid "Submit Last.fm radio to Last.fm"
-msgstr "שלח Last.fm אל Last.fm"
-
-msgctxt "#15251"
-msgid "Connecting to Last.fm..."
-msgstr "מתחבר אל Last.fm..."
-
-msgctxt "#15252"
-msgid "Selecting station..."
-msgstr "בחירת תחנה..."
-
-msgctxt "#15253"
-msgid "Search similar artists..."
-msgstr "חפש אמנים דומים..."
-
-msgctxt "#15254"
-msgid "Search similar tags..."
-msgstr "חפש תגיות דומות..."
-
-msgctxt "#15255"
-msgid "Your profile (%name%)"
-msgstr "הפרופיל שלך (%name%)"
-
-msgctxt "#15256"
-msgid "Overall top tags"
-msgstr "תגיות במקומות הראשונים"
-
-msgctxt "#15257"
-msgid "Top artists for tag %name%"
-msgstr "%name% אמנים מובילים עבור תגית %name%"
-
-msgctxt "#15258"
-msgid "Top albums for tag %name%"
-msgstr "אלבומים מובילים עבור תגית %name%"
-
-msgctxt "#15259"
-msgid "Top tracks for tag %name%"
-msgstr "רצועות מובילות עבור תגית %name% "
-
-msgctxt "#15260"
-msgid "Listen to tag %name% Last.fm radio"
-msgstr "האזן לתגית %name% Last.fm"
-
-msgctxt "#15261"
-msgid "Similar artists as %name%"
-msgstr "אמנים דומים ל%name%"
-
-msgctxt "#15262"
-msgid "Top %name% albums"
-msgstr "%name% האלבומים המובילים"
-
-msgctxt "#15263"
-msgid "Top %name% tracks"
-msgstr "%name% הרצועות המובילות"
-
-msgctxt "#15264"
-msgid "Top %name% tags"
-msgstr "%name% התגיות המובילות"
-
-msgctxt "#15265"
-msgid "Biggest fans of %name%"
-msgstr "המעריצים הגדולים של %name%"
-
-msgctxt "#15266"
-msgid "Listen to %name% fans Last.fm radio"
-msgstr "האזן למעריצי %name% רדיו Last.fm"
-
-msgctxt "#15267"
-msgid "Listen to %name% similar artists Last.fm radio"
-msgstr "האזן לאמנים דומים last.fm %name%"
-
-msgctxt "#15268"
-msgid "Top artists for user %name%"
-msgstr "האמנים הנבחרים של משתמש %name%"
-
-msgctxt "#15269"
-msgid "Top albums for user %name%"
-msgstr "האלבומים הנבחרים של משתמש %name%"
-
-msgctxt "#15270"
-msgid "Top tracks for user %name%"
-msgstr "הרצועות הנבחרות של משתמש %name%"
-
-msgctxt "#15271"
-msgid "Friends of user %name%"
-msgstr "חברים של משתמש %name%"
-
-msgctxt "#15272"
-msgid "Neighbours of user %name%"
-msgstr "שכנים של משתמש %name%"
-
-msgctxt "#15273"
-msgid "Weekly artist chart for %name%"
-msgstr "המצעד השבועי של אמן %name%"
-
-msgctxt "#15274"
-msgid "Weekly album chart for %name%"
-msgstr "המצעד השבועי של אלבום %name%"
-
-msgctxt "#15275"
-msgid "Weekly track chart for %name%"
-msgstr "המצעד השבועי של רצועת %name%"
-
-msgctxt "#15276"
-msgid "Listen to %name%'s neighbours Last.fm radio"
-msgstr "האזן לשכנים של %name% רדיו Last.fm"
-
-msgctxt "#15277"
-msgid "Listen to %name%'s personal Last.fm radio"
-msgstr "האזן להעדפות האישיות של %name% רדיו Last.fm"
-
-msgctxt "#15278"
-msgid "Listen to %name%'s mix Last.fm radio"
-msgstr "האזן לרצועות האהובות של %name% רדיו Last.fm"
-
-msgctxt "#15279"
-msgid "Retrieving list from Last.fm..."
-msgstr "שולף רשימה מ last.fm..."
-
-msgctxt "#15280"
-msgid "Can't retrieve list from Last.fm..."
-msgstr "בעיה בקבלת רשימה מ last.fm..."
-
-msgctxt "#15281"
-msgid "Enter an artist name to find related ones"
-msgstr "הזן שם אמן למציאת אמנים דומים"
-
-msgctxt "#15282"
-msgid "Enter a tag name to find similar ones"
-msgstr "הזן תגית למציאת שירים דומים"
-
-msgctxt "#15283"
-msgid "Tracks recently listened by %name%"
-msgstr "רצועות שנשמעו לאחרונה ע\"י %name%"
-
-msgctxt "#15284"
-msgid "Listen to %name%'s recommendations Last.fm radio"
-msgstr "האזן להמלצות %name%'s רדיו Last.FM"
-
-msgctxt "#15285"
-msgid "Top tags for user %name%"
-msgstr "התגיות המובילות למשתמש %name%"
-
-msgctxt "#15287"
-msgid "Do you want to add the current track to your loved tracks?"
-msgstr "האם ברצונך להוסיף את השיר הנוכחי לרשימת האהובים?"
-
-msgctxt "#15288"
-msgid "Do you want to ban the current track?"
-msgstr "האם אתה רוצה להחרים את השיר הנוכחי?"
-
-msgctxt "#15289"
-msgid "Added to your loved tracks: '%s'."
-msgstr "הוסף לרשימת השירים האהובים: '%s'."
-
-msgctxt "#15290"
-msgid "Could not add '%s' to your loved tracks."
-msgstr "לא יכול להוסיף את '%s'  לרשימת שירים אהובים"
-
-msgctxt "#15291"
-msgid "Banned: '%s'."
-msgstr "החרם '%s'."
-
-msgctxt "#15292"
-msgid "Could not ban '%s'."
-msgstr "לא יכול להחרים '%s'."
-
-msgctxt "#15293"
-msgid "Tracks recently loved by %name%"
-msgstr "שירים אהובים שנוספו לאחרונה לפי %name%"
-
-msgctxt "#15294"
-msgid "Tracks recently banned by %name%"
-msgstr "שירים שהוחרמו לאחרונה לפי %name%"
-
-msgctxt "#15295"
-msgid "Remove from loved tracks"
-msgstr "הסר מרשימת שירים אהובים"
-
-msgctxt "#15296"
-msgid "Un-ban"
-msgstr "בטל החרמה"
-
-msgctxt "#15297"
-msgid "Do you want to remove this track from your loved tracks?"
-msgstr "האם אתה רוצה להסיר את השיר מרשימת שירים אהובים?"
-
-msgctxt "#15298"
-msgid "Do you want to un-ban this track?"
-msgstr "האם אתה רוצה לבטל החרמת שיר?"
 
 msgctxt "#15300"
 msgid "Path not found or invalid"
@@ -5711,7 +5690,7 @@ msgid "No matching songs in the library."
 msgstr "לא נמצאו שירים מתאימים במסד הנתונים."
 
 msgctxt "#16032"
-msgid "Could not initialize database."
+msgid "Could not initialise database."
 msgstr "אתחול מסד הנתונים נכשל."
 
 msgctxt "#16033"
@@ -5773,6 +5752,14 @@ msgstr "סמן כלא כנצפה"
 msgctxt "#16105"
 msgid "Edit title"
 msgstr "ערוך כותרת"
+
+msgctxt "#16106"
+msgid "Manage..."
+msgstr "נהל..."
+
+msgctxt "#16107"
+msgid "Edit sort title"
+msgstr "ערוך כותרת מיון"
 
 msgctxt "#16200"
 msgid "Operation was aborted"
@@ -5862,10 +5849,6 @@ msgctxt "#16314"
 msgid "Inverse Telecine"
 msgstr "Inverse Telecine"
 
-msgctxt "#16315"
-msgid "Lanczos3 optimized"
-msgstr "Lanczos3 optimized"
-
 msgctxt "#16316"
 msgid "Auto"
 msgstr "אוטומטי"
@@ -5894,17 +5877,17 @@ msgctxt "#16322"
 msgid "Spline36"
 msgstr "Spline36"
 
-msgctxt "#16323"
-msgid "Spline36 optimized"
-msgstr "Spline36 optimized"
-
 msgctxt "#16324"
 msgid "Software Blend"
 msgstr "Software Blend"
 
 msgctxt "#16325"
-msgid "Auto - ION Optimized"
-msgstr "אוטו' - ION מיטבי"
+msgid "VDPAU - Bob"
+msgstr "VDPAU - Bob"
+
+msgctxt "#16326"
+msgid "DXVA-HD"
+msgstr "DXVA-HD"
 
 msgctxt "#16400"
 msgid "Post-processing"
@@ -5944,7 +5927,7 @@ msgstr "מצא תכנות דומות"
 
 msgctxt "#19004"
 msgid "Importing EPG from clients"
-msgstr "מייבא EPG מקליינטים"
+msgstr "מייבא לוח שידורים מקליינטים"
 
 msgctxt "#19005"
 msgid "PVR stream information"
@@ -5999,8 +5982,8 @@ msgid "TV recordings"
 msgstr "הקלטת טלוויזיה"
 
 msgctxt "#19018"
-msgid "Default folder for PVR thumbnails"
-msgstr "תיקית ברירת מחדל עבור תמונות ממוזערות PVR"
+msgid "Folder with channel icons"
+msgstr "תיקיה עם סמלי ערוץ"
 
 msgctxt "#19019"
 msgid "Channels"
@@ -6040,7 +6023,7 @@ msgstr "אין תוצאות חיפוש"
 
 msgctxt "#19028"
 msgid "No EPG entries"
-msgstr "אין ערכי EPG"
+msgstr "אין ערכי לוח שידורים"
 
 msgctxt "#19029"
 msgid "Channel"
@@ -6067,8 +6050,8 @@ msgid "Already started recording on this channel"
 msgstr "ההקלטה כבר התחילה בערוץ זה"
 
 msgctxt "#19035"
-msgid "This channel cannot be played. Check the log for details."
-msgstr "ערוץ זה אינו ניתן להפעלה. בדוק יומן רישום לפרטים."
+msgid "%s could not be played. Check the log for details."
+msgstr "לא ניתן לנגן את %s. בדוק את יומן הרישום למידע."
 
 msgctxt "#19036"
 msgid "This recording cannot be played. Check the log for details."
@@ -6188,7 +6171,11 @@ msgstr "עבור לסיום"
 
 msgctxt "#19065"
 msgid "Default EPG window"
-msgstr "חלון EPG ברירת מחדל"
+msgstr "חלון לוח שידורים ברירת מחדל"
+
+msgctxt "#19066"
+msgid "Channel icons"
+msgstr "סמלי ערוץ"
 
 msgctxt "#19067"
 msgid "This event is already being recorded."
@@ -6200,15 +6187,19 @@ msgstr "ההקלטה אינה ניתנת למחיקה.אנא בדוק יומן �
 
 msgctxt "#19069"
 msgid "EPG"
-msgstr "EPG"
+msgstr "לוח שידורים EPG"
+
+msgctxt "#19070"
+msgid "Go to now"
+msgstr "גש עכשיו אל"
 
 msgctxt "#19071"
 msgid "EPG update interval"
-msgstr "השהיית עדכון EPG"
+msgstr "השהיית עדכון לוח שידורים"
 
 msgctxt "#19072"
 msgid "Do not store the EPG in the database"
-msgstr "אל תאחסן את ה- EPG במסד הנתונים"
+msgstr "אל תאחסן את הלוח שידורים במסד הנתונים"
 
 msgctxt "#19073"
 msgid "Delay channel switch"
@@ -6314,6 +6305,18 @@ msgctxt "#19098"
 msgid "Warning"
 msgstr "אזהרה"
 
+msgctxt "#19099"
+msgid "Service"
+msgstr "שירות"
+
+msgctxt "#19100"
+msgid "Mux"
+msgstr "Mux"
+
+msgctxt "#19101"
+msgid "Provider"
+msgstr "ספק"
+
 msgctxt "#19102"
 msgid "Please switch to another channel."
 msgstr "אנא החלף לערוץ אחר."
@@ -6363,7 +6366,7 @@ msgid "Cannot use PVR functions while searching."
 msgstr "אין אפשרות להשתמש בתוכנות ה-PVR בעת חיפוש."
 
 msgctxt "#19119"
-msgid "On which server you want to search?"
+msgid "On which server do you want to search?"
 msgstr "באיזה שרת ברצונך לבצע חיפוש?"
 
 msgctxt "#19120"
@@ -6559,7 +6562,7 @@ msgid "Timeout when starting playback"
 msgstr "פסק זמן בתחילת ניגון."
 
 msgctxt "#19171"
-msgid "Start playback minimized"
+msgid "Start playback minimised"
 msgstr "התחל בצפיה בחלון ממוזער"
 
 msgctxt "#19172"
@@ -6620,18 +6623,18 @@ msgstr "כל המידע בבסיס הנתונים של PVR נמחק"
 
 msgctxt "#19187"
 msgid "Reset the EPG database"
-msgstr "אפס את מסד הנתונים של מדריך השידורים"
+msgstr "אפס את מסד הנתונים של לוח שידורים"
 
 msgctxt "#19188"
 msgid "EPG is being reset"
-msgstr "מדריך שידורים מתאפס"
+msgstr "לוח שידורים מתאפס"
 
 msgctxt "#19189"
 msgid "Continue last channel on startup"
 msgstr "בהפעלה מחדש התחל בערוץ אחרון שנצפה"
 
 msgctxt "#19190"
-msgid "Minimized"
+msgid "Minimised"
 msgstr "ממוזער"
 
 msgctxt "#19191"
@@ -6672,7 +6675,7 @@ msgstr "מנהל ערוצים"
 
 msgctxt "#19200"
 msgid "EPG source:"
-msgstr "מקור מדריך שידורים"
+msgstr "מקור לוח שידורים"
 
 msgctxt "#19201"
 msgid "Channel name:"
@@ -6696,7 +6699,7 @@ msgstr "ניהול קבוצות"
 
 msgctxt "#19206"
 msgid "Activate EPG:"
-msgstr "הפעל מדריך שידורים:"
+msgstr "הפעל לוח שידורים:"
 
 msgctxt "#19207"
 msgid "Group:"
@@ -6754,17 +6757,9 @@ msgctxt "#19220"
 msgid "Channels in"
 msgstr "ערוצים כלולים"
 
-msgctxt "#19221"
-msgid "Synchronise channel groups with backends"
-msgstr "סנכרן קבוצות ערוצים עם ממשק אחורי"
-
 msgctxt "#19222"
 msgid "EPG"
-msgstr "EPG"
-
-msgctxt "#19223"
-msgid "No PVR add-on could be enabled. Check your settings or the log for more info."
-msgstr "אף תוסף PVR לא הופעל. בדוק את ההגדרות או בדוק יומן רישום לפרטים נוספים."
+msgstr "לוח שידורים EPG"
 
 msgctxt "#19224"
 msgid "Recording aborted"
@@ -6791,8 +6786,8 @@ msgid "Close channel OSD after switching channels"
 msgstr "סגור מידע ערוץ על מסך אחרי מעבר ערוץ"
 
 msgctxt "#19230"
-msgid "Prevent EPG updates while playing a TV stream"
-msgstr "מנע עדכוני לוח שידורים בזמן צפיה בשידורחי"
+msgid "Prevent EPG updates during playback"
+msgstr "המנע מעדכון לוח שידורים בעת ניגון"
 
 msgctxt "#19231"
 msgid "Always use the channel order from the backend(s)"
@@ -6807,8 +6802,8 @@ msgid "Display a notification on timer updates"
 msgstr "הצג הודעה על עדכון תזמון הקלטה"
 
 msgctxt "#19234"
-msgid "Use backend channels numbers (only works with 1 enabled PVR addon)"
-msgstr "השתמש בערוצים ממשק אחורי(עובד עם תוסף PVR אחד בלבד)"
+msgid "Use backend channels numbers (only works with 1 enabled PVR Add-on)"
+msgstr "השתמש במספרי ערוצים מממשק אחורי (עובד רק אם הרחבה 1 של PVR מופעלת)"
 
 msgctxt "#19235"
 msgid "PVR manager is starting up"
@@ -6831,16 +6826,16 @@ msgid "Starting background threads"
 msgstr "מתחיל מחרוזות ברקע"
 
 msgctxt "#19240"
-msgid "No PVR add-on enabled"
-msgstr "לא הופעל אף תוסף PVR"
+msgid "No PVR Add-on enabled"
+msgstr "אין הרחבת PVR מופעלת"
 
 msgctxt "#19241"
 msgid "The PVR manager has been enabled without any"
 msgstr "מנהל PVR אותחל ללא כל תוסף PVR."
 
 msgctxt "#19242"
-msgid "enabled PVR add-on. Enable at least one add-on"
-msgstr "אתחל לפחות תוסף PVR אחד "
+msgid "enabled PVR Add-on. Enable at least one Add-on"
+msgstr "הרחבת PVR מופעלת. הפעל לפחות הרחבה אחת"
 
 msgctxt "#19243"
 msgid "in order to use the PVR functionality."
@@ -6955,16 +6950,16 @@ msgid "* All recordings"
 msgstr "* כל ההקלטות"
 
 msgctxt "#19271"
-msgid "No PVR add-ons could be found"
-msgstr "לא נמצא כל תוסף PVR"
+msgid "No PVR Add-ons could be found"
+msgstr "לא נמצאו הרחבות PVR"
 
 msgctxt "#19272"
 msgid "You need a tuner, backend software, and an"
 msgstr "אתה צריך כרטיס טלוויזיה,תוכנת ממשק אחורי, ובנוסף"
 
 msgctxt "#19273"
-msgid "add-on for the backend to be able to use PVR."
-msgstr "תוסף לקישור ממשק אחורי על מנת להשתמש ב PVR"
+msgid "Add-on for the backend to be able to use PVR."
+msgstr "הרחבה עבור ממשק אחורי שתאפשר שימוש ב-PVR."
 
 msgctxt "#19274"
 msgid "Please visit xbmc.org/pvr to learn more."
@@ -6997,6 +6992,22 @@ msgstr "הגדרות ספציפיות לקליינט"
 msgctxt "#19281"
 msgid "Confirm channel switches by pressing OK"
 msgstr "אשרר בטול מעברים ע״י לחיצה על אישור"
+
+msgctxt "#19282"
+msgid "Current icon"
+msgstr "סמל נוכחי"
+
+msgctxt "#19283"
+msgid "No icon"
+msgstr "ללא סמל"
+
+msgctxt "#19284"
+msgid "Choose icon"
+msgstr "בחר סמל"
+
+msgctxt "#19285"
+msgid "Browse for icon"
+msgstr "עיין לסמל"
 
 msgctxt "#19499"
 msgid "Other/Unknown"
@@ -7283,8 +7294,8 @@ msgid "Motoring"
 msgstr "נהיגה"
 
 msgctxt "#19648"
-msgid "Fitness &amp; Health"
-msgstr "כושר &amp;בריאות"
+msgid "Fitness & Health"
+msgstr "בריאות וספורט"
 
 msgctxt "#19649"
 msgid "Cooking"
@@ -7307,7 +7318,7 @@ msgid "Original Language"
 msgstr "שפה מקורית"
 
 msgctxt "#19662"
-msgid "Black &amp; White"
+msgid "Black & White"
 msgstr "שחור ולבן"
 
 msgctxt "#19663"
@@ -7635,12 +7646,12 @@ msgid "Show system info"
 msgstr "הצג פרטים אודות המערכת"
 
 msgctxt "#20086"
-msgid "Show available disc space C: E: F:"
-msgstr "הצג מקום פנוי בכונן C: E: F:"
+msgid "Show available disk space C: E: F:"
+msgstr "הצג שטח אחסון פנוי C: E: F:"
 
 msgctxt "#20087"
-msgid "Show available disc space E: F: G:"
-msgstr "הצג מקום פנוי בכונן E: F: G:"
+msgid "Show available disk space E: F: G:"
+msgstr "הצג שטח אחסון פנוי E: F: G:"
 
 msgctxt "#20088"
 msgid "Weather info"
@@ -7727,8 +7738,8 @@ msgid "Root"
 msgstr "ראשי"
 
 msgctxt "#20109"
-msgid "- Zoom"
-msgstr "- הגדלה"
+msgid "Zoom"
+msgstr "תקריב"
 
 msgctxt "#20110"
 msgid "UPnP settings"
@@ -8028,7 +8039,7 @@ msgstr "סובב תמונות בעזרת פרטי EXIF"
 
 msgctxt "#20185"
 msgid "Use poster view styles for TV shows"
-msgstr "השתמש בפוסטרים לתוכניות טלויזיה"
+msgstr "השתמש בפוסטרים לסדרות"
 
 msgctxt "#20186"
 msgid "Please wait"
@@ -8085,6 +8096,10 @@ msgstr "לא נימצא אמן!"
 msgctxt "#20199"
 msgid "Downloading artist info failed"
 msgstr "הורדת פרטי אמן נכשלה"
+
+msgctxt "#20220"
+msgid "Override song tags with online information"
+msgstr "דרוס תגיות שיר עם מידע מהאינטרנט"
 
 msgctxt "#20240"
 msgid "Android music"
@@ -8186,17 +8201,9 @@ msgctxt "#20309"
 msgid "Make new folder"
 msgstr "צור תיקיה חדשה"
 
-msgctxt "#20310"
-msgid "Dim LCD on playback"
-msgstr "עמעם LCD בזמן ניגון"
-
 msgctxt "#20311"
 msgid "Unknown or onboard (protected)"
 msgstr "לא ידוע או על הלוח (מוגן)"
-
-msgctxt "#20312"
-msgid "Dim LCD on paused"
-msgstr "עמעם LCD בזמן הפסקה"
 
 msgctxt "#20314"
 msgid "Videos - Library"
@@ -8216,7 +8223,7 @@ msgstr "סורק מוסיקה תוך שימוש ב %s"
 
 msgctxt "#20319"
 msgid "Scanning tvshows using %s"
-msgstr "סורק תוכניות טלויזיה תוך שימוש ב %s"
+msgstr "סורק סדרות תוך שימוש ב %s"
 
 msgctxt "#20320"
 msgid "Scanning artists using %s"
@@ -8225,6 +8232,10 @@ msgstr "סורק אמנים תוך שימוש ב %s"
 msgctxt "#20321"
 msgid "Scanning albums using %s"
 msgstr "סורק אלבומים תוך שימוש ב %s"
+
+msgctxt "#20323"
+msgid "Movie plot"
+msgstr "תקציר סרט"
 
 msgctxt "#20324"
 msgid "Play part..."
@@ -8239,7 +8250,7 @@ msgid "This will reset the calibration values for %s"
 msgstr "זה יאפס את ערכי הכיול ל %s"
 
 msgctxt "#20327"
-msgid "to it's default values."
+msgid "to its default values."
 msgstr "לערכי ברירת המחדל שלו"
 
 msgctxt "#20328"
@@ -8304,7 +8315,7 @@ msgstr "סרטים"
 
 msgctxt "#20343"
 msgid "TV shows"
-msgstr "תוכניות טלוויזיה"
+msgstr "סדרות"
 
 msgctxt "#20344"
 msgid "This directory contains"
@@ -8336,7 +8347,7 @@ msgstr "הצבעות"
 
 msgctxt "#20351"
 msgid "TV show information"
-msgstr "פרטי תוכנית טלוויזיה"
+msgstr "פרטי סדרה"
 
 msgctxt "#20352"
 msgid "Episode information"
@@ -8344,7 +8355,7 @@ msgstr "פרטי פרק"
 
 msgctxt "#20353"
 msgid "Loading TV show details"
-msgstr "טוען פרטי תוכנית טלוויזיה"
+msgstr "טוען פרטי סדרה"
 
 msgctxt "#20354"
 msgid "Fetching episode guide"
@@ -8356,11 +8367,11 @@ msgstr "טוען פרטים עבור פרקים בתיקייה"
 
 msgctxt "#20356"
 msgid "Select TV show:"
-msgstr "בחר תוכנית טלוויזיה:"
+msgstr "בחר סדרה:"
 
 msgctxt "#20357"
 msgid "Enter the TV show name"
-msgstr "הזן שם תוכנית טלויזיה"
+msgstr "הזן שם סדרה"
 
 msgctxt "#20358"
 msgid "Season %i"
@@ -8384,11 +8395,11 @@ msgstr "הסר פרק מספריה"
 
 msgctxt "#20363"
 msgid "Remove TV show from library"
-msgstr "הסר תוכנית טלויזיה מספריה"
+msgstr "הסר סדרה מספריה"
 
 msgctxt "#20364"
 msgid "TV show"
-msgstr "תוכנית טלויזיה"
+msgstr "סדרה"
 
 msgctxt "#20365"
 msgid "Episode plot"
@@ -8440,7 +8451,7 @@ msgstr "כותרת מקורית"
 
 msgctxt "#20377"
 msgid "Refresh TV show information"
-msgstr "רענן פרטי תוכנית טלויזיה"
+msgstr "רענן פרטי סדרה"
 
 msgctxt "#20378"
 msgid "Refresh info for all episodes?"
@@ -8448,7 +8459,7 @@ msgstr "רענן פרטים לכל הפרקים?"
 
 msgctxt "#20379"
 msgid "Selected folder contains a single TV show"
-msgstr "תיקיה מכילה תוכנית טלויזיה בודדת"
+msgstr "תיקיה מכילה סדרה בודדת"
 
 msgctxt "#20380"
 msgid "Exclude selected folder from scans"
@@ -8458,21 +8469,17 @@ msgctxt "#20381"
 msgid "Specials"
 msgstr "ספיישלים"
 
-msgctxt "#20382"
-msgid "Automatically grab season thumbs"
-msgstr "הורד אוטומטי תמונה ממוזערת לעונה"
-
 msgctxt "#20383"
 msgid "Selected folder contains a single video"
 msgstr "תיקייה מכילה וידאו בודד"
 
 msgctxt "#20384"
 msgid "Link to TV show"
-msgstr "קשר לתוכנית טלויזיה"
+msgstr "קשר לסדרה"
 
 msgctxt "#20385"
 msgid "Remove link to TV show"
-msgstr "הסר קישור לתוכנית טלויזיה"
+msgstr "הסר קישור לסדרה"
 
 msgctxt "#20386"
 msgid "Recently added movies"
@@ -8546,6 +8553,10 @@ msgctxt "#20403"
 msgid "Set actor thumb"
 msgstr "בחר תמונה ממוזערת לשחקן"
 
+msgctxt "#20404"
+msgid "Remove bookmark"
+msgstr "הסרת סימנייה"
+
 msgctxt "#20405"
 msgid "Remove episode bookmark"
 msgstr "הסר סימניית פרק"
@@ -8564,7 +8575,7 @@ msgstr "מוריד פרטי קליפ"
 
 msgctxt "#20409"
 msgid "Downloading TV show information"
-msgstr "מוריד פרטי תוכנית טלויזיה"
+msgstr "מוריד פרטי סדרה"
 
 msgctxt "#20410"
 msgid "Trailer"
@@ -8575,15 +8586,15 @@ msgid "Flatten"
 msgstr "שטח"
 
 msgctxt "#20412"
-msgid "Flatten TV shows"
-msgstr "שטח תוכניות טלויזיה"
+msgid "Flatten TV show seasons"
+msgstr "שטח עונות סדרה"
 
 msgctxt "#20413"
 msgid "Get fanart"
 msgstr "קבל פאנארט"
 
 msgctxt "#20414"
-msgid "Show Fanart in video and music libraries"
+msgid "Show fanart in video and music libraries"
 msgstr "הצג פאנארט בספריות וידאו ומוזיקה"
 
 msgctxt "#20415"
@@ -8597,6 +8608,10 @@ msgstr "שודר לראשונה"
 msgctxt "#20417"
 msgid "Writer"
 msgstr "כותב"
+
+msgctxt "#20418"
+msgid "Writers"
+msgstr "כותבים"
 
 msgctxt "#20419"
 msgid "Replace file names with library titles"
@@ -8661,6 +8676,10 @@ msgstr "חלץ תמונות ממוזערות ופרטי וידאו"
 msgctxt "#20434"
 msgid "Sets"
 msgstr "מארזים"
+
+msgctxt "#20435"
+msgid "Combine split video items"
+msgstr "אחד פריטי וידאו מפוצלים"
 
 msgctxt "#20436"
 msgid "Export actor thumbs?"
@@ -8742,6 +8761,10 @@ msgctxt "#20455"
 msgid "Listeners"
 msgstr "מאזינים"
 
+msgctxt "#20456"
+msgid "Flatten library hierarchy"
+msgstr "שטח היררכיית ספרייה"
+
 msgctxt "#20457"
 msgid "Movie set"
 msgstr "מארז סרטים"
@@ -8773,6 +8796,26 @@ msgstr "תגית עם השם '%s' קיימת כבר."
 msgctxt "#20464"
 msgid "Select %s"
 msgstr "בחר %s"
+
+msgctxt "#20465"
+msgid "Manage movie set"
+msgstr "ניהול מארז הסרטים"
+
+msgctxt "#20466"
+msgid "Select movie set"
+msgstr "בחירת מארז סרטים"
+
+msgctxt "#20467"
+msgid "No set (Remove from %s)"
+msgstr "אין מארז (הסרה מ־%s)"
+
+msgctxt "#20468"
+msgid "Add movie to a new set"
+msgstr "הוספת סרט למארז חדש"
+
+msgctxt "#20469"
+msgid "Keep current set (%s)"
+msgstr "שמירת המארז הנוכחי (%s)"
 
 msgctxt "#21330"
 msgid "Show hidden files and directories"
@@ -8814,6 +8857,18 @@ msgctxt "#21360"
 msgid "Share video and music libraries through UPnP"
 msgstr "שתף את ספריות הוידאו והמוסיקה דרך UPnP"
 
+msgctxt "#21361"
+msgid "Look for remote UPnP players"
+msgstr "חיפוש אחר נגני UPnP מרוחקים"
+
+msgctxt "#21362"
+msgid "Bookmark created"
+msgstr "נוצרה סימנייה"
+
+msgctxt "#21363"
+msgid "Episode Bookmark created"
+msgstr "נוצרה סימניית פרק"
+
 msgctxt "#21364"
 msgid "Edit media share"
 msgstr "ערוך שיתוף מדיה"
@@ -8823,8 +8878,8 @@ msgid "Remove media share"
 msgstr "הסר סיתוף מדיה"
 
 msgctxt "#21366"
-msgid "Subtitle folder"
-msgstr "תיקיית כתוביות"
+msgid "Custom subtitle folder"
+msgstr "תיקית כתוביות מותאמת אישית"
 
 msgctxt "#21367"
 msgid "Movie & alternate subtitle directory"
@@ -8835,7 +8890,7 @@ msgid "Override ASS/SSA subtitles fonts"
 msgstr "דלג על גופני כתוביות ASS/SSA"
 
 msgctxt "#21369"
-msgid "Enable mouse and Touch Screen support"
+msgid "Enable mouse and touch screen support"
 msgstr "אפשר תמיכה בעכבר ומסך מגע"
 
 msgctxt "#21370"
@@ -9016,15 +9071,15 @@ msgstr "סקרייפר ברירת מחדל לסרטים"
 
 msgctxt "#21414"
 msgid "Default tvshow scraper"
-msgstr "סקרייפר ברירת מחדל לתוכניות"
+msgstr "סקרייפר ברירת מחדל לסדרות"
 
 msgctxt "#21415"
 msgid "Default music video scraper"
 msgstr "סקרייפר ברירת מחדל למוסיקה"
 
 msgctxt "#21417"
-msgid "- Settings"
-msgstr "- הגדרות"
+msgid "Settings"
+msgstr "הגדרות"
 
 msgctxt "#21418"
 msgid "Multilingual"
@@ -9155,8 +9210,8 @@ msgid "Remote control sends keyboard presses"
 msgstr "שלט רחוק שולח לחיצות מקלדת"
 
 msgctxt "#21450"
-msgid "- Edit"
-msgstr "- עריכה"
+msgid "Edit"
+msgstr "עריכה"
 
 msgctxt "#21451"
 msgid "Internet connection required."
@@ -9186,9 +9241,17 @@ msgctxt "#21457"
 msgid "Watched episode count"
 msgstr "מונה פרקים שנצפו "
 
+msgctxt "#21458"
+msgid "Group by"
+msgstr "קיבוץ לפי"
+
+msgctxt "#21459"
+msgid "mixed"
+msgstr "מעורבב"
+
 msgctxt "#21460"
-msgid "Subtitle location"
-msgstr "מיקום הכתובית"
+msgid "Subtitle position on screen"
+msgstr "מיקום הכתובית על המסך"
 
 msgctxt "#21461"
 msgid "Fixed"
@@ -9221,6 +9284,10 @@ msgstr "%d עד %d"
 msgctxt "#21469"
 msgid "%s to %s"
 msgstr "%s עד %s"
+
+msgctxt "#21602"
+msgid "(External)"
+msgstr "(חיצוני)"
 
 msgctxt "#21800"
 msgid "File name"
@@ -9354,6 +9421,18 @@ msgctxt "#21843"
 msgid "Orientation"
 msgstr "התמצאות"
 
+msgctxt "#21857"
+msgid "Sub-location"
+msgstr "תת־מיקום"
+
+msgctxt "#21858"
+msgid "Image type"
+msgstr "סוג התמונה"
+
+msgctxt "#21859"
+msgid "Time created"
+msgstr "זמן היצירה"
+
 msgctxt "#21860"
 msgid "Supplemental categories"
 msgstr "קטגוריות נוספות"
@@ -9427,8 +9506,8 @@ msgid "Date created"
 msgstr "תאריך יצירה"
 
 msgctxt "#21878"
-msgid "Copyright flag"
-msgstr "דגל זכויות יוצרים"
+msgid "Urgency"
+msgstr "דחיפות"
 
 msgctxt "#21879"
 msgid "Country code"
@@ -9492,7 +9571,7 @@ msgstr "נולד"
 
 msgctxt "#21894"
 msgid "Formed"
-msgstr "הוקמו"
+msgstr "הוקם"
 
 msgctxt "#21895"
 msgid "Themes"
@@ -9527,8 +9606,8 @@ msgid "Hide progress of library updates"
 msgstr "תמיד עדכן ספרייה ברקע"
 
 msgctxt "#22002"
-msgid "- DNS suffix"
-msgstr "- DNS סיומת"
+msgid "DNS suffix"
+msgstr "סיומת DNS"
 
 msgctxt "#22003"
 msgid "%2.3fs"
@@ -9602,10 +9681,6 @@ msgctxt "#22020"
 msgid "Guide"
 msgstr "מדריך"
 
-msgctxt "#22021"
-msgid "Allowed error in aspect ratio to minimize black bars"
-msgstr "אפשר שגיאות ביחס גודל כדי להקטין פסים שחורים"
-
 msgctxt "#22022"
 msgid "Show video files in listings"
 msgstr "הצג קיבצי וידאו ברשימה"
@@ -9623,16 +9698,16 @@ msgid "Font"
 msgstr "פונט"
 
 msgctxt "#22031"
-msgid "- Size"
-msgstr "- גודל"
+msgid "Size"
+msgstr "גודל"
 
 msgctxt "#22032"
-msgid "- Colours"
-msgstr "- צבעים"
+msgid "Colours"
+msgstr "צבעים"
 
 msgctxt "#22033"
-msgid "- Charset"
-msgstr "- מערך תוים"
+msgid "Charset"
+msgstr "קידוד"
 
 msgctxt "#22034"
 msgid "Export karaoke titles as HTML"
@@ -9767,7 +9842,7 @@ msgid "Script"
 msgstr "סקריפט"
 
 msgctxt "#24010"
-msgid "Visualization"
+msgid "Visualisation"
 msgstr "חיזוי"
 
 msgctxt "#24011"
@@ -9804,7 +9879,7 @@ msgstr "שירותים"
 
 msgctxt "#24019"
 msgid "PVR clients"
-msgstr "קליינט PVR"
+msgstr "לקוחות PVR"
 
 msgctxt "#24020"
 msgid "Configure"
@@ -9819,6 +9894,10 @@ msgid "Enable"
 msgstr "הפעל"
 
 msgctxt "#24023"
+msgid "Disabled"
+msgstr "מנוטרל"
+
+msgctxt "#24024"
 msgid "Add-on disabled"
 msgstr "תוסף מנוטרל"
 
@@ -9891,24 +9970,28 @@ msgid "Available Updates"
 msgstr "עדכונים קיימים"
 
 msgctxt "#24044"
-msgid "Dependencies not met"
-msgstr "אין התאמה בתלויות"
+msgid "Dependencies not met. Please contact Add-on author."
+msgstr "קיימת בעיה בתאימות התוסף,פנה למפתח"
 
 msgctxt "#24045"
 msgid "Add-on does not have the correct structure"
 msgstr "להרחבה אין את המבנה הנכון"
 
 msgctxt "#24046"
-msgid "%s is used by the following installed add-on(s)"
-msgstr "%s בשימוש ע\"י ההרחבה/ות המותקנות הבאות"
+msgid "%s is used by the following installed Add-on(s)"
+msgstr "ההרחבה(ות) להלן עושות שימוש ב-%s"
 
 msgctxt "#24047"
-msgid "This add-on cannot be uninstalled"
-msgstr "התקן זה אינו ניתן להסרה"
+msgid "This Add-on cannot be uninstalled"
+msgstr "לא ניתן להסיר הרחבה זו"
 
 msgctxt "#24048"
 msgid "Rollback"
 msgstr "חזור לאחור"
+
+msgctxt "#24049"
+msgid "Incompatible"
+msgstr "איננו תואם"
 
 msgctxt "#24050"
 msgid "Available Add-ons"
@@ -10014,6 +10097,10 @@ msgctxt "#24090"
 msgid "Lock Add-on manager"
 msgstr "נעל מנהל הרחבות"
 
+msgctxt "#24091"
+msgid "This Add-on cannot be disabled"
+msgstr "לא ניתן לנטרל הרחבה זו"
+
 msgctxt "#24094"
 msgid "(current)"
 msgstr "(נוכחי)"
@@ -10021,10 +10108,6 @@ msgstr "(נוכחי)"
 msgctxt "#24095"
 msgid "(blacklisted)"
 msgstr "(רשימה שחורה)"
-
-msgctxt "#24096"
-msgid "Add-on has been marked as broken in repository."
-msgstr "ההרחבה מסומנת כלא תקינה במאגר"
 
 msgctxt "#24097"
 msgid "Would you like to disable it on your system?"
@@ -10054,6 +10137,66 @@ msgctxt "#24103"
 msgid "Skin is missing some files"
 msgstr "חסרים קבצים במעטפת"
 
+msgctxt "#24105"
+msgid "Pause when searching for subtitles"
+msgstr "השהה וידאו בעת חיפוש כתוביות"
+
+msgctxt "#24107"
+msgid "Searching for subtitles ..."
+msgstr "מחפש כתוביות ..."
+
+msgctxt "#24108"
+msgid "%d subtitles found"
+msgstr "%d כתוביות נמצאו"
+
+msgctxt "#24109"
+msgid "No subtitles found"
+msgstr "לא נמצאו כתוביות"
+
+msgctxt "#24110"
+msgid "Downloading subtitles ..."
+msgstr "מוריד כתוביות ..."
+
+msgctxt "#24111"
+msgid "Languages to download subtitles for"
+msgstr "הורדת כתוביות בשפות"
+
+msgctxt "#24113"
+msgid "Failed to download subtitle"
+msgstr "הורדת כתוביות נכשלה"
+
+msgctxt "#24114"
+msgid "No subtitle services installed"
+msgstr "לא מותקן שירות כתוביות"
+
+msgctxt "#24115"
+msgid "Subtitle storage location"
+msgstr "המיקום בו נשמרות הכתוביות"
+
+msgctxt "#24116"
+msgid "Default TV Service"
+msgstr "שירות טלוויזיה ברירת מחדל"
+
+msgctxt "#24118"
+msgid "Default Movie Service"
+msgstr "שירות סרטים ברירת מחדל"
+
+msgctxt "#24120"
+msgid "Manual search string"
+msgstr "חיפוש מחרוזת ידנית"
+
+msgctxt "#24121"
+msgid "Enter search string"
+msgstr "הזן מחרוזת חיפוש"
+
+msgctxt "#24122"
+msgid "Update all"
+msgstr "עדכן הכל"
+
+msgctxt "#24125"
+msgid "Custom location"
+msgstr "מיקום מותאם אישית"
+
 msgctxt "#25000"
 msgid "Notifications"
 msgstr "הודעות"
@@ -10067,8 +10210,8 @@ msgid "Select from all titles ..."
 msgstr "בחר מכל הכותרות ..."
 
 msgctxt "#25003"
-msgid "Show bluray menus"
-msgstr "הצג תפריטי בלוריי"
+msgid "Show Blu-ray menus"
+msgstr "הצג תפריטי Blu-ray"
 
 msgctxt "#25004"
 msgid "Play main title: %d"
@@ -10081,6 +10224,18 @@ msgstr "כותרת: %d"
 msgctxt "#25006"
 msgid "Select playback item"
 msgstr "בחר פריט השמעה"
+
+msgctxt "#25007"
+msgid "Chapters: %u - duration: %s"
+msgstr "פרקים: %u - משך: %s"
+
+msgctxt "#25008"
+msgid "Playback of Blu-ray failed"
+msgstr "ניגון Blu-ray נכשל"
+
+msgctxt "#25009"
+msgid "The menu of this Blu-ray is not supported"
+msgstr "התפריט של Blu-ray אינו נתמך"
 
 msgctxt "#29800"
 msgid "Library Mode"
@@ -10159,8 +10314,8 @@ msgid "Clips"
 msgstr "קליפים"
 
 msgctxt "#33017"
-msgid "Restart plugin to enable"
-msgstr "הפעל תוסף מחדש כדי להפעיל"
+msgid "Restart plug-in to enable"
+msgstr "אתחל תוסף כדי להפעיל"
 
 msgctxt "#33018"
 msgid "Tonight"
@@ -10382,6 +10537,10 @@ msgctxt "#33083"
 msgid "Enable custom script button"
 msgstr "הפעל כפתור סקריפט מותאם אישית"
 
+msgctxt "#33084"
+msgid "Auto login"
+msgstr "כניסה אוטומטית"
+
 msgctxt "#33100"
 msgid "Failed to start"
 msgstr "אתחול נכשל"
@@ -10426,9 +10585,17 @@ msgctxt "#34005"
 msgid "Flac"
 msgstr "Flac"
 
+msgctxt "#34006"
+msgid "MPEG-4 Audio (FFmpeg M4A AAC)"
+msgstr "MPEG-4 Audio (FFmpeg M4A AAC)"
+
+msgctxt "#34007"
+msgid "Windows Media Audio 2 (FFmpeg wmav2)"
+msgstr "Windows Media Audio 2 (FFmpeg wmav2)"
+
 msgctxt "#34100"
-msgid "Speaker Configuration"
-msgstr "תצורת רמקול"
+msgid "Number of channels"
+msgstr "מספר ערוצים"
 
 msgctxt "#34101"
 msgid "2.0"
@@ -10486,6 +10653,26 @@ msgctxt "#34123"
 msgid "Never"
 msgstr "אף פעם"
 
+msgctxt "#34124"
+msgid "44.1"
+msgstr "44.1"
+
+msgctxt "#34125"
+msgid "48.0"
+msgstr "48.0"
+
+msgctxt "#34126"
+msgid "88.2"
+msgstr "88.2"
+
+msgctxt "#34127"
+msgid "96.0"
+msgstr "96.0"
+
+msgctxt "#34128"
+msgid "192.0"
+msgstr "192.0"
+
 msgctxt "#34201"
 msgid "Can't find a next item to play"
 msgstr "לא נמצא פריט הבא לניגון"
@@ -10495,12 +10682,24 @@ msgid "Can't find a previous item to play"
 msgstr "לא נמצא הפריט הקודם לניגון"
 
 msgctxt "#34300"
-msgid "Failed to start zeroconf"
-msgstr "נכשל בהפעלת zeroconf"
+msgid "Failed to start Zeroconf"
+msgstr "הפעלת Zeroconf נכשלה"
 
 msgctxt "#34301"
 msgid "Is Apple's Bonjour Service installed? See log for more info."
 msgstr "האם שירות Apple's Bonjour מותקן? ראה לוג למידע נוסף"
+
+msgctxt "#34302"
+msgid "AirPlay requires Zeroconf to be enabled."
+msgstr "לצורך השימוש ב־AirPlay יש להפעיל את Zeroconf."
+
+msgctxt "#34303"
+msgid "Unable to stop Zeroconf"
+msgstr "לא ניתן לעצור את Zeroconf"
+
+msgctxt "#34304"
+msgid "AirPlay and AirTunes depend on Zeroconf running."
+msgstr "AirPlay ו־AirTunes שניהם תלויים בפעילות של Zeroconf."
 
 msgctxt "#34400"
 msgid "Video Rendering"
@@ -10511,8 +10710,8 @@ msgid "Failed to init video filters/scalers, falling back to bilinear scaling"
 msgstr "Failed to init video filters/scalers, falling back to bilinear scaling"
 
 msgctxt "#34402"
-msgid "Failed to initialize audio device"
-msgstr "נכשל בהפעלת התקן האודיו"
+msgid "Failed to initialise audio device"
+msgstr "נכשל באתחול התקן אודיו"
 
 msgctxt "#34403"
 msgid "Check your audiosettings"
@@ -10547,7 +10746,7 @@ msgid "Generic HID device"
 msgstr "התקן HID כללי"
 
 msgctxt "#35002"
-msgid "Generic network adapter"
+msgid "Generic network adaptor"
 msgstr "מתאם רשת כללי"
 
 msgctxt "#35003"
@@ -10583,8 +10782,12 @@ msgid "Enable joystick and gamepad support"
 msgstr "אפשר תמיכת גויסטיק ולוח משחק"
 
 msgctxt "#35102"
-msgid "Disable joystick when device is present"
-msgstr "בטל ג'ויסטיק כאשר התקן נמצא"
+msgid "Disable joystick when this device is present"
+msgstr "לנטרל את הג׳ויסטיק כאשר התקן זה קיים"
+
+msgctxt "#35103"
+msgid "Enable system keys in fullscreen"
+msgstr "הפעל מפתחות מערכת במסך מלא"
 
 msgctxt "#35500"
 msgid "Location"
@@ -10605,10 +10808,6 @@ msgstr "ספק"
 msgctxt "#35504"
 msgid "Product ID"
 msgstr "מוצר ID"
-
-msgctxt "#36000"
-msgid "Pulse-Eight CEC adapter"
-msgstr "Pulse-Eight CEC adapter"
 
 msgctxt "#36001"
 msgid "Pulse-Eight Nyxboard"
@@ -10631,8 +10830,8 @@ msgid "Enable switch side commands"
 msgstr "Enable switch side commands"
 
 msgctxt "#36006"
-msgid "Could not open the adapter"
-msgstr "אין אפשרות לפתוח מתאם"
+msgid "Could not open the adaptor"
+msgstr "אין אפשרות לפתוח את המתאם"
 
 msgctxt "#36007"
 msgid "Devices to power on when starting XBMC"
@@ -10646,13 +10845,13 @@ msgctxt "#36009"
 msgid "Put devices in standby mode when activating screensaver"
 msgstr "הכנס את ההתקנים למצב שינה כאשר מפעילים שומר מסך"
 
+msgctxt "#36010"
+msgid "Wake devices when deactivating screensaver"
+msgstr "הער מכשירים כאשר מבוטל שומר המסך"
+
 msgctxt "#36011"
 msgid "Could not detect the CEC com port. Set it up manually."
 msgstr "אין אפשרות לזהות פורט CEC. הגדר זאת ידנית."
-
-msgctxt "#36012"
-msgid "Could not initialise the CEC adapter. Please check your settings."
-msgstr "אין אפשרות לאתחל מתאם CEC. בדוק את ההגדרות שלך"
 
 msgctxt "#36015"
 msgid "HDMI port number"
@@ -10661,10 +10860,6 @@ msgstr "מספר פורט HDMI"
 msgctxt "#36016"
 msgid "Connected"
 msgstr "מחובר"
-
-msgctxt "#36017"
-msgid "Could not initialise the CEC adapter: libCEC was not found on your system."
-msgstr "מתאם נמצא. אבל libCEC לא זמין"
 
 msgctxt "#36018"
 msgid "Use the TV's language setting"
@@ -10718,13 +10913,9 @@ msgctxt "#36030"
 msgid "Connection lost"
 msgstr "חיבור אבד"
 
-msgctxt "#36031"
-msgid "This user does not have permissions to open the CEC adapter"
-msgstr "למשתמש זה אין הרשאות לפתיחת מתאם CEC"
-
 msgctxt "#36032"
-msgid "The port is busy. Only one program can access the CEC adapter"
-msgstr "הפורט עסוק. רק תוכנה אחת יכולה לגשת למתאם CEC"
+msgid "The port is busy. Only one program can access the CEC adaptor"
+msgstr "הפורט תפוס. רק תוכנה אחת בו זמנית יכולה לגשת למתאם CEC"
 
 msgctxt "#36033"
 msgid "Pause playback when switching to another source"
@@ -10757,3 +10948,675 @@ msgstr "גרסת ממשק libCEC . %x נמוכה מהגרסה ש XBMC (%x) תו�
 msgctxt "#36041"
 msgid "* Item folder"
 msgstr "* תיקיית פריט"
+
+msgctxt "#36042"
+msgid "Use limited colour range (16-235)"
+msgstr "שימוש בטווח צבעים מוגבל (16-235)"
+
+msgctxt "#36101"
+msgid "Change the look and feel of the user interface."
+msgstr "החלפת המראה והתחושה של ממשק המשתמש."
+
+msgctxt "#36103"
+msgid "Select the skin for the user interface. This will define the look and feel of XBMC."
+msgstr "בחר את המעטפת בשביל ממשק המשתמש. זה יגדיר את המראה והתחושה של XBMC."
+
+msgctxt "#36104"
+msgid "Change specific skin settings. The available options are dependent on the skin used."
+msgstr "שנה הגדרות מעטפת ספציפיות. האפשריות הקיימות תלויות במעטפת שבשימוש."
+
+msgctxt "#36105"
+msgid "Change the theme associated with your selected skin."
+msgstr "שנה את הערכת נושא שקשורה למעטפת שבחרת."
+
+msgctxt "#36106"
+msgid "Change the colours of your selected skin."
+msgstr "שנה את הצבעים של המעטפת שבחרת."
+
+msgctxt "#36108"
+msgid "Resize the view of the user interface."
+msgstr "שינוי גודל התצוגה של ממשק המשתמש."
+
+msgctxt "#36109"
+msgid "Select the media window that XBMC displays on startup."
+msgstr "בחר את חלון המדיה ש-XBMC מציג בהפעלה."
+
+msgctxt "#36111"
+msgid "Turn this off to remove the scrolling RSS news ticker."
+msgstr "כבה אפשרות זאת כדי לבטל את הגלילה של עדכוני RSS"
+
+msgctxt "#36112"
+msgid "Edit the RSS feeds."
+msgstr "עריכת הזנות ה־RSS."
+
+msgctxt "#36114"
+msgid "Chooses the language of the user interface."
+msgstr "בחר את השפה של ממשק המשתמש."
+
+msgctxt "#36115"
+msgid "Select the formats for temperature, time and date. The available options depend on the selected language."
+msgstr "בחר את תבנית להצגת מעלות, זמן ותאריך. האפשרויות הניתנות תלויות בשפה שנבחרה."
+
+msgctxt "#36116"
+msgid "Choose which character set is used for displaying text in the user interface."
+msgstr "בחר באיזו ערכת תווים להשתמש לשם הצגת הטקסט בממשק המשתמש."
+
+msgctxt "#36117"
+msgid "Select country location."
+msgstr "בחירת מדינת המיקום."
+
+msgctxt "#36118"
+msgid "Select your current timezone."
+msgstr "בחירת אזור הזמן הנוכחי שלך."
+
+msgctxt "#36119"
+msgid "Select the default audio track when different language tracks are available."
+msgstr "בחר את רצועת השמע ברירת המחדל כאשר קיימות מספר אפשרויות של שפות"
+
+msgctxt "#36120"
+msgid "Select the default subtitles when different languages are available."
+msgstr "בחר את כתוביות ברירת המחדל כאשר קיימות מספר אפשרויות של שפות"
+
+msgctxt "#36122"
+msgid "Display the (..) item in lists for visiting the parent folder."
+msgstr "הצג את הסימן (..) ברשימות כדי לעבור לספריית האב"
+
+msgctxt "#36127"
+msgid "Show hidden files and directories when listing files."
+msgstr "הצגת קבצים ותיקיות מוסתרים ברשימות הקבצים."
+
+msgctxt "#36129"
+msgid "Set the amount of idle time required before displaying the screensaver."
+msgstr "זמן המתנה להפעלת שומר מסך  "
+
+msgctxt "#36130"
+msgid "Select the screensaver. XBMC will force the 'Dim' screensaver when fullscreen video playback is paused or a dialogue box is active."
+msgstr "בחר את שומר המסך. XBMC ישתמש בכוח בשומר מסך 'Dim' כאשר נגינת סרט במסך מלא נעצרת או כאשר קופסת דיאלוג פעילה."
+
+msgctxt "#36131"
+msgid "Change specific screensaver settings. The available options are dependent on the screensaver used."
+msgstr "אפשרויות שומר מסך מתקדמות"
+
+msgctxt "#36132"
+msgid "Preview the selected screensaver."
+msgstr "תצוגה מקדימה של שומר המסך."
+
+msgctxt "#36133"
+msgid "If music is being played, XBMC will start the selected visualisation instead of displaying the screensaver."
+msgstr "אם מוזיקה מנוגנת, XBMC יתחיל את החיזוי הנבחר ובמקום להציג שומר מסך."
+
+msgctxt "#36134"
+msgid "Dim the display when media is paused. Not valid for the 'Dim' screensaver mode."
+msgstr "עמעם את התצוגה כאשר הוידאו נעצר"
+
+msgctxt "#36135"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36136"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36137"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36140"
+msgid "Enable the video library."
+msgstr "הפעל ספרית וידאו"
+
+msgctxt "#36141"
+msgid "Show plot information for unwatched media in the Video Library."
+msgstr "הצגת פרטי העלילה למדיה שעדיין לא נצפתה בספריית הווידאו."
+
+msgctxt "#36143"
+msgid "Get thumbnails for actors when scanning media."
+msgstr "השג תמונות ממוזערות עבור שחקנים בעת סריקת מדיה."
+
+msgctxt "#36144"
+msgid "Remove the TV show season node, toggles between 'If only one season' (default), 'Always' and 'Never'."
+msgstr "מסיר קישור עונת הסדרה, מחליף בין 'אם רק עונה אחת' (ברירת מחדל), 'תמיד' ו-'אף פעם'."
+
+msgctxt "#36145"
+msgid "Group movies into 'Movie sets' when browsing the movie library."
+msgstr "קבץ סרטים כ'מארז סרטים' כאשר מעיינים בספרית סרטים."
+
+msgctxt "#36146"
+msgid "Check for new media files on XBMC startup."
+msgstr "בדוק אם קיימים קבצי מדיה חדשים בעת הפעלת XBMC."
+
+msgctxt "#36147"
+msgid "Hide the library scanning progress bar during scans."
+msgstr "הסתר את פס תהליך סריקת הספריה בזמן סריקות."
+
+msgctxt "#36148"
+msgid "Remove items from your library that can't be found (either renamed, deleted, or on removable storage that is currently unplugged)."
+msgstr "הסר מהספריה פריטים שלא נמצאו בסריקה (נמחקו, כונן חיצוני מנותק)"
+
+msgctxt "#36149"
+msgid "Export the Video Library database to XML files. This will optionally overwrite your current XML files."
+msgstr "יצא את בסיס הנתונים של הספריה לקבצי XML "
+
+msgctxt "#36150"
+msgid "Import a XML file into the Video Library database."
+msgstr "ייבא קובץ XML אל ספריית הוידאו."
+
+msgctxt "#36152"
+msgid "Enable automatic playback of the next file in the list."
+msgstr "נגן באופן אוטומטי את הקובץ הבא ברשימה."
+
+msgctxt "#36153"
+msgid "Adjust the method used to process and display video."
+msgstr "כוון את האופן בו משתמשתים לעבד ולהציג וידיאו."
+
+msgctxt "#36174"
+msgid "Enable Teletext when watching a live TV stream."
+msgstr "הפעלת טלטקסט בעת צפייה בתזרים טלוויזיה."
+
+msgctxt "#36175"
+msgid "Scale Teletext to 4:3 ratio."
+msgstr "שנה יחס תצוגת טלטקס ל 4:3"
+
+msgctxt "#36180"
+msgid "Extract thumbnails and information, such as codecs and aspect ratio, to display in Library Mode."
+msgstr "חלץ תמונות ממוזערות ומידע, כמו מקודדים ויחס רוחב גובה, כדי להציג במצב ספריה."
+
+msgctxt "#36181"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36183"
+msgid "Removes the title, genre etc nodes from the library view. Selecting a category takes you straight to the title view."
+msgstr "מסיר את קישור הכותרת, סגנון וכו' מתצוגת הספריה. בחירת קטגוריה מעבירה אותך ישר לתצוגת כותרת."
+
+msgctxt "#36185"
+msgid "Set the font type to be used for subtitles."
+msgstr "בחר את סוג הגופן לשימוש עבור כתוביות."
+
+msgctxt "#36186"
+msgid "Set the font size to be used for subtitles."
+msgstr "בחר את גודל הגופן לשימוש עבור כתוביות."
+
+msgctxt "#36187"
+msgid "Set the font style to be used for subtitles."
+msgstr "בחר את סגנון הגופן לשימוש עבור כתוביות."
+
+msgctxt "#36188"
+msgid "Set the font colour to be used for subtitles."
+msgstr "בחר את צבע הגופן לשימוש עבור כתוביות."
+
+msgctxt "#36189"
+msgid "Set the font character set to be used for subtitles."
+msgstr "בחר ערכת התווים שתשמש את הגופן שמופיע בכתוביות."
+
+msgctxt "#36190"
+msgid "Override ASS/SSA subtitles fonts."
+msgstr "דרוס גופני כתוביות ASS/SSA"
+
+msgctxt "#36192"
+msgid "Location of subtitles on the screen."
+msgstr "מיקום הכתוביות על המסך."
+
+msgctxt "#36194"
+msgid "Autorun DVD video when inserted in drive."
+msgstr "נגינת סרט ה־DVD מהדיסק עם הכנסתו."
+
+msgctxt "#36195"
+msgid "Force a region for DVD playback."
+msgstr "אלץ אזור צפיה לניגון DVD."
+
+msgctxt "#36197"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36199"
+msgid "Select the default TV show information source. See the Add-ons Manager for options."
+msgstr "בחר מקור מידע ברירת המחדל עבור סדרה. ראה מנהל הרחבות עבור אפשרויות."
+
+msgctxt "#36201"
+msgid "Settings for PVR/Live TV features."
+msgstr "הגדרות עבור תכונות PVR/שידור חי"
+
+msgctxt "#36202"
+msgid "Category for general settings for PVR/Live TV features."
+msgstr "קטגורית הגדרות כלליות עבור תכונות PVR/שידור חי"
+
+msgctxt "#36204"
+msgid "Import channel groups from the PVR backend (if supported). Will delete user created groups if they're not found on the backend."
+msgstr "ייבא קבוצת ערוצים מממשק אחורי PVR (אם נתמך). ימחק קבוצות משתמש שלא קיימות בממשק אחורי."
+
+msgctxt "#36206"
+msgid "Use numbering from the backend, instead of configuring them manually over XBMC."
+msgstr "השתמש במספור מתוך ממשק אחורי, במקום הגדרה ידנית בתוך XBMC."
+
+msgctxt "#36208"
+msgid "Instruct the backend to search for channels (if supported)."
+msgstr "הנחה את הממשק האחורי לחפש בערוצים (אם נתמך)."
+
+msgctxt "#36209"
+msgid "Delete channel/EPG database and reimport the data from the backend afterwards."
+msgstr "מחק מסד נתונים של ערוצים/לוח שידורים ולאחר מכן ייבא מחדש מידע מממשק אחורי."
+
+msgctxt "#36216"
+msgid "Folder where channel icons are stored."
+msgstr "תיקיה אשר מכילה סמלי ערוץ"
+
+msgctxt "#36217"
+msgid "Scan for missing channel icons."
+msgstr "סרוק לסמלי ערוץ חסרים"
+
+msgctxt "#36220"
+msgid "Number of days of EPG data to import from backends."
+msgstr "מספר ימי לוח השידורים אשר לייבא מממשק אחורי."
+
+msgctxt "#36221"
+msgid "Time between EPG data imports from backends."
+msgstr "זמן בין ייבוא לוח השידורים מממשק אחורי."
+
+msgctxt "#36222"
+msgid "Do not import EPG data while playing TV to minimise CPU usage."
+msgstr "אל תייבא לוח שידורים בעת צפייה בטלוויזיה כדי למזער שימוש במעבד."
+
+msgctxt "#36227"
+msgid "Display stream of selected channel in a small box instead of fullscreen."
+msgstr "הצג את הערוץ הנבחר בחלונית קטנה במקום בחלון מלא."
+
+msgctxt "#36228"
+msgid "Continue with the last viewed channel on startup."
+msgstr "בהפעלה מחדש המשך בצפייה בערוץ אחרון שנצפה"
+
+msgctxt "#36229"
+msgid "Display signal quality information in the codec information window (if supported by the Add-on and backend)."
+msgstr "הצג מידע על אות איכות בחלון מידע מקודד (אם נתמך ע\"י ההרחבה והממשק אחורי)"
+
+msgctxt "#36235"
+msgid "Priority of the recording. Higher number means higher priority. Not supported by all Add-ons and backends."
+msgstr "עדיפות ההקלטה. מספר גבוה אומר עדיפות גבוהה. לא נתמך בכל ההרחבות וממשקים אחוריים."
+
+msgctxt "#36239"
+msgid "Display a notification when timers are added, finished or removed by the backend."
+msgstr "הצג הודעה כאשר תזמונים מתווספים, מסתיימים או נמחקים ע\"י הממשק האחורי."
+
+msgctxt "#36243"
+msgid "The command to execute."
+msgstr "הפקודה כדי להריץ."
+
+msgctxt "#36246"
+msgid "When to execute the daily wakeup command."
+msgstr "מתי להפעיל את פקודת ההתעוררות היומית."
+
+msgctxt "#36248"
+msgid "Asks for a pin code to access parental locked channels. Channels can be marked as locked in the channels editor on the general tab. Parental locked channels can not be played or recorded without entering a pin code, and the EPG information is hidden for those channels."
+msgstr "הפעל בקרת הורים ,ידרוש סיסמא עבור ערוצים שהוגדרו כנעולים. ניתן לנעול ערוצים בעורך הערוצים בלשונית \"כללי\" .  לא ניתן לגשת או להקליט ערוצים נעולים  ללא הכנסת סיסמא, כמו כן ה EPG מוסתר."
+
+msgctxt "#36249"
+msgid "Enter a new pin code to unlock parental locked channels."
+msgstr "שנה את הסיסמא  לבקרת הורים עבור ערוצים נעולים"
+
+msgctxt "#36254"
+msgid "Enable the music library."
+msgstr "הפעל ספרית המוסיקה"
+
+msgctxt "#36256"
+msgid "Automatically fetch album and artist information via scrapers during scan."
+msgstr "ייבא פרטי אלבום ואמן באופן אוטומטי באמצעות הסקרייפרים בזמן עדכון."
+
+msgctxt "#36257"
+msgid "Select the default album information source."
+msgstr "בחר את שירות ברירת המחדל לפרטי אלבום"
+
+msgctxt "#36259"
+msgid "Check for new and removed media files on XBMC startup."
+msgstr "בדוק אם קיימים קבצי מדיה חדשים בעת הפעלת XBMC."
+
+msgctxt "#36260"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36263"
+msgid "Import a XML file into the Music Library database."
+msgstr "ייבא קובץ XML למסד הנתונים של ספריית המוסיקה"
+
+msgctxt "#36268"
+msgid "Default is 89dB per standard. Change with caution."
+msgstr "בררת המחדל היא 89dB לפי התקן. ניתן לשנות אך בזהירות רבה."
+
+msgctxt "#36269"
+msgid "Default is 89dB per standard. Change with caution."
+msgstr "בררת המחדל היא 89dB לפי התקן. ניתן לשנות אך בזהירות רבה."
+
+msgctxt "#36283"
+msgid "Autorun CDs when inserted in drive."
+msgstr "נגן דיסקים באופן אוטומטי בעת הכנסתם למחשב"
+
+msgctxt "#36285"
+msgid "Select the location on your hard drive where ripped tracks will be saved to."
+msgstr "בחר את המיקום בדיסק הקשיח שלך שבו הרצועות המועתקות ישמרו."
+
+msgctxt "#36288"
+msgid "Select which quality you want to rip your files."
+msgstr "בחר באיזו איכות אתה רוצה להעתיק את הקבצים שלך."
+
+msgctxt "#36291"
+msgid "Auto eject disc after rip is complete."
+msgstr "הוצא דיסק לאחר שההעתקה תושלם."
+
+msgctxt "#36295"
+msgid "Select the font type used during karaoke."
+msgstr "בחירת סוג הגופן המופיע בקריוקי."
+
+msgctxt "#36296"
+msgid "Select the size of the font used during karaoke."
+msgstr "בחירת גודל הגופן המופיע בקריוקי."
+
+msgctxt "#36297"
+msgid "Select the font colour used during karaoke."
+msgstr "בחירת צבע הגופן המופיע בקריוקי."
+
+msgctxt "#36298"
+msgid "Select the character set used during karaoke."
+msgstr "בחירת ערכת התווים שתשמש את הגופן שמופיע בקריוקי."
+
+msgctxt "#36301"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36302"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36303"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36306"
+msgid "If EXIF information exists (date, time, camera used, etc.), it will be displayed."
+msgstr "אם קיימים נתוני EXIF (תאריך, שעה, המצלמה שצילמה ועוד), הם יוצגו."
+
+msgctxt "#36309"
+msgid "Show videos in picture file lists."
+msgstr "הצג וידאו ברשימת קבצי תמונות"
+
+msgctxt "#36310"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36314"
+msgid "View slideshow images in a random order."
+msgstr "צפה במצגת תמונות בסדר אקראי."
+
+msgctxt "#36324"
+msgid "When a manual or automatical library update occurs, notify UPnP clients."
+msgstr "כאשר יש עדכוני ספריה עדכן את כל המכשירים."
+
+msgctxt "#36328"
+msgid "Enable remote users to control XBMC through the built-in webserver."
+msgstr "אפשר שליטה מרחוק של ה-XBMC באמצעות שרת ה-WEB."
+
+msgctxt "#36329"
+msgid "Define the webserver port."
+msgstr "הגדר פורט לשרת WEB"
+
+msgctxt "#36330"
+msgid "Define the webserver username."
+msgstr "הגדר שם משתמש לשרת WEB"
+
+msgctxt "#36331"
+msgid "Define the webserver password."
+msgstr "הגדר סיסמא לשרת ה-WEB שלך."
+
+msgctxt "#36339"
+msgid "Initial repeat delay (ms)."
+msgstr "חוזר על עיכוב ראשוני (ms)"
+
+msgctxt "#36365"
+msgid "Select this option if your receiver is capable of decoding AC3 streams."
+msgstr "יש לבחור באפשרות זאת אם המקלט שלך מסוגל לקודד תזרימי AC3."
+
+msgctxt "#36366"
+msgid "Select this option if your receiver is capable of decoding DTS streams."
+msgstr "יש לבחור באפשרות זאת אם המקלט שלך מסוגל לקודד תזרימי DTS."
+
+msgctxt "#36369"
+msgid "Select this option if your receiver is capable of decoding TrueHD streams."
+msgstr "יש לבחור באפשרות זאת אם המקלט שלך מסוגל לקודד תזרימי TrueHD."
+
+msgctxt "#36370"
+msgid "Select this option if your receiver is capable of decoding DTS-HD streams."
+msgstr "יש לבחור באפשרות זאת אם המקלט שלך מסוגל לקודד תזרימי DTS-HD."
+
+msgctxt "#36373"
+msgid "Configure how interface sounds are handled, such as menu navigation and important notifications."
+msgstr "הגדר איך צלילי הממשק יופעלו, כמו ניווט תפריט והודעות חשובות."
+
+msgctxt "#36378"
+msgid "Use a joystick to control XBMC."
+msgstr "שימוש בג׳ויסטיק לשליטה ב־XBMC."
+
+msgctxt "#36380"
+msgid "If your internet connection uses a proxy, configure it here."
+msgstr "אם חיבור האינטרנט שלך משתמש במתווך, יש להגדיר אותו להלן."
+
+msgctxt "#36381"
+msgid "Configure which proxy type is used."
+msgstr "הגדרת סוג המתווך שבשימוש."
+
+msgctxt "#36382"
+msgid "Configure the proxy server address."
+msgstr "הגדרת כתובת השרת המתווך."
+
+msgctxt "#36383"
+msgid "Configure the proxy server port."
+msgstr "הגדרת פתחת השרת המתווך."
+
+msgctxt "#36384"
+msgid "Configure the proxy server username."
+msgstr "הגדרת שם המשתמש של השרת המתווך."
+
+msgctxt "#36385"
+msgid "Configure the proxy server password."
+msgstr "הגדרת ססמת השרת המתווך."
+
+msgctxt "#36386"
+msgid "If you have limited bandwidth available, XBMC will try to keep within these limits."
+msgstr "אם על החיבור שלך יש הגבלת רוחב פס, מערכת XBMC תנסה להתאים עצמה למגבלות אלה."
+
+msgctxt "#36389"
+msgid "Define how long XBMC should idle before shutting down."
+msgstr "הגדר/י כמה זמן להמתין לפני כבוי"
+
+msgctxt "#36393"
+msgid "Folder used to save screenshots taken within XBMC."
+msgstr "התקייה לשמירת תצלומי מסך נלקחת מתוך ה-XBMC."
+
+msgctxt "#36394"
+msgid "Specify additional libraries to be included in the debug log."
+msgstr "הגדר הצגת ספריות נוספות לתצוגה בלוג הדיבאג."
+
+msgctxt "#36396"
+msgid "Define the PIN code used for the master lock."
+msgstr "הגדר את קוד ה-PIN לשימוש לנעילת מאסטר."
+
+msgctxt "#36410"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36411"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36412"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36413"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36414"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36415"
+msgid "No info available yet."
+msgstr "אין מידע זמין כעת."
+
+msgctxt "#36416"
+msgid "Specify the type of remote used."
+msgstr "הגדר את סוג השלט שבשימוש."
+
+msgctxt "#36419"
+msgid "Define locations used for retrieving weather information."
+msgstr "הגדר מיקומים לשימוש עבור איחזור מידע לגבי מזג-האוויר."
+
+msgctxt "#36425"
+msgid "Show context menu"
+msgstr "הצג תפריט משני"
+
+msgctxt "#36426"
+msgid "Switch to channel"
+msgstr "החלף לערוץ"
+
+msgctxt "#36427"
+msgid "Show information"
+msgstr "הצג מידע"
+
+msgctxt "#36428"
+msgid "Record"
+msgstr "הקלט"
+
+msgctxt "#36500"
+msgid "Stereoscopic mode (current)"
+msgstr "מצב סטריאוסקופי (נוכחי)"
+
+msgctxt "#36501"
+msgid "Stereoscopic mode"
+msgstr "מצב סטריאוסקופי"
+
+msgctxt "#36502"
+msgid "None"
+msgstr "ללא"
+
+msgctxt "#36503"
+msgid "Over/Under"
+msgstr "מעל/מתחת"
+
+msgctxt "#36504"
+msgid "Side by side"
+msgstr "צד לצד"
+
+msgctxt "#36507"
+msgid "Interlaced"
+msgstr "שזור"
+
+msgctxt "#36508"
+msgid "Hardware Based"
+msgstr "מבוסס חומרה"
+
+msgctxt "#36521"
+msgid "Ask me"
+msgstr "שאל אותי"
+
+msgctxt "#36522"
+msgid "Use preferred mode"
+msgstr "השתמש במצב המועדף"
+
+msgctxt "#36524"
+msgid "Preferred mode"
+msgstr "מצב מועדף"
+
+msgctxt "#36525"
+msgid "Same as movie (autodetect)"
+msgstr "כמו הסרט (אוטומטית)"
+
+msgctxt "#36528"
+msgid "Select stereoscopic mode"
+msgstr "בחר מצב סטריאוסקופי"
+
+msgctxt "#36529"
+msgid "Mono (2D)"
+msgstr "מונו (2D)"
+
+msgctxt "#36530"
+msgid "Preferred mode"
+msgstr "מצב מועדף"
+
+msgctxt "#36531"
+msgid "Select alternate mode..."
+msgstr "בחר מצב חלופי..."
+
+msgctxt "#36532"
+msgid "Same as movie"
+msgstr "כמו הסרט"
+
+msgctxt "#36535"
+msgid "Stereoscopic mode of video"
+msgstr "מצב סטריאוסקופי של וידאו"
+
+msgctxt "#36536"
+msgid "Stereoscopic mode inverted"
+msgstr "מצב סטיראוסקופי הפוך"
+
+msgctxt "#36544"
+msgid "Enable hardware decoding of video files."
+msgstr "אפשר פענוח חומרה של קבצי וידאו."
+
+msgctxt "#36545"
+msgid "Subtitle stereoscopic depth"
+msgstr "עומק כתוביות סטיראוסקופי"
+
+msgctxt "#37000"
+msgid "(Visually Impaired)"
+msgstr "(לקצרי ראייה)"
+
+msgctxt "#37001"
+msgid "(Directors Comments)"
+msgstr "(הערות הבמאי)"
+
+msgctxt "#37002"
+msgid "(Directors Comments 2)"
+msgstr "(הערות הבמאי 2)"
+
+msgctxt "#37011"
+msgid "(CC)"
+msgstr "(CC)"
+
+msgctxt "#37012"
+msgid "(Forced)"
+msgstr "(מאולץ)"
+
+msgctxt "#37013"
+msgid "(Directors Comments)"
+msgstr "(הערות הבמאי)"
+
+msgctxt "#37014"
+msgid "Last used profile"
+msgstr "הפרופיל האחרון שהיה בשימוש"
+
+msgctxt "#37015"
+msgid "Browse Into"
+msgstr "לעיין בתוך"
+
+msgctxt "#37017"
+msgid "Dual audio output"
+msgstr "פלט אודיו כפול"
+
+msgctxt "#37020"
+msgid "Enable higher colour depth artwork"
+msgstr "הפעל עומק צבע גבוה לגרפיקה"
+
+msgctxt "#37021"
+msgid "Set GUI resolution limit"
+msgstr "הגדר הגבלת רזולוצית GUI"
+
+msgctxt "#37022"
+msgid "UPnP Player"
+msgstr "נגן UPnP"
+
+msgctxt "#37023"
+msgid "Do you wish to stop playback on the remote device?"
+msgstr "האם ברצונך להפסיק את הניגון במכשיר המרוחק?"
+
+msgctxt "#37024"
+msgid "Select this if the audio out connection only supports multichannel audio as Dolby Digital 5.1, this allows multichannel audio such as AAC5.1 or FLAC5.1 to be listened to in 5.1 surround sound. Note - Not recommended on Pi as this requires a lot of CPU."
+msgstr "בחר באפשרות זו רק אם היציאת אודיו תומכת באודיו רב ערוצי כמו Dolby Digital 5.1, זה מאפשר שמיעה באודיו רב ערוצי כמו AAC5.1 או FLAC5.1 בצליל היקפי. הערה - לא מומולץ במכשירי Pi כי זה דורש משאבי מעבד רבים."

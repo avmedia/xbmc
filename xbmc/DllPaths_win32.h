@@ -3,7 +3,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@
 #define DLL_PATH_CPLUFF        "special://xbmcbin/system/cpluff.dll"
 #define DLL_PATH_IMAGELIB      "special://xbmcbin/system/ImageLib.dll"
 #define DLL_PATH_LIBEXIF       "special://xbmcbin/system/libexif.dll"
-#define DLL_PATH_LIBID3TAG     "special://xbmcbin/system/libid3tag.dll"
 #define DLL_PATH_LIBCMYTH      "special://xbmcbin/system/libcmyth.dll"
 #define DLL_PATH_LIBHDHOMERUN  "special://xbmcbin/system/hdhomerun.dll"
 #define DLL_PATH_LIBCURL       "special://xbmcbin/system/libcurl.dll"

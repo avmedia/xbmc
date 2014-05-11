@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 
 #include "dialogs/GUIDialogYesNo.h"
 #include "guilib/GUIWindowManager.h"
+#include "utils/StringUtils.h"
 
 #include <set>
 
@@ -43,7 +44,7 @@ using namespace XFILE;
 
 CFileInfo::CFileInfo()
 {
-  m_strCachedPath.Empty();
+  m_strCachedPath.clear();
   m_bAutoDel = true;
   m_iUsed = 0;
   m_iIsSeekable = -1;
@@ -117,7 +118,7 @@ bool CRarManager::CacheRarredFile(CStdString& strPathInCache, const CStdString& 
     {
       CFileItemList items;
       CDirectory::GetDirectory(g_advancedSettings.m_cachePath,items);
-      items.Sort(SORT_METHOD_SIZE, SortOrderDescending);
+      items.Sort(SortBySize, SortOrderDescending);
       while (items.Size() && CheckFreeSpace(strDir) < iSize)
       {
         if (!items[0]->m_bIsFolder)
@@ -132,21 +133,19 @@ bool CRarManager::CacheRarredFile(CStdString& strPathInCache, const CStdString& 
   }
 
   CStdString strPath = strPathInRar;
-#ifndef _LINUX
-  strPath.Replace('/', '\\');
+#ifndef TARGET_POSIX
+  StringUtils::Replace(strPath, '/', '\\');
 #endif
   //g_charsetConverter.unknownToUTF8(strPath);
-  CStdString strCachedPath;
-  URIUtils::AddFileToFolder(strDir + "rarfolder%04d", URIUtils::GetFileName(strPathInRar), strCachedPath);
+  CStdString strCachedPath = URIUtils::AddFileToFolder(strDir + "rarfolder%04d",
+                                           URIUtils::GetFileName(strPathInRar));
   strCachedPath = CUtil::GetNextPathname(strCachedPath, 9999);
-  if (strCachedPath.IsEmpty())
+  if (strCachedPath.empty())
   {
     CLog::Log(LOGWARNING, "Could not cache file %s", (strRarPath + strPathInRar).c_str());
     return false;
   }
   strCachedPath = CUtil::MakeLegalPath(strCachedPath);
-  CStdString strCachedDir;
-  URIUtils::GetDirectory(strCachedPath, strCachedDir);
   int64_t iOffset = -1;
   if (iRes != 2)
   {
@@ -179,7 +178,7 @@ bool CRarManager::CacheRarredFile(CStdString& strPathInCache, const CStdString& 
     if (iSize > 1024*1024 || iSize == -2) // 1MB
       bShowProgress=true;
 
-    CStdString strDir2(strCachedDir);
+    CStdString strDir2 = URIUtils::GetDirectory(strCachedPath);
     URIUtils::RemoveSlashAtEnd(strDir2);
     if (!CDirectory::Exists(strDir2))
       CDirectory::Create(strDir2);
@@ -249,14 +248,14 @@ bool CRarManager::GetFilesInRar(CFileItemList& vecpItems, const CStdString& strR
     pFileList = it->second.first;
 
   CFileItemPtr pFileItem;
-  vector<CStdString> vec;
+  vector<std::string> vec;
   set<CStdString> dirSet;
-  CUtil::Tokenize(strPathInRar,vec,"/");
+  StringUtils::Tokenize(strPathInRar,vec,"/");
   unsigned int iDepth = vec.size();
 
   ArchiveList_struct* pIterator;
   CStdString strCompare = strPathInRar;
-  if (!URIUtils::HasSlashAtEnd(strCompare) && !strCompare.IsEmpty())
+  if (!URIUtils::HasSlashAtEnd(strCompare) && !strCompare.empty())
     strCompare += '/';
   for( pIterator = pFileList; pIterator  ; pIterator ? pIterator = pIterator->next : NULL)
   {
@@ -271,7 +270,7 @@ bool CRarManager::GetFilesInRar(CFileItemList& vecpItems, const CStdString& strR
 
     /* replace back slashes into forward slashes */
     /* this could get us into troubles, file could two different files, one with / and one with \ */
-    strName.Replace('\\', '/');
+    StringUtils::Replace(strName, '\\', '/');
 
     if (bMask)
     {
@@ -279,7 +278,7 @@ bool CRarManager::GetFilesInRar(CFileItemList& vecpItems, const CStdString& strR
         continue;
 
       vec.clear();
-      CUtil::Tokenize(strName,vec,"/");
+      StringUtils::Tokenize(strName,vec,"/");
       if (vec.size() < iDepth)
         continue;
     }

@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
  */
 
 #include "PVRChannelGroup.h"
+#include "utils/Observer.h"
 
 namespace PVR
 {
@@ -29,7 +30,7 @@ namespace PVR
 
   /** XBMC's internal group, the group containing all channels */
 
-  class CPVRChannelGroupInternal : public CPVRChannelGroup
+  class CPVRChannelGroupInternal : public CPVRChannelGroup, public Observer
   {
     friend class CPVRChannelGroups;
     friend class CPVRDatabase;
@@ -44,6 +45,8 @@ namespace PVR
     CPVRChannelGroupInternal(const CPVRChannelGroup &group);
 
     virtual ~CPVRChannelGroupInternal(void);
+
+    virtual void Notify(const Observable &obs, const ObservableMessage msg);
 
     /**
      * @brief The amount of channels in this container.

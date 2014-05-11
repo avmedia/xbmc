@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -56,8 +56,11 @@ namespace XbmcThreads
     }
 
     inline void wait(CCriticalSection& lock) 
-    { 
+    {
+      int count  = lock.count;
+      lock.count = 0;
       pthread_cond_wait(&cond,&lock.get_underlying().mutex);
+      lock.count = count;
     }
 
     inline bool wait(CCriticalSection& lock, unsigned long milliseconds) 
@@ -76,8 +79,11 @@ namespace XbmcThreads
       ts.tv_nsec += milliseconds % 1000 * 1000000;
       ts.tv_sec  += milliseconds / 1000 + ts.tv_nsec / 1000000000;
       ts.tv_nsec %= 1000000000;
-
-      return (pthread_cond_timedwait(&cond,&lock.get_underlying().mutex,&ts) == 0);
+      int count  = lock.count;
+      lock.count = 0;
+      int res    = pthread_cond_timedwait(&cond,&lock.get_underlying().mutex,&ts);
+      lock.count = count;
+      return res == 0;
     }
 
     inline void wait(CSingleLock& lock) { wait(lock.get_underlying()); }

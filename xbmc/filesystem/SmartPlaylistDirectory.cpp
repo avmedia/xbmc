@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,9 +24,10 @@
 #include "FileItem.h"
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
+#include "filesystem/FileDirectoryFactory.h"
 #include "music/MusicDatabase.h"
 #include "playlists/SmartPlayList.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
@@ -64,18 +65,32 @@ namespace XFILE
   bool CSmartPlaylistDirectory::GetDirectory(const CSmartPlaylist &playlist, CFileItemList& items, const CStdString &strBaseDir /* = "" */, bool filter /* = false */)
   {
     bool success = false, success2 = false;
-    std::set<CStdString> playlists;
+    std::vector<CStdString> virtualFolders;
 
     SortDescription sorting;
     sorting.limitEnd = playlist.GetLimit();
     sorting.sortBy = playlist.GetOrder();
     sorting.sortOrder = playlist.GetOrderAscending() ? SortOrderAscending : SortOrderDescending;
-    if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
-      sorting.sortAttributes = SortAttributeIgnoreArticle;
+    sorting.sortAttributes = playlist.GetOrderAttributes();
+    if (CSettings::Get().GetBool("filelists.ignorethewhensorting"))
+      sorting.sortAttributes = (SortAttribute)(sorting.sortAttributes | SortAttributeIgnoreArticle);
+    items.SetSortIgnoreFolders((sorting.sortAttributes & SortAttributeIgnoreFolders) == SortAttributeIgnoreFolders);
 
     std::string option = !filter ? "xsp" : "filter";
     const CStdString& group = playlist.GetGroup();
     bool isGrouped = !group.empty() && !StringUtils::EqualsNoCase(group, "none") && !playlist.IsGroupMixed();
+
+    // get all virtual folders and add them to the item list
+    playlist.GetVirtualFolders(virtualFolders);
+    for (std::vector<CStdString>::const_iterator virtualFolder = virtualFolders.begin(); virtualFolder != virtualFolders.end(); virtualFolder++)
+    {
+      CFileItemPtr pItem = CFileItemPtr(new CFileItem(*virtualFolder, true));
+      if (CFileDirectoryFactory::Create(*virtualFolder, pItem.get()) != NULL)
+      {
+        pItem->SetSpecialSort(SortSpecialOnTop);
+        items.Add(pItem);
+      }
+    }
 
     if (playlist.GetType().Equals("movies") ||
         playlist.GetType().Equals("tvshows") ||
@@ -113,7 +128,7 @@ namespace XFILE
             baseDir += group;
           URIUtils::AddSlashAtEnd(baseDir);
 
-          if (mediaType = MediaTypeEpisode)
+          if (mediaType == MediaTypeEpisode)
             baseDir += "-1/-1/";
         }
 
@@ -145,15 +160,13 @@ namespace XFILE
         items.SetProperty(PROPERTY_PATH_DB, videoUrl.ToString());
       }
     }
-    else if (playlist.GetType().Equals("artists") ||
-             playlist.GetType().Equals("albums") ||
-             playlist.GetType().Equals("songs") || playlist.GetType().Equals("mixed") || playlist.GetType().IsEmpty())
+    else if (playlist.IsMusicType() || playlist.GetType().empty())
     {
       CMusicDatabase db;
       if (db.Open())
       {
         CSmartPlaylist plist(playlist);
-        if (playlist.GetType().Equals("mixed") || playlist.GetType().IsEmpty())
+        if (playlist.GetType().Equals("mixed") || playlist.GetType().empty())
           plist.SetType("songs");
 
         MediaType mediaType = DatabaseUtils::MediaTypeFromString(plist.GetType());
@@ -287,7 +300,7 @@ namespace XFILE
 
     // sort grouped list by label
     if (items.Size() > 1 && !group.empty())
-      items.Sort(SORT_METHOD_LABEL_IGNORE_THE, SortOrderAscending);
+      items.Sort(SortByLabel, SortOrderAscending, SortAttributeIgnoreArticle);
 
     // go through and set the playlist order
     for (int i = 0; i < items.Size(); i++)
@@ -314,7 +327,7 @@ namespace XFILE
   {
     CFileItemList list;
     bool filesExist = false;
-    if (playlistType == "songs" || playlistType == "albums")
+    if (CSmartPlaylist::IsMusicType(playlistType))
       filesExist = CDirectory::GetDirectory("special://musicplaylists/", list, ".xsp", false);
     else // all others are video
       filesExist = CDirectory::GetDirectory("special://videoplaylists/", list, ".xsp", false);
@@ -326,7 +339,7 @@ namespace XFILE
         CSmartPlaylist playlist;
         if (playlist.OpenAndReadName(item->GetPath()))
         {
-          if (playlist.GetName().CompareNoCase(name) == 0)
+          if (StringUtils::EqualsNoCase(playlist.GetName(), name))
             return item->GetPath();
         }
       }

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,11 +29,15 @@
 #if defined(TARGET_DARWIN)
 #include "osx/OSXGNUReplacements.h"
 #endif
-#ifdef __FreeBSD__
+#ifdef TARGET_FREEBSD
 #include "freebsd/FreeBSDGNUReplacements.h"
 #endif
 
 #include "Util.h"
+#include "utils/StringUtils.h"
+#include "XBDateTime.h"
+#include "settings/lib/Setting.h"
+#include "settings/Settings.h"
 
 using namespace std;
 
@@ -43,7 +47,7 @@ CLinuxTimezone::CLinuxTimezone() : m_IsDST(0)
    size_t linelen = 0;
    int nameonfourthfield = 0;
    CStdString s;
-   vector<CStdString> tokens;
+   std::vector<std::string> tokens;
 
    // Load timezones
    FILE* fp = fopen("/usr/share/zoneinfo/zone.tab", "r");
@@ -56,7 +60,7 @@ CLinuxTimezone::CLinuxTimezone() : m_IsDST(0)
       {
          tokens.clear();
          s = line;
-         s.TrimLeft(" \t").TrimRight(" \n");
+         StringUtils::Trim(s);
 
          if (s.length() == 0)
             continue;
@@ -64,7 +68,7 @@ CLinuxTimezone::CLinuxTimezone() : m_IsDST(0)
          if (s[0] == '#')
             continue;
 
-         CUtil::Tokenize(s, tokens, " \t");
+         StringUtils::Tokenize(s, tokens, " \t");
          if (tokens.size() < 3)
             continue;
 
@@ -110,8 +114,9 @@ CLinuxTimezone::CLinuxTimezone() : m_IsDST(0)
       while (getdelim(&line, &linelen, '\n', fp) > 0)
       {
          s = line;
-         s.TrimLeft(" \t").TrimRight(" \n");
+         StringUtils::Trim(s);
 
+        /* TODO:STRING_CLEANUP */
          if (s.length() == 0)
             continue;
 
@@ -132,8 +137,8 @@ CLinuxTimezone::CLinuxTimezone() : m_IsDST(0)
             while (s[i] == ' ' || s[i] == '\t') i++;
          }
 
-         countryCode = s.Left(2);
-         countryName = s.Mid(i);
+         countryCode = s.substr(0, 2);
+         countryName = s.substr(i);
 
          m_counties.push_back(countryName);
          m_countryByCode[countryCode] = countryName;
@@ -143,6 +148,32 @@ CLinuxTimezone::CLinuxTimezone() : m_IsDST(0)
       fclose(fp);
    }
    free(line);
+}
+
+void CLinuxTimezone::OnSettingChanged(const CSetting *setting)
+{
+  if (setting == NULL)
+    return;
+
+  const std::string &settingId = setting->GetId();
+  if (settingId == "locale.timezone")
+  {
+    SetTimezone(((CSettingString*)setting)->GetValue());
+
+    CDateTime::ResetTimezoneBias();
+  }
+  else if (settingId == "locale.timezonecountry")
+  {
+    // nothing to do here. Changing locale.timezonecountry will trigger an
+    // update of locale.timezone and automatically adjust its value
+    // and execute OnSettingChanged() for it as well (see above)
+  }
+}
+
+void CLinuxTimezone::OnSettingsLoaded()
+{
+  SetTimezone(CSettings::Get().GetString("locale.timezone"));
+  CDateTime::ResetTimezoneBias();
 }
 
 vector<CStdString> CLinuxTimezone::GetCounties()
@@ -219,6 +250,30 @@ CStdString CLinuxTimezone::GetOSConfiguredTimezone()
    }
 
    return timezoneName;
+}
+
+void CLinuxTimezone::SettingOptionsTimezoneCountriesFiller(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current)
+{
+  vector<CStdString> countries = g_timezone.GetCounties();
+  for (unsigned int i = 0; i < countries.size(); i++)
+    list.push_back(make_pair(countries[i], countries[i]));
+}
+
+void CLinuxTimezone::SettingOptionsTimezonesFiller(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current)
+{
+  current = ((const CSettingString*)setting)->GetValue();
+  bool found = false;
+  vector<CStdString> timezones = g_timezone.GetTimezonesByCountry(CSettings::Get().GetString("locale.timezonecountry"));
+  for (unsigned int i = 0; i < timezones.size(); i++)
+  {
+    if (!found && timezones[i].Equals(current.c_str()))
+      found = true;
+
+    list.push_back(make_pair(timezones[i], timezones[i]));
+  }
+
+  if (!found && timezones.size() > 0)
+    current = timezones[0];
 }
 
 CLinuxTimezone g_timezone;

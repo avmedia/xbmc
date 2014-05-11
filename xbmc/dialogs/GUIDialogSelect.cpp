@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "FileItem.h"
 #include "guilib/Key.h"
 #include "guilib/LocalizeStrings.h"
+#include "utils/StringUtils.h"
 
 #define CONTROL_HEADING       1
 #define CONTROL_LIST          3
@@ -131,6 +132,14 @@ bool CGUIDialogSelect::OnMessage(CGUIMessage& message)
     break;
   case GUI_MSG_SETFOCUS:
     {
+      // make sure the additional button is focused in case the list is empty
+      // (otherwise it is impossible to navigate to the additional button)
+      if (m_vecList->IsEmpty() && m_bButtonEnabled &&
+          m_viewControl.HasControl(message.GetControlId()))
+      {
+        SET_CONTROL_FOCUS(CONTROL_BUTTON, 0);
+        return true;
+      }
       if (m_viewControl.HasControl(message.GetControlId()) && m_viewControl.GetCurrentControl() != message.GetControlId())
       {
         m_viewControl.SetFocused();
@@ -161,10 +170,11 @@ void CGUIDialogSelect::Reset()
   m_selectedItems->Clear();
 }
 
-void CGUIDialogSelect::Add(const CStdString& strLabel)
+int CGUIDialogSelect::Add(const CStdString& strLabel)
 {
   CFileItemPtr pItem(new CFileItem(strLabel));
   m_vecList->Add(pItem);
+  return m_vecList->Size() - 1;
 }
 
 void CGUIDialogSelect::Add(const CFileItemList& items)
@@ -176,10 +186,11 @@ void CGUIDialogSelect::Add(const CFileItemList& items)
   }
 }
 
-void CGUIDialogSelect::Add(const CFileItem* pItem)
+int CGUIDialogSelect::Add(const CFileItem* pItem)
 {
   CFileItemPtr item(new CFileItem(*pItem));
   m_vecList->Add(item);
+  return m_vecList->Size() - 1;
 }
 
 void CGUIDialogSelect::SetItems(CFileItemList* pList)
@@ -226,7 +237,7 @@ bool CGUIDialogSelect::IsButtonPressed()
 
 void CGUIDialogSelect::Sort(bool bSortOrder /*=true*/)
 {
-  m_vecList->Sort(SORT_METHOD_LABEL, bSortOrder ? SortOrderAscending : SortOrderDescending);
+  m_vecList->Sort(SortByLabel, bSortOrder ? SortOrderAscending : SortOrderDescending);
 }
 
 void CGUIDialogSelect::SetSelected(int iSelected)
@@ -321,8 +332,7 @@ void CGUIDialogSelect::OnInitWindow()
   }
   m_viewControl.SetCurrentView(m_useDetails ? CONTROL_DETAILS : CONTROL_LIST);
 
-  CStdString items;
-  items.Format("%i %s", m_vecList->Size(), g_localizeStrings.Get(127).c_str());
+  CStdString items = StringUtils::Format("%i %s", m_vecList->Size(), g_localizeStrings.Get(127).c_str());
   SET_CONTROL_LABEL(CONTROL_NUMBEROFFILES, items);
   
   if (m_multiSelection)

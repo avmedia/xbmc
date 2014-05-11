@@ -132,17 +132,23 @@
 		</RegExp>
 	</ParseFallbackTMDBTagline>
 
-	<GetTMDBSetByIdChain dest="4">
+	<GetTMDBSetByIdChain clearbuffers="no" dest="4">
 		<RegExp input="$$5" output="&lt;details&gt;\1&lt;/details&gt;" dest="4">
-			<RegExp input="$$1" output="&lt;url function=&quot;ParseTMDBSet&quot; cache=&quot;tmdb-$INFO[language]-\1.json&quot;&gt;http://api.themoviedb.org/3/movie/\1?api_key=57983e31fb435df4df77afb854740ea9&amp;amp;language=$INFO[language]&lt;/url&gt;" dest="5">
+			<RegExp input="$$1" output="\1" dest="8">
+				<expression clear="yes" noclean="1" />
+			</RegExp>
+			<RegExp input="$$8" output="&lt;url function=&quot;ParseTMDBSet&quot; cache=&quot;tmdb-$INFO[language]-\1.json&quot;&gt;http://api.themoviedb.org/3/movie/\1?api_key=57983e31fb435df4df77afb854740ea9&amp;amp;language=$INFO[language]&lt;/url&gt;" dest="5">
 				<expression />
 			</RegExp>
 			<expression noclean="1" />
 		</RegExp>
 	</GetTMDBSetByIdChain>
-	<GetTMDBLangSetByIdChain dest="4">
+	<GetTMDBLangSetByIdChain clearbuffers="no" dest="4">
 		<RegExp input="$$5" output="&lt;details&gt;\1&lt;/details&gt;" dest="4">
-			<RegExp input="$$1" output="&lt;url function=&quot;ParseTMDBSet&quot; cache=&quot;tmdb-$INFO[tmdbsetlanguage]-\1.json&quot;&gt;http://api.themoviedb.org/3/movie/\1?api_key=57983e31fb435df4df77afb854740ea9&amp;amp;language=$INFO[tmdbsetlanguage]&lt;/url&gt;" dest="5">
+			<RegExp input="$$1" output="\1" dest="8">
+				<expression clear="yes" noclean="1" />
+			</RegExp>
+			<RegExp input="$$8" output="&lt;url function=&quot;ParseTMDBSet&quot; cache=&quot;tmdb-$INFO[tmdbsetlanguage]-\1.json&quot;&gt;http://api.themoviedb.org/3/movie/\1?api_key=57983e31fb435df4df77afb854740ea9&amp;amp;language=$INFO[tmdbsetlanguage]&lt;/url&gt;" dest="5">
 				<expression />
 			</RegExp>
 			<expression noclean="1" />
@@ -184,11 +190,11 @@
 			<RegExp input="$$1" output="\1" dest="7">
 				<expression clear="yes" noclean="1">&quot;cast&quot;:\[([^\]]*)</expression>
 			</RegExp>
-			<RegExp input="$$7" output="&lt;actor&gt;&lt;name&gt;\1&lt;/name&gt;&lt;role&gt;\2&lt;/role&gt;&lt;thumb&gt;http://cf2.imgobject.com/t/p/original\3&lt;/thumb&gt;&lt;/actor&gt;" dest="2">
-				<expression repeat="yes" fixchars="1">&quot;name&quot;:&quot;([^&quot;]*)&quot;,&quot;character&quot;:&quot;([^&quot;]*)&quot;,&quot;order&quot;:[0-9]*,&quot;cast_id&quot;:[0-9]*,&quot;profile_path&quot;:&quot;([^&quot;]*)&quot;</expression>
+			<RegExp input="$$7" output="&lt;actor&gt;&lt;name&gt;\1&lt;/name&gt;&lt;role&gt;\2&lt;/role&gt;&lt;order&gt;\3&lt;/order&gt;&lt;thumb&gt;http://cf2.imgobject.com/t/p/original\4&lt;/thumb&gt;&lt;/actor&gt;" dest="2">
+				<expression repeat="yes" fixchars="1">&quot;name&quot;:&quot;([^&quot;]*)&quot;,&quot;character&quot;:&quot;([^&quot;]*)&quot;,&quot;order&quot;:([0-9]*),&quot;cast_id&quot;:[0-9]*,&quot;profile_path&quot;:&quot;([^&quot;]*)&quot;</expression>
 			</RegExp>
-			<RegExp input="$$7" output="&lt;actor&gt;&lt;name&gt;\1&lt;/name&gt;&lt;role&gt;\2&lt;/role&gt;&lt;/actor&gt;" dest="2+">
-				<expression repeat="yes" fixchars="1">&quot;name&quot;:&quot;([^&quot;]*)&quot;,&quot;character&quot;:&quot;([^&quot;]*)&quot;,&quot;order&quot;:[0-9]*,&quot;cast_id&quot;:[0-9]*,&quot;profile_path&quot;:null</expression>
+			<RegExp input="$$7" output="&lt;actor&gt;&lt;name&gt;\1&lt;/name&gt;&lt;role&gt;\2&lt;/role&gt;&lt;order&gt;\3&lt;/order&gt;&lt;/actor&gt;" dest="2+">
+				<expression repeat="yes" fixchars="1">&quot;name&quot;:&quot;([^&quot;]*)&quot;,&quot;character&quot;:&quot;([^&quot;]*)&quot;,&quot;order&quot;:([0-9]*),&quot;cast_id&quot;:[0-9]*,&quot;profile_path&quot;:null</expression>
 			</RegExp>
 			<expression noclean="1" />
 		</RegExp>

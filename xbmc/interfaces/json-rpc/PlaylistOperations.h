@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "utils/StdString.h"
 #include "JSONRPC.h"
 #include "FileItemHandler.h"
+#include "FileItem.h"
 
 namespace JSONRPC
 {
@@ -41,5 +42,7 @@ namespace JSONRPC
     static int GetPlaylist(const CVariant &playlist);
     static inline void NotifyAll();
     static JSONRPC_STATUS GetPropertyValue(int playlist, const CStdString &property, CVariant &result);
+    static bool CheckMediaParameter(int playlist, const CVariant &itemObject);
+    static bool HandleItemsParameter(int playlistid, const CVariant &itemParam, CFileItemList &items);
   };
 }

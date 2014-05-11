@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -105,5 +105,7 @@ bool CVideoSettings::operator!=(const CVideoSettings &right) const
   if (m_CropBottom != right.m_CropBottom) return true;
   if (m_CropLeft != right.m_CropLeft) return true;
   if (m_CropRight != right.m_CropRight) return true;
+  if (m_StereoMode != right.m_StereoMode) return true;
+  if (m_StereoInvert != right.m_StereoInvert) return true;
   return false;
 }

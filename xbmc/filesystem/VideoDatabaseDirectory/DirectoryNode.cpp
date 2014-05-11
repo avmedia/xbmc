@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ CDirectoryNode* CDirectoryNode::ParseURL(const CStdString& strPath)
 
   CStdStringArray Path;
   StringUtils::SplitString(strDirectory, "/", Path);
-  if (!strDirectory.IsEmpty())
+  if (!strDirectory.empty())
     Path.insert(Path.begin(), "");
 
   CDirectoryNode* pNode=NULL;
@@ -197,14 +197,14 @@ CStdString CDirectoryNode::BuildPath() const
 {
   CStdStringArray array;
 
-  if (!m_strName.IsEmpty())
+  if (!m_strName.empty())
     array.insert(array.begin(), m_strName);
 
   CDirectoryNode* pParent=m_pParent;
   while (pParent!=NULL)
   {
     const CStdString& strNodeName=pParent->GetName();
-    if (!strNodeName.IsEmpty())
+    if (!strNodeName.empty())
       array.insert(array.begin(), strNodeName);
 
     pParent=pParent->GetParent();

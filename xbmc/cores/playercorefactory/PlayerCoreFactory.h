@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,14 +20,13 @@
  *
  */
 
-#include "system.h"
+#include <vector>
 
+#include "system.h"
 #include "cores/IPlayerCallback.h"
-#include "settings/ISettingsHandler.h"
+#include "settings/lib/ISettingsHandler.h"
 #include "threads/CriticalSection.h"
 #include "utils/StdString.h"
-
-#include <vector>
 
 /*----------------------------------------------------------------------
 |   forward references
@@ -45,17 +44,14 @@ enum EPLAYERCORES
   EPC_DVDPLAYER,
   EPC_MPLAYER,
   EPC_PAPLAYER,
-#if defined(HAS_AMLPLAYER)
-  EPC_AMLPLAYER,
-#endif
 #if defined(HAS_OMXPLAYER)
   EPC_OMXPLAYER,
 #endif
-  EPC_EXTPLAYER,
-  EPC_UPNPPLAYER,
 #ifdef HAS_DS_PLAYER
   EPC_DSPLAYER,
 #endif
+  EPC_EXTPLAYER,
+  EPC_UPNPPLAYER,
 };
 
 typedef unsigned int PLAYERCOREID;
@@ -64,9 +60,6 @@ const PLAYERCOREID PCID_NONE = EPC_NONE;
 const PLAYERCOREID PCID_DVDPLAYER = EPC_DVDPLAYER;
 const PLAYERCOREID PCID_MPLAYER = EPC_MPLAYER;
 const PLAYERCOREID PCID_PAPLAYER = EPC_PAPLAYER;
-#if defined(HAS_AMLPLAYER)
-const PLAYERCOREID PCID_AMLPLAYER = EPC_AMLPLAYER;
-#endif
 #if defined(HAS_OMXPLAYER)
 const PLAYERCOREID PCID_OMXPLAYER = EPC_OMXPLAYER;
 #endif

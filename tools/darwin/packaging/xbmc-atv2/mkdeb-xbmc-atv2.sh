@@ -23,7 +23,7 @@ fi
 #copy bzip2 of dsym to xbmc-depends install dir
 if [ -d $DSYM ]; then
   if [ -d $DSYM_TARGET_DIR ]; then
-    tar -C $DSYM/.. -c $DSYM_FILENAME/ | bzip2 > $DSYM_TARGET_DIR/`$DIRNAME/../../../buildbot/gitrev-posix`-${DSYM_FILENAME}.tar.bz2
+    tar -C $DSYM/.. -c $DSYM_FILENAME/ | bzip2 > $DSYM_TARGET_DIR/`$DIRNAME/../gitrev-posix`-${DSYM_FILENAME}.tar.bz2
   fi
 fi
 
@@ -44,8 +44,8 @@ fi
 
 PACKAGE=org.xbmc.xbmc-atv2
 
-VERSION=13.0
-REVISION=0~alpha3
+VERSION=14.0
+REVISION=0~alpha1
 ARCHIVE=${PACKAGE}_${VERSION}-${REVISION}_iphoneos-arm.deb
 
 echo Creating $PACKAGE package version $VERSION revision $REVISION

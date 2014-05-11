@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,11 +24,12 @@
 #include "guilib/GraphicContext.h"
 #include "profiles/ProfilesManager.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
+#include "utils/StringUtils.h"
 
-#ifdef _LINUX
+#ifdef TARGET_POSIX
 #include <dirent.h>
 #endif
 
@@ -98,7 +99,7 @@ CStdString CSpecialProtocol::TranslatePath(const CURL &url)
   // check for special-protocol, if not, return
   if (!url.GetProtocol().Equals("special"))
   {
-#if defined(_LINUX) && defined(_DEBUG)
+#if defined(TARGET_POSIX) && defined(_DEBUG)
     CStdString path(url.Get());
     if (path.length() >= 2 && path[1] == ':')
     {
@@ -117,37 +118,37 @@ CStdString CSpecialProtocol::TranslatePath(const CURL &url)
   CStdString RootDir;
 
   // Split up into the special://root and the rest of the filename
-  int pos = FullFileName.Find('/');
-  if (pos != -1 && pos > 1)
+  size_t pos = FullFileName.find('/');
+  if (pos != std::string::npos && pos > 1)
   {
-    RootDir = FullFileName.Left(pos);
+    RootDir = FullFileName.substr(0, pos);
 
-    if (pos < FullFileName.GetLength())
-      FileName = FullFileName.Mid(pos + 1);
+    if (pos < FullFileName.size())
+      FileName = FullFileName.substr(pos + 1);
   }
   else
     RootDir = FullFileName;
 
   if (RootDir.Equals("subtitles"))
-    URIUtils::AddFileToFolder(g_guiSettings.GetString("subtitles.custompath"), FileName, translatedPath);
+    translatedPath = URIUtils::AddFileToFolder(CSettings::Get().GetString("subtitles.custompath"), FileName);
   else if (RootDir.Equals("userdata"))
-    URIUtils::AddFileToFolder(CProfilesManager::Get().GetUserDataFolder(), FileName, translatedPath);
+    translatedPath = URIUtils::AddFileToFolder(CProfilesManager::Get().GetUserDataFolder(), FileName);
   else if (RootDir.Equals("database"))
-    URIUtils::AddFileToFolder(CProfilesManager::Get().GetDatabaseFolder(), FileName, translatedPath);
+    translatedPath = URIUtils::AddFileToFolder(CProfilesManager::Get().GetDatabaseFolder(), FileName);
   else if (RootDir.Equals("thumbnails"))
-    URIUtils::AddFileToFolder(CProfilesManager::Get().GetThumbnailsFolder(), FileName, translatedPath);
+    translatedPath = URIUtils::AddFileToFolder(CProfilesManager::Get().GetThumbnailsFolder(), FileName);
   else if (RootDir.Equals("recordings") || RootDir.Equals("cdrips"))
-    URIUtils::AddFileToFolder(g_guiSettings.GetString("audiocds.recordingpath", false), FileName, translatedPath);
+    translatedPath = URIUtils::AddFileToFolder(CSettings::Get().GetString("audiocds.recordingpath"), FileName);
   else if (RootDir.Equals("screenshots"))
-    URIUtils::AddFileToFolder(g_guiSettings.GetString("debug.screenshotpath", false), FileName, translatedPath);
+    translatedPath = URIUtils::AddFileToFolder(CSettings::Get().GetString("debug.screenshotpath"), FileName);
   else if (RootDir.Equals("musicplaylists"))
-    URIUtils::AddFileToFolder(CUtil::MusicPlaylistsLocation(), FileName, translatedPath);
+    translatedPath = URIUtils::AddFileToFolder(CUtil::MusicPlaylistsLocation(), FileName);
   else if (RootDir.Equals("videoplaylists"))
-    URIUtils::AddFileToFolder(CUtil::VideoPlaylistsLocation(), FileName, translatedPath);
+    translatedPath = URIUtils::AddFileToFolder(CUtil::VideoPlaylistsLocation(), FileName);
   else if (RootDir.Equals("skin"))
-    URIUtils::AddFileToFolder(g_graphicsContext.GetMediaDir(), FileName, translatedPath);
+    translatedPath = URIUtils::AddFileToFolder(g_graphicsContext.GetMediaDir(), FileName);
   else if (RootDir.Equals("logpath"))
-    URIUtils::AddFileToFolder(g_advancedSettings.m_logFolder, FileName, translatedPath);
+    translatedPath = URIUtils::AddFileToFolder(g_advancedSettings.m_logFolder, FileName);
 
 
   // from here on, we have our "real" special paths
@@ -161,8 +162,8 @@ CStdString CSpecialProtocol::TranslatePath(const CURL &url)
            RootDir.Equals("frameworks"))
   {
     CStdString basePath = GetPath(RootDir);
-    if (!basePath.IsEmpty())
-      URIUtils::AddFileToFolder(basePath, FileName, translatedPath);
+    if (!basePath.empty())
+      translatedPath = URIUtils::AddFileToFolder(basePath, FileName);
     else
       translatedPath.clear();
   }
@@ -181,8 +182,8 @@ CStdString CSpecialProtocol::TranslatePathConvertCase(const CStdString& path)
 {
   CStdString translatedPath = TranslatePath(path);
 
-#ifdef _LINUX
-  if (translatedPath.Find("://") > 0)
+#ifdef TARGET_POSIX
+  if (translatedPath.find("://") != std::string::npos)
     return translatedPath;
 
   // If the file exists with the requested name, simply return it
@@ -191,15 +192,16 @@ CStdString CSpecialProtocol::TranslatePathConvertCase(const CStdString& path)
     return translatedPath;
 
   CStdString result;
-  vector<CStdString> tokens;
-  CUtil::Tokenize(translatedPath, tokens, "/");
+  std::vector<std::string> tokens;
+  StringUtils::Tokenize(translatedPath, tokens, "/");
   CStdString file;
   DIR* dir;
   struct dirent* de;
 
   for (unsigned int i = 0; i < tokens.size(); i++)
   {
-    file = result + "/" + tokens[i];
+    file = result + "/";
+    file += tokens[i];
     if (stat(file.c_str(), &stat_buf) == 0)
     {
       result += "/" + tokens[i];
@@ -212,7 +214,7 @@ CStdString CSpecialProtocol::TranslatePathConvertCase(const CStdString& path)
         while ((de = readdir(dir)) != NULL)
         {
           // check if there's a file with same name but different case
-          if (strcasecmp(de->d_name, tokens[i]) == 0)
+          if (strcasecmp(de->d_name, tokens[i].c_str()) == 0)
           {
             result += "/";
             result += de->d_name;
@@ -248,7 +250,7 @@ void CSpecialProtocol::LogPaths()
   CLog::Log(LOGNOTICE, "special://home/ is mapped to: %s", GetPath("home").c_str());
   CLog::Log(LOGNOTICE, "special://temp/ is mapped to: %s", GetPath("temp").c_str());
   //CLog::Log(LOGNOTICE, "special://userhome/ is mapped to: %s", GetPath("userhome").c_str());
-  if (!CUtil::GetFrameworksPath().IsEmpty())
+  if (!CUtil::GetFrameworksPath().empty())
     CLog::Log(LOGNOTICE, "special://frameworks/ is mapped to: %s", GetPath("frameworks").c_str());
 }
 

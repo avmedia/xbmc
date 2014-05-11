@@ -1,24 +1,28 @@
 /*
-* UPnP Support for XBMC
-* Copyright (c) 2006 c0diq (Sylvain Rebaud)
-* Portions Copyright (c) by the authors of libPlatinum
-*
-* http://www.plutinosoft.com/blog/category/platinum/
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * UPnP Support for XBMC
+ *      Copyright (c) 2006 c0diq (Sylvain Rebaud)
+ *      Portions Copyright (c) by the authors of libPlatinum
+ *      http://www.plutinosoft.com/blog/category/platinum/
+ *      Copyright (C) 2006-2013 Team XBMC
+ *      http://xbmc.org
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#include <set>
 
 #include "threads/SystemClock.h"
 #include "UPnP.h"
@@ -34,7 +38,7 @@
 #include "Platinum.h"
 #include "URL.h"
 #include "profiles/ProfilesManager.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "GUIUserMessages.h"
 #include "FileItem.h"
 #include "guilib/GUIWindowManager.h"
@@ -106,6 +110,8 @@ namespace UPNP
 |   static
 +---------------------------------------------------------------------*/
 CUPnP* CUPnP::upnp = NULL;
+static NPT_List<void*> g_UserData;
+static NPT_Mutex       g_UserDataLock;
 
 /*----------------------------------------------------------------------
 |   CDeviceHostReferenceHolder class
@@ -179,8 +185,7 @@ public:
     {
         NPT_String path = "upnp://"+device->GetUUID()+"/";
         if (!NPT_StringsEqual(item_id, "0")) {
-            CStdString id = item_id;
-            CURL::Encode(id);
+            CStdString id(CURL::Encode(item_id));
             URIUtils::AddSlashAtEnd(id);
             path += id.c_str();
         }
@@ -216,7 +221,7 @@ public:
 
         if (item.GetVideoInfoTag()->m_resumePoint.timeInSeconds != bookmark.timeInSeconds) {
             CLog::Log(LOGDEBUG, "UPNP: Updating resume point for item %s", path.c_str());
-            long time = bookmark.timeInSeconds;
+            long time = (long)bookmark.timeInSeconds;
             if (time < 0) time = 0;
             curr_value.Append(NPT_String::Format("<upnp:lastPlaybackPosition>%ld</upnp:lastPlaybackPosition>",
                                                  (long)item.GetVideoInfoTag()->m_resumePoint.timeInSeconds));
@@ -284,54 +289,100 @@ public:
 
   ~CMediaController()
   {
+    for (std::set<std::string>::const_iterator itRenderer = m_registeredRenderers.begin(); itRenderer != m_registeredRenderers.end(); ++itRenderer)
+      unregisterRenderer(*itRenderer);
+    m_registeredRenderers.clear();
   }
 
+#define CHECK_USERDATA_RETURN(userdata) do {     \
+  if (!g_UserData.Contains(userdata))            \
+      return;                                    \
+  } while(0)
+
   virtual void OnStopResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnStopResult(res, device, userdata); }
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnStopResult(res, device, userdata);
+  }
 
   virtual void OnSetPlayModeResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnSetPlayModeResult(res, device, userdata); }
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnSetPlayModeResult(res, device, userdata);
+  }
 
   virtual void OnSetAVTransportURIResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnSetAVTransportURIResult(res, device, userdata); }
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnSetAVTransportURIResult(res, device, userdata);
+  }
 
   virtual void OnSeekResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnSeekResult(res, device, userdata); }
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnSeekResult(res, device, userdata);
+  }
 
   virtual void OnPreviousResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnPreviousResult(res, device, userdata); }
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnPreviousResult(res, device, userdata);
+  }
 
   virtual void OnPlayResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnPlayResult(res, device, userdata); }
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnPlayResult(res, device, userdata);
+  }
 
   virtual void OnPauseResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnPauseResult(res, device, userdata); }
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnPauseResult(res, device, userdata);
+  }
 
   virtual void OnNextResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnNextResult(res, device, userdata); }
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnNextResult(res, device, userdata);
+  }
 
   virtual void OnGetMediaInfoResult(NPT_Result res, PLT_DeviceDataReference& device, PLT_MediaInfo* info, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnGetMediaInfoResult(res, device, info, userdata); }
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnGetMediaInfoResult(res, device, info, userdata);
+  }
 
   virtual void OnGetPositionInfoResult(NPT_Result res, PLT_DeviceDataReference& device, PLT_PositionInfo* info, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnGetPositionInfoResult(res, device, info, userdata); }
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnGetPositionInfoResult(res, device, info, userdata);
+  }
 
   virtual void OnGetTransportInfoResult(NPT_Result res, PLT_DeviceDataReference& device, PLT_TransportInfo* info, void* userdata)
-  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnGetTransportInfoResult(res, device, info, userdata); }
-
+  { CHECK_USERDATA_RETURN(userdata);
+    static_cast<PLT_MediaControllerDelegate*>(userdata)->OnGetTransportInfoResult(res, device, info, userdata);
+  }
 
   virtual bool OnMRAdded(PLT_DeviceDataReference& device )
   {
+    if (device->GetUUID().IsEmpty() || device->GetUUID().GetChars() == NULL)
+      return false;
+
     CPlayerCoreFactory::Get().OnPlayerDiscovered((const char*)device->GetUUID()
                                           ,(const char*)device->GetFriendlyName()
                                           , EPC_UPNPPLAYER);
+    m_registeredRenderers.insert(std::string(device->GetUUID().GetChars()));
     return true;
   }
 
   virtual void OnMRRemoved(PLT_DeviceDataReference& device )
   {
-    CPlayerCoreFactory::Get().OnPlayerRemoved((const char*)device->GetUUID());
+    if (device->GetUUID().IsEmpty() || device->GetUUID().GetChars() == NULL)
+      return;
+
+    std::string uuid(device->GetUUID().GetChars());
+    unregisterRenderer(uuid);
+    m_registeredRenderers.erase(uuid);
   }
+
+private:
+  void unregisterRenderer(const std::string &deviceUUID)
+  {
+    CPlayerCoreFactory::Get().OnPlayerRemoved(deviceUUID);
+  }
+
+  std::set<std::string> m_registeredRenderers;
 };
 
 /*----------------------------------------------------------------------
@@ -355,7 +406,7 @@ CUPnP::CUPnP() :
     if (NPT_SUCCEEDED(PLT_UPnPMessageHelper::GetIPAddresses(list)) && list.GetItemCount()) {
         m_IP = (*(list.GetFirstItem())).ToString();
     }
-    else if(m_IP.IsEmpty())
+    else if(m_IP.empty())
         m_IP = "localhost";
 
     // start upnp monitoring
@@ -467,7 +518,8 @@ CUPnP::StartClient()
     m_MediaBrowser = new CMediaBrowser(m_CtrlPointHolder->m_CtrlPoint);
 
     // start controller
-    if (g_guiSettings.GetBool("services.upnpcontroller")) {
+    if (CSettings::Get().GetBool("services.upnpcontroller") &&
+        CSettings::Get().GetBool("services.upnpserver")) {
         m_MediaController = new CMediaController(m_CtrlPointHolder->m_CtrlPoint);
     }
 }
@@ -504,15 +556,15 @@ CUPnP::CreateServer(int port /* = 0 */)
     // but it doesn't work anyways as it requires multicast for XP to detect us
     device->m_PresentationURL =
         NPT_HttpUrl(m_IP,
-                    atoi(g_guiSettings.GetString("services.webserverport")),
+                    CSettings::Get().GetInt("services.webserverport"),
                     "/").ToString();
 
     device->m_ModelName        = "XBMC Media Center";
     device->m_ModelNumber      = g_infoManager.GetVersion().c_str();
     device->m_ModelDescription = "XBMC Media Center - Media Server";
-    device->m_ModelURL         = "http://www.xbmc.org/";
+    device->m_ModelURL         = "http://xbmc.org/";
     device->m_Manufacturer     = "Team XBMC";
-    device->m_ManufacturerURL  = "http://www.xbmc.org/";
+    device->m_ManufacturerURL  = "http://xbmc.org/";
 
     device->SetDelegate(device);
     return device;
@@ -521,14 +573,13 @@ CUPnP::CreateServer(int port /* = 0 */)
 /*----------------------------------------------------------------------
 |   CUPnP::StartServer
 +---------------------------------------------------------------------*/
-void
+bool
 CUPnP::StartServer()
 {
-    if (!m_ServerHolder->m_Device.IsNull()) return;
+    if (!m_ServerHolder->m_Device.IsNull()) return false;
 
-    // load upnpserver.xml so that g_settings.m_vecUPnPMusiCMediaSources, etc.. are loaded
-    CStdString filename;
-    URIUtils::AddFileToFolder(CProfilesManager::Get().GetUserDataFolder(), "upnpserver.xml", filename);
+    // load upnpserver.xml
+    CStdString filename = URIUtils::AddFileToFolder(CProfilesManager::Get().GetUserDataFolder(), "upnpserver.xml");
     CUPnPSettings::Get().Load(filename);
 
     // create the server with a XBox compatible friendlyname and UUID from upnpserver.xml if found
@@ -559,7 +610,7 @@ CUPnP::StartServer()
 
     // save UUID
     CUPnPSettings::Get().SetServerUUID(m_ServerHolder->m_Device->GetUUID().GetChars());
-    CUPnPSettings::Get().Save(filename);
+    return CUPnPSettings::Get().Save(filename);
 }
 
 /*----------------------------------------------------------------------
@@ -588,14 +639,14 @@ CUPnP::CreateRenderer(int port /* = 0 */)
 
     device->m_PresentationURL =
         NPT_HttpUrl(m_IP,
-                    atoi(g_guiSettings.GetString("services.webserverport")),
+                    CSettings::Get().GetInt("services.webserverport"),
                     "/").ToString();
     device->m_ModelName        = "XBMC Media Center";
     device->m_ModelNumber      = g_infoManager.GetVersion().c_str();
     device->m_ModelDescription = "XBMC Media Center - Media Renderer";
-    device->m_ModelURL         = "http://www.xbmc.org/";
+    device->m_ModelURL         = "http://xbmc.org/";
     device->m_Manufacturer     = "Team XBMC";
-    device->m_ManufacturerURL  = "http://www.xbmc.org/";
+    device->m_ManufacturerURL  = "http://xbmc.org/";
 
     return device;
 }
@@ -603,12 +654,11 @@ CUPnP::CreateRenderer(int port /* = 0 */)
 /*----------------------------------------------------------------------
 |   CUPnP::StartRenderer
 +---------------------------------------------------------------------*/
-void CUPnP::StartRenderer()
+bool CUPnP::StartRenderer()
 {
-    if (!m_RendererHolder->m_Device.IsNull()) return;
+    if (!m_RendererHolder->m_Device.IsNull()) return false;
 
-    CStdString filename;
-    URIUtils::AddFileToFolder(CProfilesManager::Get().GetUserDataFolder(), "upnpserver.xml", filename);
+    CStdString filename = URIUtils::AddFileToFolder(CProfilesManager::Get().GetUserDataFolder(), "upnpserver.xml");
     CUPnPSettings::Get().Load(filename);
 
     m_RendererHolder->m_Device = CreateRenderer(CUPnPSettings::Get().GetRendererPort());
@@ -629,7 +679,7 @@ void CUPnP::StartRenderer()
 
     // save UUID
     CUPnPSettings::Get().SetRendererUUID(m_RendererHolder->m_Device->GetUUID().GetChars());
-    CUPnPSettings::Get().Save(filename);
+    return CUPnPSettings::Get().Save(filename);
 }
 
 /*----------------------------------------------------------------------
@@ -650,6 +700,18 @@ void CUPnP::UpdateState()
 {
   if (!m_RendererHolder->m_Device.IsNull())
       ((CUPnPRenderer*)m_RendererHolder->m_Device.AsPointer())->UpdateState();
+}
+
+void CUPnP::RegisterUserdata(void* ptr)
+{
+  NPT_AutoLock lock(g_UserDataLock);
+  g_UserData.Add(ptr);
+}
+
+void CUPnP::UnregisterUserdata(void* ptr)
+{
+  NPT_AutoLock lock(g_UserDataLock);
+  g_UserData.Remove(ptr);
 }
 
 } /* namespace UPNP */

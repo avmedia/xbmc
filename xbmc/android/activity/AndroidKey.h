@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,19 +19,19 @@
  *
  */
 
-#include <stdint.h>
 #include <android/input.h>
 
-typedef struct {
-  int32_t nativeKey;
-  int16_t xbmcKey;
-} KeyMap;
+#include <stdint.h>
+#include <string>
+#include <vector>
 
 class CAndroidKey
 {
 public:
-  CAndroidKey(){};
-  ~CAndroidKey(){};
-  void XBMC_Key(uint8_t code, uint16_t key, uint16_t modifiers, bool up);
-  bool onKeyboardEvent(AInputEvent* event);
+  CAndroidKey() {};
+ ~CAndroidKey() {};
+
+  bool onKeyboardEvent(AInputEvent *event);
+  void XBMC_Key(uint8_t code, uint16_t key, uint16_t modifiers, uint16_t unicode, bool up);
+  void XBMC_JoyButton(uint8_t id, uint8_t button, bool up);
 };

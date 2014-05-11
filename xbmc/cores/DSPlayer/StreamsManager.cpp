@@ -659,8 +659,8 @@ void CStreamsManager::ExtractCodecDetail(CStreamDetail& s, CStdString& codecInfo
   if (s.m_eType == CStreamDetail::SUBTITLE)
     return;
   
-  std::vector<CStdString> tokens;
-  CUtil::Tokenize(codecInfos, tokens, "|");
+  std::vector<std::string> tokens;
+  StringUtils::Tokenize(codecInfos, tokens, "|");
 
   if (tokens.empty() || tokens.size() != 2)
   {
@@ -975,13 +975,13 @@ void CSubtitleManager::Initialize()
   SSubStyle style; //auto default on constructor
 
   // Build style based on XBMC settings
-  style.colors[0] = color[g_guiSettings.GetInt("subtitles.color")];
-  style.alpha[0] = g_guiSettings.GetInt("subtitles.alpha");
+  style.colors[0] = color[CSettings::Get().GetInt("subtitles.color")];
+  style.alpha[0] = CSettings::Get().GetInt("subtitles.alpha");
 
   g_graphicsContext.SetScalingResolution(RES_PAL_4x3, true);
-  style.fontSize = (float) (g_guiSettings.GetInt("subtitles.height")) * 50.0 / 72.0;
+  style.fontSize = (float) (CSettings::Get().GetInt("subtitles.height")) * 50.0 / 72.0;
 
-  int fontStyle = g_guiSettings.GetInt("subtitles.style");
+  int fontStyle = CSettings::Get().GetInt("subtitles.style");
   switch (fontStyle)
   {
   case FONT_STYLE_NORMAL:
@@ -1005,17 +1005,17 @@ void CSubtitleManager::Initialize()
 
   style.charSet = g_charsetConverter.getCharsetIdByName(g_langInfo.GetSubtitleCharSet());
 
-  style.borderStyle = g_guiSettings.GetInt("subtitles.border");
-  style.shadowDepthX = style.shadowDepthY = g_guiSettings.GetInt("subtitles.shadow.depth");
-  style.outlineWidthX = style.outlineWidthY = g_guiSettings.GetInt("subtitles.outline.width");
+  style.borderStyle = CSettings::Get().GetInt("subtitles.border");
+  style.shadowDepthX = style.shadowDepthY = CSettings::Get().GetInt("subtitles.shadowdepth");
+  style.outlineWidthX = style.outlineWidthY = CSettings::Get().GetInt("subtitles.outlinewidth");
   
   CStdStringW fontName;
-  g_charsetConverter.utf8ToW(g_guiSettings.GetString("subtitles.dsfont"), fontName);
+  g_charsetConverter.utf8ToW(CSettings::Get().GetString("subtitles.dsfont"), fontName);
   style.fontName = (wchar_t *) CoTaskMemAlloc(fontName.length() * sizeof(wchar_t) + 2);
   if (style.fontName)
     wcscpy_s(style.fontName, fontName.length() + 1, fontName.c_str());
 
-  bool override = g_guiSettings.GetBool("subtitles.overrideassfonts");
+  bool override = CSettings::Get().GetBool("subtitles.overrideassfonts");
   m_pManager->SetStyle(&style, override);
 
   if (FAILED(m_pManager->InsertPassThruFilter(g_dsGraph->pFilterGraph)))

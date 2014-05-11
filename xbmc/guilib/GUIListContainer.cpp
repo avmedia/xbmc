@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,9 +18,11 @@
  *
  */
 
+#include "system.h"
 #include "GUIListContainer.h"
 #include "GUIListItem.h"
 #include "Key.h"
+#include "utils/StringUtils.h"
 
 CGUIListContainer::CGUIListContainer(int parentID, int controlID, float posX, float posY, float width, float height, ORIENTATION orientation, const CScroller& scroller, int preloadItems)
     : CGUIBaseContainer(parentID, controlID, posX, posY, width, height, orientation, scroller, preloadItems)
@@ -293,8 +295,7 @@ CGUIListContainer::CGUIListContainer(int parentID, int controlID, float posX, fl
   CGUIListItemLayout layout;
   layout.CreateListControlLayouts(width, textureHeight + spaceBetweenItems, false, labelInfo, labelInfo2, textureButton, textureButtonFocus, textureHeight, itemWidth, itemHeight, "", "");
   m_layouts.push_back(layout);
-  CStdString condition;
-  condition.Format("control.hasfocus(%i)", controlID);
+  CStdString condition = StringUtils::Format("control.hasfocus(%i)", controlID);
   CStdString condition2 = "!" + condition;
   CGUIListItemLayout focusLayout;
   focusLayout.CreateListControlLayouts(width, textureHeight + spaceBetweenItems, true, labelInfo, labelInfo2, textureButton, textureButtonFocus, textureHeight, itemWidth, itemHeight, condition2, condition);

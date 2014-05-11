@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ bool CGUIWindowKaraokeLyrics::OnAction(const CAction &action)
 {
   CSingleLock lock (m_CritSection);
 
-  if ( !m_Lyrics || !g_application.IsPlayingAudio() )
+  if ( !m_Lyrics || !g_application.m_pPlayer->IsPlayingAudio() )
     return false;
 
   CGUIDialogKaraokeSongSelectorSmall * songSelector = (CGUIDialogKaraokeSongSelectorSmall *)

@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 #include "md5.h"
 #include "InfoLoader.h"
-#include "settings/ISubSettings.h"
+#include "settings/lib/ISubSettings.h"
 
 #define KB  (1024)          // 1 KiloByte (1KB)   1024 Byte (2^10 Byte)
 #define MB  (1024*KB)       // 1 MegaByte (1MB)   1024 KB (2^10 KB)
@@ -35,7 +35,7 @@
 class CSysData
 {
 public:
-  enum INTERNET_STATE { UNKNOWN, CONNECTED, NO_DNS, DISCONNECTED };
+  enum INTERNET_STATE { UNKNOWN, CONNECTED, DISCONNECTED };
   CSysData()
   {
     Reset();
@@ -83,10 +83,10 @@ public:
   enum WindowsVersion
   {
     WindowsVersionUnknown = -1, // Undetected, unsupported Windows version or OS in not Windows
-    WindowsVersionWinXP,        // Windows XP, Windows Server 2003 (R2), Windows Home Server
     WindowsVersionVista,        // Windows Vista, Windows Server 2008
     WindowsVersionWin7,         // Windows 7, Windows Server 2008 R2
     WindowsVersionWin8,         // Windows 8, Windows Server 2012
+    WindowsVersionWin8_1,       // Windows 8.1
     /* Insert new Windows versions here, when they'll be known */
     WindowsVersionFuture = 100  // Future Windows version, not known to code
   };
@@ -103,39 +103,45 @@ public:
   bool GetHDDInfo(CStdString& strHDDModel, CStdString& strHDDSerial,CStdString& strHDDFirmware,CStdString& strHDDpw,CStdString& strHDDLockState);
   bool GetRefurbInfo(CStdString& rfi_FirstBootTime, CStdString& rfi_PowerCycleCount);
 
-#if defined(_LINUX) && !defined(TARGET_DARWIN) && !defined(__FreeBSD__)
+#if defined(TARGET_LINUX)
   CStdString GetLinuxDistro();
 #endif
-#ifdef _LINUX
+#ifdef TARGET_POSIX
   CStdString GetUnameVersion();
 #endif
 #if defined(TARGET_WINDOWS)
-  CStdString CSysInfo::GetUAWindowsVersion();
+  CStdString GetUAWindowsVersion();
 #endif
   CStdString GetUserAgent();
   bool HasInternet();
   bool IsAppleTV2();
-  bool HasVDADecoder();
   bool HasVideoToolBoxDecoder();
   bool IsAeroDisabled();
-  bool IsVistaOrHigher();
-  bool IsWindows8OrHigher();
+  bool HasHW3DInterlaced();
   static bool IsWindowsVersion(WindowsVersion ver);
   static bool IsWindowsVersionAtLeast(WindowsVersion ver);
   static WindowsVersion GetWindowsVersion();
-  static bool IsOS64bit();
+  static int GetKernelBitness(void);
+  static int GetXbmcBitness(void);
   static CStdString GetKernelVersion();
   CStdString GetCPUModel();
   CStdString GetCPUBogoMips();
   CStdString GetCPUHardware();
   CStdString GetCPURevision();
   CStdString GetCPUSerial();
-  bool GetDiskSpace(const CStdString drive,int& iTotal, int& iTotalFree, int& iTotalUsed, int& iPercentFree, int& iPercentUsed);
+  CStdString GetManufacturer();
+  CStdString GetProduct();
+  CStdString GetModel();
+  bool GetDiskSpace(const CStdString& drive,int& iTotal, int& iTotalFree, int& iTotalUsed, int& iPercentFree, int& iPercentUsed);
   CStdString GetHddSpaceInfo(int& percent, int drive, bool shortText=false);
   CStdString GetHddSpaceInfo(int drive, bool shortText=false);
 
   int GetTotalUptime() const { return m_iSystemTimeTotalUp; }
   void SetTotalUptime(int uptime) { m_iSystemTimeTotalUp = uptime; }
+
+  static std::string GetBuildTargetPlatformName(void);
+  static std::string GetBuildTargetPlatformVersion(void);
+  static std::string GetBuildTargetCpuFamily(void);
 
 protected:
   virtual CJob *GetJob() const;

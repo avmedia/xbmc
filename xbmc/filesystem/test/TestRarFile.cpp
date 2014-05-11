@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
 #include "filesystem/NFSFile.h"
-#include "settings/GUISettings.h"
 #include "utils/URIUtils.h"
 #include "FileItem.h"
 #include "test/TestUtils.h"
@@ -167,12 +166,12 @@ TEST(TestRarFile, CorruptedFile)
   std::cout << "File contents:" << std::endl;
   while ((size = file->Read(buf, sizeof(buf))) > 0)
   {
-    str.Format("  %08X", count);
+    str = StringUtils::Format("  %08X", count);
     std::cout << str << "  ";
     count += size;
     for (i = 0; i < size; i++)
     {
-      str.Format("%02X ", buf[i]);
+      str = StringUtils::Format("%02X ", buf[i]);
       std::cout << str;
     }
     while (i++ < sizeof(buf))
@@ -203,7 +202,7 @@ TEST(TestRarFile, StoredRAR)
   reffile = XBMC_REF_FILE_PATH("xbmc/filesystem/test/refRARstored.rar");
   URIUtils::CreateArchivePath(strrarpath, "rar", reffile, "");
   ASSERT_TRUE(XFILE::CDirectory::GetDirectory(strrarpath, itemlist));
-  itemlist.Sort(SORT_METHOD_FULLPATH, SortOrderAscending);
+  itemlist.Sort(SortByPath, SortOrderAscending);
 
   /* /reffile.txt */
   /*
@@ -211,7 +210,7 @@ TEST(TestRarFile, StoredRAR)
    * an uncompressed RAR archive. See TestRarFile.Read test case.
    */
   strpathinrar = itemlist[1]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/reffile.txt", true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/reffile.txt"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFREG);
 
@@ -256,7 +255,7 @@ TEST(TestRarFile, StoredRAR)
 
   /* /testsymlink -> testdir/reffile.txt */
   strpathinrar = itemlist[2]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testsymlink", true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testsymlink"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFLNK);
 
@@ -271,7 +270,7 @@ TEST(TestRarFile, StoredRAR)
 
   /* /testsymlinksubdir -> testdir/testsubdir/reffile.txt */
   strpathinrar = itemlist[3]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testsymlinksubdir", true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testsymlinksubdir"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFLNK);
 
@@ -281,18 +280,17 @@ TEST(TestRarFile, StoredRAR)
 
   /* /testdir/ */
   strpathinrar = itemlist[0]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/", true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFDIR);
 
   itemlist.Clear();
   ASSERT_TRUE(XFILE::CDirectory::GetDirectory(strpathinrar, itemlist));
-  itemlist.Sort(SORT_METHOD_FULLPATH, SortOrderAscending);
+  itemlist.Sort(SortByPath, SortOrderAscending);
 
   /* /testdir/reffile.txt */
   strpathinrar = itemlist[1]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/reffile.txt",
-                                    true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/reffile.txt"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFREG);
 
@@ -337,8 +335,7 @@ TEST(TestRarFile, StoredRAR)
 
   /* /testdir/testemptysubdir */
   strpathinrar = itemlist[2]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testemptysubdir",
-                                    true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testemptysubdir"));
   /* TODO: Should this set the itemlist to an empty list instead? */
   EXPECT_FALSE(XFILE::CDirectory::GetDirectory(strpathinrar, itemlistemptydir));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
@@ -346,12 +343,11 @@ TEST(TestRarFile, StoredRAR)
 
   /* FIXME: This directory appears a second time as a file */
   strpathinrar = itemlist[3]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsubdir", true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsubdir"));
 
   /* /testdir/testsymlink -> testsubdir/reffile.txt */
   strpathinrar = itemlist[4]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsymlink",
-                                    true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsymlink"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFLNK);
 
@@ -361,19 +357,18 @@ TEST(TestRarFile, StoredRAR)
 
   /* /testdir/testsubdir/ */
   strpathinrar = itemlist[0]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsubdir/",
-                                    true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsubdir/"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFDIR);
 
   itemlist.Clear();
   ASSERT_TRUE(XFILE::CDirectory::GetDirectory(strpathinrar, itemlist));
-  itemlist.Sort(SORT_METHOD_FULLPATH, SortOrderAscending);
+  itemlist.Sort(SortByPath, SortOrderAscending);
 
   /* /testdir/testsubdir/reffile.txt */
   strpathinrar = itemlist[0]->GetPath();
   ASSERT_TRUE(StringUtils::EndsWith(strpathinrar,
-                                    "/testdir/testsubdir/reffile.txt", true));
+                                    "/testdir/testsubdir/reffile.txt"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFREG);
 
@@ -429,11 +424,11 @@ TEST(TestRarFile, NormalRAR)
   reffile = XBMC_REF_FILE_PATH("xbmc/filesystem/test/refRARnormal.rar");
   URIUtils::CreateArchivePath(strrarpath, "rar", reffile, "");
   ASSERT_TRUE(XFILE::CDirectory::GetDirectory(strrarpath, itemlist));
-  itemlist.Sort(SORT_METHOD_FULLPATH, SortOrderAscending);
+  itemlist.Sort(SortByPath, SortOrderAscending);
 
   /* /reffile.txt */
   strpathinrar = itemlist[1]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/reffile.txt", true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/reffile.txt"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFREG);
 
@@ -478,7 +473,7 @@ TEST(TestRarFile, NormalRAR)
 
   /* /testsymlink -> testdir/reffile.txt */
   strpathinrar = itemlist[2]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testsymlink", true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testsymlink"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFLNK);
 
@@ -493,7 +488,7 @@ TEST(TestRarFile, NormalRAR)
 
   /* /testsymlinksubdir -> testdir/testsubdir/reffile.txt */
   strpathinrar = itemlist[3]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testsymlinksubdir", true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testsymlinksubdir"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFLNK);
 
@@ -503,18 +498,17 @@ TEST(TestRarFile, NormalRAR)
 
   /* /testdir/ */
   strpathinrar = itemlist[0]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/", true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFDIR);
 
   itemlist.Clear();
   ASSERT_TRUE(XFILE::CDirectory::GetDirectory(strpathinrar, itemlist));
-  itemlist.Sort(SORT_METHOD_FULLPATH, SortOrderAscending);
+  itemlist.Sort(SortByPath, SortOrderAscending);
 
   /* /testdir/reffile.txt */
   strpathinrar = itemlist[1]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/reffile.txt",
-                                    true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/reffile.txt"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFREG);
 
@@ -559,8 +553,7 @@ TEST(TestRarFile, NormalRAR)
 
   /* /testdir/testemptysubdir */
   strpathinrar = itemlist[2]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testemptysubdir",
-                                    true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testemptysubdir"));
   /* TODO: Should this set the itemlist to an empty list instead? */
   EXPECT_FALSE(XFILE::CDirectory::GetDirectory(strpathinrar, itemlistemptydir));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
@@ -568,12 +561,11 @@ TEST(TestRarFile, NormalRAR)
 
   /* FIXME: This directory appears a second time as a file */
   strpathinrar = itemlist[3]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsubdir", true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsubdir"));
 
   /* /testdir/testsymlink -> testsubdir/reffile.txt */
   strpathinrar = itemlist[4]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsymlink",
-                                    true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsymlink"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFLNK);
 
@@ -583,19 +575,18 @@ TEST(TestRarFile, NormalRAR)
 
   /* /testdir/testsubdir/ */
   strpathinrar = itemlist[0]->GetPath();
-  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsubdir/",
-                                    true));
+  ASSERT_TRUE(StringUtils::EndsWith(strpathinrar, "/testdir/testsubdir/"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFDIR);
 
   itemlist.Clear();
   ASSERT_TRUE(XFILE::CDirectory::GetDirectory(strpathinrar, itemlist));
-  itemlist.Sort(SORT_METHOD_FULLPATH, SortOrderAscending);
+  itemlist.Sort(SortByPath, SortOrderAscending);
 
   /* /testdir/testsubdir/reffile.txt */
   strpathinrar = itemlist[0]->GetPath();
   ASSERT_TRUE(StringUtils::EndsWith(strpathinrar,
-                                    "/testdir/testsubdir/reffile.txt", true));
+                                    "/testdir/testsubdir/reffile.txt"));
   EXPECT_EQ(0, XFILE::CFile::Stat(strpathinrar, &stat_buffer));
   EXPECT_TRUE((stat_buffer.st_mode & S_IFMT) | S_IFREG);
 

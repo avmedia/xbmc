@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 #include "FileItem.h"
 #include "CurlFile.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/MediaSettings.h"
+#include "settings/Settings.h"
 #include "utils/URIUtils.h"
 #include "utils/XBMCTinyXML.h"
 #include "utils/HTMLUtil.h"
@@ -30,7 +32,6 @@
 #include "music/tags/MusicInfoTag.h"
 #include "utils/log.h"
 #include "URL.h"
-#include "settings/GUISettings.h"
 #include "climits"
 #include "threads/SingleLock.h"
 
@@ -87,42 +88,18 @@ bool CRSSDirectory::ContainsFiles(const CStdString& strPath)
 
 static bool IsPathToMedia(const CStdString& strPath )
 {
-  CStdString extension;
-  URIUtils::GetExtension(strPath, extension);
-
-  if (extension.IsEmpty())
-    return false;
-
-  extension.ToLower();
-
-  if (g_advancedSettings.m_videoExtensions.Find(extension) != -1)
-    return true;
-
-  if (g_advancedSettings.m_musicExtensions.Find(extension) != -1)
-    return true;
-
-  if (g_advancedSettings.m_pictureExtensions.Find(extension) != -1)
-    return true;
-
-  return false;
+  return URIUtils::HasExtension(strPath,
+                              g_advancedSettings.m_videoExtensions + '|' +
+                              g_advancedSettings.m_musicExtensions + '|' +
+                              g_advancedSettings.m_pictureExtensions);
 }
 
 static bool IsPathToThumbnail(const CStdString& strPath )
 {
   // Currently just check if this is an image, maybe we will add some
   // other checks later
-  CStdString extension;
-  URIUtils::GetExtension(strPath, extension);
-
-  if (extension.IsEmpty())
-    return false;
-
-  extension.ToLower();
-
-  if (g_advancedSettings.m_pictureExtensions.Find(extension) != -1)
-    return true;
-
-  return false;
+  return URIUtils::HasExtension(strPath,
+                                    g_advancedSettings.m_pictureExtensions);
 }
 
 static time_t ParseDate(const CStdString & strDate)
@@ -177,7 +154,7 @@ static void ParseItemMRSS(CFileItem* item, SResources& resources, TiXmlElement* 
   }
   else if (name == "title")
   {
-    if(text.IsEmpty())
+    if(text.empty())
       return;
 
     if(text.length() > item->m_strTitle.length())
@@ -185,7 +162,7 @@ static void ParseItemMRSS(CFileItem* item, SResources& resources, TiXmlElement* 
   }
   else if(name == "description")
   {
-    if(text.IsEmpty())
+    if(text.empty())
       return;
 
     CStdString description = text;
@@ -195,14 +172,14 @@ static void ParseItemMRSS(CFileItem* item, SResources& resources, TiXmlElement* 
   }
   else if(name == "category")
   {
-    if(text.IsEmpty())
+    if(text.empty())
       return;
 
     CStdString scheme = item_child->Attribute("scheme");
 
     /* okey this is silly, boxee what did you think?? */
     if     (scheme == "urn:boxee:genre")
-      vtag->m_genre = StringUtils::Split(text, g_advancedSettings.m_videoItemSeparator);
+      vtag->m_genre.push_back(text);
     else if(scheme == "urn:boxee:title-type")
     {
       if     (text == "tv")
@@ -423,7 +400,7 @@ static void ParseItemSVT(CFileItem* item, SResources& resources, TiXmlElement* e
   else if (name == "broadcasts")
   {
     CURL url(path);
-    if(url.GetFileName().Left(3) == "v1/")
+    if(StringUtils::StartsWith(url.GetFileName(), "v1/"))
     {
       SResource res;
       res.tag  = "svtplay:broadcasts";
@@ -440,11 +417,11 @@ static void ParseItem(CFileItem* item, SResources& resources, TiXmlElement* root
   {
     CStdString name = child->Value();
     CStdString xmlns;
-    int pos = name.Find(':');
-    if(pos >= 0)
+    size_t pos = name.find(':');
+    if(pos != std::string::npos)
     {
-      xmlns = name.Left(pos);
-      name.Delete(0, pos+1);
+      xmlns = name.substr(0, pos);
+      name.erase(0, pos+1);
     }
 
     if      (xmlns == "media")
@@ -468,7 +445,7 @@ static bool FindMime(SResources resources, CStdString mime)
 {
   for(SResources::iterator it = resources.begin(); it != resources.end(); it++)
   {
-    if(it->mime.Left(mime.length()).Equals(mime))
+    if(StringUtils::StartsWithNoCase(it->mime, mime))
       return true;
   }
   return false;
@@ -491,7 +468,7 @@ static void ParseItem(CFileItem* item, TiXmlElement* root, const CStdString& pat
   else if(FindMime(resources, "image/"))
     mime = "image/";
 
-  int maxrate = g_guiSettings.GetInt("network.bandwidth");
+  int maxrate = CSettings::Get().GetInt("network.bandwidth");
   if(maxrate == 0)
     maxrate = INT_MAX;
 
@@ -500,7 +477,7 @@ static void ParseItem(CFileItem* item, TiXmlElement* root, const CStdString& pat
   {
     for(SResources::iterator it = resources.begin(); it != resources.end(); it++)
     {
-      if(it->mime.Left(mime.length()) != mime)
+      if(!StringUtils::StartsWith(it->mime, mime))
         continue;
 
       if(it->tag == *type)
@@ -544,16 +521,16 @@ static void ParseItem(CFileItem* item, TiXmlElement* root, const CStdString& pat
       item->SetProperty("duration", StringUtils::SecondsToTimeString(best->duration));    
 
     /* handling of mimetypes fo directories are sub optimal at best */
-    if(best->mime == "application/rss+xml" && item->GetPath().Left(7).Equals("http://"))
-      item->SetPath("rss://" + item->GetPath().Mid(7));
+    if(best->mime == "application/rss+xml" && StringUtils::StartsWithNoCase(item->GetPath(), "http://"))
+      item->SetPath("rss://" + item->GetPath().substr(7));
 
-    if(item->GetPath().Left(6).Equals("rss://"))
+    if(StringUtils::StartsWithNoCase(item->GetPath(), "rss://"))
       item->m_bIsFolder = true;
     else
       item->m_bIsFolder = false;
   }
 
-  if(!item->m_strTitle.IsEmpty())
+  if(!item->m_strTitle.empty())
     item->SetLabel(item->m_strTitle);
 
   if(item->HasVideoInfoTag())
@@ -563,14 +540,14 @@ static void ParseItem(CFileItem* item, TiXmlElement* root, const CStdString& pat
     if(item->HasProperty("duration")    && !vtag->GetDuration())
       vtag->m_duration = StringUtils::TimeStringToSeconds(item->GetProperty("duration").asString());
 
-    if(item->HasProperty("description") && vtag->m_strPlot.IsEmpty())
+    if(item->HasProperty("description") && vtag->m_strPlot.empty())
       vtag->m_strPlot = item->GetProperty("description").asString();
 
-    if(vtag->m_strPlotOutline.IsEmpty() && !vtag->m_strPlot.IsEmpty())
+    if(vtag->m_strPlotOutline.empty() && !vtag->m_strPlot.empty())
     {
-      int pos = vtag->m_strPlot.Find('\n');
-      if(pos >= 0)
-        vtag->m_strPlotOutline = vtag->m_strPlot.Left(pos);
+      size_t pos = vtag->m_strPlot.find('\n');
+      if(pos != std::string::npos)
+        vtag->m_strPlotOutline = vtag->m_strPlot.substr(0, pos);
       else
         vtag->m_strPlotOutline = vtag->m_strPlot;
     }
@@ -632,14 +609,14 @@ bool CRSSDirectory::GetDirectory(const CStdString& path, CFileItemList &items)
     if (!item->HasArt("thumb") && items.HasArt("thumb"))
       item->SetArt("thumb", items.GetArt("thumb"));
 
-    if (!item->GetPath().IsEmpty())
+    if (!item->GetPath().empty())
       items.Add(item);
   }
 
-  items.AddSortMethod(SORT_METHOD_UNSORTED , 231, LABEL_MASKS("%L", "%D", "%L", ""));    // FileName, Duration | Foldername, empty
-  items.AddSortMethod(SORT_METHOD_LABEL    , 551, LABEL_MASKS("%L", "%D", "%L", ""));    // FileName, Duration | Foldername, empty
-  items.AddSortMethod(SORT_METHOD_SIZE     , 553, LABEL_MASKS("%L", "%I", "%L", "%I"));  // FileName, Size | Foldername, Size
-  items.AddSortMethod(SORT_METHOD_DATE     , 552, LABEL_MASKS("%L", "%J", "%L", "%J"));  // FileName, Date | Foldername, Date
+  items.AddSortMethod(SortByNone   , 231, LABEL_MASKS("%L", "%D", "%L", ""));    // FileName, Duration | Foldername, empty
+  items.AddSortMethod(SortByLabel  , 551, LABEL_MASKS("%L", "%D", "%L", ""));    // FileName, Duration | Foldername, empty
+  items.AddSortMethod(SortBySize   , 553, LABEL_MASKS("%L", "%I", "%L", "%I"));  // FileName, Size | Foldername, Size
+  items.AddSortMethod(SortByDate   , 552, LABEL_MASKS("%L", "%J", "%L", "%J"));  // FileName, Date | Foldername, Date
 
   CDateTime time = CDateTime::GetCurrentDateTime();
   int mins = 60;

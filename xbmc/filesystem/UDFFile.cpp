@@ -2,6 +2,9 @@
  *      Copyright (C) 2010 Team Boxee
  *      http://www.boxee.tv
  *
+ *      Copyright (C) 2010-2013 Team XBMC
+ *      http://xbmc.org
+ *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
@@ -17,7 +20,6 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
-
 #include "UDFFile.h"
 #include "URL.h"
 #include "Util.h"
@@ -48,7 +50,10 @@ CUDFFile::~CUDFFile()
 //*********************************************************************************************
 bool CUDFFile::Open(const CURL& url)
 {
-  m_hFile = m_udfIsoReaderLocal.OpenFile(url.GetHostName(), url.GetFileName());
+  if(!m_udfIsoReaderLocal.Open(url.GetHostName()) || url.GetFileName().empty())
+     return false;
+
+  m_hFile = m_udfIsoReaderLocal.OpenFile(url.GetFileName());
   if (m_hFile == INVALID_HANDLE_VALUE)
   {
     m_bOpened = false;
@@ -76,6 +81,7 @@ void CUDFFile::Close()
 {
   if (!m_bOpened) return ;
   m_udfIsoReaderLocal.CloseFile( m_hFile);
+  m_bOpened = false;
 }
 
 //*********************************************************************************************
@@ -102,7 +108,10 @@ int64_t CUDFFile::GetPosition()
 
 bool CUDFFile::Exists(const CURL& url)
 {
-  m_hFile = m_udfIsoReaderLocal.OpenFile(url.GetHostName(), url.GetFileName());
+  if(!m_udfIsoReaderLocal.Open(url.GetHostName()))
+     return false;
+
+  m_hFile = m_udfIsoReaderLocal.OpenFile(url.GetFileName());
   if (m_hFile == INVALID_HANDLE_VALUE)
     return false;
 
@@ -113,7 +122,16 @@ bool CUDFFile::Exists(const CURL& url)
 
 int CUDFFile::Stat(const CURL& url, struct __stat64* buffer)
 {
-  m_hFile = m_udfIsoReaderLocal.OpenFile(url.GetHostName(), url.GetFileName());
+  if(!m_udfIsoReaderLocal.Open(url.GetHostName()))
+     return -1;
+
+  if (url.GetFileName().empty())
+  {
+    buffer->st_mode = _S_IFDIR;
+    return 0;
+  }
+
+  m_hFile = m_udfIsoReaderLocal.OpenFile(url.GetFileName());
   if (m_hFile != INVALID_HANDLE_VALUE)
   {
     buffer->st_size = m_udfIsoReaderLocal.GetFileSize(m_hFile);

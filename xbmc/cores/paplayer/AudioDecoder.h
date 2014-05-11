@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,23 +50,11 @@ class CFileItem;
 #define RET_SUCCESS 0
 #define RET_SLEEP 1
 
-// replay gain settings struct for quick access by the player multiple
-// times per second (saves doing settings lookup)
-struct ReplayGainSettings
-{
-  int iPreAmp;
-  int iNoGainPreAmp;
-  int iType;
-  bool bAvoidClipping;
-};
-
 class CAudioDecoder
 {
 public:
   CAudioDecoder();
   ~CAudioDecoder();
-
-  static ReplayGainSettings& GetReplayGainSettings() { return m_replayGainSettings; }
 
   bool Create(const CFileItem &file, int64_t seekOffset);
   void Destroy();
@@ -89,8 +77,6 @@ public:
   float GetReplayGain();
 
 private:
-  static ReplayGainSettings m_replayGainSettings;
-
   // pcm buffer
   CRingBuffer m_pcmBuffer;
 

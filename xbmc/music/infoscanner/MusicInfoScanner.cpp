@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
 #include "filesystem/File.h"
 #include "filesystem/Directory.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "FileItem.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/StringUtils.h"
@@ -50,15 +50,19 @@
 #include "music/MusicThumbLoader.h"
 #include "interfaces/AnnouncementManager.h"
 #include "GUIUserMessages.h"
+#include "addons/AddonManager.h"
+#include "addons/Scraper.h"
 
 #include <algorithm>
 
 using namespace std;
 using namespace MUSIC_INFO;
 using namespace XFILE;
+using namespace MUSICDATABASEDIRECTORY;
 using namespace MUSIC_GRABBER;
+using namespace ADDON;
 
-CMusicInfoScanner::CMusicInfoScanner() : CThread("MusicInfoScanner")
+CMusicInfoScanner::CMusicInfoScanner() : CThread("MusicInfoScanner"), m_fileCountReader(this, "MusicFileCounter")
 {
   m_bRunning = false;
   m_showDialog = false;
@@ -82,7 +86,7 @@ void CMusicInfoScanner::Process()
 
     m_musicDatabase.Open();
 
-    if (m_showDialog && !g_guiSettings.GetBool("musiclibrary.backgroundupdate"))
+    if (m_showDialog && !CSettings::Get().GetBool("musiclibrary.backgroundupdate"))
     {
       CGUIDialogExtendedProgressBar* dialog =
         (CGUIDialogExtendedProgressBar*)g_windowManager.GetWindow(WINDOW_DIALOG_EXT_PROGRESS);
@@ -104,9 +108,8 @@ void CMusicInfoScanner::Process()
 
       // Create the thread to count all files to be scanned
       SetPriority( GetMinPriority() );
-      CThread fileCountReader(this, "MusicFileCounter");
       if (m_handle)
-        fileCountReader.Create();
+        m_fileCountReader.Create();
 
       // Database operations should not be canceled
       // using Interupt() while scanning as it could
@@ -114,20 +117,25 @@ void CMusicInfoScanner::Process()
       m_bCanInterrupt = false;
       m_needsCleanup = false;
 
-      bool commit = false;
-      bool cancelled = false;
-      while (!cancelled && m_pathsToScan.size())
+      bool commit = true;
+      for (std::set<std::string>::const_iterator it = m_pathsToScan.begin(); it != m_pathsToScan.end(); it++)
       {
-        /*
-         * A copy of the directory path is used because the path supplied is
-         * immediately removed from the m_pathsToScan set in DoScan(). If the
-         * reference points to the entry in the set a null reference error
-         * occurs.
-         */
-        CStdString directory = *m_pathsToScan.begin();
-        if (!DoScan(directory))
-          cancelled = true;
-        commit = !cancelled;
+        if (!CDirectory::Exists(*it) && !m_bClean)
+        {
+          /*
+           * Note that this will skip scanning (if m_bClean is disabled) if the directory really
+           * doesn't exist. Since the music scanner is fed with a list of existing paths from the DB
+           * and cleans out all songs under that path as its first step before re-adding files, if 
+           * the entire source is offline we totally empty the music database in one go.
+           */
+          CLog::Log(LOGWARNING, "%s directory '%s' does not exist - skipping scan.", __FUNCTION__, it->c_str());
+          continue;
+        }
+        else if (!DoScan(*it))
+        {
+          commit = false;
+          break;
+        }
       }
 
       if (commit)
@@ -151,49 +159,70 @@ void CMusicInfoScanner::Process()
         }
       }
 
-      fileCountReader.StopThread();
+      m_fileCountReader.StopThread();
 
       m_musicDatabase.EmptyCache();
-
-      m_musicDatabase.Close();
-      CLog::Log(LOGDEBUG, "%s - Finished scan", __FUNCTION__);
-
+      
       tick = XbmcThreads::SystemClockMillis() - tick;
       CLog::Log(LOGNOTICE, "My Music: Scanning for music info using worker thread, operation took %s", StringUtils::SecondsToTimeString(tick / 1000).c_str());
     }
-    bool bCanceled;
     if (m_scanType == 1) // load album info
     {
-      int iCurrentItem = 1;
-      for (set<CAlbum>::iterator it=m_albumsToScan.begin();it != m_albumsToScan.end();++it)
+      for (std::set<std::string>::const_iterator it = m_pathsToScan.begin(); it != m_pathsToScan.end(); ++it)
       {
+        CQueryParams params;
+        CDirectoryNode::GetDatabaseInfo(*it, params);
+        if (m_musicDatabase.HasAlbumBeenScraped(params.GetAlbumId())) // should this be here?
+          continue;
+
+        CAlbum album;
+        m_musicDatabase.GetAlbum(params.GetAlbumId(), album);
         if (m_handle)
         {
-          m_handle->SetText(StringUtils::Join(it->artist, g_advancedSettings.m_musicItemSeparator)+" - "+it->strAlbum);
-          m_handle->SetPercentage(iCurrentItem++/(float)m_albumsToScan.size());
+          float percentage = (float) std::distance(it, m_pathsToScan.end()) / m_pathsToScan.size();
+          m_handle->SetText(StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator) + " - " + album.strAlbum);
+          m_handle->SetPercentage(percentage);
         }
 
-        CMusicAlbumInfo albumInfo;
-        DownloadAlbumInfo(it->genre[0],StringUtils::Join(it->artist, g_advancedSettings.m_musicItemSeparator),it->strAlbum, bCanceled, albumInfo); // genre field holds path - see fetchalbuminfo()
+        // find album info
+        ADDON::ScraperPtr scraper;
+        if (!m_musicDatabase.GetScraperForPath(*it, scraper, ADDON::ADDON_SCRAPER_ALBUMS))
+          continue;
 
-        if (m_bStop || bCanceled)
+        UpdateDatabaseAlbumInfo(album, scraper, false);
+
+        if (m_bStop)
           break;
       }
     }
     if (m_scanType == 2) // load artist info
     {
-      int iCurrentItem=1;
-      for (set<CArtist>::iterator it=m_artistsToScan.begin();it != m_artistsToScan.end();++it)
+      for (std::set<std::string>::const_iterator it = m_pathsToScan.begin(); it != m_pathsToScan.end(); ++it)
       {
+        CQueryParams params;
+        CDirectoryNode::GetDatabaseInfo(*it, params);
+        if (m_musicDatabase.HasArtistBeenScraped(params.GetArtistId())) // should this be here?
+            continue;
+
+        CArtist artist;
+        m_musicDatabase.GetArtist(params.GetArtistId(), artist);
+        m_musicDatabase.GetArtistPath(params.GetArtistId(), artist.strPath);
+
         if (m_handle)
         {
-          m_handle->SetText(it->strArtist);
-          m_handle->SetPercentage(iCurrentItem++/(float)m_artistsToScan.size()*100);
+          float percentage = (float) (std::distance(m_pathsToScan.begin(), it) / m_pathsToScan.size()) * 100;
+          m_handle->SetText(artist.strArtist);
+          m_handle->SetPercentage(percentage);
         }
 
-        DownloadArtistInfo(it->genre[0],it->strArtist,bCanceled); // genre field holds path - see fetchartistinfo()
+        // find album info
+        ADDON::ScraperPtr scraper;
+        if (!m_musicDatabase.GetScraperForPath(*it, scraper, ADDON::ADDON_SCRAPER_ARTISTS) || !scraper)
+          continue;
 
-        if (m_bStop || bCanceled)
+        UpdateDatabaseArtistInfo(artist, scraper, false);
+
+        if (m_bStop)
           break;
       }
     }
@@ -203,7 +232,9 @@ void CMusicInfoScanner::Process()
   {
     CLog::Log(LOGERROR, "MusicInfoScanner: Exception while scanning.");
   }
-
+  m_musicDatabase.Close();
+  CLog::Log(LOGDEBUG, "%s - Finished scan", __FUNCTION__);
+  
   m_bRunning = false;
   ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "OnScanFinished");
   
@@ -219,12 +250,12 @@ void CMusicInfoScanner::Process()
 
 void CMusicInfoScanner::Start(const CStdString& strDirectory, int flags)
 {
+  m_fileCountReader.StopThread();
+  StopThread();
   m_pathsToScan.clear();
-  m_albumsScanned.clear();
-  m_artistsScanned.clear();
   m_flags = flags;
 
-  if (strDirectory.IsEmpty())
+  if (strDirectory.empty())
   { // scan all paths in the database.  We do this by scanning all paths in the db, and crossing them off the list as
     // we go.
     m_musicDatabase.Open();
@@ -233,9 +264,9 @@ void CMusicInfoScanner::Start(const CStdString& strDirectory, int flags)
   }
   else
     m_pathsToScan.insert(strDirectory);
-  m_pathsToCount = m_pathsToScan;
+  m_bClean = g_advancedSettings.m_bMusicLibraryCleanOnUpdate;
+
   m_scanType = 0;
-  StopThread();
   Create();
   m_bRunning = true;
 }
@@ -243,11 +274,12 @@ void CMusicInfoScanner::Start(const CStdString& strDirectory, int flags)
 void CMusicInfoScanner::FetchAlbumInfo(const CStdString& strDirectory,
                                        bool refresh)
 {
-  m_albumsToScan.clear();
-  m_albumsScanned.clear();
+  m_fileCountReader.StopThread();
+  StopThread();
+  m_pathsToScan.clear();
 
   CFileItemList items;
-  if (strDirectory.IsEmpty())
+  if (strDirectory.empty())
   {
     m_musicDatabase.Open();
     m_musicDatabase.GetAlbumsNav("musicdb://albums/", items);
@@ -270,22 +302,15 @@ void CMusicInfoScanner::FetchAlbumInfo(const CStdString& strDirectory,
     if (CMusicDatabaseDirectory::IsAllItem(items[i]->GetPath()) || items[i]->IsParentFolder())
       continue;
 
-    CAlbum album;
-    album.strAlbum = items[i]->GetMusicInfoTag()->GetAlbum();
-    album.artist = items[i]->GetMusicInfoTag()->GetArtist();
-    album.genre.push_back(items[i]->GetPath()); // a bit hacky use of field
-    m_albumsToScan.insert(album);
+    m_pathsToScan.insert(items[i]->GetPath());
     if (refresh)
     {
-      int id = m_musicDatabase.GetAlbumByName(album.strAlbum, album.artist);
-      if (id > -1)
-        m_musicDatabase.DeleteAlbumInfo(id);
+      m_musicDatabase.ClearAlbumLastScrapedTime(items[i]->GetMusicInfoTag()->GetDatabaseId());
     }
   }
   m_musicDatabase.Close();
 
   m_scanType = 1;
-  StopThread();
   Create();
   m_bRunning = true;
 }
@@ -293,11 +318,12 @@ void CMusicInfoScanner::FetchAlbumInfo(const CStdString& strDirectory,
 void CMusicInfoScanner::FetchArtistInfo(const CStdString& strDirectory,
                                         bool refresh)
 {
-  m_artistsToScan.clear();
-  m_artistsScanned.clear();
+  m_fileCountReader.StopThread();
+  StopThread();
+  m_pathsToScan.clear();
   CFileItemList items;
 
-  if (strDirectory.IsEmpty())
+  if (strDirectory.empty())
   {
     m_musicDatabase.Open();
     m_musicDatabase.GetArtistsNav("musicdb://artists/", items, false, -1);
@@ -320,21 +346,15 @@ void CMusicInfoScanner::FetchArtistInfo(const CStdString& strDirectory,
     if (CMusicDatabaseDirectory::IsAllItem(items[i]->GetPath()) || items[i]->IsParentFolder())
       continue;
 
-    CArtist artist;
-    artist.strArtist = StringUtils::Join(items[i]->GetMusicInfoTag()->GetArtist(), g_advancedSettings.m_musicItemSeparator);
-    artist.genre.push_back(items[i]->GetPath()); // a bit hacky use of field
-    m_artistsToScan.insert(artist);
+    m_pathsToScan.insert(items[i]->GetPath());
     if (refresh)
     {
-      int id = m_musicDatabase.GetArtistByName(artist.strArtist);
-      if (id > -1)
-        m_musicDatabase.DeleteArtistInfo(id);
+      m_musicDatabase.ClearArtistLastScrapedTime(items[i]->GetMusicInfoTag()->GetDatabaseId());
     }
   }
   m_musicDatabase.Close();
 
   m_scanType = 2;
-  StopThread();
   Create();
   m_bRunning = true;
 }
@@ -362,10 +382,8 @@ static void OnDirectoryScanned(const CStdString& strDirectory)
 static CStdString Prettify(const CStdString& strDirectory)
 {
   CURL url(strDirectory);
-  CStdString strStrippedPath = url.GetWithoutUserDetails();
-  CURL::Decode(strStrippedPath);
 
-  return strStrippedPath;
+  return CURL::Decode(url.GetWithoutUserDetails());
 }
 
 bool CMusicInfoScanner::DoScan(const CStdString& strDirectory)
@@ -373,19 +391,8 @@ bool CMusicInfoScanner::DoScan(const CStdString& strDirectory)
   if (m_handle)
     m_handle->SetText(Prettify(strDirectory));
 
-  /*
-   * remove this path from the list we're processing. This must be done prior to
-   * the check for file or folder exclusion to prevent an infinite while loop
-   * in Process().
-   */
-  set<CStdString>::iterator it = m_pathsToScan.find(strDirectory);
-  if (it != m_pathsToScan.end())
-    m_pathsToScan.erase(it);
-
   // Discard all excluded files defined by m_musicExcludeRegExps
-
   CStdStringArray regexps = g_advancedSettings.m_audioExcludeFromScanRegExps;
-
   if (CUtil::ExcludeFileOrFolder(strDirectory, regexps))
     return true;
 
@@ -396,7 +403,7 @@ bool CMusicInfoScanner::DoScan(const CStdString& strDirectory)
   // sort and get the path hash.  Note that we don't filter .cue sheet items here as we want
   // to detect changes in the .cue sheet as well.  The .cue sheet items only need filtering
   // if we have a changed hash.
-  items.Sort(SORT_METHOD_LABEL, SortOrderAscending);
+  items.Sort(SortByLabel, SortOrderAscending);
   CStdString hash;
   GetPathHash(items, hash);
 
@@ -404,17 +411,17 @@ bool CMusicInfoScanner::DoScan(const CStdString& strDirectory)
   CStdString dbHash;
   if ((m_flags & SCAN_RESCAN) || !m_musicDatabase.GetPathHash(strDirectory, dbHash) || dbHash != hash)
   { // path has changed - rescan
-    if (dbHash.IsEmpty())
+    if (dbHash.empty())
       CLog::Log(LOGDEBUG, "%s Scanning dir '%s' as not in the database", __FUNCTION__, strDirectory.c_str());
     else
       CLog::Log(LOGDEBUG, "%s Rescanning dir '%s' due to change", __FUNCTION__, strDirectory.c_str());
 
     // filter items in the sub dir (for .cue sheet support)
     items.FilterCueItems();
-    items.Sort(SORT_METHOD_LABEL, SortOrderAscending);
+    items.Sort(SortByLabel, SortOrderAscending);
 
     // and then scan in the new information
-    if (RetrieveMusicInfo(items, strDirectory) > 0)
+    if (RetrieveMusicInfo(strDirectory, items) > 0)
     {
       if (m_handle)
         OnDirectoryScanned(strDirectory);
@@ -462,209 +469,103 @@ INFO_RET CMusicInfoScanner::ScanTags(const CFileItemList& items, CFileItemList& 
 {
   CStdStringArray regexps = g_advancedSettings.m_audioExcludeFromScanRegExps;
 
-  // for every file found, but skip folder
   for (int i = 0; i < items.Size(); ++i)
   {
-    CFileItemPtr pItem = items[i];
-
     if (m_bStop)
       return INFO_CANCELLED;
 
-    // Discard all excluded files defined by m_musicExcludeRegExps
+    CFileItemPtr pItem = items[i];
+
     if (CUtil::ExcludeFileOrFolder(pItem->GetPath(), regexps))
       continue;
 
-    // dont try reading id3tags for folders, playlists or shoutcast streams
-    if (!pItem->m_bIsFolder && !pItem->IsPlayList() && !pItem->IsPicture() && !pItem->IsLyrics() )
+    if (pItem->m_bIsFolder || pItem->IsPlayList() || pItem->IsPicture() || pItem->IsLyrics())
+      continue;
+
+    m_currentItem++;
+
+    CMusicInfoTag& tag = *pItem->GetMusicInfoTag();
+    if (!tag.Loaded())
     {
-      m_currentItem++;
-
-      CMusicInfoTag& tag = *pItem->GetMusicInfoTag();
-      if (!tag.Loaded())
-      {
-        // read the tag from a file
-        auto_ptr<IMusicInfoTagLoader> pLoader (CMusicInfoTagLoaderFactory::CreateLoader(pItem->GetPath()));
-        if (NULL != pLoader.get())
-          pLoader->Load(pItem->GetPath(), tag);
-      }
-
-      // if we have the itemcount, update our
-      // dialog with the progress we made
-      if (m_handle && m_itemCount>0)
-        m_handle->SetPercentage(m_currentItem/(float)m_itemCount*100);
-
-      if (tag.Loaded())
-        scannedItems.Add(pItem);
-      else
-        CLog::Log(LOGDEBUG, "%s - No tag found for: %s", __FUNCTION__, pItem->GetPath().c_str());
+      auto_ptr<IMusicInfoTagLoader> pLoader (CMusicInfoTagLoaderFactory::CreateLoader(pItem->GetPath()));
+      if (NULL != pLoader.get())
+        pLoader->Load(pItem->GetPath(), tag);
     }
+
+    if (m_handle && m_itemCount>0)
+      m_handle->SetPercentage(m_currentItem/(float)m_itemCount*100);
+
+    if (!tag.Loaded())
+    {
+      CLog::Log(LOGDEBUG, "%s - No tag found for: %s", __FUNCTION__, pItem->GetPath().c_str());
+      continue;
+    }
+    scannedItems.Add(pItem);
   }
   return INFO_ADDED;
 }
 
-int CMusicInfoScanner::RetrieveMusicInfo(CFileItemList& items, const CStdString& strDirectory)
+static bool SortSongsByTrack(const CSong& song, const CSong& song2)
 {
-  MAPSONGS songsMap;
+  return song.iTrack < song2.iTrack;
+}
 
-  // get all information for all files in current directory from database, and remove them
-  if (m_musicDatabase.RemoveSongsFromPath(strDirectory, songsMap))
-    m_needsCleanup = true;
-
-  CFileItemList scannedItems;
-  if (ScanTags(items, scannedItems) == INFO_CANCELLED)
-    return 0;
-
-  VECSONGS songsToAdd;
-  for (int i = 0; i < scannedItems.Size(); ++i)
+void CMusicInfoScanner::FileItemsToAlbums(CFileItemList& items, VECALBUMS& albums, MAPSONGS* songsMap /* = NULL */)
+{
+  /*
+   * Step 1: Convert the FileItems into Songs. 
+   * If they're MB tagged, create albums directly from the FileItems.
+   * If they're non-MB tagged, index them by album name ready for step 2.
+   */
+  map<string, VECSONGS> songsByAlbumNames;
+  for (int i = 0; i < items.Size(); ++i)
   {
-    CFileItemPtr pItem = scannedItems[i];
-    CMusicInfoTag& tag = *pItem->GetMusicInfoTag();
-    CSong song(tag);
+    CMusicInfoTag& tag = *items[i]->GetMusicInfoTag();
+    CSong song(*items[i]);
 
-    // ensure our song has a valid filename or else it will assert in AddSong()
-    if (song.strFileName.IsEmpty())
+    // keep the db-only fields intact on rescan...
+    if (songsMap != NULL)
     {
-      // copy filename from path in case UPnP or other tag loaders didn't specify one (FIXME?)
-      song.strFileName = pItem->GetPath();
-
-      // if we still don't have a valid filename, skip the song
-      if (song.strFileName.IsEmpty())
+      MAPSONGS::iterator it = songsMap->find(items[i]->GetPath());
+      if (it != songsMap->end())
       {
-        // this shouldn't ideally happen!
-        CLog::Log(LOGERROR, "Skipping song since it doesn't seem to have a filename");
-        continue;
+        song.iTimesPlayed = it->second.iTimesPlayed;
+        song.lastPlayed = it->second.lastPlayed;
+        song.iKaraokeNumber = it->second.iKaraokeNumber;
+        if (song.rating == '0')    song.rating = it->second.rating;
+        if (song.strThumb.empty()) song.strThumb = it->second.strThumb;
       }
     }
 
-    song.iStartOffset = pItem->m_lStartOffset;
-    song.iEndOffset = pItem->m_lEndOffset;
-    song.strThumb = pItem->GetUserMusicThumb(true);
-
-    // grab info from the song
-    MAPSONGS::iterator it = songsMap.find(pItem->GetPath());
-    if (it != songsMap.end())
+    if (!tag.GetMusicBrainzAlbumID().empty())
     {
-      // keep the db-only fields intact on rescan...
-      song.iTimesPlayed = it->second.iTimesPlayed;
-      song.lastPlayed = it->second.lastPlayed;
-      song.iKaraokeNumber = it->second.iKaraokeNumber;
+      VECALBUMS::iterator it;
+      for (it = albums.begin(); it != albums.end(); ++it)
+        if (it->strMusicBrainzAlbumID.Equals(tag.GetMusicBrainzAlbumID()))
+          break;
 
-      if (song.rating == '0')
-        song.rating = it->second.rating;
-      if (song.strThumb.empty())
-        song.strThumb = it->second.strThumb;
-    }
-    songsToAdd.push_back(song);
-  }
-
-  VECALBUMS albums;
-  CategoriseAlbums(songsToAdd, albums);
-  FindArtForAlbums(albums, items.GetPath());
-
-  // finally, add these to the database
-  m_musicDatabase.BeginTransaction();
-  int numAdded = 0;
-  set<int> albumsToScan;
-  set<int> artistsToScan;
-  for (VECALBUMS::iterator i = albums.begin(); i != albums.end(); ++i)
-  {
-    vector<int> songIDs;
-    int idAlbum = m_musicDatabase.AddAlbum(*i, songIDs);
-    numAdded += i->songs.size();
-    if (m_bStop)
-    {
-      m_musicDatabase.RollbackTransaction();
-      return numAdded;
-    }
-
-    // Build the artist & album sets
-    albumsToScan.insert(idAlbum);
-    for (vector<int>::iterator j = songIDs.begin(); j != songIDs.end(); ++j)
-    {
-      vector<int> songArtists;
-      m_musicDatabase.GetArtistsBySong(*j, false, songArtists);
-      artistsToScan.insert(songArtists.begin(), songArtists.end());
-    }
-    std::vector<int> albumArtists;
-    m_musicDatabase.GetArtistsByAlbum(idAlbum, false, albumArtists);
-    artistsToScan.insert(albumArtists.begin(), albumArtists.end());
-  }
-  m_musicDatabase.CommitTransaction();
-
-  // Download info & artwork
-  bool bCanceled;
-  for (set<int>::iterator it = artistsToScan.begin(); it != artistsToScan.end(); ++it)
-  {
-    bCanceled = false;
-    if (find(m_artistsScanned.begin(),m_artistsScanned.end(), *it) == m_artistsScanned.end())
-    {
-      CStdString strArtist = m_musicDatabase.GetArtistById(*it);
-      m_artistsScanned.push_back(*it);
-      if (!m_bStop && (m_flags & SCAN_ONLINE))
+      if (it == albums.end())
       {
-        CStdString strPath;
-        strPath.Format("musicdb://artists/%u/", *it);
-
-        if (!DownloadArtistInfo(strPath, strArtist, bCanceled)) // assume we want to retry
-          m_artistsScanned.pop_back();
+        CAlbum album(*items[i]);
+        album.songs.push_back(song);
+        albums.push_back(album);
       }
       else
-      {
-        map<string, string> artwork = GetArtistArtwork(*it);
-        m_musicDatabase.SetArtForItem(*it, "artist", artwork);
-      }
+        it->songs.push_back(song);
     }
+    else
+      songsByAlbumNames[tag.GetAlbum()].push_back(song);
   }
-
-  if (m_flags & SCAN_ONLINE)
-  {
-    for (set<int>::iterator it = albumsToScan.begin(); it != albumsToScan.end(); ++it)
-    {
-      if (m_bStop)
-        return songsToAdd.size();
-
-      CStdString strPath;
-      strPath.Format("musicdb://albums/%u/",*it);
-
-      CAlbum album;
-      m_musicDatabase.GetAlbumInfo(*it, album, NULL);
-      bCanceled = false;
-      if (find(m_albumsScanned.begin(), m_albumsScanned.end(), *it) == m_albumsScanned.end())
-      {
-        CMusicAlbumInfo albumInfo;
-        if (DownloadAlbumInfo(strPath, StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator), album.strAlbum, bCanceled, albumInfo))
-          m_albumsScanned.push_back(*it);
-      }
-    }
-  }
-  if (m_handle)
-    m_handle->SetTitle(g_localizeStrings.Get(505));
-
-  return songsToAdd.size();
-}
-
-static bool SortSongsByTrack(CSong *song, CSong *song2)
-{
-  return song->iTrack < song2->iTrack;
-}
-
-void CMusicInfoScanner::CategoriseAlbums(VECSONGS &songsToCheck, VECALBUMS &albums)
-{
-  /* Step 1: categorise on the album name */
-  map<string, vector<CSong *> > albumNames;
-  for (VECSONGS::iterator i = songsToCheck.begin(); i != songsToCheck.end(); ++i)
-    albumNames[i->strAlbum].push_back(&(*i));
 
   /*
    Step 2: Split into unique albums based on album name and album artist
    In the case where the album artist is unknown, we use the primary artist
    (i.e. first artist from each song).
    */
-  albums.clear();
-  for (map<string, vector<CSong *> >::iterator i = albumNames.begin(); i != albumNames.end(); ++i)
+  for (map<string, VECSONGS>::iterator songsByAlbumName = songsByAlbumNames.begin(); songsByAlbumName != songsByAlbumNames.end(); ++songsByAlbumName)
   {
+    VECSONGS &songs = songsByAlbumName->second;
     // sort the songs by tracknumber to identify duplicate track numbers
-    vector<CSong *> &songs = i->second;
     sort(songs.begin(), songs.end(), SortSongsByTrack);
 
     // map the songs to their primary artists
@@ -673,14 +574,13 @@ void CMusicInfoScanner::CategoriseAlbums(VECSONGS &songsToCheck, VECALBUMS &albu
     bool isCompilation = true;
 
     map<string, vector<CSong *> > artists;
-    for (vector<CSong *>::iterator j = songs.begin(); j != songs.end(); ++j)
+    for (VECSONGS::iterator song = songs.begin(); song != songs.end(); ++song)
     {
-      CSong *song = *j;
       // test for song overlap
-      if (j != songs.begin() && song->iTrack == (*(j-1))->iTrack)
+      if (song != songs.begin() && song->iTrack == (song - 1)->iTrack)
         tracksOverlap = true;
 
-      if (! song->bCompilation)
+      if (!song->bCompilation)
         isCompilation = false;
 
       // get primary artist
@@ -694,7 +594,7 @@ void CMusicInfoScanner::CategoriseAlbums(VECSONGS &songsToCheck, VECALBUMS &albu
         primary = song->artist[0];
 
       // add to the artist map
-      artists[primary].push_back(song);
+      artists[primary].push_back(&(*song));
     }
 
     /*
@@ -705,7 +605,7 @@ void CMusicInfoScanner::CategoriseAlbums(VECSONGS &songsToCheck, VECALBUMS &albu
      3a. a unique primary artist is specified as "various" or "various artists" OR
      3b. we have at least two primary artists and no album artist specified.
      */
-    bool compilation = !i->first.empty() && (isCompilation || !tracksOverlap); // 1+2b+2a
+    bool compilation = !songsByAlbumName->first.empty() && (isCompilation || !tracksOverlap); // 1+2b+2a
     if (artists.size() == 1)
     {
       string artist = artists.begin()->first; StringUtils::ToLower(artist);
@@ -718,13 +618,15 @@ void CMusicInfoScanner::CategoriseAlbums(VECSONGS &songsToCheck, VECALBUMS &albu
 
     if (compilation)
     {
-      CLog::Log(LOGDEBUG, "Album '%s' is a compilation as there's no overlapping tracks and %s", i->first.c_str(), hasAlbumArtist ? "the album artist is 'Various'" : "there is more than one unique artist");
+      CLog::Log(LOGDEBUG, "Album '%s' is a compilation as there's no overlapping tracks and %s", songsByAlbumName->first.c_str(), hasAlbumArtist ? "the album artist is 'Various'" : "there is more than one unique artist");
       artists.clear();
       std::string various = g_localizeStrings.Get(340); // Various Artists
       vector<string> va; va.push_back(various);
-      for (vector<CSong *>::iterator j = songs.begin(); j != songs.end(); ++j)
-        (*j)->albumArtist = va;
-      artists.insert(make_pair(various, songs));
+      for (VECSONGS::iterator song = songs.begin(); song != songs.end(); ++song)
+      {
+        song->albumArtist = va;
+        artists[various].push_back(&(*song));
+      }
     }
 
     /*
@@ -753,25 +655,140 @@ void CMusicInfoScanner::CategoriseAlbums(VECSONGS &songsToCheck, VECALBUMS &albu
        and add to the album vector
        */
       CAlbum album;
-      album.strAlbum = i->first;
+      album.strAlbum = songsByAlbumName->first;
       album.artist = common;
+      for (vector<string>::iterator it = common.begin(); it != common.end(); ++it)
+      {
+        CStdString strJoinPhrase = (it == --common.end() ? "" : g_advancedSettings.m_musicItemSeparator);
+        CArtistCredit artistCredit(*it, strJoinPhrase);
+        album.artistCredits.push_back(artistCredit);
+      }
       album.bCompilation = compilation;
       for (vector<CSong *>::iterator k = artistSongs.begin(); k != artistSongs.end(); ++k)
       {
         if ((*k)->albumArtist.empty())
           (*k)->albumArtist = common;
-        album.songs.push_back(*(*k));
         // TODO: in future we may wish to union up the genres, for now we assume they're the same
-        if (album.genre.empty())
-          album.genre = (*k)->genre;
+        album.genre = (*k)->genre;
         //       in addition, we may want to use year as discriminating for albums
-        if (album.iYear == 0)
-          album.iYear = (*k)->iYear;
+        album.iYear = (*k)->iYear;
+        album.songs.push_back(**k);
       }
-
       albums.push_back(album);
     }
   }
+}
+
+int CMusicInfoScanner::RetrieveMusicInfo(const CStdString& strDirectory, CFileItemList& items)
+{
+  MAPSONGS songsMap;
+
+  // get all information for all files in current directory from database, and remove them
+  if (m_musicDatabase.RemoveSongsFromPath(strDirectory, songsMap))
+    m_needsCleanup = true;
+
+  CFileItemList scannedItems;
+  if (ScanTags(items, scannedItems) == INFO_CANCELLED || scannedItems.Size() == 0)
+    return 0;
+
+  VECALBUMS albums;
+  FileItemsToAlbums(scannedItems, albums, &songsMap);
+  FindArtForAlbums(albums, items.GetPath());
+
+  int numAdded = 0;
+  ADDON::AddonPtr addon;
+  ADDON::ScraperPtr albumScraper;
+  ADDON::ScraperPtr artistScraper;
+  if(ADDON::CAddonMgr::Get().GetDefault(ADDON::ADDON_SCRAPER_ALBUMS, addon))
+    albumScraper = boost::dynamic_pointer_cast<ADDON::CScraper>(addon);
+
+  if(ADDON::CAddonMgr::Get().GetDefault(ADDON::ADDON_SCRAPER_ARTISTS, addon))
+    artistScraper = boost::dynamic_pointer_cast<ADDON::CScraper>(addon);
+
+  // Add each album
+  for (VECALBUMS::iterator album = albums.begin(); album != albums.end(); ++album)
+  {
+    if (m_bStop)
+      break;
+
+    album->strPath = strDirectory;
+    m_musicDatabase.AddAlbum(*album);
+
+    // Yuk - this is a kludgy way to do what we want to do, but it will work to sort
+    // out artist fanart until we can restructure the artist fanart to work more
+    // like the album fanart. This has to be done after we've added the album so
+    // we have the artist IDs to update, but before we call UpdateDatabaseArtistInfo.
+    if (albums.size() == 1 &&
+        album->artistCredits.size() > 0 &&
+        !StringUtils::EqualsNoCase(album->artistCredits[0].GetArtist(), "various artists") &&
+        !StringUtils::EqualsNoCase(album->artistCredits[0].GetArtist(), "various"))
+    {
+      CArtist artist;
+      if (m_musicDatabase.GetArtist(album->artistCredits[0].GetArtistId(), artist))
+      {
+        artist.strPath = URIUtils::GetParentPath(strDirectory);
+        m_musicDatabase.SetArtForItem(artist.idArtist, "artist", GetArtistArtwork(artist));
+      }
+    }
+
+    if ((m_flags & SCAN_ONLINE))
+    {
+      if (!albumScraper || !artistScraper)
+        continue;
+
+      INFO_RET albumScrapeStatus = INFO_NOT_FOUND;
+      if (!m_musicDatabase.HasAlbumBeenScraped(album->idAlbum))
+        albumScrapeStatus = UpdateDatabaseAlbumInfo(*album, albumScraper, false);
+
+      if (albumScrapeStatus == INFO_ADDED)
+      {
+        for (VECARTISTCREDITS::const_iterator artistCredit  = album->artistCredits.begin();
+                                              artistCredit != album->artistCredits.end();
+                                            ++artistCredit)
+        {
+          if (m_bStop)
+            break;
+
+          if (!m_musicDatabase.HasArtistBeenScraped(artistCredit->GetArtistId()))
+          {
+            CArtist artist;
+            m_musicDatabase.GetArtist(artistCredit->GetArtistId(), artist);
+            UpdateDatabaseArtistInfo(artist, artistScraper, false);
+          }
+        }
+
+        for (VECSONGS::iterator song  = album->songs.begin();
+                                song != album->songs.end();
+                                song++)
+        {
+          if (m_bStop)
+            break;
+
+          for (VECARTISTCREDITS::const_iterator artistCredit  = song->artistCredits.begin();
+                                                artistCredit != song->artistCredits.end();
+                                              ++artistCredit)
+          {
+            if (m_bStop)
+              break;
+
+            CMusicArtistInfo musicArtistInfo;
+            if (!m_musicDatabase.HasArtistBeenScraped(artistCredit->GetArtistId()))
+            {
+              CArtist artist;
+              m_musicDatabase.GetArtist(artistCredit->GetArtistId(), artist);
+              UpdateDatabaseArtistInfo(artist, artistScraper, false);
+            }
+          }
+        }
+      }
+    }
+    numAdded += album->songs.size();
+  }
+
+  if (m_handle)
+    m_handle->SetTitle(g_localizeStrings.Get(505));
+
+  return numAdded;
 }
 
 void CMusicInfoScanner::FindArtForAlbums(VECALBUMS &albums, const CStdString &path)
@@ -827,7 +844,7 @@ void CMusicInfoScanner::FindArtForAlbums(VECALBUMS &albums, const CStdString &pa
       if (!art->strThumb.empty())
         albumArt = art->strThumb;
       else
-        albumArt = CTextureCache::GetWrappedImageURL(art->strFileName, "music");
+        albumArt = CTextureUtils::GetWrappedImageURL(art->strFileName, "music");
     }
 
     if (!albumArt.empty())
@@ -843,61 +860,17 @@ void CMusicInfoScanner::FindArtForAlbums(VECALBUMS &albums, const CStdString &pa
       for (VECSONGS::iterator k = album.songs.begin(); k != album.songs.end(); ++k)
       {
         if (k->strThumb.empty() && !k->embeddedArt.empty())
-          k->strThumb = CTextureCache::GetWrappedImageURL(k->strFileName, "music");
+          k->strThumb = CTextureUtils::GetWrappedImageURL(k->strFileName, "music");
       }
     }
   }
   if (albums.size() == 1 && !albumArt.empty())
-  { // assign to folder thumb as well
-    CMusicThumbLoader::SetCachedImage(path, "thumb", albumArt);
-  }
-}
-
-// This function is run by another thread
-void CMusicInfoScanner::Run()
-{
-  int count = 0;
-  while (!m_bStop && m_pathsToCount.size())
-    count+=CountFilesRecursively(*m_pathsToCount.begin());
-  m_itemCount = count;
-}
-
-// Recurse through all folders we scan and count files
-int CMusicInfoScanner::CountFilesRecursively(const CStdString& strPath)
-{
-  // load subfolder
-  CFileItemList items;
-//  CLog::Log(LOGDEBUG, __FUNCTION__" - processing dir: %s", strPath.c_str());
-  CDirectory::GetDirectory(strPath, items, g_advancedSettings.m_musicExtensions, DIR_FLAG_NO_FILE_DIRS);
-
-  if (m_bStop)
-    return 0;
-
-  // true for recursive counting
-  int count = CountFiles(items, true);
-
-  // remove this path from the list we're processing
-  set<CStdString>::iterator it = m_pathsToCount.find(strPath);
-  if (it != m_pathsToCount.end())
-    m_pathsToCount.erase(it);
-
-//  CLog::Log(LOGDEBUG, __FUNCTION__" - finished processing dir: %s", strPath.c_str());
-  return count;
-}
-
-int CMusicInfoScanner::CountFiles(const CFileItemList &items, bool recursive)
-{
-  int count = 0;
-  for (int i=0; i<items.Size(); ++i)
   {
-    const CFileItemPtr pItem=items[i];
-
-    if (recursive && pItem->m_bIsFolder)
-      count+=CountFilesRecursively(pItem->GetPath());
-    else if (pItem->IsAudio() && !pItem->IsPlayList() && !pItem->IsNFO())
-      count++;
+    // assign to folder thumb as well
+    CFileItem albumItem(path, true);
+    CMusicThumbLoader loader;
+    loader.SetCachedImage(albumItem, "thumb", albumArt);
   }
-  return count;
 }
 
 int CMusicInfoScanner::GetPathHash(const CFileItemList &items, CStdString &hash)
@@ -920,88 +893,151 @@ int CMusicInfoScanner::GetPathHash(const CFileItemList &items, CStdString &hash)
   return count;
 }
 
+INFO_RET CMusicInfoScanner::UpdateDatabaseAlbumInfo(CAlbum& album, const ADDON::ScraperPtr& scraper, bool bAllowSelection, CGUIDialogProgress* pDialog /* = NULL */)
+{
+  if (!scraper)
+    return INFO_ERROR;
+
+  CMusicAlbumInfo albumInfo;
+
+loop:
+  CLog::Log(LOGDEBUG, "%s downloading info for: %s", __FUNCTION__, album.strAlbum.c_str());
+  INFO_RET albumDownloadStatus = DownloadAlbumInfo(album, scraper, albumInfo, pDialog);
+  if (albumDownloadStatus == INFO_NOT_FOUND)
+  {
+    if (pDialog && bAllowSelection)
+    {
+      if (!CGUIKeyboardFactory::ShowAndGetInput(album.strAlbum, g_localizeStrings.Get(16011), false))
+        return INFO_CANCELLED;
+
+      CStdString strTempArtist(StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator));
+      if (!CGUIKeyboardFactory::ShowAndGetInput(strTempArtist, g_localizeStrings.Get(16025), false))
+        return INFO_CANCELLED;
+
+      album.artist = StringUtils::Split(strTempArtist, g_advancedSettings.m_musicItemSeparator);
+      goto loop;
+    }
+  }
+  else if (albumDownloadStatus == INFO_ADDED)
+  {
+    album.MergeScrapedAlbum(albumInfo.GetAlbum(), CSettings::Get().GetBool("musiclibrary.overridetags"));
+    m_musicDatabase.Open();
+    m_musicDatabase.UpdateAlbum(album);
+    GetAlbumArtwork(album.idAlbum, album);
+    m_musicDatabase.Close();
+    albumInfo.SetLoaded(true);
+  }
+  return albumDownloadStatus;
+}
+
+INFO_RET CMusicInfoScanner::UpdateDatabaseArtistInfo(CArtist& artist, const ADDON::ScraperPtr& scraper, bool bAllowSelection, CGUIDialogProgress* pDialog /* = NULL */)
+{
+  if (!scraper)
+    return INFO_ERROR;
+
+  CMusicArtistInfo artistInfo;
+
+loop:
+  CLog::Log(LOGDEBUG, "%s downloading info for: %s", __FUNCTION__, artist.strArtist.c_str());
+  INFO_RET artistDownloadStatus = DownloadArtistInfo(artist, scraper, artistInfo, pDialog);
+  if (artistDownloadStatus == INFO_NOT_FOUND)
+  {
+    if (pDialog && bAllowSelection)
+    {
+      if (!CGUIKeyboardFactory::ShowAndGetInput(artist.strArtist, g_localizeStrings.Get(16025), false))
+        return INFO_CANCELLED;
+      goto loop;
+    }
+  }
+  else if (artistDownloadStatus == INFO_ADDED)
+  {
+    artist.MergeScrapedArtist(artistInfo.GetArtist(), CSettings::Get().GetBool("musiclibrary.overridetags"));
+    m_musicDatabase.Open();
+    m_musicDatabase.UpdateArtist(artist);
+    m_musicDatabase.GetArtistPath(artist.idArtist, artist.strPath);
+    m_musicDatabase.SetArtForItem(artist.idArtist, "artist", GetArtistArtwork(artist));
+    m_musicDatabase.Close();
+    artistInfo.SetLoaded();
+  }
+  return artistDownloadStatus;
+}
+
 #define THRESHOLD .95f
 
-bool CMusicInfoScanner::DownloadAlbumInfo(const CStdString& strPath, const CStdString& strArtist, const CStdString& strAlbum, bool& bCanceled, CMusicAlbumInfo& albumInfo, CGUIDialogProgress* pDialog)
+INFO_RET CMusicInfoScanner::DownloadAlbumInfo(const CAlbum& album, const ADDON::ScraperPtr& info, CMusicAlbumInfo& albumInfo, CGUIDialogProgress* pDialog)
 {
-  CAlbum album;
-  VECSONGS songs;
-  XFILE::MUSICDATABASEDIRECTORY::CQueryParams params;
-  XFILE::MUSICDATABASEDIRECTORY::CDirectoryNode::GetDatabaseInfo(strPath, params);
-  bCanceled = false;
-  m_musicDatabase.Open();
-  if (m_musicDatabase.HasAlbumInfo(params.GetAlbumId()) && m_musicDatabase.GetAlbumInfo(params.GetAlbumId(),album,&songs))
-    return true;
-
-  // find album info
-  ADDON::ScraperPtr info;
-  if (!m_musicDatabase.GetScraperForPath(strPath, info, ADDON::ADDON_SCRAPER_ALBUMS) || !info)
-  {
-    m_musicDatabase.Close();
-    return false;
-  }
-
   if (m_handle)
   {
     m_handle->SetTitle(StringUtils::Format(g_localizeStrings.Get(20321), info->Name().c_str()));
-    m_handle->SetText(strArtist+" - "+strAlbum);
+    m_handle->SetText(StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator) + " - " + album.strAlbum);
   }
 
   // clear our scraper cache
   info->ClearCache();
 
   CMusicInfoScraper scraper(info);
+  bool bMusicBrainz = false;
+  if (!album.strMusicBrainzAlbumID.empty())
+  {
+    CScraperUrl musicBrainzURL;
+    if (ResolveMusicBrainz(album.strMusicBrainzAlbumID, info, musicBrainzURL))
+    {
+      CMusicAlbumInfo albumNfo("nfo", musicBrainzURL);
+      scraper.GetAlbums().clear();
+      scraper.GetAlbums().push_back(albumNfo);
+      bMusicBrainz = true;
+    }
+  }
 
   // handle nfo files
-  CStdString strAlbumPath, strNfo;
-  m_musicDatabase.GetAlbumPath(params.GetAlbumId(),strAlbumPath);
-  URIUtils::AddFileToFolder(strAlbumPath,"album.nfo",strNfo);
-  CNfoFile::NFOResult result=CNfoFile::NO_NFO;
+  CStdString path = album.strPath;
+  if (path.empty())
+    m_musicDatabase.GetAlbumPath(album.idAlbum, path);
+
+  CStdString strNfo = URIUtils::AddFileToFolder(path, "album.nfo");
+  CNfoFile::NFOResult result = CNfoFile::NO_NFO;
   CNfoFile nfoReader;
   if (XFILE::CFile::Exists(strNfo))
   {
     CLog::Log(LOGDEBUG,"Found matching nfo file: %s", strNfo.c_str());
-    result = nfoReader.Create(strNfo, info, -1, strPath);
+    result = nfoReader.Create(strNfo, info);
     if (result == CNfoFile::FULL_NFO)
     {
       CLog::Log(LOGDEBUG, "%s Got details from nfo", __FUNCTION__);
-      CAlbum album;
-      nfoReader.GetDetails(album);
-      m_musicDatabase.SetAlbumInfo(params.GetAlbumId(), album, album.songs);
-      GetAlbumArtwork(params.GetAlbumId(), album);
-      m_musicDatabase.Close();
-      return true;
+      nfoReader.GetDetails(albumInfo.GetAlbum());
+      return INFO_ADDED;
     }
     else if (result == CNfoFile::URL_NFO || result == CNfoFile::COMBINED_NFO)
     {
       CScraperUrl scrUrl(nfoReader.ScraperUrl());
-      CMusicAlbumInfo album("nfo",scrUrl);
-      info = nfoReader.GetScraperInfo();
-      CLog::Log(LOGDEBUG,"-- nfo-scraper: %s",info->Name().c_str());
+      CMusicAlbumInfo albumNfo("nfo",scrUrl);
+      ADDON::ScraperPtr nfoReaderScraper = nfoReader.GetScraperInfo();
+      CLog::Log(LOGDEBUG,"-- nfo-scraper: %s", nfoReaderScraper->Name().c_str());
       CLog::Log(LOGDEBUG,"-- nfo url: %s", scrUrl.m_url[0].m_url.c_str());
-      scraper.SetScraperInfo(info);
-      scraper.GetAlbums().push_back(album);
+      scraper.SetScraperInfo(nfoReaderScraper);
+      scraper.GetAlbums().clear();
+      scraper.GetAlbums().push_back(albumNfo);
     }
     else
       CLog::Log(LOGERROR,"Unable to find an url in nfo file: %s", strNfo.c_str());
   }
 
-  if (!scraper.CheckValidOrFallback(g_guiSettings.GetString("musiclibrary.albumsscraper")))
+  if (!scraper.CheckValidOrFallback(CSettings::Get().GetString("musiclibrary.albumsscraper")))
   { // the current scraper is invalid, as is the default - bail
     CLog::Log(LOGERROR, "%s - current and default scrapers are invalid.  Pick another one", __FUNCTION__);
-    return false;
+    return INFO_ERROR;
   }
 
   if (!scraper.GetAlbumCount())
   {
-    scraper.FindAlbumInfo(strAlbum, strArtist);
+    scraper.FindAlbumInfo(album.strAlbum, StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator));
 
     while (!scraper.Completed())
     {
       if (m_bStop)
       {
         scraper.Cancel();
-        bCanceled = true;
+        return INFO_CANCELLED;
       }
       Sleep(1);
     }
@@ -1009,7 +1045,7 @@ bool CMusicInfoScanner::DownloadAlbumInfo(const CStdString& strPath, const CStdS
 
   CGUIDialogSelect *pDlg = NULL;
   int iSelectedAlbum=0;
-  if (result == CNfoFile::NO_NFO)
+  if (result == CNfoFile::NO_NFO && !bMusicBrainz)
   {
     iSelectedAlbum = -1; // set negative so that we can detect a failure
     if (scraper.Succeeded() && scraper.GetAlbumCount() >= 1)
@@ -1032,7 +1068,7 @@ bool CMusicInfoScanner::DownloadAlbumInfo(const CStdString& strPath, const CStdS
           CMusicAlbumInfo& info = scraper.GetAlbum(i);
           double relevance = info.GetRelevance();
           if (relevance < 0)
-            relevance = CUtil::AlbumRelevance(info.GetAlbum().strAlbum, strAlbum, StringUtils::Join(info.GetAlbum().artist, g_advancedSettings.m_musicItemSeparator), strArtist);
+            relevance = CUtil::AlbumRelevance(info.GetAlbum().strAlbum, album.strAlbum, StringUtils::Join(info.GetAlbum().artist, g_advancedSettings.m_musicItemSeparator), StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator));
 
           // if we're doing auto-selection (ie querying all albums at once, then allow 95->100% for perfect matches)
           // otherwise, perfect matches only
@@ -1044,8 +1080,7 @@ bool CMusicInfoScanner::DownloadAlbumInfo(const CStdString& strPath, const CStdS
           if (pDialog)
           {
             // set the label to [relevance]  album - artist
-            CStdString strTemp;
-            strTemp.Format("[%0.2f]  %s", relevance, info.GetTitle2());
+            CStdString strTemp = StringUtils::Format("[%0.2f]  %s", relevance, info.GetTitle2().c_str());
             CFileItem item(strTemp);
             item.m_idepth = i; // use this to hold the index of the album in the scraper
             pDlg->Add(&item);
@@ -1063,22 +1098,25 @@ bool CMusicInfoScanner::DownloadAlbumInfo(const CStdString& strPath, const CStdS
           if (pDlg->GetSelectedLabel() < 0)
           { // none chosen
             if (!pDlg->IsButtonPressed())
-              return false;
+              return INFO_CANCELLED;
 
             // manual button pressed
             CStdString strNewAlbum = album.strAlbum;
-            if (!CGUIKeyboardFactory::ShowAndGetInput(strNewAlbum, g_localizeStrings.Get(16011), false)) return false;
-            if (strNewAlbum == "") return false;
+            if (!CGUIKeyboardFactory::ShowAndGetInput(strNewAlbum, g_localizeStrings.Get(16011), false)) return INFO_CANCELLED;
+            if (strNewAlbum == "") return INFO_CANCELLED;
 
             CStdString strNewArtist = StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator);
-            if (!CGUIKeyboardFactory::ShowAndGetInput(strNewArtist, g_localizeStrings.Get(16025), false)) return false;
+            if (!CGUIKeyboardFactory::ShowAndGetInput(strNewArtist, g_localizeStrings.Get(16025), false)) return INFO_CANCELLED;
 
             pDialog->SetLine(0, strNewAlbum);
             pDialog->SetLine(1, strNewArtist);
             pDialog->Progress();
 
-            m_musicDatabase.Close();
-            return DownloadAlbumInfo(strPath,strNewArtist,strNewAlbum,bCanceled,albumInfo,pDialog);
+            CAlbum newAlbum = album;
+            newAlbum.strAlbum = strNewAlbum;
+            newAlbum.artist = StringUtils::Split(strNewArtist, g_advancedSettings.m_musicItemSeparator);
+
+            return DownloadAlbumInfo(newAlbum, info, albumInfo, pDialog);
           }
           iSelectedAlbum = pDlg->GetSelectedItem()->m_idepth;
         }
@@ -1088,21 +1126,20 @@ bool CMusicInfoScanner::DownloadAlbumInfo(const CStdString& strPath, const CStdS
         CMusicAlbumInfo& info = scraper.GetAlbum(0);
         double relevance = info.GetRelevance();
         if (relevance < 0)
-          relevance = CUtil::AlbumRelevance(info.GetAlbum().strAlbum, strAlbum, StringUtils::Join(info.GetAlbum().artist, g_advancedSettings.m_musicItemSeparator), strArtist);
+          relevance = CUtil::AlbumRelevance(info.GetAlbum().strAlbum,
+                                            album.strAlbum,
+                                            StringUtils::Join(info.GetAlbum().artist, g_advancedSettings.m_musicItemSeparator),
+                                            StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator));
         if (relevance < THRESHOLD)
-        {
-          m_musicDatabase.Close();
-          return false;
-        }
+          return INFO_NOT_FOUND;
+
         iSelectedAlbum = 0;
       }
     }
 
     if (iSelectedAlbum < 0)
-    {
-      m_musicDatabase.Close();
-      return false;
-    }
+      return INFO_NOT_FOUND;
+
   }
 
   scraper.LoadAlbumInfo(iSelectedAlbum);
@@ -1110,30 +1147,21 @@ bool CMusicInfoScanner::DownloadAlbumInfo(const CStdString& strPath, const CStdS
   {
     if (m_bStop)
     {
-      bCanceled = true;
       scraper.Cancel();
+      return INFO_CANCELLED;
     }
     Sleep(1);
   }
 
-  if (scraper.Succeeded())
-  {
-    albumInfo = scraper.GetAlbum(iSelectedAlbum);
-    album = scraper.GetAlbum(iSelectedAlbum).GetAlbum();
-    if (result == CNfoFile::COMBINED_NFO)
-      nfoReader.GetDetails(album,NULL,true);
-    m_musicDatabase.SetAlbumInfo(params.GetAlbumId(), album, scraper.GetAlbum(iSelectedAlbum).GetSongs(),false);
-  }
-  else
-  {
-    m_musicDatabase.Close();
-    return false;
-  }
+  if (!scraper.Succeeded())
+    return INFO_ERROR;
 
-  // check thumb stuff
-  GetAlbumArtwork(params.GetAlbumId(), album);
-  m_musicDatabase.Close();
-  return true;
+  albumInfo = scraper.GetAlbum(iSelectedAlbum);
+  
+  if (result == CNfoFile::COMBINED_NFO)
+    nfoReader.GetDetails(albumInfo.GetAlbum(), NULL, true);
+  
+  return INFO_ADDED;
 }
 
 void CMusicInfoScanner::GetAlbumArtwork(long id, const CAlbum &album)
@@ -1152,38 +1180,37 @@ void CMusicInfoScanner::GetAlbumArtwork(long id, const CAlbum &album)
   }
 }
 
-bool CMusicInfoScanner::DownloadArtistInfo(const CStdString& strPath, const CStdString& strArtist, bool& bCanceled, CGUIDialogProgress* pDialog)
+INFO_RET CMusicInfoScanner::DownloadArtistInfo(const CArtist& artist, const ADDON::ScraperPtr& info, MUSIC_GRABBER::CMusicArtistInfo& artistInfo, CGUIDialogProgress* pDialog)
 {
-  XFILE::MUSICDATABASEDIRECTORY::CQueryParams params;
-  XFILE::MUSICDATABASEDIRECTORY::CDirectoryNode::GetDatabaseInfo(strPath, params);
-  bCanceled = false;
-  CArtist artist;
-  m_musicDatabase.Open();
-  if (m_musicDatabase.HasArtistInfo(params.GetArtistId()) && m_musicDatabase.GetArtistInfo(params.GetArtistId(),artist)) // already got the info
-    return true;
-
-  // find artist info
-  ADDON::ScraperPtr info;
-  if (!m_musicDatabase.GetScraperForPath(strPath, info, ADDON::ADDON_SCRAPER_ARTISTS) || !info)
-  {
-    m_musicDatabase.Close();
-    return false;
-  }
-
   if (m_handle)
   {
     m_handle->SetTitle(StringUtils::Format(g_localizeStrings.Get(20320), info->Name().c_str()));
-    m_handle->SetText(strArtist);
+    m_handle->SetText(artist.strArtist);
   }
 
   // clear our scraper cache
   info->ClearCache();
 
   CMusicInfoScraper scraper(info);
+  bool bMusicBrainz = false;
+  if (!artist.strMusicBrainzArtistID.empty())
+  {
+    CScraperUrl musicBrainzURL;
+    if (ResolveMusicBrainz(artist.strMusicBrainzArtistID, info, musicBrainzURL))
+    {
+      CMusicArtistInfo artistNfo("nfo", musicBrainzURL);
+      scraper.GetArtists().clear();
+      scraper.GetArtists().push_back(artistNfo);
+      bMusicBrainz = true;
+    }
+  }
+
   // handle nfo files
-  CStdString strArtistPath, strNfo;
-  m_musicDatabase.GetArtistPath(params.GetArtistId(),strArtistPath);
-  URIUtils::AddFileToFolder(strArtistPath,"artist.nfo",strNfo);
+  CStdString path = artist.strPath;
+  if (path.empty())
+    m_musicDatabase.GetArtistPath(artist.idArtist, path);
+
+  CStdString strNfo = URIUtils::AddFileToFolder(path, "artist.nfo");
   CNfoFile::NFOResult result=CNfoFile::NO_NFO;
   CNfoFile nfoReader;
   if (XFILE::CFile::Exists(strNfo))
@@ -1193,23 +1220,18 @@ bool CMusicInfoScanner::DownloadArtistInfo(const CStdString& strPath, const CStd
     if (result == CNfoFile::FULL_NFO)
     {
       CLog::Log(LOGDEBUG, "%s Got details from nfo", __FUNCTION__);
-      CArtist artist;
-      nfoReader.GetDetails(artist);
-      m_musicDatabase.SetArtistInfo(params.GetArtistId(), artist);
-      map<string, string> artwork = GetArtistArtwork(params.GetArtistId(), &artist);
-      m_musicDatabase.SetArtForItem(params.GetArtistId(), "artist", artwork);
-      m_musicDatabase.Close();
-      return true;
+      nfoReader.GetDetails(artistInfo.GetArtist());
+      return INFO_ADDED;
     }
     else if (result == CNfoFile::URL_NFO || result == CNfoFile::COMBINED_NFO)
     {
       CScraperUrl scrUrl(nfoReader.ScraperUrl());
-      CMusicArtistInfo artist("nfo",scrUrl);
-      info = nfoReader.GetScraperInfo();
-      CLog::Log(LOGDEBUG,"-- nfo-scraper: %s",info->Name().c_str());
+      CMusicArtistInfo artistNfo("nfo",scrUrl);
+      ADDON::ScraperPtr nfoReaderScraper = nfoReader.GetScraperInfo();
+      CLog::Log(LOGDEBUG,"-- nfo-scraper: %s",nfoReaderScraper->Name().c_str());
       CLog::Log(LOGDEBUG,"-- nfo url: %s", scrUrl.m_url[0].m_url.c_str());
-      scraper.SetScraperInfo(info);
-      scraper.GetArtists().push_back(artist);
+      scraper.SetScraperInfo(nfoReaderScraper);
+      scraper.GetArtists().push_back(artistNfo);
     }
     else
       CLog::Log(LOGERROR,"Unable to find an url in nfo file: %s", strNfo.c_str());
@@ -1217,23 +1239,23 @@ bool CMusicInfoScanner::DownloadArtistInfo(const CStdString& strPath, const CStd
 
   if (!scraper.GetArtistCount())
   {
-    scraper.FindArtistInfo(strArtist);
+    scraper.FindArtistInfo(artist.strArtist);
 
     while (!scraper.Completed())
     {
       if (m_bStop)
       {
         scraper.Cancel();
-        bCanceled = true;
+        return INFO_CANCELLED;
       }
       Sleep(1);
     }
   }
 
   int iSelectedArtist = 0;
-  if (result == CNfoFile::NO_NFO)
+  if (result == CNfoFile::NO_NFO && !bMusicBrainz)
   {
-    if (scraper.Succeeded() && scraper.GetArtistCount() >= 1)
+    if (scraper.GetArtistCount() >= 1)
     {
       // now load the first match
       if (pDialog && scraper.GetArtistCount() > 1)
@@ -1251,13 +1273,13 @@ bool CMusicInfoScanner::DownloadArtistInfo(const CStdString& strPath, const CStd
             // set the label to artist
             CFileItem item(scraper.GetArtist(i).GetArtist());
             CStdString strTemp=scraper.GetArtist(i).GetArtist().strArtist;
-            if (!scraper.GetArtist(i).GetArtist().strBorn.IsEmpty())
+            if (!scraper.GetArtist(i).GetArtist().strBorn.empty())
               strTemp += " ("+scraper.GetArtist(i).GetArtist().strBorn+")";
             if (!scraper.GetArtist(i).GetArtist().genre.empty())
             {
               CStdString genres = StringUtils::Join(scraper.GetArtist(i).GetArtist().genre, g_advancedSettings.m_musicItemSeparator);
               if (!genres.empty())
-                strTemp.Format("[%s] %s", genres.c_str(), strTemp.c_str());
+                strTemp = StringUtils::Format("[%s] %s", genres.c_str(), strTemp.c_str());
             }
             item.SetLabel(strTemp);
             item.m_idepth = i; // use this to hold the index of the album in the scraper
@@ -1269,77 +1291,102 @@ bool CMusicInfoScanner::DownloadArtistInfo(const CStdString& strPath, const CStd
           if (pDlg->GetSelectedLabel() < 0)
           { // none chosen
             if (!pDlg->IsButtonPressed())
-            {
-              bCanceled = true;
-              return false;
-            }
+              return INFO_CANCELLED;
+
             // manual button pressed
-            CStdString strNewArtist = strArtist;
-            if (!CGUIKeyboardFactory::ShowAndGetInput(strNewArtist, g_localizeStrings.Get(16025), false)) return false;
+            CStdString strNewArtist = artist.strArtist;
+            if (!CGUIKeyboardFactory::ShowAndGetInput(strNewArtist, g_localizeStrings.Get(16025), false)) return INFO_CANCELLED;
 
             if (pDialog)
             {
               pDialog->SetLine(0, strNewArtist);
               pDialog->Progress();
             }
-            m_musicDatabase.Close();
-            return DownloadArtistInfo(strPath,strNewArtist,bCanceled,pDialog);
+
+            CArtist newArtist;
+            newArtist.strArtist = strNewArtist;
+            return DownloadArtistInfo(newArtist, info, artistInfo, pDialog);
           }
           iSelectedArtist = pDlg->GetSelectedItem()->m_idepth;
         }
       }
     }
     else
-    {
-      m_musicDatabase.Close();
-      return false;
-    }
+      return INFO_NOT_FOUND;
   }
 
-  scraper.LoadArtistInfo(iSelectedArtist, strArtist);
+  scraper.LoadArtistInfo(iSelectedArtist, artist.strArtist);
   while (!scraper.Completed())
   {
     if (m_bStop)
     {
       scraper.Cancel();
-      bCanceled = true;
+      return INFO_CANCELLED;
     }
     Sleep(1);
   }
 
-  if (scraper.Succeeded())
-  {
-    artist = scraper.GetArtist(iSelectedArtist).GetArtist();
-    if (result == CNfoFile::COMBINED_NFO)
-      nfoReader.GetDetails(artist,NULL,true);
-    m_musicDatabase.SetArtistInfo(params.GetArtistId(), artist);
-  }
+  if (!scraper.Succeeded())
+    return INFO_ERROR;
 
-  // check thumb stuff
-  map<string, string> artwork = GetArtistArtwork(params.GetArtistId(), &artist);
-  m_musicDatabase.SetArtForItem(params.GetArtistId(), "artist", artwork);
+  artistInfo = scraper.GetArtist(iSelectedArtist);
 
-  m_musicDatabase.Close();
-  return true;
+  if (result == CNfoFile::COMBINED_NFO)
+    nfoReader.GetDetails(artistInfo.GetArtist(), NULL, true);
+
+  return INFO_ADDED;
 }
 
-map<string, string> CMusicInfoScanner::GetArtistArtwork(long id, const CArtist *artist)
+bool CMusicInfoScanner::ResolveMusicBrainz(const CStdString &strMusicBrainzID, const ScraperPtr &preferredScraper, CScraperUrl &musicBrainzURL)
 {
-  CStdString artistPath;
-  m_musicDatabase.Open();
-  bool checkLocal = m_musicDatabase.GetArtistPath(id, artistPath);
-  m_musicDatabase.Close();
+  // We have a MusicBrainz ID
+  // Get a scraper that can resolve it to a MusicBrainz URL & force our
+  // search directly to the specific album.
+  bool bMusicBrainz = false;
+  try
+  {
+    musicBrainzURL = preferredScraper->ResolveIDToUrl(strMusicBrainzID);
+  }
+  catch (const ADDON::CScraperError &sce)
+  {
+    if (sce.FAborted())
+      return false;
+  }
 
-  CFileItem item(artistPath, true);
+  if (!musicBrainzURL.m_url.empty())
+  {
+    Sleep(2000); // MusicBrainz rate-limits queries to 1 p.s - once we hit the rate-limiter
+                 // they start serving up the 'you hit the rate-limiter' page fast - meaning
+                 // we will never get below the rate-limit threshold again in a specific run.
+                 // This helps us to avoidthe rate-limiter as far as possible.
+    CLog::Log(LOGDEBUG,"-- nfo-scraper: %s",preferredScraper->Name().c_str());
+    CLog::Log(LOGDEBUG,"-- nfo url: %s", musicBrainzURL.m_url[0].m_url.c_str());
+    bMusicBrainz = true;
+  }
+
+  return bMusicBrainz;
+}
+
+map<string, string> CMusicInfoScanner::GetArtistArtwork(const CArtist& artist)
+{
   map<string, string> artwork;
 
   // check thumb
+  CStdString strFolder;
   CStdString thumb;
-  if (checkLocal)
-    thumb = item.GetUserMusicThumb(true);
-  if (thumb.IsEmpty() && artist)
-    thumb = CScraperUrl::GetThumbURL(artist->thumbURL.GetFirstThumb());
-  if (!thumb.IsEmpty())
+  if (!artist.strPath.empty())
+  {
+    strFolder = artist.strPath;
+    for (int i = 0; i < 3 && thumb.empty(); ++i)
+    {
+      CFileItem item(strFolder, true);
+      thumb = item.GetUserMusicThumb(true);
+      strFolder = URIUtils::GetParentPath(strFolder);
+    }
+  }
+  if (thumb.empty())
+    thumb = CScraperUrl::GetThumbURL(artist.thumbURL.GetFirstThumb());
+  if (!thumb.empty())
   {
     CTextureCache::Get().BackgroundCacheImage(thumb);
     artwork.insert(make_pair("thumb", thumb));
@@ -1347,15 +1394,65 @@ map<string, string> CMusicInfoScanner::GetArtistArtwork(long id, const CArtist *
 
   // check fanart
   CStdString fanart;
-  if (checkLocal)
-    fanart = item.GetLocalFanart();
-  if (fanart.IsEmpty() && artist)
-    fanart = artist->fanart.GetImageURL();
-  if (!fanart.IsEmpty())
+  if (!artist.strPath.empty())
+  {
+    strFolder = artist.strPath;
+    for (int i = 0; i < 3 && fanart.empty(); ++i)
+    {
+      CFileItem item(strFolder, true);
+      fanart = item.GetLocalFanart();
+      strFolder = URIUtils::GetParentPath(strFolder);
+    }
+  }
+  if (fanart.empty())
+    fanart = artist.fanart.GetImageURL();
+  if (!fanart.empty())
   {
     CTextureCache::Get().BackgroundCacheImage(fanart);
     artwork.insert(make_pair("fanart", fanart));
   }
 
   return artwork;
+}
+
+// This function is the Run() function of the IRunnable
+// CFileCountReader and runs in a separate thread.
+void CMusicInfoScanner::Run()
+{
+  int count = 0;
+  for (set<std::string>::iterator it = m_pathsToScan.begin(); it != m_pathsToScan.end() && !m_bStop; ++it)
+  {
+    count+=CountFilesRecursively(*it);
+  }
+  m_itemCount = count;
+}
+
+// Recurse through all folders we scan and count files
+int CMusicInfoScanner::CountFilesRecursively(const CStdString& strPath)
+{
+  // load subfolder
+  CFileItemList items;
+  CDirectory::GetDirectory(strPath, items, g_advancedSettings.m_musicExtensions, DIR_FLAG_NO_FILE_DIRS);
+
+  if (m_bStop)
+    return 0;
+
+  // true for recursive counting
+  int count = CountFiles(items, true);
+  return count;
+}
+
+int CMusicInfoScanner::CountFiles(const CFileItemList &items, bool recursive)
+{
+  int count = 0;
+  for (int i=0; i<items.Size(); ++i)
+  {
+    const CFileItemPtr pItem=items[i];
+    
+    if (recursive && pItem->m_bIsFolder)
+      count+=CountFilesRecursively(pItem->GetPath());
+    else if (pItem->IsAudio() && !pItem->IsPlayList() && !pItem->IsNFO())
+      count++;
+  }
+  return count;
 }

@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #undef restrict
 #include "DllAvCodec.h"
 #include "DllAvFormat.h"
+#include "DllSwResample.h"
 
 class CAEEncoderFFmpeg: public IAEEncoder
 {
@@ -35,29 +36,33 @@ public:
   virtual ~CAEEncoderFFmpeg();
 
   virtual bool IsCompatible(AEAudioFormat format);
-  virtual bool Initialize(AEAudioFormat &format);
+  virtual bool Initialize(AEAudioFormat &format, bool allow_planar_input = false);
   virtual void Reset();
 
   virtual unsigned int GetBitRate    ();
-  virtual CodecID      GetCodecID    ();
+  virtual AVCodecID    GetCodecID    ();
   virtual unsigned int GetFrames     ();
 
   virtual int Encode (float *data, unsigned int frames);
+  virtual int Encode (uint8_t *in, int in_size, uint8_t *out, int out_size);
   virtual int GetData(uint8_t **data);
   virtual double GetDelay(unsigned int bufferSize);
 private:
   DllAvCodec  m_dllAvCodec;
   DllAvFormat m_dllAvFormat;
   DllAvUtil   m_dllAvUtil;
+  DllSwResample m_dllSwResample;
 
   std::string                m_CodecName;
-  CodecID                   m_CodecID;
+  AVCodecID                  m_CodecID;
   unsigned int              m_BitRate;
   CAEPackIEC61937::PackFunc m_PackFunc;
 
   AEAudioFormat     m_CurrentFormat;
   AVCodecContext   *m_CodecCtx;
+  SwrContext       *m_SwrCtx;
   CAEChannelInfo    m_Layout;
+  AVPacket          m_Pkt;
   uint8_t           m_Buffer[IEC61937_DATA_OFFSET + FF_MIN_BUFFER_SIZE];
   int               m_BufferSize;
   int               m_OutputSize;
@@ -67,5 +72,9 @@ private:
   unsigned int      m_NeededFrames;
 
   unsigned int BuildChannelLayout(const int64_t ffmap, CAEChannelInfo& layout);
+
+  bool              m_NeedConversion;
+  uint8_t          *m_ResampBuffer;
+  int               m_ResampBufferSize;
 };
 

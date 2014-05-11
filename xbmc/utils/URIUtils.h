@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,28 +28,57 @@ class URIUtils
 public:
   URIUtils(void);
   virtual ~URIUtils(void);
-  static CStdString GetParentFolderURI(const CStdString& uri,
-                                       bool preserveFileNameInPath);
   static bool IsInPath(const CStdString &uri, const CStdString &baseURI);
 
-  static void GetDirectory(const CStdString& strFilePath,
-                           CStdString& strDirectoryPath);
-  static CStdString GetDirectory(const CStdString &filePath);
-
-  static const CStdString GetExtension(const CStdString& strFileName);
-  static void GetExtension(const CStdString& strFile, CStdString& strExtension);
+  static CStdString GetDirectory(const CStdString &strFilePath);
   static const CStdString GetFileName(const CStdString& strFileNameAndPath);
+
+  static CStdString GetExtension(const CStdString& strFileName);
+
+  /*!
+   \brief Check if there is a file extension
+   \param strFileName Path or URL to check
+   \return \e true if strFileName have an extension.
+   \note Returns false when strFileName is empty.
+   \sa GetExtension
+   */
+  static bool HasExtension(const CStdString& strFileName);
+
+  /*!
+   \brief Check if filename have any of the listed extensions
+   \param strFileName Path or URL to check
+   \param strExtensions List of '.' prefixed lowercase extensions seperated with '|'
+   \return \e true if strFileName have any one of the extensions.
+   \note The check is case insensitive for strFileName, but requires
+         strExtensions to be lowercase. Returns false when strFileName or
+         strExtensions is empty.
+   \sa GetExtension
+   */
+  static bool HasExtension(const CStdString& strFileName, const CStdString& strExtensions);
+
   static void RemoveExtension(CStdString& strFileName);
   static CStdString ReplaceExtension(const CStdString& strFile,
                                      const CStdString& strNewExtension);
   static void Split(const CStdString& strFileNameAndPath, 
                     CStdString& strPath, CStdString& strFileName);
+  static void Split(const std::string& strFileNameAndPath, 
+                    std::string& strPath, std::string& strFileName);
   static CStdStringArray SplitPath(const CStdString& strPath);
 
   static void GetCommonPath(CStdString& strPath, const CStdString& strPath2);
   static CStdString GetParentPath(const CStdString& strPath);
   static bool GetParentPath(const CStdString& strPath, CStdString& strParent);
-  static CStdString SubstitutePath(const CStdString& strPath);
+
+  /* \brief Change the base path of a URL: fromPath/fromFile -> toPath/toFile
+    Handles changes in path separator and filename URL encoding if necessary to derive toFile.
+    \param fromPath the base path of the original URL
+    \param fromFile the filename portion of the original URL
+    \param toPath the base path of the resulting URL
+    \return the full path.
+   */
+  static std::string ChangeBasePath(const std::string &fromPath, const std::string &fromFile, const std::string &toPath);
+
+  static CStdString SubstitutePath(const CStdString& strPath, bool reverse = false);
 
   static bool IsAddonsPath(const CStdString& strFile);
   static bool IsSourcesPath(const CStdString& strFile);
@@ -78,6 +107,7 @@ public:
   static bool IsAfp(const CStdString& strFile);    
   static bool IsOnDVD(const CStdString& strFile);
   static bool IsOnLAN(const CStdString& strFile);
+  static bool IsHostOnLAN(const CStdString& hostName, bool offLineCheck = false);
   static bool IsPlugin(const CStdString& strFile);
   static bool IsScript(const CStdString& strFile);
   static bool IsRAR(const CStdString& strFile);
@@ -95,11 +125,26 @@ public:
   static bool IsArchive(const CStdString& strFile);
   static bool IsBluray(const CStdString& strFile);
   static bool IsAndroidApp(const CStdString& strFile);
+  static bool IsLibraryFolder(const CStdString& strFile);
+  static bool IsLibraryContent(const std::string& strFile);
 
-  static void AddSlashAtEnd(CStdString& strFolder);
-  static bool HasSlashAtEnd(const CStdString& strFile, bool checkURL = false);
-  static void RemoveSlashAtEnd(CStdString& strFolder);
+  static void AddSlashAtEnd(std::string& strFolder);
+  static bool HasSlashAtEnd(const std::string& strFile, bool checkURL = false);
+  static void RemoveSlashAtEnd(std::string& strFolder);
   static bool CompareWithoutSlashAtEnd(const CStdString& strPath1, const CStdString& strPath2);
+  static std::string FixSlashesAndDups(const std::string& path, const char slashCharacter = '/', const size_t startFrom = 0);
+  /**
+   * Convert path to form without duplicated slashes and without relative directories
+   * Strip duplicated slashes
+   * Resolve and remove relative directories ("/../" and "/./")
+   * Will ignore slashes with other direction than specified
+   * Will not resolve path starting from relative directory
+   * @warning Don't use with "protocol://path"-style URLs
+   * @param path string to process
+   * @param slashCharacter character to use as directory delimiter
+   * @return transformed path
+   */
+  static std::string CanonicalizePath(const std::string& path, const char slashCharacter = '\\');
 
   static void CreateArchivePath(CStdString& strUrlPath,
                                 const CStdString& strType,
@@ -107,15 +152,7 @@ public:
                                 const CStdString& strFilePathInArchive,
                                 const CStdString& strPwd="");
 
-  static void AddFileToFolder(const CStdString& strFolder,
-                              const CStdString& strFile, CStdString& strResult);
-  static CStdString AddFileToFolder(const CStdString &strFolder, 
-                                    const CStdString &strFile)
-  {
-    CStdString result;
-    AddFileToFolder(strFolder, strFile, result);
-    return result;
-  }
+  static CStdString AddFileToFolder(const CStdString &strFolder, const CStdString &strFile);
 
   static bool ProtocolHasParentInHostname(const CStdString& prot);
   static bool ProtocolHasEncodedHostname(const CStdString& prot);

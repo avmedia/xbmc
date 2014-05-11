@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #ifndef __PVRCLIENT_TYPES_H__
 #define __PVRCLIENT_TYPES_H__
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include <windows.h>
 #else
 #ifndef __cdecl
@@ -37,6 +37,7 @@
 
 #include "xbmc_addon_types.h"
 #include "xbmc_epg_types.h"
+#include "xbmc_codec_types.h"
 
 /*! @note Define "USE_DEMUX" at compile time if demuxing in the PVR add-on is used.
  *        Also XBMC's "DVDDemuxPacket.h" file must be in the include path of the add-on,
@@ -74,10 +75,10 @@ struct DemuxPacket;
 #define PVR_STREAM_MAX_STREAMS 20
 
 /* current PVR API version */
-#define XBMC_PVR_API_VERSION "1.7.0"
+#define XBMC_PVR_API_VERSION "1.9.0"
 
 /* min. PVR API version */
-#define XBMC_PVR_MIN_API_VERSION "1.7.0"
+#define XBMC_PVR_MIN_API_VERSION "1.9.0"
 
 #ifdef __cplusplus
 extern "C" {
@@ -121,6 +122,7 @@ extern "C" {
    */
   typedef enum
   {
+    PVR_MENUHOOK_UNKNOWN         =-1, /*!< @brief unknown menu hook */
     PVR_MENUHOOK_ALL             = 0, /*!< @brief all categories */
     PVR_MENUHOOK_CHANNEL         = 1, /*!< @brief for channels */
     PVR_MENUHOOK_TIMER           = 2, /*!< @brief for timers */
@@ -167,22 +169,22 @@ extern "C" {
     unsigned int iStreamCount;
     struct PVR_STREAM
     {
-      unsigned int iPhysicalId;        /*!< @brief (required) physical index */
-      unsigned int iCodecType;         /*!< @brief (required) codec type id */
-      unsigned int iCodecId;           /*!< @brief (required) codec id */
-      char         strLanguage[4];     /*!< @brief (required) language id */
-      int          iIdentifier;        /*!< @brief (required) stream id */
-      int          iFPSScale;          /*!< @brief (required) scale of 1000 and a rate of 29970 will result in 29.97 fps */
-      int          iFPSRate;           /*!< @brief (required) FPS rate */
-      int          iHeight;            /*!< @brief (required) height of the stream reported by the demuxer */
-      int          iWidth;             /*!< @brief (required) width of the stream reported by the demuxer */
-      float        fAspect;            /*!< @brief (required) display aspect ratio of the stream */
-      int          iChannels;          /*!< @brief (required) amount of channels */
-      int          iSampleRate;        /*!< @brief (required) sample rate */
-      int          iBlockAlign;        /*!< @brief (required) block alignment */
-      int          iBitRate;           /*!< @brief (required) bit rate */
-      int          iBitsPerSample;     /*!< @brief (required) bits per sample */
-     } stream[PVR_STREAM_MAX_STREAMS]; /*!< @brief (required) the streams */
+      unsigned int      iPhysicalId;        /*!< @brief (required) physical index */
+      xbmc_codec_type_t iCodecType;         /*!< @brief (required) codec type this stream */
+      xbmc_codec_id_t   iCodecId;           /*!< @brief (required) codec id of this stream */
+      char              strLanguage[4];     /*!< @brief (required) language id */
+      int               iIdentifier;        /*!< @brief (required) stream id */
+      int               iFPSScale;          /*!< @brief (required) scale of 1000 and a rate of 29970 will result in 29.97 fps */
+      int               iFPSRate;           /*!< @brief (required) FPS rate */
+      int               iHeight;            /*!< @brief (required) height of the stream reported by the demuxer */
+      int               iWidth;             /*!< @brief (required) width of the stream reported by the demuxer */
+      float             fAspect;            /*!< @brief (required) display aspect ratio of the stream */
+      int               iChannels;          /*!< @brief (required) amount of channels */
+      int               iSampleRate;        /*!< @brief (required) sample rate */
+      int               iBlockAlign;        /*!< @brief (required) block alignment */
+      int               iBitRate;           /*!< @brief (required) bit rate */
+      int               iBitsPerSample;     /*!< @brief (required) bits per sample */
+     } stream[PVR_STREAM_MAX_STREAMS];      /*!< @brief (required) the streams */
    } ATTRIBUTE_PACKED PVR_STREAM_PROPERTIES;
 
   /*!
@@ -192,6 +194,9 @@ extern "C" {
   {
     char   strAdapterName[PVR_ADDON_NAME_STRING_LENGTH];   /*!< @brief (optional) name of the adapter that's being used */
     char   strAdapterStatus[PVR_ADDON_NAME_STRING_LENGTH]; /*!< @brief (optional) status of the adapter that's being used */
+    char   strServiceName[PVR_ADDON_NAME_STRING_LENGTH];   /*!< @brief (optional) name of the current service */
+    char   strProviderName[PVR_ADDON_NAME_STRING_LENGTH];  /*!< @brief (optional) name of the current service's provider */
+    char   strMuxName[PVR_ADDON_NAME_STRING_LENGTH];       /*!< @brief (optional) name of the current mux */
     int    iSNR;                                           /*!< @brief (optional) signal/noise ratio */
     int    iSignal;                                        /*!< @brief (optional) signal strength */
     long   iBER;                                           /*!< @brief (optional) bit error rate */
@@ -310,6 +315,20 @@ extern "C" {
   } ATTRIBUTE_PACKED PVR_EDL_ENTRY;
 
   /*!
+   * @brief PVR menu hook data
+   */
+  typedef struct PVR_MENUHOOK_DATA
+  {
+    PVR_MENUHOOK_CAT cat;
+    union data {
+      int iEpgUid;
+      PVR_CHANNEL channel;
+      PVR_TIMER timer;
+      PVR_RECORDING recording;
+    } data;
+  } ATTRIBUTE_PACKED PVR_MENUHOOK_DATA;
+
+  /*!
    * @brief Structure to transfer the methods from xbmc_pvr_dll.h to XBMC
    */
   typedef struct PVRClient
@@ -324,7 +343,7 @@ extern "C" {
     const char*  (__cdecl* GetBackendVersion)(void);
     const char*  (__cdecl* GetConnectionString)(void);
     PVR_ERROR    (__cdecl* GetDriveSpace)(long long*, long long*);
-    PVR_ERROR    (__cdecl* MenuHook)(const PVR_MENUHOOK&);
+    PVR_ERROR    (__cdecl* MenuHook)(const PVR_MENUHOOK&, const PVR_MENUHOOK_DATA&);
     PVR_ERROR    (__cdecl* GetEpg)(ADDON_HANDLE, const PVR_CHANNEL&, time_t, time_t);
     int          (__cdecl* GetChannelGroupsAmount)(void);
     PVR_ERROR    (__cdecl* GetChannelGroups)(ADDON_HANDLE, bool);
@@ -376,6 +395,9 @@ extern "C" {
     bool         (__cdecl* CanSeekStream)(void);
     bool         (__cdecl* SeekTime)(int, bool, double*);
     void         (__cdecl* SetSpeed)(int);
+    time_t       (__cdecl* GetPlayingTime)(void);
+    time_t       (__cdecl* GetBufferTimeStart)(void);
+    time_t       (__cdecl* GetBufferTimeEnd)(void);
   } PVRClient;
 
 #ifdef __cplusplus

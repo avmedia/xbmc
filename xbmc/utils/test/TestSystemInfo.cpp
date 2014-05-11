@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
  */
 
 #include "utils/SystemInfo.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "GUIInfoManager.h"
 
 #include "gtest/gtest.h"
@@ -29,33 +29,33 @@ class TestSystemInfo : public testing::Test
 protected:
   TestSystemInfo()
   {
-    CSettingsCategory* net = g_guiSettings.AddCategory(4, "network", 798);
-    g_guiSettings.AddBool(net, "network.usehttpproxy", 708, false);
-    g_guiSettings.AddString(net, "network.httpproxyserver", 706, "",
+/*    CSettingsCategory* net = CSettings::Get().AddCategory(4, "network", 798);
+    CSettings::Get().AddBool(net, "network.usehttpproxy", 708, false);
+    CSettings::Get().AddString(net, "network.httpproxyserver", 706, "",
                             EDIT_CONTROL_INPUT);
-    g_guiSettings.AddString(net, "network.httpproxyport", 730, "8080",
+    CSettings::Get().AddString(net, "network.httpproxyport", 730, "8080",
                             EDIT_CONTROL_NUMBER_INPUT, false, 707);
-    g_guiSettings.AddString(net, "network.httpproxyusername", 1048, "",
+    CSettings::Get().AddString(net, "network.httpproxyusername", 1048, "",
                             EDIT_CONTROL_INPUT);
-    g_guiSettings.AddString(net, "network.httpproxypassword", 733, "",
+    CSettings::Get().AddString(net, "network.httpproxypassword", 733, "",
                             EDIT_CONTROL_HIDDEN_INPUT,true,733);
-    g_guiSettings.AddInt(net, "network.bandwidth", 14041, 0, 0, 512, 100*1024,
-                         SPIN_CONTROL_INT_PLUS, 14048, 351);
+    CSettings::Get().AddInt(net, "network.bandwidth", 14041, 0, 0, 512, 100*1024,
+                         SPIN_CONTROL_INT_PLUS, 14048, 351);*/
   }
   ~TestSystemInfo()
   {
-    g_guiSettings.Clear();
+//    CSettings::Get().Clear();
   }
 };
 
-#if defined(_LINUX) && !defined(TARGET_DARWIN) && !defined(__FreeBSD__)
+#if defined(TARGET_LINUX)
 TEST_F(TestSystemInfo, GetLinuxDistro)
 {
   std::cout << "GetLinuxDistro(): " << g_sysinfo.GetLinuxDistro() << std::endl;
 }
 #endif
 
-#ifdef _LINUX
+#ifdef TARGET_POSIX
 TEST_F(TestSystemInfo, GetUnameVersion)
 {
   std::cout << "GetUnameVersion(): " << g_sysinfo.GetUnameVersion() << std::endl;
@@ -79,12 +79,6 @@ TEST_F(TestSystemInfo, IsAppleTV2)
     testing::PrintToString(g_sysinfo.IsAppleTV2()) << std::endl;
 }
 
-TEST_F(TestSystemInfo, HasVDADecoder)
-{
-  std::cout << "HasVDADecoder(): " <<
-    testing::PrintToString(g_sysinfo.HasVDADecoder()) << std::endl;
-}
-
 TEST_F(TestSystemInfo, HasVideoToolBoxDecoder)
 {
   std::cout << "HasVideoToolBoxDecoder(): " <<
@@ -97,10 +91,11 @@ TEST_F(TestSystemInfo, IsAeroDisabled)
     testing::PrintToString(g_sysinfo.IsAeroDisabled()) << std::endl;
 }
 
-TEST_F(TestSystemInfo, IsVistaOrHigher)
+TEST_F(TestSystemInfo, IsWindowsVersionAtLeast_Vista)
 {
-  std::cout << "IsVistaOrHigher(): " <<
-    testing::PrintToString(g_sysinfo.IsVistaOrHigher()) << std::endl;
+  std::cout << "IsWindowsVersionAtLeast(WindowsVersionVista): " <<
+    testing::PrintToString(g_sysinfo.IsWindowsVersionAtLeast(
+                                  CSysInfo::WindowsVersionVista)) << std::endl;
 }
 
 TEST_F(TestSystemInfo, GetKernelVersion)

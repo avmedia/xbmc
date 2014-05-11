@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,8 @@
 
 #include "threads/CriticalSection.h"
 
-#include "settings/ISettingsHandler.h"
+#include "settings/lib/ISettingCallback.h"
+#include "settings/lib/ISettingsHandler.h"
 
 class CRssReader;
 class IRssObserver;
@@ -38,13 +39,15 @@ typedef struct
 } RssSet;
 typedef std::map<int, RssSet> RssUrls;
 
-class CRssManager : public ISettingsHandler
+class CRssManager : public ISettingCallback, public ISettingsHandler
 {
 public:
   static CRssManager& Get();
 
   virtual void OnSettingsLoaded();
-  virtual void OnSettingsCleared();
+  virtual void OnSettingsUnloaded();
+
+  virtual void OnSettingAction(const CSetting *setting);
 
   void Start();
   void Stop();

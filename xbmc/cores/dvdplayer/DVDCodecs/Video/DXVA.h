@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -58,6 +58,7 @@ public:
   virtual int  Check     (AVCodecContext* avctx);
   virtual void Close();
   virtual const std::string Name() { return "dxva2"; }
+  virtual unsigned GetAllowedReferences();
 
   bool  OpenTarget(const GUID &guid);
   bool  OpenDecoder();
@@ -118,13 +119,13 @@ public:
   CProcessor();
  ~CProcessor();
 
-  bool           PreInit();
-  void           UnInit();
-  bool           Open(UINT width, UINT height, unsigned int flags, unsigned int format, unsigned int extended_format);
-  void           Close();
-  REFERENCE_TIME Add(DVDVideoPicture* picture);
-  bool           Render(CRect src, CRect dst, IDirect3DSurface9* target, const REFERENCE_TIME time, DWORD flags);
-  unsigned       Size() { if (m_service) return m_size; return 0; }
+  virtual bool           PreInit();
+  virtual void           UnInit();
+  virtual bool           Open(UINT width, UINT height, unsigned int flags, unsigned int format, unsigned int extended_format);
+  virtual void           Close();
+  virtual REFERENCE_TIME Add(DVDVideoPicture* picture);
+  virtual bool           Render(CRect src, CRect dst, IDirect3DSurface9* target, const REFERENCE_TIME time, DWORD flags);
+  virtual unsigned       Size() { if (m_service) return m_size; return 0; }
 
   virtual void OnCreateDevice()  {}
   virtual void OnDestroyDevice() { CSingleLock lock(m_section); Close(); }
@@ -132,11 +133,11 @@ public:
   virtual void OnResetDevice()   { CSingleLock lock(m_section); Close(); }
 
 protected:
-  bool UpdateSize(const DXVA2_VideoDesc& dsc);
-  bool CreateSurfaces();
-  bool OpenProcessor();
-  bool SelectProcessor();
-  void EvaluateQuirkNoDeintProcForProg();
+  virtual bool UpdateSize(const DXVA2_VideoDesc& dsc);
+  virtual bool CreateSurfaces();
+  virtual bool OpenProcessor();
+  virtual bool SelectProcessor();
+  virtual void EvaluateQuirkNoDeintProcForProg();
 
   IDirectXVideoProcessorService* m_service;
   IDirectXVideoProcessor*        m_process;

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include "GUILabelControl.h"
 #include "utils/CharsetConverter.h"
+#include "utils/StringUtils.h"
 
 using namespace std;
 
@@ -33,9 +34,8 @@ CGUILabelControl::CGUILabelControl(int parentID, int controlID, float posX, floa
   m_dwCounter = 0;
   ControlType = GUICONTROL_LABEL;
   m_startHighlight = m_endHighlight = 0;
+  m_startSelection = m_endSelection = 0;
   m_minWidth = 0;
-  if ((labelInfo.align & XBFONT_RIGHT) && m_width)
-    m_posX -= m_width;
 }
 
 CGUILabelControl::~CGUILabelControl(void)
@@ -74,38 +74,104 @@ bool CGUILabelControl::UpdateColors()
   return changed;
 }
 
+typedef struct InsertPointInfo
+{
+  typedef enum Type
+  {
+    HEAD = 0,
+    HEAD_AND_TAIL,
+    TAIL,
+  } Type;
+
+  bool operator < (const InsertPointInfo& info) const
+  {
+    if (pos < info.pos)
+      return true;
+    if (pos > info.pos)
+      return false;
+    // TAIL always ahead HEAD at same pos.
+    if (type > info.type)
+      return true;
+    if (type < info.type)
+      return false;
+    if (type == HEAD)
+    {
+      // HEADs in same pos, larger block's HEAD ahead
+      if (blockLength > info.blockLength)
+        return true;
+      if (blockLength < info.blockLength)
+        return false;
+      // same pos, type, blocklength, then lower priority HEAD ahead.
+      // then the higher priority block will nested in the lower priority one.
+      return priority < info.priority;
+    }
+    else if (type == TAIL)
+    {
+      // TAILs in same pos, smaill block's TAIL ahead
+      if (blockLength < info.blockLength)
+        return true;
+      if (blockLength > info.blockLength)
+        return false;
+      // same pos, type, blocklength, then higher priority TAIL ahead.
+      return priority > info.priority;
+    }
+    else
+      // order type HEAD_AND_TAIL by priority, higher ahead.
+      return priority > info.priority;
+  }
+
+  int pos;
+  Type type;
+  int blockLength;
+  int priority; // only used when same pos, same type, same blocklength
+  CStdStringW text;
+} InsertPointInfo;
+
 void CGUILabelControl::UpdateInfo(const CGUIListItem *item)
 {
   CStdString label(m_infoLabel.GetLabel(m_parentID));
 
-  if (m_bShowCursor)
-  { // cursor location assumes utf16 text, so deal with that (inefficient, but it's not as if it's a high-use area
-    // virtual keyboard only)
+  bool changed = false;
+  if (m_startHighlight < m_endHighlight || m_startSelection < m_endSelection || m_bShowCursor)
+  {
     CStdStringW utf16;
     g_charsetConverter.utf8ToW(label, utf16);
-    CStdStringW col;
-    if ((++m_dwCounter % 50) > 25)
-      col = L"|";
-    else
-      col = L"[COLOR 00FFFFFF]|[/COLOR]";
-    utf16.Insert(m_iCursorPos, col);
-    g_charsetConverter.wToUTF8(utf16, label);
+    vecText text; text.reserve(utf16.size()+1);
+    vecColors colors;
+    colors.push_back(m_label.GetLabelInfo().textColor);
+    colors.push_back(m_label.GetLabelInfo().disabledColor);
+    color_t select = m_label.GetLabelInfo().selectedColor;
+    if (!select)
+      select = 0xFFFF0000;
+    colors.push_back(select);
+    colors.push_back(0xFF000000);
+    for (unsigned int i = 0; i < utf16.size(); i++)
+    {
+      unsigned int ch = utf16[i];
+      if ((m_startSelection < m_endSelection) && (m_startSelection <= i && i < m_endSelection))
+        ch |= (2 << 16);
+      else if ((m_startHighlight < m_endHighlight) && (i < m_startHighlight || i >= m_endHighlight))
+        ch |= (1 << 16);
+      text.push_back(ch);
+    }
+    if (m_bShowCursor && m_iCursorPos >= 0 && (unsigned int)m_iCursorPos <= utf16.size())
+    {
+      unsigned int ch = L'|';
+      if ((++m_dwCounter % 50) <= 25)
+        ch |= (3 << 16);
+      text.insert(text.begin() + m_iCursorPos, ch);
+    }
+    changed |= m_label.SetMaxRect(m_posX, m_posY, GetWidth(), m_height);
+    changed |= m_label.SetStyledText(text, colors);
   }
-  else if (m_startHighlight || m_endHighlight)
-  { // this is only used for times/dates, so working in ascii (utf8) is fine
-    CStdString colorLabel;
-    colorLabel.Format("[COLOR %x]%s[/COLOR]%s[COLOR %x]%s[/COLOR]", (color_t)m_label.GetLabelInfo().disabledColor, label.Left(m_startHighlight),
-                 label.Mid(m_startHighlight, m_endHighlight - m_startHighlight), (color_t)m_label.GetLabelInfo().disabledColor, label.Mid(m_endHighlight));
-    label = colorLabel;
+  else
+  {
+    if (m_bHasPath)
+      label = ShortenPath(label);
+
+    changed |= m_label.SetMaxRect(m_posX, m_posY, GetWidth(), m_height);
+    changed |= m_label.SetText(label);
   }
-  else if (m_bHasPath)
-    label = ShortenPath(label);
-
-  bool changed = false;
-
-  changed |= m_label.SetMaxRect(m_posX, m_posY, GetWidth(), m_height);
-  changed |= m_label.SetText(label);
-
   if (changed)
     MarkDirtyRegion();
 }
@@ -143,11 +209,17 @@ bool CGUILabelControl::CanFocus() const
 
 void CGUILabelControl::SetLabel(const string &strLabel)
 {
-  m_infoLabel.SetLabel(strLabel, "", GetParentID());
-  if (m_iCursorPos > (int)strLabel.size())
-    m_iCursorPos = strLabel.size();
+  // NOTE: this optimization handles fixed labels only (i.e. not info labels).
+  // One way it might be extended to all labels would be for GUIInfoLabel ( or here )
+  // to store the label prior to parsing, and then compare that against what you're setting.
+  if (m_infoLabel.GetLabel(GetParentID(), false) != strLabel)
+  {
+    m_infoLabel.SetLabel(strLabel, "", GetParentID());
+    if (m_iCursorPos > (int)strLabel.size())
+      m_iCursorPos = strLabel.size();
 
-  SetInvalid();
+    SetInvalid();
+  }
 }
 
 void CGUILabelControl::SetWidthControl(float minWidth, bool bScroll)
@@ -202,7 +274,7 @@ bool CGUILabelControl::OnMessage(CGUIMessage& message)
 
 CStdString CGUILabelControl::ShortenPath(const CStdString &path)
 {
-  if (m_width == 0 || path.IsEmpty())
+  if (m_width == 0 || path.empty())
     return path;
 
   char cDelim = '\0';
@@ -223,7 +295,8 @@ CStdString CGUILabelControl::ShortenPath(const CStdString &path)
   CStdString workPath(path);
   // remove trailing slashes
   if (workPath.size() > 3)
-    if (workPath.Right(3).Compare("://") != 0 && workPath.Right(2).Compare(":\\") != 0)
+    if (!StringUtils::EndsWith(workPath, "://") &&
+        !StringUtils::EndsWith(workPath, ":\\"))
       if (nPos == workPath.size() - 1)
       {
         workPath.erase(workPath.size() - 1);
@@ -259,6 +332,12 @@ void CGUILabelControl::SetHighlight(unsigned int start, unsigned int end)
 {
   m_startHighlight = start;
   m_endHighlight = end;
+}
+
+void CGUILabelControl::SetSelection(unsigned int start, unsigned int end)
+{
+  m_startSelection = start;
+  m_endSelection = end;
 }
 
 CStdString CGUILabelControl::GetDescription() const

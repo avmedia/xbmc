@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,14 +48,11 @@ public:
   virtual bool  ShowWindow(bool show);
 
 protected:
-  int get_sysfs_str(const char *path, char *valstr, const int size) const;
-  int set_sysfs_str(const char *path, const char *val) const;
-  int set_sysfs_int(const char *path, const int val) const;
-  int get_sysfs_int(const char *path) const;
-
   bool SetDisplayResolution(const char *resolution);
   bool ModeToResolution(const char *mode, RESOLUTION_INFO *res) const;
   void EnableFreeScale();
   void DisableFreeScale();
-  void SetCpuMinLimit(bool limit);
+
+private:
+  std::string m_framebuffer_name;
 };

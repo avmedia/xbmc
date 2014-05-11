@@ -55,11 +55,13 @@ void CAEChannelInfo::ResolveChannels(const CAEChannelInfo& rhs)
   bool srcHasSR = false;
   bool srcHasRL = false;
   bool srcHasRR = false;
+  bool srcHasBC = false;
 
   bool dstHasSL = false;
   bool dstHasSR = false;
   bool dstHasRL = false;
   bool dstHasRR = false;
+  bool dstHasBC = false;
 
   for (unsigned int c = 0; c < rhs.m_channelCount; ++c)
     switch(rhs.m_channels[c])
@@ -68,6 +70,7 @@ void CAEChannelInfo::ResolveChannels(const CAEChannelInfo& rhs)
       case AE_CH_SR: dstHasSR = true; break;
       case AE_CH_BL: dstHasRL = true; break;
       case AE_CH_BR: dstHasRR = true; break;
+      case AE_CH_BC: dstHasBC = true; break;
       default:
         break;
     }
@@ -81,6 +84,7 @@ void CAEChannelInfo::ResolveChannels(const CAEChannelInfo& rhs)
       case AE_CH_SR: srcHasSR = true; break;
       case AE_CH_BL: srcHasRL = true; break;
       case AE_CH_BR: srcHasRR = true; break;
+      case AE_CH_BC: srcHasBC = true; break;
       default:
         break;
     }
@@ -98,14 +102,29 @@ void CAEChannelInfo::ResolveChannels(const CAEChannelInfo& rhs)
   }
 
   /* we need to ensure we end up with rear or side channels for downmix to work */
-  if (srcHasSL && !dstHasSL && dstHasRL)
+  if (srcHasSL && !dstHasSL && dstHasRL && !newInfo.HasChannel(AE_CH_BL))
     newInfo += AE_CH_BL;
-  if (srcHasSR && !dstHasSR && dstHasRR)
+  if (srcHasSR && !dstHasSR && dstHasRR && !newInfo.HasChannel(AE_CH_BR))
     newInfo += AE_CH_BR;
-  if (srcHasRL && !dstHasRL && dstHasSL)
+  if (srcHasRL && !dstHasRL && dstHasSL && !newInfo.HasChannel(AE_CH_SL))
     newInfo += AE_CH_SL;
-  if (srcHasRR && !dstHasRR && dstHasSR)
+  if (srcHasRR && !dstHasRR && dstHasSR && !newInfo.HasChannel(AE_CH_SR))
     newInfo += AE_CH_SR;
+
+  // mix back center if not available in destination layout
+  // prefer mixing into backs if available
+  if (srcHasBC && !dstHasBC)
+  {
+    if (dstHasRL && !newInfo.HasChannel(AE_CH_BL))
+      newInfo += AE_CH_BL;
+    else if (dstHasSL && !newInfo.HasChannel(AE_CH_SL))
+      newInfo += AE_CH_SL;
+
+    if (dstHasRR && !newInfo.HasChannel(AE_CH_BR))
+      newInfo += AE_CH_BR;
+    else if (dstHasSR && !newInfo.HasChannel(AE_CH_SR))
+      newInfo += AE_CH_SR;
+  }
 
   *this = newInfo;
 }
@@ -169,7 +188,7 @@ CAEChannelInfo& CAEChannelInfo::operator=(const enum AEStdChLayout rhs)
   return *this;
 }
 
-bool CAEChannelInfo::operator==(const CAEChannelInfo& rhs)
+bool CAEChannelInfo::operator==(const CAEChannelInfo& rhs) const
 {
   /* if the channel count doesnt match, no need to check further */
   if (m_channelCount != rhs.m_channelCount)
@@ -221,7 +240,7 @@ const enum AEChannel CAEChannelInfo::operator[](unsigned int i) const
   return m_channels[i];
 }
 
-CAEChannelInfo::operator std::string()
+CAEChannelInfo::operator std::string() const
 {
   if (m_channelCount == 0)
     return "NULL";
@@ -239,8 +258,7 @@ CAEChannelInfo::operator std::string()
 
 const char* CAEChannelInfo::GetChName(const enum AEChannel ch)
 {
-  // Logical disjunction always evaluates to true: ch >= 0 || ch < 29.
-  ASSERT(ch >= 0 || ch < AE_CH_MAX);
+  ASSERT(ch >= 0 && ch < AE_CH_MAX);
 
   static const char* channels[AE_CH_MAX] =
   {

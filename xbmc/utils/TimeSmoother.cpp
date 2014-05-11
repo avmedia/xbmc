@@ -1,22 +1,22 @@
 /*
-*      Copyright (C) 2011-2013 Team XBMC
-*      http://www.xbmc.org
-*
-*  This Program is free software; you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; either version 2, or (at your option)
-*  any later version.
-*
-*  This Program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with XBMC; see the file COPYING.  If not, see
-*  <http://www.gnu.org/licenses/>.
-*
-*/
+ *      Copyright (C) 2011-2013 Team XBMC
+ *      http://xbmc.org
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ */
 
 
 #include "TimeSmoother.h"
@@ -83,8 +83,12 @@ unsigned int CTimeSmoother::GetNextFrameTime(unsigned int currentTime)
     // ensure we jump at least 1 period ahead of the last time we were called
     if (frameTime < m_lastFrameTime + m_period)
       frameTime = m_lastFrameTime + m_period;
+    // Return an unsigned int in ms, so wrap into that, and round.
+    // Don't use MathUtils::round_int as that's restricted to -2^30..2^30
+    if (frameTime >= UINT_MAX)
+      frameTime = fmod(frameTime, UINT_MAX);
     m_lastFrameTime = frameTime;
-    return MathUtils::round_int(frameTime);
+    return (unsigned int)floor(frameTime + 0.5);
   }
   return currentTime;
 }

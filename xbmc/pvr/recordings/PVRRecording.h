@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@ namespace PVR
     CStdString    m_strIconPath;      /*!< icon path */
     CStdString    m_strThumbnailPath; /*!< thumbnail path */
     CStdString    m_strFanartPath;    /*!< fanart path */
+    unsigned      m_iRecordingId;     /*!< id that won't change while xbmc is running */
 
     CPVRRecording(void);
     CPVRRecording(const PVR_RECORDING &recording, unsigned int iClientId);
@@ -62,6 +63,8 @@ namespace PVR
 
     bool operator ==(const CPVRRecording& right) const;
     bool operator !=(const CPVRRecording& right) const;
+
+    virtual void Serialize(CVariant& value) const;
 
     /*!
      * @brief Reset this tag to it's initial state.
@@ -120,8 +123,8 @@ namespace PVR
     std::vector<PVR_EDL_ENTRY> GetEdl() const;
 
     /*!
-     * @brief Get the resume point and play count from the server (if supported) or the database
-     * @param bookmark The bookmark to update
+     * @brief Get the resume point and play count from the database if the 
+     * client doesn't handle it itself.
      */
     void UpdateMetadata(void);
 

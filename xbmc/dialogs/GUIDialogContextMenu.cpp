@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@
 #include "GUIPassword.h"
 #include "Util.h"
 #include "utils/URIUtils.h"
-#include "settings/GUISettings.h"
 #include "settings/MediaSourceSettings.h"
+#include "settings/Settings.h"
 #include "GUIDialogMediaSource.h"
 #include "profiles/ProfilesManager.h"
 #include "profiles/dialogs/GUIDialogLockSettings.h"
@@ -40,13 +40,13 @@
 #include "addons/AddonManager.h"
 #include "FileItem.h"
 #include "filesystem/File.h"
-#include "settings/Settings.h"
 #include "guilib/LocalizeStrings.h"
 #include "TextureCache.h"
 #include "video/windows/GUIWindowVideoBase.h"
 #include "URL.h"
+#include "utils/StringUtils.h"
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include "WIN32Util.h"
 #endif
 
@@ -352,7 +352,7 @@ void CGUIDialogContextMenu::GetContextButtons(const CStdString &type, const CFil
 
       buttons.Add(CONTEXT_BUTTON_SET_THUMB, 20019);
     }
-    if (!GetDefaultShareNameByType(type).IsEmpty())
+    if (!GetDefaultShareNameByType(type).empty())
       buttons.Add(CONTEXT_BUTTON_CLEAR_DEFAULT, 13403); // Clear Default
 
     buttons.Add(CONTEXT_BUTTON_ADD_SOURCE, 1026); // Add Source
@@ -368,8 +368,8 @@ void CGUIDialogContextMenu::GetContextButtons(const CStdString &type, const CFil
       buttons.Add(CONTEXT_BUTTON_REMOVE_LOCK, 12335);
 
       bool maxRetryExceeded = false;
-      if (g_guiSettings.GetInt("masterlock.maxretries") != 0)
-        maxRetryExceeded = (share->m_iBadPwdCount >= g_guiSettings.GetInt("masterlock.maxretries"));
+      if (CSettings::Get().GetInt("masterlock.maxretries") != 0)
+        maxRetryExceeded = (share->m_iBadPwdCount >= CSettings::Get().GetInt("masterlock.maxretries"));
 
       if (maxRetryExceeded)
         buttons.Add(CONTEXT_BUTTON_RESET_LOCK, 12334);
@@ -454,7 +454,7 @@ bool CGUIDialogContextMenu::OnContextButton(const CStdString &type, const CFileI
     if (CGUIDialogYesNo::ShowAndGetInput(751, 0, 750, 0))
     { // check default before we delete, as deletion will kill the share object
       CStdString defaultSource(GetDefaultShareNameByType(type));
-      if (!defaultSource.IsEmpty())
+      if (!defaultSource.empty())
       {
         if (share->strName.Equals(defaultSource))
           ClearDefault(type);
@@ -493,7 +493,7 @@ bool CGUIDialogContextMenu::OnContextButton(const CStdString &type, const CFileI
       CFileItemList items;
 
       // add the current thumb, if available
-      if (!share->m_strThumbnailImage.IsEmpty())
+      if (!share->m_strThumbnailImage.empty())
       {
         CFileItemPtr current(new CFileItem("thumb://Current", false));
         current->SetArt("thumb", share->m_strThumbnailImage);
@@ -542,7 +542,7 @@ bool CGUIDialogContextMenu::OnContextButton(const CStdString &type, const CFileI
         CMediaSourceSettings::Get().UpdateSource(type,share->strName,"thumbnail",strThumb);
         CMediaSourceSettings::Get().Save();
       }
-      else if (!strThumb.IsEmpty())
+      else if (!strThumb.empty())
       { // this is some sort of an auto-share, so store in the texture database
         CTextureDatabase db;
         if (db.Open())
@@ -566,7 +566,7 @@ bool CGUIDialogContextMenu::OnContextButton(const CStdString &type, const CFileI
       // password entry and re-entry succeeded, write out the lock data
       share->m_iHasLock = 2;
       CMediaSourceSettings::Get().UpdateSource(type, share->strName, "lockcode", strNewPassword);
-      strNewPassword.Format("%i",share->m_iLockMode);
+      strNewPassword = StringUtils::Format("%i", share->m_iLockMode);
       CMediaSourceSettings::Get().UpdateSource(type, share->strName, "lockmode", strNewPassword);
       CMediaSourceSettings::Get().UpdateSource(type, share->strName, "badpwdcount", "0");
       CMediaSourceSettings::Get().Save();
@@ -607,8 +607,8 @@ bool CGUIDialogContextMenu::OnContextButton(const CStdString &type, const CFileI
   case CONTEXT_BUTTON_REACTIVATE_LOCK:
     {
       bool maxRetryExceeded = false;
-      if (g_guiSettings.GetInt("masterlock.maxretries") != 0)
-        maxRetryExceeded = (share->m_iBadPwdCount >= g_guiSettings.GetInt("masterlock.maxretries"));
+      if (CSettings::Get().GetInt("masterlock.maxretries") != 0)
+        maxRetryExceeded = (share->m_iBadPwdCount >= CSettings::Get().GetInt("masterlock.maxretries"));
       if (!maxRetryExceeded)
       {
         // don't prompt user for mastercode when reactivating a lock
@@ -625,7 +625,7 @@ bool CGUIDialogContextMenu::OnContextButton(const CStdString &type, const CFileI
       CStdString strNewPW;
       CStdString strNewLockMode;
       if (CGUIDialogLockSettings::ShowAndGetLock(share->m_iLockMode,strNewPW))
-        strNewLockMode.Format("%i",share->m_iLockMode);
+        strNewLockMode = StringUtils::Format("%i",share->m_iLockMode);
       else
         return false;
       // password ReSet and re-entry succeeded, write out the lock data
@@ -646,7 +646,7 @@ bool CGUIDialogContextMenu::OnContextButton(const CStdString &type, const CFileI
 CMediaSource *CGUIDialogContextMenu::GetShare(const CStdString &type, const CFileItem *item)
 {
   VECSOURCES *shares = CMediaSourceSettings::Get().GetSources(type);
-  if (!shares) return NULL;
+  if (!shares || !item) return NULL;
   for (unsigned int i = 0; i < shares->size(); i++)
   {
     CMediaSource &testShare = shares->at(i);
@@ -662,7 +662,7 @@ CMediaSource *CGUIDialogContextMenu::GetShare(const CStdString &type, const CFil
     }
     // paths match, what about share name - only match the leftmost
     // characters as the label may contain other info (status for instance)
-    if (item->GetLabel().Left(testShare.strName.size()).Equals(testShare.strName))
+    if (StringUtils::StartsWithNoCase(item->GetLabel(), testShare.strName))
     {
       return &testShare;
     }

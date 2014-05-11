@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ namespace JSONRPC
   public:
     static bool StartServer(int port, bool nonlocal);
     static void StopServer(bool bWait);
+    static bool IsRunning();
 
     virtual bool PrepareDownload(const char *path, CVariant &details, std::string &protocol);
     virtual bool Download(const char *path, CVariant &result);

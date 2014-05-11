@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -165,6 +165,26 @@ bool CZeroconfAvahi::doPublishService(const std::string& fcr_identifier,
     CLog::Log(LOGDEBUG, "CZeroconfAvahi::doPublishService: client not running, queued for publishing");
   }
   return true;
+}
+
+bool CZeroconfAvahi::doForceReAnnounceService(const std::string& fcr_identifier)
+{
+  bool ret = false;
+  ScopedEventLoopBlock l_block(mp_poll);
+  tServiceMap::iterator it = m_services.find(fcr_identifier);
+  if (it != m_services.end() && it->second->mp_group)
+  {
+    // to force a reannounce on avahi its enough to reverse the txtrecord list
+    it->second->mp_txt = avahi_string_list_reverse(it->second->mp_txt);
+
+    // this will trigger the reannouncement
+    if ((avahi_entry_group_update_service_txt_strlst(it->second->mp_group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, AvahiPublishFlags(0),
+                                              it->second->m_name.c_str(),
+                                              it->second->m_type.c_str(), NULL, it->second->mp_txt)) >= 0)
+      ret = true;
+  }
+
+  return ret;
 }
 
 bool CZeroconfAvahi::doRemoveService(const std::string& fcr_ident)

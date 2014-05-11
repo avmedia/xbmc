@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,11 +20,7 @@
  */
 
 #include "Addon.h"
-#include "AddonManager.h"
-#include "XBDateTime.h"
 #include "utils/Job.h"
-#include "threads/CriticalSection.h"
-#include "threads/SingleLock.h"
 
 namespace ADDON
 {
@@ -33,29 +29,38 @@ namespace ADDON
   class CRepository : public CAddon
   {
   public:
-    AddonPtr Clone(const AddonPtr &self) const;
+    virtual AddonPtr Clone() const;
     CRepository(const AddonProps& props);
     CRepository(const cp_extension_t *props);
     virtual ~CRepository();
 
-    CStdString Checksum();
+    std::string Checksum() const;
 
     /*! \brief Get the md5 hash for an addon.
      \param the addon in question.
      \return the md5 hash for the given addon, empty if non exists.
      */
-    CStdString GetAddonHash(const AddonPtr& addon);
-    VECADDONS Parse();
+    std::string GetAddonHash(const AddonPtr& addon) const;
+
+    struct DirInfo
+    {
+      DirInfo() : version("0.0.0"), compressed(false), zipped(false), hashes(false) {}
+      AddonVersion version;
+      std::string info;
+      std::string checksum;
+      std::string datadir;
+      bool compressed;
+      bool zipped;
+      bool hashes;
+    };
+
+    typedef std::vector<DirInfo> DirList;
+    DirList m_dirs;
+
+    static VECADDONS Parse(const DirInfo& dir);
+    static std::string FetchChecksum(const std::string& url);
   private:
-    CStdString FetchChecksum(const CStdString& url);
-    CRepository(const CRepository&, const AddonPtr&);
-    CStdString m_info;
-    CStdString m_checksum;
-    CStdString m_datadir;
-    bool m_compressed; // gzipped info xml
-    bool m_zipped;     // zipped addons
-    bool m_hashes;     // repo supports hashes. e.g. plugin.i.rule-1.0.5.zip.md5
-    CCriticalSection m_critSection;
+    CRepository(const CRepository &rhs);
   };
 
   class CRepositoryUpdateJob : public CJob

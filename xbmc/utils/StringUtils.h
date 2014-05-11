@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,26 +52,47 @@ public:
   */
   static std::string Format(const char *fmt, ...);
   static std::string FormatV(const char *fmt, va_list args);
+  static std::wstring Format(const wchar_t *fmt, ...);
+  static std::wstring FormatV(const wchar_t *fmt, va_list args);
   static void ToUpper(std::string &str);
+  static void ToUpper(std::wstring &str);
   static void ToLower(std::string &str);
+  static void ToLower(std::wstring &str);
   static bool EqualsNoCase(const std::string &str1, const std::string &str2);
+  static bool EqualsNoCase(const std::string &str1, const char *s2);
+  static bool EqualsNoCase(const char *s1, const char *s2);
+  static int  CompareNoCase(const std::string &str1, const std::string &str2);
+  static int  CompareNoCase(const char *s1, const char *s2);
   static std::string Left(const std::string &str, size_t count);
   static std::string Mid(const std::string &str, size_t first, size_t count = std::string::npos);
   static std::string Right(const std::string &str, size_t count);
   static std::string& Trim(std::string &str);
+  static std::string& Trim(std::string &str, const char* const chars);
   static std::string& TrimLeft(std::string &str);
+  static std::string& TrimLeft(std::string &str, const char* const chars);
   static std::string& TrimRight(std::string &str);
+  static std::string& TrimRight(std::string &str, const char* const chars);
+  static std::string& RemoveDuplicatedSpacesAndTabs(std::string& str);
   static int Replace(std::string &str, char oldChar, char newChar);
   static int Replace(std::string &str, const std::string &oldStr, const std::string &newStr);
-  static bool StartsWith(const std::string &str, const std::string &str2, bool useCase = false);
-  static bool EndsWith(const std::string &str, const std::string &str2, bool useCase = false);
+  static int Replace(std::wstring &str, const std::wstring &oldStr, const std::wstring &newStr);
+  static bool StartsWith(const std::string &str1, const std::string &str2);
+  static bool StartsWith(const std::string &str1, const char *s2);
+  static bool StartsWith(const char *s1, const char *s2);
+  static bool StartsWithNoCase(const std::string &str1, const std::string &str2);
+  static bool StartsWithNoCase(const std::string &str1, const char *s2);
+  static bool StartsWithNoCase(const char *s1, const char *s2);
+  static bool EndsWith(const std::string &str1, const std::string &str2);
+  static bool EndsWith(const std::string &str1, const char *s2);
+  static bool EndsWithNoCase(const std::string &str1, const std::string &str2);
+  static bool EndsWithNoCase(const std::string &str1, const char *s2);
 
   static void JoinString(const CStdStringArray &strings, const CStdString& delimiter, CStdString& result);
   static CStdString JoinString(const CStdStringArray &strings, const CStdString& delimiter);
   static CStdString Join(const std::vector<std::string> &strings, const CStdString& delimiter);
   static int SplitString(const CStdString& input, const CStdString& delimiter, CStdStringArray &results, unsigned int iMaxStrings = 0);
   static CStdStringArray SplitString(const CStdString& input, const CStdString& delimiter, unsigned int iMaxStrings = 0);
-  static std::vector<std::string> Split(const CStdString& input, const CStdString& delimiter, unsigned int iMaxStrings = 0);
+  static std::vector<std::string> Split(const std::string& input, const std::string& delimiter, unsigned int iMaxStrings = 0);
   static int FindNumber(const CStdString& strInput, const CStdString &strFind);
   static int64_t AlphaNumericCompare(const wchar_t *left, const wchar_t *right);
   static long TimeStringToSeconds(const CStdString &timeString);
@@ -104,6 +125,32 @@ public:
    \return true if the string is an integer, false otherwise.
    */
   static bool IsInteger(const CStdString& str);
+
+  /* The next several isasciiXX and asciiXXvalue functions are locale independent (US-ASCII only),
+   * as opposed to standard ::isXX (::isalpha, ::isdigit...) which are locale dependent.
+   * Next functions get parameter as char and don't need double cast ((int)(unsigned char) is required for standard functions). */
+  inline static bool isasciidigit(char chr) // locale independent 
+  {
+    return chr >= '0' && chr <= '9'; 
+  }
+  inline static bool isasciixdigit(char chr) // locale independent 
+  {
+    return (chr >= '0' && chr <= '9') || (chr >= 'a' && chr <= 'f') || (chr >= 'A' && chr <= 'F'); 
+  }
+  static int asciidigitvalue(char chr); // locale independent 
+  static int asciixdigitvalue(char chr); // locale independent 
+  inline static bool isasciiuppercaseletter(char chr) // locale independent
+  {
+    return (chr >= 'A' && chr <= 'Z'); 
+  }
+  inline static bool isasciilowercaseletter(char chr) // locale independent
+  {
+    return (chr >= 'a' && chr <= 'z'); 
+  }
+  inline static bool isasciialphanum(char chr) // locale independent
+  {
+    return isasciiuppercaseletter(chr) || isasciilowercaseletter(chr) || isasciidigit(chr); 
+  }
   static CStdString SizeToString(int64_t size);
   static const CStdString EmptyString;
   static const std::string Empty;
@@ -115,6 +162,7 @@ public:
   static bool ValidateUUID(const CStdString &uuid); // NB only validates syntax
   static double CompareFuzzy(const CStdString &left, const CStdString &right);
   static int FindBestMatch(const CStdString &str, const CStdStringArray &strings, double &matchscore);
+  static bool ContainsKeyword(const CStdString &str, const CStdStringArray &keywords);
 
   /*! \brief Escapes the given string to be able to be used as a parameter.
 
@@ -125,6 +173,7 @@ public:
    \return Escaped/Paramified string
    */
   static std::string Paramify(const std::string &param);
+  static void Tokenize(const std::string& input, std::vector<std::string>& tokens, const std::string& delimiters);
 private:
   static CStdString m_lastUUID;
 };

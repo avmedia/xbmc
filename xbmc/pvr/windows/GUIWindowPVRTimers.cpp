@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -70,11 +70,12 @@ void CGUIWindowPVRTimers::GetContextButtons(int itemNumber, CContextButtons &but
   }
   else
   {
-    buttons.Add(CONTEXT_BUTTON_EDIT, 19057);            /* edit timer */
-    buttons.Add(CONTEXT_BUTTON_ADD, 19056);             /* new timer */
+    buttons.Add(CONTEXT_BUTTON_FIND, 19003);            /* Find similar program */
     buttons.Add(CONTEXT_BUTTON_ACTIVATE, 19058);        /* activate/deactivate */
-    buttons.Add(CONTEXT_BUTTON_RENAME, 118);            /* rename timer */
     buttons.Add(CONTEXT_BUTTON_DELETE, 117);            /* delete timer */
+    buttons.Add(CONTEXT_BUTTON_EDIT, 19057);            /* edit timer */
+    buttons.Add(CONTEXT_BUTTON_RENAME, 118);            /* rename timer */
+    buttons.Add(CONTEXT_BUTTON_ADD, 19056);             /* new timer */
     buttons.Add(CONTEXT_BUTTON_SORTBY_NAME, 103);       /* sort by name */
     buttons.Add(CONTEXT_BUTTON_SORTBY_DATE, 104);       /* sort by date */
     if (g_PVRClients->HasMenuHooks(pItem->GetPVRTimerInfoTag()->m_iClientId, PVR_MENUHOOK_TIMER))
@@ -111,7 +112,7 @@ void CGUIWindowPVRTimers::UpdateData(bool bUpdateSelectedFile /* = true */)
   m_parent->m_vecItems->Clear();
   m_parent->m_vecItems->SetPath("pvr://timers/");
   m_parent->Update(m_parent->m_vecItems->GetPath());
-  m_parent->m_vecItems->Sort(m_iSortMethod, m_iSortOrder);
+  m_parent->m_vecItems->Sort(m_iSortMethod, m_iSortOrder, m_iSortAttributes);
   m_parent->m_viewControl.SetItems(*m_parent->m_vecItems);
 
   if (bUpdateSelectedFile)

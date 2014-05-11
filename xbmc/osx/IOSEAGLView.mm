@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include "utils/log.h"
 #include "utils/TimeUtils.h"
 #include "Util.h"
+#include "XbmcContext.h"
 #undef BOOL
 
 #import <QuartzCore/QuartzCore.h>
@@ -42,7 +43,11 @@
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import "IOSEAGLView.h"
-#import "XBMCController.h"
+#if defined(TARGET_DARWIN_IOS_ATV2)
+#import "xbmc/osx/atv2/XBMCController.h"
+#elif defined(TARGET_DARWIN_IOS)
+#import "xbmc/osx/ios/XBMCController.h"
+#endif
 #import "IOSScreenManager.h"
 #import "AutoPool.h"
 #import "DarwinUtils.h"
@@ -330,7 +335,6 @@
 	if (!animating && context)
 	{
 		animating = TRUE;
-    CWinEventsIOS::Init();
 
     // kick off an animation thread
     animationThreadLock = [[NSConditionLock alloc] initWithCondition: FALSE];
@@ -358,13 +362,14 @@
     // wait for animation thread to die
     if ([animationThread isFinished] == NO)
       [animationThreadLock lockWhenCondition:TRUE];
-    CWinEventsIOS::DeInit();
 	}
 }
 //--------------------------------------------------------------
 - (void) runAnimation:(id) arg
 {
   CCocoaAutoPool outerpool;
+  // set up some xbmc specific relationships
+  XBMC::Context context;
   bool readyToRun = true;
 
   // signal we are alive

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
  */
 
 #include "system.h"
-#if defined(_WIN32)
+#if defined(TARGET_WINDOWS)
 #include "WIN32Util.h"
 #include "util.h"
 #include "dialogs/GUIDialogKaiToast.h"
@@ -42,7 +42,7 @@
 
 namespace BCM
 {
-  #if defined(WIN32)
+  #if defined(TARGET_WINDOWS)
     typedef void		*HANDLE;
   #else
     #ifndef __LINUX_USER__
@@ -672,12 +672,11 @@ void CMPCOutputThread::CopyOutAsYV12(CPictureBuffer *pBuffer, BCM::BC_DTS_PROC_O
   }
   //copy chroma
   //copy uv packed to u,v planes (1/2 the width and 1/2 the height of y)
-  uint8_t *s_uv;
   uint8_t *d_u = pBuffer->m_u_buffer_ptr;
   uint8_t *d_v = pBuffer->m_v_buffer_ptr;
   for (int y = 0; y < h/2; y++)
   {
-    s_uv = procOut->UVbuff + (y * stride);
+    uint8_t *s_uv = procOut->UVbuff + (y * stride);
     for (int x = 0; x < w/2; x++)
     {
       *d_u++ = *s_uv++;
@@ -700,12 +699,11 @@ void CMPCOutputThread::CopyOutAsYV12DeInterlace(CPictureBuffer *pBuffer, BCM::BC
   }
   //copy chroma
   //copy uv packed to u,v planes (1/2 the width and 1/2 the height of y)
-  uint8_t *s_uv;
   uint8_t *d_u = pBuffer->m_u_buffer_ptr;
   uint8_t *d_v = pBuffer->m_v_buffer_ptr;
   for (int y = 0; y < h/4; y++)
   {
-    s_uv = procOut->UVbuff + (y * stride);
+    uint8_t *s_uv = procOut->UVbuff + (y * stride);
     for (int x = 0; x < w/2; x++)
     {
       *d_u++ = *s_uv++;
@@ -1118,7 +1116,7 @@ CCrystalHD::CCrystalHD() :
   memset(&m_sps_pps_context, 0, sizeof(m_sps_pps_context));
 
   m_dll = new DllLibCrystalHD;
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
   CStdString  strDll;
   if(CWIN32Util::GetCrystalHDLibraryPath(strDll) && m_dll->SetFile(strDll) && m_dll->Load() && m_dll->IsLoaded() )
 #else
@@ -1647,10 +1645,10 @@ bool CCrystalHD::GetPicture(DVDVideoPicture *pDvdVideoPicture)
     default:
     case RENDER_FMT_NV12:
       // Y plane
-      pDvdVideoPicture->data[0] = (BYTE*)pBuffer->m_y_buffer_ptr;
+      pDvdVideoPicture->data[0] = (uint8_t*)pBuffer->m_y_buffer_ptr;
       pDvdVideoPicture->iLineSize[0] = pBuffer->m_width;
       // UV packed plane
-      pDvdVideoPicture->data[1] = (BYTE*)pBuffer->m_uv_buffer_ptr;
+      pDvdVideoPicture->data[1] = (uint8_t*)pBuffer->m_uv_buffer_ptr;
       pDvdVideoPicture->iLineSize[1] = pBuffer->m_width;
       // unused
       pDvdVideoPicture->data[2] = NULL;
@@ -1658,7 +1656,7 @@ bool CCrystalHD::GetPicture(DVDVideoPicture *pDvdVideoPicture)
     break;
     case RENDER_FMT_YUYV422:
       // YUV packed plane
-      pDvdVideoPicture->data[0] = (BYTE*)pBuffer->m_y_buffer_ptr;
+      pDvdVideoPicture->data[0] = (uint8_t*)pBuffer->m_y_buffer_ptr;
       pDvdVideoPicture->iLineSize[0] = pBuffer->m_width * 2;
       // unused
       pDvdVideoPicture->data[1] = NULL;
@@ -1669,13 +1667,13 @@ bool CCrystalHD::GetPicture(DVDVideoPicture *pDvdVideoPicture)
     break;
     case RENDER_FMT_YUV420P:
       // Y plane
-      pDvdVideoPicture->data[0] = (BYTE*)pBuffer->m_y_buffer_ptr;
+      pDvdVideoPicture->data[0] = (uint8_t*)pBuffer->m_y_buffer_ptr;
       pDvdVideoPicture->iLineSize[0] = pBuffer->m_width;
       // U plane
-      pDvdVideoPicture->data[1] = (BYTE*)pBuffer->m_u_buffer_ptr;
+      pDvdVideoPicture->data[1] = (uint8_t*)pBuffer->m_u_buffer_ptr;
       pDvdVideoPicture->iLineSize[1] = pBuffer->m_width / 2;
       // V plane
-      pDvdVideoPicture->data[2] = (BYTE*)pBuffer->m_v_buffer_ptr;
+      pDvdVideoPicture->data[2] = (uint8_t*)pBuffer->m_v_buffer_ptr;
       pDvdVideoPicture->iLineSize[2] = pBuffer->m_width / 2;
     break;
   }
@@ -1896,7 +1894,7 @@ bool CCrystalHD::bitstream_convert_init(void *in_extradata, int in_extrasize)
   return true;
 }
 
-bool CCrystalHD::bitstream_convert(BYTE* pData, int iSize, uint8_t **poutbuf, int *poutbuf_size)
+bool CCrystalHD::bitstream_convert(uint8_t* pData, int iSize, uint8_t **poutbuf, int *poutbuf_size)
 {
   // based on h264_mp4toannexb_bsf.c (ffmpeg)
   // which is Copyright (c) 2007 Benoit Fouet <benoit.fouet@free.fr>

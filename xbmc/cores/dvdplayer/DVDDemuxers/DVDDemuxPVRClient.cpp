@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,10 +61,10 @@ void CDemuxStreamVideoPVRClient::GetStreamInfo(std::string& strInfo)
 {
   switch (codec)
   {
-    case CODEC_ID_MPEG2VIDEO:
+    case AV_CODEC_ID_MPEG2VIDEO:
       strInfo = "mpeg2video";
       break;
-    case CODEC_ID_H264:
+    case AV_CODEC_ID_H264:
       strInfo = "h264";
       break;
     default:
@@ -76,19 +76,19 @@ void CDemuxStreamAudioPVRClient::GetStreamInfo(std::string& strInfo)
 {
   switch (codec)
   {
-    case CODEC_ID_AC3:
+    case AV_CODEC_ID_AC3:
       strInfo = "ac3";
       break;
-    case CODEC_ID_EAC3:
+    case AV_CODEC_ID_EAC3:
       strInfo = "eac3";
       break;
-    case CODEC_ID_MP2:
+    case AV_CODEC_ID_MP2:
       strInfo = "mpeg2audio";
       break;
-    case CODEC_ID_AAC:
+    case AV_CODEC_ID_AAC:
       strInfo = "aac";
       break;
-    case CODEC_ID_DTS:
+    case AV_CODEC_ID_DTS:
       strInfo = "dts";
       break;
     default:
@@ -136,12 +136,7 @@ void CDVDDemuxPVRClient::Dispose()
 {
   for (int i = 0; i < MAX_STREAMS; i++)
   {
-    if (m_streams[i])
-    {
-      if (m_streams[i]->ExtraData)
-        delete[] (BYTE*)(m_streams[i]->ExtraData);
-      delete m_streams[i];
-    }
+    delete m_streams[i];
     m_streams[i] = NULL;
   }
 
@@ -154,11 +149,6 @@ void CDVDDemuxPVRClient::DisposeStream(int iStreamId)
 {
   if (iStreamId < 0 || iStreamId >= MAX_STREAMS)
     return;
-  if (m_streams[iStreamId]->ExtraData)
-  {
-    delete[] (uint8_t*)m_streams[iStreamId]->ExtraData;
-    m_streams[iStreamId]->ExtraData = NULL;
-  }
   delete m_streams[iStreamId];
   m_streams[iStreamId] = NULL;
 }
@@ -262,7 +252,7 @@ void CDVDDemuxPVRClient::ParsePacket(DemuxPacket* pkt)
 
 
     CHECK_UPDATE(st, profile, pvr->m_context->profile , FF_PROFILE_UNKNOWN);
-    CHECK_UPDATE(st, level  , pvr->m_context->level   , 0);
+    CHECK_UPDATE(st, level  , pvr->m_context->level   , FF_LEVEL_UNKNOWN);
 
     switch (st->type)
     {
@@ -335,7 +325,7 @@ void CDVDDemuxPVRClient::RequestStreams()
   if (!g_PVRManager.IsStarted())
     return;
 
-  PVR_STREAM_PROPERTIES props;
+  PVR_STREAM_PROPERTIES props = {};
   m_pvrClient->GetStreamProperties(&props);
   unsigned int i;
 
@@ -343,14 +333,14 @@ void CDVDDemuxPVRClient::RequestStreams()
   {
     CDemuxStream *stm = m_streams[i];
 
-    if (props.stream[i].iCodecType == AVMEDIA_TYPE_AUDIO)
+    if (props.stream[i].iCodecType == XBMC_CODEC_TYPE_AUDIO)
     {
       CDemuxStreamAudioPVRClient* st = NULL;
       if (stm)
       {
         st = dynamic_cast<CDemuxStreamAudioPVRClient*>(stm);
         if (!st
-            || (st->codec != (CodecID)props.stream[i].iCodecId)
+            || (st->codec != (AVCodecID)props.stream[i].iCodecId)
             || (st->iChannels != props.stream[i].iChannels))
           DisposeStream(i);
       }
@@ -369,14 +359,14 @@ void CDVDDemuxPVRClient::RequestStreams()
       m_streams[i] = st;
       st->m_parser_split = true;
     }
-    else if (props.stream[i].iCodecType == AVMEDIA_TYPE_VIDEO)
+    else if (props.stream[i].iCodecType == XBMC_CODEC_TYPE_VIDEO)
     {
       CDemuxStreamVideoPVRClient* st = NULL;
       if (stm)
       {
         st = dynamic_cast<CDemuxStreamVideoPVRClient*>(stm);
         if (!st
-            || (st->codec != (CodecID)props.stream[i].iCodecId)
+            || (st->codec != (AVCodecID)props.stream[i].iCodecId)
             || (st->iWidth != props.stream[i].iWidth)
             || (st->iHeight != props.stream[i].iHeight))
           DisposeStream(i);
@@ -393,26 +383,27 @@ void CDVDDemuxPVRClient::RequestStreams()
       st->iHeight         = props.stream[i].iHeight;
       st->iWidth          = props.stream[i].iWidth;
       st->fAspect         = props.stream[i].fAspect;
+      st->stereo_mode     = "mono";
       m_streams[i] = st;
       st->m_parser_split = true;
     }
-    else if (props.stream[i].iCodecId == CODEC_ID_DVB_TELETEXT)
+    else if (props.stream[i].iCodecId == AV_CODEC_ID_DVB_TELETEXT)
     {
       if (stm)
       {
-        if (stm->codec != (CodecID)props.stream[i].iCodecId)
+        if (stm->codec != (AVCodecID)props.stream[i].iCodecId)
           DisposeStream(i);
       }
       if (!m_streams[i])
         m_streams[i] = new CDemuxStreamTeletext();
     }
-    else if (props.stream[i].iCodecType == AVMEDIA_TYPE_SUBTITLE)
+    else if (props.stream[i].iCodecType == XBMC_CODEC_TYPE_SUBTITLE)
     {
       CDemuxStreamSubtitlePVRClient* st = NULL;
       if (stm)
       {
         st = dynamic_cast<CDemuxStreamSubtitlePVRClient*>(stm);
-        if (!st || (st->codec != (CodecID)props.stream[i].iCodecId))
+        if (!st || (st->codec != (AVCodecID)props.stream[i].iCodecId))
           DisposeStream(i);
       }
       if (!m_streams[i])
@@ -423,8 +414,10 @@ void CDVDDemuxPVRClient::RequestStreams()
       {
         st->ExtraData = new uint8_t[4];
         st->ExtraSize = 4;
-        ((uint16_t*)st->ExtraData)[0] = (props.stream[i].iIdentifier >> 0) & 0xFFFFu;
-        ((uint16_t*)st->ExtraData)[1] = (props.stream[i].iIdentifier >> 4) & 0xFFFFu;
+        st->ExtraData[0] = (props.stream[i].iIdentifier >> 8) & 0xff;
+        st->ExtraData[1] = (props.stream[i].iIdentifier >> 0) & 0xff;
+        st->ExtraData[2] = (props.stream[i].iIdentifier >> 24) & 0xff;
+        st->ExtraData[3] = (props.stream[i].iIdentifier >> 16) & 0xff;
       }
       m_streams[i] = st;
     }
@@ -435,7 +428,7 @@ void CDVDDemuxPVRClient::RequestStreams()
       m_streams[i] = new CDemuxStream();
     }
 
-    m_streams[i]->codec       = (CodecID)props.stream[i].iCodecId;
+    m_streams[i]->codec       = (AVCodecID)props.stream[i].iCodecId;
     m_streams[i]->iId         = i;
     m_streams[i]->iPhysicalId = props.stream[i].iPhysicalId;
     m_streams[i]->language[0] = props.stream[i].strLanguage[0];
@@ -482,19 +475,19 @@ void CDVDDemuxPVRClient::GetStreamCodecName(int iStreamId, CStdString &strName)
   CDemuxStream *stream = GetStream(iStreamId);
   if (stream)
   {
-    if (stream->codec == CODEC_ID_AC3)
+    if (stream->codec == AV_CODEC_ID_AC3)
       strName = "ac3";
-    else if (stream->codec == CODEC_ID_MP2)
+    else if (stream->codec == AV_CODEC_ID_MP2)
       strName = "mp2";
-    else if (stream->codec == CODEC_ID_AAC)
+    else if (stream->codec == AV_CODEC_ID_AAC)
       strName = "aac";
-    else if (stream->codec == CODEC_ID_DTS)
+    else if (stream->codec == AV_CODEC_ID_DTS)
       strName = "dca";
-    else if (stream->codec == CODEC_ID_MPEG2VIDEO)
+    else if (stream->codec == AV_CODEC_ID_MPEG2VIDEO)
       strName = "mpeg2video";
-    else if (stream->codec == CODEC_ID_H264)
+    else if (stream->codec == AV_CODEC_ID_H264)
       strName = "h264";
-    else if (stream->codec == CODEC_ID_EAC3)
+    else if (stream->codec == AV_CODEC_ID_EAC3)
       strName = "eac3";
   }
 }

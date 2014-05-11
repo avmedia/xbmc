@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -85,7 +84,7 @@ public class Helper
     Node doc = null
     def ret = ''
 
-    // make the class name or namespave
+    // make the class name or namespace
     String doxygenId = findFullClassName(methodOrClass,'_1_1')
     boolean isInClass = doxygenId != null
     if (!doxygenId)
@@ -107,7 +106,7 @@ public class Helper
     {
       Node memberdef = docspec.depthFirst().find { 
         return (it instanceof String) ? false :
-          ((it.name() == 'memberdef' && it.@kind == 'function' && it.@id.startsWith(doxygenId)) &&
+          ((it.name() == 'memberdef' && (it.@kind == 'function' || it.@kind == 'variable') && it.@id.startsWith(doxygenId)) &&
            (it.name != null && it.name.text().trim() == methodOrClass.@sym_name))
       }
 
@@ -154,6 +153,11 @@ public class Helper
             ret += newline
           else if (it.name() == 'ndash')
             ret += "--"
+          else if (it.name() == 'emphasis')
+          {
+            ret += '*'
+            it.children().each handleDoc
+          }
           else
             System.out.println("WARNING: Cannot parse the following as part of the doxygen processing:" + XmlUtil.serialize(it))
         }
@@ -217,6 +221,11 @@ public class Helper
 
       if (!convertTemplate)
       {
+        // check the typedef resolution
+        String apiTypeResolved = SwigTypeParser.SwigType_resolve_all_typedefs(apiType)
+        if (!apiTypeResolved.equals(apiType))
+          return getOutConversion(apiTypeResolved, apiName, method, overrideBindings, recurse)
+
         if (recurse)
           return getOutConversion(SwigTypeParser.SwigType_ltype(apiType),apiName,method,overrideBindings,false)
         else if (!isKnownApiType(apiType,method))
@@ -335,7 +344,13 @@ public class Helper
       if (convertTemplate == null)
         convertTemplate = inTypemap.find({ key, value -> (key instanceof Pattern && key.matcher(apiLType).matches()) })?.value
 
-      if (!convertTemplate){
+      if (!convertTemplate)
+      {
+         // check the typedef resolution
+         String apiTypeResolved = SwigTypeParser.SwigType_resolve_all_typedefs(apiType)
+         if (!apiTypeResolved.equals(apiType))
+           return getInConversion(apiTypeResolved, apiName, paramName, slName, method, overrideBindings)
+
          // it's ok if this is a known type
          if (!isKnownApiType(apiType,method) && !isKnownApiType(apiLType,method))
            System.out.println("WARNING: Unknown parameter type: ${apiType} (or ${apiLType}) for the call ${Helper.findFullClassName(method) + '::' + Helper.callingName(method)}")
@@ -479,6 +494,19 @@ public class Helper
       List allMethods = ret.depthFirst().findAll({ it.name() == 'function' || it.name() == 'destructor' || it.name() == 'constructor'})
       allMethods.each {
          if (it.@access != null && it.@access != 'public' && it.name() != 'constructor')
+            it.parent().remove(it)
+         else
+         {
+           def doc = retrieveDocStringFromDoxygen(it)
+           if (doc != null && doc != '' && doc.trim() != ' ')
+             new Node(it,'doc',['value' : doc])
+         }
+      }
+      
+      // now remove all non-public variables
+      List allVariables = ret.depthFirst().findAll({ it.name() == 'variable' })
+      allVariables.each {
+         if (it.@access != null && it.@access != 'public')
             it.parent().remove(it)
          else
          {

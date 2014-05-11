@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,8 +26,18 @@
 #include "utils/Observer.h"
 #include "../channels/PVRChannelGroup.h"
 
+class CSetting;
+
 namespace PVR
 {
+  enum EpgGuideView
+  {
+    GUIDE_VIEW_CHANNEL  = 0,
+    GUIDE_VIEW_NOW,
+    GUIDE_VIEW_NEXT,
+    GUIDE_VIEW_TIMELINE
+  };
+
   class CGUIWindowPVR;
 
   class CGUIWindowPVRGuide : public CGUIWindowPVRCommon, public Observer
@@ -45,6 +55,8 @@ namespace PVR
     void SetInvalid(void) { UpdateData(); }
     void UnregisterObservers(void);
     void ResetObservers(void);
+    
+    static void SettingOptionsEpgGuideViewFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
 
   private:
     bool SelectPlayingFile(void);
@@ -52,10 +64,10 @@ namespace PVR
     bool IsSelectedList(CGUIMessage &message) const;
     bool OnClickButton(CGUIMessage &message);
     bool OnClickList(CGUIMessage &message);
-    bool PlayEpgItem(CFileItem *item);
 
     bool OnContextButtonBegin(CFileItem *item, CONTEXT_BUTTON button);
     bool OnContextButtonEnd(CFileItem *item, CONTEXT_BUTTON button);
+    bool OnContextButtonNow(CFileItem *item, CONTEXT_BUTTON button);
     bool OnContextButtonInfo(CFileItem *item, CONTEXT_BUTTON button);
     bool OnContextButtonPlay(CFileItem *item, CONTEXT_BUTTON button);
     bool OnContextButtonStartRecord(CFileItem *item, CONTEXT_BUTTON button);

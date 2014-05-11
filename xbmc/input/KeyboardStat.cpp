@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2007-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -83,6 +83,8 @@ const CKey CKeyboardStat::ProcessKeyDown(XBMC_keysym& keysym)
     modifiers |= CKey::MODIFIER_ALT;
   if (keysym.mod & XBMCKMOD_SUPER)
     modifiers |= CKey::MODIFIER_SUPER;
+  if (keysym.mod & XBMCKMOD_META)
+    modifiers |= CKey::MODIFIER_META;
 
   CLog::Log(LOGDEBUG, "Keyboard: scancode: 0x%02x, sym: 0x%04x, unicode: 0x%04x, modifier: 0x%x", keysym.scancode, keysym.sym, keysym.unicode, keysym.mod);
 
@@ -203,6 +205,8 @@ CStdString CKeyboardStat::GetKeyName(int KeyID)
     keyname.append("alt-");
   if (KeyID & CKey::MODIFIER_SUPER)
     keyname.append("win-");
+  if (KeyID & CKey::MODIFIER_META)
+    keyname.append("meta-");
 
 // Now get the key name
 
@@ -210,8 +214,8 @@ CStdString CKeyboardStat::GetKeyName(int KeyID)
   if (KeyTableLookupVKeyName(keyid, &keytable))
     keyname.append(keytable.keyname);
   else
-    keyname.AppendFormat("%i", keyid);
-  keyname.AppendFormat(" (0x%02x)", KeyID);
+    keyname += StringUtils::Format("%i", keyid);
+  keyname += StringUtils::Format(" (0x%02x)", KeyID);
 
   return keyname;
 }

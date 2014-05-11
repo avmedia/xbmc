@@ -1,13 +1,12 @@
 # XBMC Media Center language file
-# XBMC-core v12.0
 msgid ""
 msgstr ""
-"Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
+"Project-Id-Version: XBMC Main\n"
 "Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: XBMC Translation Team\n"
-"Language-Team: Esperanto (http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/eo/)\n"
+"Language-Team: Esperanto (http://www.transifex.com/projects/p/xbmc-main/language/eo/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -686,25 +685,13 @@ msgctxt "#249"
 msgid "Music"
 msgstr "Muziko"
 
-msgctxt "#250"
-msgid "Visualization"
-msgstr "Vido"
-
 msgctxt "#251"
 msgid "Select destination directory"
 msgstr "Elektu celdosierujon"
 
-msgctxt "#252"
-msgid "Output stereo to all speakers"
-msgstr "Output Stereo to ĉiom Speakers"
-
 msgctxt "#253"
 msgid "Number of channels"
 msgstr "Nombro de kanaloj"
-
-msgctxt "#254"
-msgid "- DTS capable receiver"
-msgstr "- DTS Capable Receiver"
 
 msgctxt "#255"
 msgid "CDDB"
@@ -834,10 +821,6 @@ msgctxt "#288"
 msgid "Font"
 msgstr "Tiparo"
 
-msgctxt "#289"
-msgid "- Size"
-msgstr "- grando"
-
 msgctxt "#290"
 msgid "Dynamic range compression"
 msgstr "Dynamic Range Compression"
@@ -869,18 +852,6 @@ msgstr "Soni malfruiĝo"
 msgctxt "#298"
 msgid "Bookmarks"
 msgstr "Legosignoj"
-
-msgctxt "#300"
-msgid "- MP1 capable receiver"
-msgstr "1. Lingvo"
-
-msgctxt "#301"
-msgid "- MP2 capable receiver"
-msgstr "2. Soni-granda"
-
-msgctxt "#302"
-msgid "- MP3 capable receiver"
-msgstr "3. Stream"
 
 msgctxt "#303"
 msgid "Delay"
@@ -998,18 +969,6 @@ msgctxt "#336"
 msgid "Framerate conversion"
 msgstr "Framerate Conversion"
 
-msgctxt "#337"
-msgid "Audio output"
-msgstr "Audio Output"
-
-msgctxt "#338"
-msgid "Analog"
-msgstr "Analog"
-
-msgctxt "#339"
-msgid "Optical/Coax"
-msgstr "Diĝita"
-
 msgctxt "#340"
 msgid "Various artists"
 msgstr "Various Artists"
@@ -1033,10 +992,6 @@ msgstr "Aktoro"
 msgctxt "#345"
 msgid "Year"
 msgstr "Jaro"
-
-msgctxt "#346"
-msgid "Boost volume level on downmix"
-msgstr "Stack"
 
 msgctxt "#350"
 msgid "Programs"
@@ -1093,10 +1048,6 @@ msgstr "ekranosaver Fade Level"
 msgctxt "#363"
 msgid "Sort by: File"
 msgstr "ordigi je: vico"
-
-msgctxt "#364"
-msgid "- Dolby Digital (AC3) capable receiver"
-msgstr "- AC3 Capable Receiver"
 
 msgctxt "#365"
 msgid "Sort by: Name"
@@ -1266,6 +1217,10 @@ msgctxt "#406"
 msgid "Humidity"
 msgstr "Humideco"
 
+msgctxt "#409"
+msgid "Defaults"
+msgstr "Standard"
+
 msgctxt "#410"
 msgid "Accessing weather service"
 msgstr "Accessing Wealar.com"
@@ -1305,10 +1260,6 @@ msgstr "Mia Filmoj/Gxenroj"
 msgctxt "#419"
 msgid "High"
 msgstr "Mia Filmoj/Aktoroj"
-
-msgctxt "#420"
-msgid "HDMI"
-msgstr "Mia Filmoj/Jaroj"
 
 msgctxt "#422"
 msgid "Delete album info"
@@ -1374,10 +1325,6 @@ msgctxt "#439"
 msgid "Cache"
 msgstr "Cache"
 
-msgctxt "#440"
-msgid "Harddisk"
-msgstr "Durdisko"
-
 msgctxt "#441"
 msgid "UDF"
 msgstr "UDF"
@@ -1405,10 +1352,6 @@ msgstr "KD"
 msgctxt "#447"
 msgid "Autorun media"
 msgstr "Autorun"
-
-msgctxt "#448"
-msgid "LCD"
-msgstr "LCD"
 
 msgctxt "#449"
 msgid "Enabled"
@@ -1493,10 +1436,6 @@ msgstr "OSD Position"
 msgctxt "#470"
 msgid "Credits"
 msgstr "CrEditiis"
-
-msgctxt "#471"
-msgid "Modchip"
-msgstr "Modchip"
 
 msgctxt "#474"
 msgid "Off"
@@ -1617,10 +1556,6 @@ msgstr "Loading media info from vicos..."
 msgctxt "#507"
 msgid "Sort by: Usage"
 msgstr "ordigi je: Usage"
-
-msgctxt "#510"
-msgid "Enable visualizations"
-msgstr "Enable Visualisations"
 
 msgctxt "#511"
 msgid "Enable video mode switching"
@@ -1818,14 +1753,6 @@ msgctxt "#636"
 msgid "Custom"
 msgstr "Custom"
 
-msgctxt "#637"
-msgid "Replay gain"
-msgstr "Replay Gain"
-
-msgctxt "#638"
-msgid "Replaygain volume adjustments"
-msgstr "Replay Gain Mode"
-
 msgctxt "#639"
 msgid "Use track levels"
 msgstr "Use Track Levels"
@@ -1833,18 +1760,6 @@ msgstr "Use Track Levels"
 msgctxt "#640"
 msgid "Use album levels"
 msgstr "Use Albumo Levels"
-
-msgctxt "#641"
-msgid "PreAmp Level - Replay gained files"
-msgstr "PreAmp Level - Replay Gained vicos"
-
-msgctxt "#642"
-msgid "PreAmp Level - Non replay gained files"
-msgstr "PreAmp Level - Non Replay Gained vicos"
-
-msgctxt "#643"
-msgid "Avoid clipping on replay gained files"
-msgstr "Avoid Clipping on Replay Gained vicos"
 
 msgctxt "#644"
 msgid "Crop black bars"
@@ -1874,10 +1789,6 @@ msgctxt "#705"
 msgid "Network"
 msgstr "Network"
 
-msgctxt "#706"
-msgid "- Server"
-msgstr "HTTP Proxy Host"
-
 msgctxt "#708"
 msgid "Use an HTTP proxy server to access the internet"
 msgstr "Enable HTTP Proxy"
@@ -1894,10 +1805,6 @@ msgctxt "#713"
 msgid "HTTP proxy"
 msgstr "HTTP Proxy"
 
-msgctxt "#715"
-msgid "- Assignment"
-msgstr "Assignment"
-
 msgctxt "#716"
 msgid "Automatic (DHCP)"
 msgstr "Aŭtomate (DHCP)"
@@ -1907,20 +1814,8 @@ msgid "Manual (Static)"
 msgstr "Manual (Static)"
 
 msgctxt "#719"
-msgid "- IP address"
-msgstr "- IP Address"
-
-msgctxt "#720"
-msgid "- Netmask"
-msgstr "- Netmpeti"
-
-msgctxt "#721"
-msgid "- Default gateway"
-msgstr "- Default Gateway"
-
-msgctxt "#722"
-msgid "- DNS server"
-msgstr "- DNS Server"
+msgid "IP address"
+msgstr "IP-adreso"
 
 msgctxt "#723"
 msgid "Save & restart"
@@ -1947,32 +1842,20 @@ msgid "FTP server"
 msgstr "FTP Server"
 
 msgctxt "#730"
-msgid "- Port"
-msgstr "Web Server Port"
+msgid "Port"
+msgstr "Port"
 
 msgctxt "#732"
 msgid "Save & apply"
 msgstr "Save & Apply"
 
 msgctxt "#733"
-msgid "- Password"
-msgstr "Web Server pasvorto"
+msgid "Password"
+msgstr "pasvorto"
 
 msgctxt "#734"
 msgid "No pass"
 msgstr "No Pass"
-
-msgctxt "#735"
-msgid "- Character set"
-msgstr "- Charset"
-
-msgctxt "#736"
-msgid "- Style"
-msgstr "- Style"
-
-msgctxt "#737"
-msgid "- Colour"
-msgstr "- Color"
 
 msgctxt "#738"
 msgid "Normal"
@@ -2110,10 +1993,6 @@ msgctxt "#999"
 msgid "Add Videos..."
 msgstr "Interreto-gaming"
 
-msgctxt "#1000"
-msgid "- Preview"
-msgstr "ekranosaver PreVido"
-
 msgctxt "#1001"
 msgid "Unable to connect"
 msgstr "Unable to connect"
@@ -2237,6 +2116,10 @@ msgstr "an image folder"
 msgctxt "#1032"
 msgid "Add network location..."
 msgstr "Add Network Location..."
+
+msgctxt "#1048"
+msgid "Username"
+msgstr "Uzulonomo"
 
 msgctxt "#1200"
 msgid "SMB client"
@@ -2418,6 +2301,10 @@ msgctxt "#1418"
 msgid "Thunderstorms"
 msgstr "Fulmotondro"
 
+msgctxt "#1439"
+msgid "and"
+msgstr "kaj"
+
 msgctxt "#1446"
 msgid "Unknown"
 msgstr "Unknown"
@@ -2425,10 +2312,6 @@ msgstr "Unknown"
 msgctxt "#2050"
 msgid "Runtime"
 msgstr "Runtime:"
-
-msgctxt "#4501"
-msgid "Enable LCD/VFD"
-msgstr "LCD Type"
 
 msgctxt "#10000"
 msgid "Home"
@@ -2530,13 +2413,9 @@ msgctxt "#10034"
 msgid "Settings - Profiles"
 msgstr "Preferoj->Provicos"
 
-msgctxt "#10100"
-msgid "Yes/No dialog"
-msgstr "Jes/ne dialog"
-
-msgctxt "#10101"
-msgid "Progress dialog"
-msgstr "Progress dialog"
+msgctxt "#10037"
+msgid "Standard"
+msgstr "Standard"
 
 msgctxt "#10500"
 msgid "Music/Playlist"
@@ -2606,17 +2485,9 @@ msgctxt "#10524"
 msgid "Movie info"
 msgstr "Filmo Info"
 
-msgctxt "#12000"
-msgid "Select dialog"
-msgstr "Elekti dialog"
-
 msgctxt "#12001"
 msgid "Music/Info"
 msgstr "Mia Muziko/info"
-
-msgctxt "#12002"
-msgid "Dialog OK"
-msgstr "Dialog OK"
 
 msgctxt "#12003"
 msgid "Videos/Info"
@@ -2629,14 +2500,6 @@ msgstr "Mia Scripts/Info"
 msgctxt "#12005"
 msgid "Fullscreen video"
 msgstr "Fullekrano filmoj"
-
-msgctxt "#12006"
-msgid "Audio visualization"
-msgstr "Soni visualisation"
-
-msgctxt "#12008"
-msgid "File stacking dialog"
-msgstr "Vicostacking dialog"
 
 msgctxt "#12009"
 msgid "Rebuild index..."
@@ -2794,10 +2657,6 @@ msgctxt "#12346"
 msgid "Password retry limit exceeded."
 msgstr "pasvorto retry limit exceeded."
 
-msgctxt "#12347"
-msgid "The system will now shut off."
-msgstr "La XBOX will now shut off."
-
 msgctxt "#12348"
 msgid "Item locked"
 msgstr "Item Locked"
@@ -2949,10 +2808,6 @@ msgstr "Gateway:"
 msgctxt "#13161"
 msgid "Primary DNS"
 msgstr "DNS"
-
-msgctxt "#13162"
-msgid "Initialize failed"
-msgstr "Initialize failed"
 
 msgctxt "#13170"
 msgid "Never"
@@ -3114,10 +2969,6 @@ msgctxt "#13302"
 msgid "Fan speed override"
 msgstr "Fan Speed Override"
 
-msgctxt "#13303"
-msgid "- Fonts"
-msgstr "Skin Fonts"
-
 msgctxt "#13304"
 msgid "Enable flipping bi-directional strings"
 msgstr "Enable Flipping Bi-Directional Strings"
@@ -3177,10 +3028,6 @@ msgstr "Vido Slideshow"
 msgctxt "#13318"
 msgid "Recursive slideshow"
 msgstr "Recursive Slideshow"
-
-msgctxt "#13319"
-msgid "Randomize"
-msgstr "Randomize"
 
 msgctxt "#13320"
 msgid "Stereo"
@@ -3290,10 +3137,6 @@ msgctxt "#13349"
 msgid "Scan for new content"
 msgstr "Query Info For ĉiom vicos"
 
-msgctxt "#13350"
-msgid "Now playing..."
-msgstr "Now Playing..."
-
 msgctxt "#13351"
 msgid "Album information"
 msgstr "Albumo informaĵo"
@@ -3394,21 +3237,9 @@ msgctxt "#13388"
 msgid "Preset"
 msgstr "Presets"
 
-msgctxt "#13389"
-msgid "There are no presets available\nfor this visualization"
-msgstr "Lare are no presets available\nfor this visualisation"
-
-msgctxt "#13390"
-msgid "There are no settings available\nfor this visualization"
-msgstr "Lare are no Preferoj available\nfor this visualisation"
-
 msgctxt "#13391"
 msgid "Eject/Load"
 msgstr "Eject/Load"
-
-msgctxt "#13392"
-msgid "Use visualization if playing audio"
-msgstr "Use Visualisation if playing audio"
 
 msgctxt "#13393"
 msgid "Calculate size"
@@ -3578,41 +3409,17 @@ msgctxt "#14024"
 msgid "Enter the nearest large town"
 msgstr "tajpi la nearest large town or US ZIP code"
 
-msgctxt "#14025"
-msgid "Video/Audio/DVD cache - Harddisk"
-msgstr "Filmoj/Audio/DVD Cache - Harddisk"
-
 msgctxt "#14026"
 msgid "Video cache - DVD-ROM"
 msgstr "Filmoj Cache - DVDRom"
-
-msgctxt "#14027"
-msgid "- Local Network"
-msgstr "- Local Network"
-
-msgctxt "#14028"
-msgid "- Internet"
-msgstr "- Internet"
 
 msgctxt "#14030"
 msgid "Audio cache - DVD-ROM"
 msgstr "Audio Cache - DVDRom"
 
-msgctxt "#14031"
-msgid "- Local Network"
-msgstr "- Local Network"
-
-msgctxt "#14032"
-msgid "- Internet"
-msgstr "- Internet"
-
 msgctxt "#14034"
 msgid "DVD cache - DVD-ROM"
 msgstr "DVD Cache - DVDRom"
-
-msgctxt "#14035"
-msgid "- Local Network"
-msgstr "- Local Network"
 
 msgctxt "#14036"
 msgid "Services"
@@ -3802,10 +3609,6 @@ msgctxt "#15109"
 msgid "Skin default"
 msgstr "Skin Default"
 
-msgctxt "#15111"
-msgid "- Theme"
-msgstr "Skin Lame"
-
 msgctxt "#15112"
 msgid "Default theme"
 msgstr "Default Lame"
@@ -3813,30 +3616,6 @@ msgstr "Default Lame"
 msgctxt "#15200"
 msgid "Last.fm"
 msgstr "LastFM"
-
-msgctxt "#15201"
-msgid "Submit songs to Last.fm"
-msgstr "Submit kantoj to LastFM"
-
-msgctxt "#15202"
-msgid "Last.fm username"
-msgstr "LastFM Uzulonomo"
-
-msgctxt "#15203"
-msgid "Last.fm password"
-msgstr "LastFM pasvorto"
-
-msgctxt "#15204"
-msgid "Unable to handshake: sleeping..."
-msgstr "Unable to handshake: sleeping..."
-
-msgctxt "#15205"
-msgid "Please update XBMC"
-msgstr "Plaĉi Updati XBMC"
-
-msgctxt "#15206"
-msgid "Bad authorization: Check username and password"
-msgstr "Submission failed: bad authorization."
 
 msgctxt "#15207"
 msgid "Connected"
@@ -3846,169 +3625,13 @@ msgctxt "#15208"
 msgid "Not connected"
 msgstr "Not Connected"
 
-msgctxt "#15209"
-msgid "Submit interval %i"
-msgstr "Submit Interval %i"
-
-msgctxt "#15210"
-msgid "Cached %i songs"
-msgstr "Cached %i kantoj"
-
-msgctxt "#15211"
-msgid "Submitting..."
-msgstr "Submitting..."
-
-msgctxt "#15212"
-msgid "Submitting in %i secs"
-msgstr "Submitting in %i secs"
-
 msgctxt "#15213"
 msgid "Play using..."
 msgstr "Play Using..."
 
-msgctxt "#15214"
-msgid "Use smoothed A/V synchronization"
-msgstr "Use Smoolad A/V Syncronization"
-
 msgctxt "#15215"
 msgid "Hide file names in thumbs view"
 msgstr "Hide vico nomoj in Thumbs Vido"
-
-msgctxt "#15250"
-msgid "Submit Last.fm radio to Last.fm"
-msgstr "Submit Last.fm Radio to LastFM"
-
-msgctxt "#15251"
-msgid "Connecting to Last.fm..."
-msgstr "Connecting to Last.fm..."
-
-msgctxt "#15252"
-msgid "Selecting station..."
-msgstr "Elektiing station..."
-
-msgctxt "#15253"
-msgid "Search similar artists..."
-msgstr "Search similar artists..."
-
-msgctxt "#15254"
-msgid "Search similar tags..."
-msgstr "Search similar tags..."
-
-msgctxt "#15255"
-msgid "Your profile (%name%)"
-msgstr "Via logxas (%nomo%)"
-
-msgctxt "#15256"
-msgid "Overall top tags"
-msgstr "Overĉiom top tags"
-
-msgctxt "#15257"
-msgid "Top artists for tag %name%"
-msgstr "Top artists for tag %nomo%"
-
-msgctxt "#15258"
-msgid "Top albums for tag %name%"
-msgstr "Top albumos for tag %nomo%"
-
-msgctxt "#15259"
-msgid "Top tracks for tag %name%"
-msgstr "Top tracks for tag %nomo%"
-
-msgctxt "#15260"
-msgid "Listen to tag %name% Last.fm radio"
-msgstr "aŭskulti to tag %nomo% last.fm radio"
-
-msgctxt "#15261"
-msgid "Similar artists as %name%"
-msgstr "Similar artists as %nomo%"
-
-msgctxt "#15262"
-msgid "Top %name% albums"
-msgstr "Top %nomo% albumos"
-
-msgctxt "#15263"
-msgid "Top %name% tracks"
-msgstr "Top %nomo% tracks"
-
-msgctxt "#15264"
-msgid "Top %name% tags"
-msgstr "Top %nomo% tags"
-
-msgctxt "#15265"
-msgid "Biggest fans of %name%"
-msgstr "Pligranda fans of %nomo%"
-
-msgctxt "#15266"
-msgid "Listen to %name% fans Last.fm radio"
-msgstr "aŭskulti to %nomo% fans last.fm radio"
-
-msgctxt "#15267"
-msgid "Listen to %name% similar artists Last.fm radio"
-msgstr "aŭskulti to %nomo% similar artists last.fm radio"
-
-msgctxt "#15268"
-msgid "Top artists for user %name%"
-msgstr "Top artists for uzulo %nomo%"
-
-msgctxt "#15269"
-msgid "Top albums for user %name%"
-msgstr "Top albumos for uzulo %nomo%"
-
-msgctxt "#15270"
-msgid "Top tracks for user %name%"
-msgstr "Top tracks for uzulo %nomo%"
-
-msgctxt "#15271"
-msgid "Friends of user %name%"
-msgstr "Amikoj of uzulo %nomo%"
-
-msgctxt "#15272"
-msgid "Neighbours of user %name%"
-msgstr "Najboroj of uzulo %nomo%"
-
-msgctxt "#15273"
-msgid "Weekly artist chart for %name%"
-msgstr "Weekly artist chart for %nomo%"
-
-msgctxt "#15274"
-msgid "Weekly album chart for %name%"
-msgstr "Weekly albumo chart for %nomo%"
-
-msgctxt "#15275"
-msgid "Weekly track chart for %name%"
-msgstr "Weekly track chart for %nomo%"
-
-msgctxt "#15276"
-msgid "Listen to %name%'s neighbours Last.fm radio"
-msgstr "aŭskulti to %nomo% naboroja last.fm radio"
-
-msgctxt "#15277"
-msgid "Listen to %name%'s personal Last.fm radio"
-msgstr "aŭskulti to %nomo% personal last.fm radio"
-
-msgctxt "#15278"
-msgid "Listen to %name%'s mix Last.fm radio"
-msgstr "aŭskulti to %nomo% amas kanto last.fm radio"
-
-msgctxt "#15279"
-msgid "Retrieving list from Last.fm..."
-msgstr "Retrieving list from last.fm..."
-
-msgctxt "#15280"
-msgid "Can't retrieve list from Last.fm..."
-msgstr "Can't retrieve list from last.fm..."
-
-msgctxt "#15281"
-msgid "Enter an artist name to find related ones"
-msgstr "tajpi la artisto nomo to find related ones"
-
-msgctxt "#15282"
-msgid "Enter a tag name to find similar ones"
-msgstr "tajpi a tag nomo to find similar ones"
-
-msgctxt "#15283"
-msgid "Tracks recently listened by %name%"
-msgstr "Kanto lastatempe aŭskultas by %nomo%"
 
 msgctxt "#15300"
 msgid "Path not found or invalid"
@@ -4126,10 +3749,6 @@ msgctxt "#16031"
 msgid "No matching songs in the library."
 msgstr "Ne matching kantoj in la datinbanko."
 
-msgctxt "#16032"
-msgid "Could not initialize database."
-msgstr "Could not initialise datinbanko."
-
 msgctxt "#16033"
 msgid "Could not open database."
 msgstr "Could not open datinbanko."
@@ -4178,6 +3797,14 @@ msgctxt "#19031"
 msgid "Next"
 msgstr "Sekva"
 
+msgctxt "#19607"
+msgid "Fashion"
+msgstr "Mode"
+
+msgctxt "#20109"
+msgid "Zoom"
+msgstr "Zoom"
+
 msgctxt "#20142"
 msgid "Username"
 msgstr "Uzulonomo"
@@ -4210,6 +3837,10 @@ msgctxt "#21385"
 msgid "Open"
 msgstr "Open"
 
+msgctxt "#21417"
+msgid "Settings"
+msgstr "Agordoj"
+
 msgctxt "#21805"
 msgid "Resolution"
 msgstr "Distingivo"
@@ -4218,10 +3849,6 @@ msgctxt "#22030"
 msgid "Font"
 msgstr "Tiparo"
 
-msgctxt "#22031"
-msgid "- Size"
-msgstr "- amplekso"
-
 msgctxt "#24007"
 msgid "Movie information"
 msgstr "Filmoj info"
@@ -4229,10 +3856,6 @@ msgstr "Filmoj info"
 msgctxt "#24008"
 msgid "Screensaver"
 msgstr "ekranosaver"
-
-msgctxt "#24010"
-msgid "Visualization"
-msgstr "Visualisation"
 
 msgctxt "#24012"
 msgid "Subtitles"
@@ -4246,9 +3869,21 @@ msgctxt "#24018"
 msgid "Services"
 msgstr "Servers"
 
+msgctxt "#24023"
+msgid "Disabled"
+msgstr "Disabled"
+
 msgctxt "#24027"
 msgid "Weather"
 msgstr "Mia Wealar"
+
+msgctxt "#24121"
+msgid "Enter search string"
+msgstr "Tajpi Search String"
+
+msgctxt "#34100"
+msgid "Number of channels"
+msgstr "Nombro de kanaloj"
 
 msgctxt "#34123"
 msgid "Never"
@@ -4257,3 +3892,7 @@ msgstr "Never"
 msgctxt "#36016"
 msgid "Connected"
 msgstr "Xbox is Connected"
+
+msgctxt "#36428"
+msgid "Record"
+msgstr "Registri"

@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,5 +27,5 @@ class ISortable
 {
 public:
   virtual ~ISortable() { }
-  virtual void ToSortable(SortItem& sortable) = 0;
+  virtual void ToSortable(SortItem& sortable, Field field) const = 0;
 };

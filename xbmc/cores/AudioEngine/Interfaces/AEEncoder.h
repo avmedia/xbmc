@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  */
 
 #include "DllAvCodec.h"
-#include "cores/AudioEngine/AEAudioFormat.h"
+#include "cores/AudioEngine/Utils/AEAudioFormat.h"
 
 /**
  * IAEEncoder interface for on the fly audio compression
@@ -48,9 +48,10 @@ public:
   /**
    * Called to setup the encoder to accept data in the specified format
    * @param format the desired audio format, may be changed to suit the encoder
+   * @param allow_planar_input allow engine to use with planar formats
    * @return true on success, false on failure
    */
-  virtual bool Initialize(AEAudioFormat &format) = 0;
+  virtual bool Initialize(AEAudioFormat &format, bool allow_planar_input = false) = 0;
 
   /**
    * Reset the encoder for new data
@@ -64,10 +65,10 @@ public:
   virtual unsigned int GetBitRate() = 0;
 
   /**
-   * Returns the CodecID of the encoder
+   * Returns the AVCodecID of the encoder
    * @return the ffmpeg codec id
    */
-  virtual CodecID GetCodecID() = 0;
+  virtual AVCodecID GetCodecID() = 0;
 
   /**
    * Return the number of frames needed to encode
@@ -82,6 +83,16 @@ public:
    * @return the number of samples consumed
    */
   virtual int Encode(float *data, unsigned int frames) = 0;
+
+  /**
+   * Encodes the supplied samples into a provided buffer
+   * @param in the PCM samples encoder requested format
+   * @param in_size input buffer size
+   * @param output buffer
+   * @param out_size output buffer size
+   * @return the number of samples consumed
+   */
+  virtual int Encode (uint8_t *in, int in_size, uint8_t *out, int out_size) { return 0; };
 
   /**
    * Get the encoded data

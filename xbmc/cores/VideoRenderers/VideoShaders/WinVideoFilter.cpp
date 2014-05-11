@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2007-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ D3DXMATRIX* CYUV2RGBMatrix::Matrix()
     m_mat._31 = matrix.m[0][2];
     m_mat._32 = matrix.m[1][2];
     m_mat._33 = matrix.m[2][2];
-    m_mat._44 = 0.0f;
+    m_mat._34 = 0.0f;
     m_mat._41 = matrix.m[0][3];
     m_mat._42 = matrix.m[1][3];
     m_mat._43 = matrix.m[2][3];
@@ -203,6 +203,10 @@ bool CWinShader::Execute(std::vector<LPDIRECT3DSURFACE9> *vecRT, unsigned int ve
     oldRT->Release();
   }
 
+  // MSDN says: Setting a new render target will cause the viewport 
+  // to be set to the full size of the new render target.
+  // So we need restore our viewport
+  g_Windowing.RestoreViewPort();
   return true;
 }
 
@@ -769,6 +773,10 @@ bool CConvolutionShaderSeparable::ClearIntermediateRenderTarget()
   currentRT->Release();
   intermediateRT->Release();
 
+  // MSDN says: Setting a new render target will cause the viewport 
+  // to be set to the full size of the new render target.
+  // So we need restore our viewport
+  g_Windowing.RestoreViewPort();
   return true;
 }
 

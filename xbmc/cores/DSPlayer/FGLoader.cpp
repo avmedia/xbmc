@@ -38,7 +38,6 @@
 #include "guilib/GUIWindowManager.h"
 #include "filtercorefactory/filtercorefactory.h"
 #include "profiles/ProfilesManager.h"
-#include "settings/GUISettings.h"
 #include "utils/SystemInfo.h"
 
 #include "filters/XBMCFileSource.h"
@@ -109,7 +108,7 @@ HRESULT CFGLoader::InsertSourceFilter(CFileItem& pFileItem, const CStdString& fi
     CGraphFilters::Get()->SetIsDVD(true);
     CStdString dirA;
     CStdStringW dirW;
-    URIUtils::GetDirectory(pFileItem.GetPath(), dirA);
+    dirA = URIUtils::GetDirectory(pFileItem.GetPath());
     g_charsetConverter.utf8ToW(dirA, dirW);
 
     hr = CGraphFilters::Get()->DVD.dvdControl->SetDVDDirectory(dirW.c_str());
@@ -284,7 +283,7 @@ HRESULT CFGLoader::InsertAudioRenderer(const CStdString& filterName)
   END_PERFORMANCE_COUNTER("Loaded audio renderer list");
 
   //see if there a config first 
-  const CStdString renderer = g_guiSettings.GetString("dsplayer.audiorenderer");
+  const CStdString renderer = CSettings::Get().GetString("dsplayer.audiorenderer");
   for (std::vector<DSFilterInfo>::const_iterator iter = deviceList.begin(); !renderer.empty() && (iter != deviceList.end()); ++iter)
   {
     DSFilterInfo dev = *iter;
@@ -323,16 +322,16 @@ HRESULT CFGLoader::InsertVideoRenderer()
   HRESULT hr = S_OK;
   
   // TODO: Use a listbox instead of a checkbox on the GUI. Simpler and easier
-  if (g_sysinfo.IsVistaOrHigher())
+  if (CSysInfo::IsWindowsVersionAtLeast(CSysInfo::WindowsVersionVista))
   {
-    if (g_guiSettings.GetBool("dsplayer.forcenondefaultrenderer"))
+    if (CSettings::Get().GetBool("dsplayer.forcenondefaultrenderer"))
       CGraphFilters::Get()->SetCurrentRenderer(DIRECTSHOW_RENDERER_VMR9);
     else 
       CGraphFilters::Get()->SetCurrentRenderer(DIRECTSHOW_RENDERER_EVR);
   }
   else
   {
-    if (g_guiSettings.GetBool("dsplayer.forcenondefaultrenderer"))
+    if (CSettings::Get().GetBool("dsplayer.forcenondefaultrenderer"))
       CGraphFilters::Get()->SetCurrentRenderer(DIRECTSHOW_RENDERER_EVR);
     else 
       CGraphFilters::Get()->SetCurrentRenderer(DIRECTSHOW_RENDERER_VMR9);
@@ -405,7 +404,7 @@ HRESULT CFGLoader::LoadFilterRules(const CFileItem& _pFileItem)
   // We *need* those informations for filter loading. If the user wants it, be sure it's loaded
   // before using it.
   bool hasStreamDetails = false;
-  if (g_guiSettings.GetBool("myvideos.extractflags") &&
+  if (CSettings::Get().GetBool("myvideos.extractflags") &&
     pFileItem.HasVideoInfoTag() && !pFileItem.GetVideoInfoTag()->HasStreamDetails())
   {
     CLog::Log(LOGDEBUG,"%s - trying to extract filestream details from video file %s", __FUNCTION__, pFileItem.GetPath().c_str());
@@ -450,7 +449,7 @@ HRESULT CFGLoader::LoadFilterRules(const CFileItem& _pFileItem)
     // We will use our own stream detail
     // We need to make a copy of our streams details because
     // Reset() delete the streams
-    if (g_guiSettings.GetBool("myvideos.extractflags")) // Only warn user if the option is enabled
+    if (CSettings::Get().GetBool("myvideos.extractflags")) // Only warn user if the option is enabled
       CLog::Log(LOGWARNING, __FUNCTION__" DVDPlayer failed to fetch streams details. Using DirectShow ones");
 
     pFileItem.GetVideoInfoTag()->m_streamDetails.AddStream(

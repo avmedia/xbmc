@@ -53,8 +53,10 @@ public:
 	void ClearEditionOfFile(const CStdString& strFilenameAndPath);
 
 protected:
-	virtual bool CreateTables();
-	virtual int GetMinVersion() const;
+	virtual void CreateTables();
+	virtual void CreateAnalytics();
+	virtual int GetMinVersion() const { return 1; }
+	virtual int GetSchemaVersion() const { return 1; }
 	const char *GetBaseDBName() const { return "DSPlayer"; };
 
 };

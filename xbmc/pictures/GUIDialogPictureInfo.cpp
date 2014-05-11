@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ void CGUIDialogPictureInfo::UpdatePictureInfo()
       continue;
 
     CStdString picInfo = g_infoManager.GetLabel(info);
-    if (!picInfo.IsEmpty())
+    if (!picInfo.empty())
     {
       CFileItemPtr item(new CFileItem(g_localizeStrings.Get(SLIDE_STRING_BASE + info)));
       item->SetLabel2(picInfo);
@@ -117,5 +117,5 @@ void CGUIDialogPictureInfo::OnDeinitWindow(int nextWindowID)
   CGUIMessage msgReset(GUI_MSG_LABEL_RESET, GetID(), CONTROL_PICTURE_INFO);
   OnMessage(msgReset);
   m_pictureInfo->Clear();
-  m_currentPicture.Empty();
+  m_currentPicture.clear();
 }

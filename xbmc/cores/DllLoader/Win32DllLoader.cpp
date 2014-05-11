@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -158,15 +158,25 @@ bool Win32DllLoader::Load()
   CStdString strFileName = GetFileName();
 
   CStdStringW strDllW;
-  g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(strFileName), strDllW);
+  g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(strFileName), strDllW, false, false, false);
   m_dllHandle = LoadLibraryExW(strDllW.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
   if (!m_dllHandle)
   {
-    LPVOID lpMsgBuf;
     DWORD dw = GetLastError(); 
+    wchar_t* lpMsgBuf = NULL;
+    DWORD strLen = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), (LPWSTR)&lpMsgBuf, 0, NULL);
+    if (strLen == 0)
+      strLen = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), (LPWSTR)&lpMsgBuf, 0, NULL);
 
-    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw, 0, (LPTSTR) &lpMsgBuf, 0, NULL );
-    CLog::Log(LOGERROR, "%s: Failed to load %s with error %d:%s", __FUNCTION__, CSpecialProtocol::TranslatePath(strFileName).c_str(), dw, lpMsgBuf);
+    if (strLen != 0)
+    {
+      std::string strMessage;
+      g_charsetConverter.wToUTF8(std::wstring(lpMsgBuf, strLen), strMessage);
+      CLog::Log(LOGERROR, "%s: Failed to load \"%s\" with error %lu: \"%s\"", __FUNCTION__, CSpecialProtocol::TranslatePath(strFileName).c_str(), dw, strMessage.c_str());
+    }
+    else
+      CLog::Log(LOGERROR, "%s: Failed to load \"%s\" with error %lu", __FUNCTION__, CSpecialProtocol::TranslatePath(strFileName).c_str(), dw);
+    
     LocalFree(lpMsgBuf);
     return false;
   }
@@ -343,9 +353,9 @@ bool Win32DllLoader::NeedsHooking(const char *dllName)
   CStdString xbmcPath = CSpecialProtocol::TranslatePath("special://xbmc");
   CStdString homePath = CSpecialProtocol::TranslatePath("special://home");
   CStdString tempPath = CSpecialProtocol::TranslatePath("special://temp");
-  return ((strncmp(xbmcPath.c_str(), dllPath.c_str(), xbmcPath.GetLength()) == 0) ||
-    (strncmp(homePath.c_str(), dllPath.c_str(), homePath.GetLength()) == 0) ||
-    (strncmp(tempPath.c_str(), dllPath.c_str(), tempPath.GetLength()) == 0));
+  return ((strncmp(xbmcPath.c_str(), dllPath.c_str(), xbmcPath.size()) == 0) ||
+    (strncmp(homePath.c_str(), dllPath.c_str(), homePath.size()) == 0) ||
+    (strncmp(tempPath.c_str(), dllPath.c_str(), tempPath.size()) == 0));
 }
 
 void Win32DllLoader::RestoreImports()

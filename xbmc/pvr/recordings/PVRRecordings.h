@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,13 +35,14 @@ namespace PVR
     CCriticalSection             m_critSection;
     bool                         m_bIsUpdating;
     std::vector<CPVRRecording *> m_recordings;
+    unsigned int                 m_iLastId;
 
     virtual void UpdateFromClients(void);
     virtual CStdString TrimSlashes(const CStdString &strOrig) const;
     virtual const CStdString GetDirectoryFromPath(const CStdString &strPath, const CStdString &strBase) const;
     virtual bool IsDirectoryMember(const CStdString &strDirectory, const CStdString &strEntryDirectory, bool bDirectMember = true) const;
     virtual void GetContents(const CStdString &strDirectory, CFileItemList *results);
-    virtual void GetSubDirectories(const CStdString &strBase, CFileItemList *results, bool bAutoSkip = true);
+    virtual void GetSubDirectories(const CStdString &strBase, CFileItemList *results);
 
     CStdString AddAllRecordingsPathExtension(const CStdString &strDirectory);
     CStdString RemoveAllRecordingsPathExtension(const CStdString &strDirectory);
@@ -71,6 +72,7 @@ namespace PVR
     CFileItemPtr GetByPath(const CStdString &path);
     void SetPlayCount(const CFileItem &item, int iPlayCount);
     void GetAll(CFileItemList &items);
+    CFileItemPtr GetById(unsigned int iId) const;
 
     bool HasAllRecordingsPathExtension(const CStdString &strDirectory);
   };

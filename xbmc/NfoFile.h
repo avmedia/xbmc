@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,9 +24,7 @@
 #if !defined(AFX_NfoFile_H__641CCF68_6D2A_426E_9204_C0E4BEF12D00__INCLUDED_)
 #define AFX_NfoFile_H__641CCF68_6D2A_426E_9204_C0E4BEF12D00__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "utils/XBMCTinyXML.h"
 #include "addons/Scraper.h"
@@ -48,8 +46,7 @@ public:
     ERROR_NFO    = 4
   };
 
-  NFOResult Create(const CStdString&, const ADDON::ScraperPtr&, int episode=-1,
-                   const CStdString& strPath2="");
+  NFOResult Create(const CStdString&, const ADDON::ScraperPtr&, int episode=-1);
   template<class T>
     bool GetDetails(T& details,const char* document=NULL, bool prioritise=false)
   {
@@ -60,17 +57,7 @@ public:
     else
       strDoc = m_headofdoc;
 
-    CStdString encoding;
-    XMLUtils::GetEncoding(&doc, encoding);
-
-    CStdString strUtf8(strDoc);
-    if (encoding.IsEmpty())
-      g_charsetConverter.unknownToUTF8(strUtf8);
-    else
-      g_charsetConverter.stringCharsetToUtf8(encoding, strDoc, strUtf8);
-
-    doc.Clear();
-    doc.Parse(strUtf8.c_str(),0,TIXML_ENCODING_UTF8);
+    doc.Parse(strDoc, TIXML_ENCODING_UNKNOWN);
     return details.Load(doc.RootElement(), true, prioritise);
   }
 

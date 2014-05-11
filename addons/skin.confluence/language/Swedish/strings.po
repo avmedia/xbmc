@@ -1,16 +1,15 @@
 # XBMC Media Center language file
 # Addon Name: Confluence
 # Addon id: skin.confluence
-# Addon version: 2.1.3
 # Addon Provider: Jezz_X, Team XBMC
 msgid ""
 msgstr ""
-"Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
+"Project-Id-Version: XBMC Main\n"
 "Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: XBMC Translation Team\n"
-"Language-Team: Swedish (http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/sv/)\n"
+"Language-Team: Swedish (http://www.transifex.com/projects/p/xbmc-main/language/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -23,7 +22,7 @@ msgstr "Ändra din"
 
 msgctxt "#31003"
 msgid "Power Options"
-msgstr "Strömalternativ"
+msgstr "Energialternativ"
 
 msgctxt "#31004"
 msgid "Working..."
@@ -35,11 +34,11 @@ msgstr "Dölj information"
 
 msgctxt "#31006"
 msgid "View Options"
-msgstr "Visa alternativ"
+msgstr "Vy alternativ"
 
 msgctxt "#31008"
-msgid "Fullscreen"
-msgstr "Helskärm"
+msgid "Full screen"
+msgstr "Fullskärm"
 
 msgctxt "#31009"
 msgid "Total Duration"
@@ -89,6 +88,10 @@ msgctxt "#31033"
 msgid "Info"
 msgstr "Info"
 
+msgctxt "#31039"
+msgid "Actions"
+msgstr "Åtgärder"
+
 msgctxt "#31040"
 msgid "Now Playing"
 msgstr "Nu spelas"
@@ -109,9 +112,13 @@ msgctxt "#31045"
 msgid "REWIND"
 msgstr "SPOLA BAKÅT"
 
+msgctxt "#31046"
+msgid "SEEKING"
+msgstr "SÖKER"
+
 msgctxt "#31048"
-msgid "Visualization Presets"
-msgstr "Visualiseringsförval"
+msgid "Visualisation Presets"
+msgstr "Visualiseringsval"
 
 msgctxt "#31049"
 msgid "End Time"
@@ -166,8 +173,8 @@ msgid "Show \"Paused\" in picture slide show"
 msgstr "Visa \"Pausad\" i bildspel"
 
 msgctxt "#31104"
-msgid "Play Trailers in a window [COLOR=grey3](Video Information Dialog Only)[/COLOR]"
-msgstr "Spela trailers i ett fönster [COLOR=grey3](Endast i videoinformationsdialogen)[/COLOR]"
+msgid "Play Trailers in a window [COLOR=grey3](Video Information Dialogue Only)[/COLOR]"
+msgstr "Spela trailers i ett fönster [COLOR=grey3](Endast Video Informations Dialog)[/COLOR]"
 
 msgctxt "#31106"
 msgid "Miscellaneous options"
@@ -206,24 +213,20 @@ msgid "Show Recently added Videos"
 msgstr "Visa nyligen tillagda filmer"
 
 msgctxt "#31118"
-msgid "Home Page Programs Submenu"
+msgid "Home Page Programs Sub-menu"
 msgstr "Hemskärmens programundermeny"
 
 msgctxt "#31119"
 msgid "Hide Background Fanart"
 msgstr "Dölj bakgrundsfanart"
 
-msgctxt "#31122"
-msgid "Weather Page"
-msgstr "Vädersida"
-
 msgctxt "#31124"
 msgid "Show Background \"Now Playing\" Video"
 msgstr "Visa bakgrund \"Nu spelas\" filmer"
 
 msgctxt "#31125"
-msgid "Show Background \"Now Playing\" Visualization"
-msgstr "Visa bakgrund i \"Nu spelas\" visualisering"
+msgid "Show Background \"Now Playing\" Visualisation"
+msgstr "Visa \"Spelas nu\" backgrundsvisualisering"
 
 msgctxt "#31126"
 msgid "Play TV theme songs in video library (TvTunes add-on)"
@@ -238,27 +241,23 @@ msgid "Lyrics"
 msgstr "Sångtexter"
 
 msgctxt "#31129"
-msgid "Hide Fanart in full screen visualization"
+msgid "Hide Fanart in full screen visualisation"
 msgstr "Dölj fanart i fullskärmsvisualisering"
 
 msgctxt "#31132"
 msgid "Lyrics Add-on"
 msgstr "Sångtextstillägg"
 
-msgctxt "#31133"
-msgid "Subtitle Add-on"
-msgstr "Undertextstillägg"
-
 msgctxt "#31134"
-msgid "Home Page Videos Submenu"
+msgid "Home Page Videos Sub-menu"
 msgstr "Hemskärmens videoundermeny"
 
 msgctxt "#31135"
-msgid "Home Page Music Submenu"
+msgid "Home Page Music Sub-menu"
 msgstr "Hemskärmens musikundermeny"
 
 msgctxt "#31136"
-msgid "Home Page Pictures Submenu"
+msgid "Home Page Pictures Sub-menu"
 msgstr "Hemskärmens bildundermeny"
 
 msgctxt "#31140"
@@ -268,6 +267,10 @@ msgstr "Musik-OSD"
 msgctxt "#31141"
 msgid "Video OSD"
 msgstr "Video-OSD"
+
+msgctxt "#31142"
+msgid "Settings level"
+msgstr "Inställningsnivå"
 
 msgctxt "#31200"
 msgid "Shortcuts"
@@ -339,7 +342,7 @@ msgstr "Innehållsskrapealternativ"
 
 msgctxt "#31317"
 msgid "Set Fanart Path"
-msgstr "Sätt fanartsökväg"
+msgstr "Ange fanartsökväg"
 
 msgctxt "#31319"
 msgid "Selected Profile"
@@ -347,11 +350,11 @@ msgstr "Vald profil"
 
 msgctxt "#31320"
 msgid "Last Logged In"
-msgstr "Sist inloggad"
+msgstr "Senast inloggad"
 
 msgctxt "#31321"
 msgid "Karaoke Song Selector"
-msgstr "Karaokelåtväljare"
+msgstr "Karaoke-låtväljare"
 
 msgctxt "#31322"
 msgid "Aired"
@@ -409,13 +412,25 @@ msgctxt "#31356"
 msgid "Download Subtitles"
 msgstr "Ladda ner undertexter"
 
+msgctxt "#31360"
+msgid "Watch as 2D"
+msgstr "Se i 2D"
+
+msgctxt "#31361"
+msgid "Change mode"
+msgstr "Ändra läge"
+
+msgctxt "#31362"
+msgid "Enabled"
+msgstr "Aktiverad"
+
 msgctxt "#31390"
 msgid "Skin default"
 msgstr "Skalets standard"
 
 msgctxt "#31391"
 msgid "Skin default with no Caps"
-msgstr "Skalets standard utan VERSAL"
+msgstr "Skalets standard utan VERSALER"
 
 msgctxt "#31392"
 msgid "Arial based"
@@ -427,11 +442,11 @@ msgstr "[B]KONFIGURERA UTSEENDEINSTÄLLNINGAR[/B][CR][CR]Ändra skalet · Ange s
 
 msgctxt "#31401"
 msgid "[B]CONFIGURE VIDEO SETTINGS[/B][CR][CR]Manage your video library · Set video playback options · Change video listing options[CR]Set subtitle fonts"
-msgstr "[B]KONFIGURERA GRAFIKINSTÄLLNINGAR[/B][CR][CR]Hantera ditt filmbibliotek · Ange filmuppspelningsalternativ[CR]Ändra videoförteckningsalternativ · Konfigurera undertextfonter"
+msgstr "[B]KONFIGURERA GRAFIKINSTÄLLNINGAR[/B][CR][CR]Hantera ditt filmbibliotek · Ange filmuppspelningsalternativ[CR]Ändra videoförteckningsalternativ · Konfigurera undertexttypsnitt"
 
 msgctxt "#31402"
 msgid "[B]CONFIGURE MUSIC SETTINGS[/B][CR][CR]Manage your music library · Set music playback options · Change music listing options[CR]Setup song submission · Set karaoke options"
-msgstr "[B]KONFIGURERA MUSIKINSTÄLLNINGAR[/B][CR][CR]Hantera ditt musikbibliotek · Ange musikuppspelningsalternativ[CR]Ändra musiklistningsalternativ · Ange låtinskickning · Ange karaokealternativ"
+msgstr "[B]KONFIGURERA MUSIKINSTÄLLNINGAR[/B][CR][CR]Hantera ditt musikbibliotek · Ange musikuppspelningsalternativ[CR]Ändra musiklistningsalternativ · Ange låtinskickning · Ange karaoke-alternativ"
 
 msgctxt "#31403"
 msgid "[B]CONFIGURE PICTURE SETTINGS[/B][CR][CR]Set picture listing options · Configure slideshows"
@@ -450,28 +465,40 @@ msgid "[B]CONFIGURE ADD-ONS[/B][CR][CR]Manage your installed Add-ons · Browse f
 msgstr "[B]KONFIGURERA TILLÄGG[/B][CR][CR]Hantera installerade tillägg · Visa och installera tillägg från xbmc.org[CR]Ändra inställningar för tillägg"
 
 msgctxt "#31409"
-msgid "[B]CONFIGURE TV SETTINGS[/B][CR][CR]Change fullscreen info · Manage EPG data settings"
-msgstr "[B]KONFIGURERA TV-INSTÄLLNINGAR[/B][CR][CR]Ändra helskärmsinfo · Hantera EPG-datainställningar"
+msgid "[B]CONFIGURE TV SETTINGS[/B][CR][CR]Change full screen info · Manage EPG data settings"
+msgstr "[B]KONFIGURERA TV-INSTÄLLNINGAR[/B][CR][CR]Ändra fullskärmslägesinformation · Hantera EPG-datainställningar"
 
 msgctxt "#31410"
 msgid "[B]CONFIGURE SERVICE SETTINGS[/B][CR][CR]Setup control of XBMC via UPnP and HTTP · Configure file sharing[CR]Enable Zeroconf · Configure AirPlay"
-msgstr "[B]KONFIGURERA SERVICEINSTÄLLNINGAR[/B][CR][CR]Ställ in kontroll av XBMC via UPnP och HTTP · Konfigurera fildelning[CR]Aktivera Zeroconf · Konfigurera AirPlay"
+msgstr "[B]KONFIGURERA TJÄNSTINSTÄLLNINGAR[/B][CR][CR]Ställ in kontroll av XBMC via UPnP och HTTP · Konfigurera fildelning[CR]Aktivera Zeroconf · Konfigurera AirPlay"
 
 msgctxt "#31411"
 msgid "First run help...."
 msgstr "Förstagångshjälp..."
 
 msgctxt "#31412"
-msgid "This tab signifies that there is a menu off to the side of this window that contains extra options for this section.  To access the menu, navigate to the left with your remote control or keyboard or place your mouse pointer over the tab. [CR][CR]Click \"Ok\" to close this dialog. It will not appear again."
-msgstr "Den här fliken innebär att det är en meny på sidan av det här fönstret som innehåller extra val för denna section. För att komma åt menyn, navigera till vänster med din fjärrkontroll eller tangentbord eller placera din muspekare över fliken.[CR][CR]Klicka \"Ok\" för att stänga denna dialog. Den kommer inte att visas igen."
+msgid "This tab signifies that there is a menu off to the side of this window that contains extra options for this section.  To access the menu, navigate to the left with your remote control or keyboard or place your mouse pointer over the tab. [CR][CR]Click \"Ok\" to close this dialogue. It will not appear again."
+msgstr "Denna flik visar att det finns en meny till sidan om detta fönster som innehåller extra inställningar för denna sektion. För att nå menyn, navigera med din fjärrkontroll, tangentbord eller placera din mus ovanför fliken. [CR][CR]Klicka på \"OK\" för att stänga denna dialogruta. Den kommer inte att visas igen."
+
+msgctxt "#31413"
+msgid "Local subtitle available"
+msgstr "Lokal undertext tillgänglig"
+
+msgctxt "#31420"
+msgid "Login"
+msgstr "Logga in"
 
 msgctxt "#31421"
 msgid "Select your XBMC user Profile[CR]to login and continue"
-msgstr "Välj din XBMC användarprofil[CR]för att logga in och fortsätta"
+msgstr "Välj din XBMC-användarprofil[CR]för att logga in och fortsätta"
 
-msgctxt "#31500"
-msgid "Recording Timers"
-msgstr "Inspelningstimers"
+msgctxt "#31422"
+msgid "Show or hide the login screen at startup."
+msgstr "Visa eller dölj inloggningsskärmen vid start."
+
+msgctxt "#31423"
+msgid "Select the profile that will be used at startup when the login screen is disabled."
+msgstr "Välj den profil som skall användas vid start då inloggningsskärmen inte visas."
 
 msgctxt "#31501"
 msgid "Scheduled Time"
@@ -479,7 +506,7 @@ msgstr "Schemalagd tid"
 
 msgctxt "#31502"
 msgid "Live TV"
-msgstr "Live TV"
+msgstr "Live-TV"
 
 msgctxt "#31503"
 msgid "Add Group"
@@ -491,7 +518,7 @@ msgstr "Döp om grupp"
 
 msgctxt "#31505"
 msgid "Delete Group"
-msgstr "Ta bort grupp"
+msgstr "Radera grupp"
 
 msgctxt "#31506"
 msgid "Available[CR]Groups"
@@ -539,4 +566,44 @@ msgstr "Hämtar prognosinfo..."
 
 msgctxt "#31910"
 msgid "Map & Alerts"
-msgstr "Kartor & varningar"
+msgstr "Karta & varningar"
+
+msgctxt "#31950"
+msgid "WEATHER"
+msgstr "VÄDER"
+
+msgctxt "#31951"
+msgid "PICTURES"
+msgstr "FOTON"
+
+msgctxt "#31952"
+msgid "LIVE TV"
+msgstr "LIVE-TV"
+
+msgctxt "#31953"
+msgid "VIDEOS"
+msgstr "VIDEOR"
+
+msgctxt "#31954"
+msgid "MOVIES"
+msgstr "FILMER"
+
+msgctxt "#31955"
+msgid "TV SHOWS"
+msgstr "TV-SERIER"
+
+msgctxt "#31956"
+msgid "MUSIC"
+msgstr "MUSIK"
+
+msgctxt "#31957"
+msgid "PROGRAMS"
+msgstr "PROGRAM"
+
+msgctxt "#31958"
+msgid "PLAY DISC"
+msgstr "SPELA SKIVA"
+
+msgctxt "#31959"
+msgid "SYSTEM"
+msgstr "SYSTEM"

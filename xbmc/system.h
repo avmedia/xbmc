@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,9 @@
 #include "config.h"
 #define DECLARE_UNUSED(a,b) a __attribute__((unused)) b;
 #endif
+
+#define PRE_SKIN_VERSION_9_10_COMPATIBILITY 1
+#define PRE_SKIN_VERSION_11_COMPATIBILITY 1
 
 /*****************
  * All platforms
@@ -74,7 +77,7 @@
   #define HAS_AIRPLAY
 #endif
 
-#ifdef HAVE_LIBSHAIRPORT
+#if defined(HAVE_LIBSHAIRPORT) || defined(HAVE_LIBSHAIRPLAY)
   #define HAS_AIRTUNES
 #endif
 
@@ -84,6 +87,12 @@
 
 #if defined(USE_UPNP)
   #define HAS_UPNP
+#endif
+
+#if defined(HAVE_LIBMDNSEMBEDDED)
+  #define HAS_ZEROCONF
+  #define HAS_MDNS
+  #define HAS_MDNS_EMBEDDED
 #endif
 
 /**********************
@@ -119,8 +128,10 @@
 #define HAS_FILESYSTEM_SMB
 #define HAS_FILESYSTEM_NFS
 #define HAS_ZEROCONF
+#define HAS_MDNS
 #define HAS_AIRPLAY
 #define HAS_AIRTUNES
+#define HAVE_LIBSHAIRPLAY
 #define HAVE_LIBCEC
 #define HAVE_LIBMP3LAME
 #define HAVE_LIBVORBISENC
@@ -185,18 +196,6 @@
 
 #ifdef HAVE_LIBSSH
 #define HAS_FILESYSTEM_SFTP
-#endif
-
-/*****************
- * Git revision
- *****************/
-
-#if defined(TARGET_DARWIN)
-#include "../git_revision.h"
-#endif
-
-#ifndef GIT_REV
-#define GIT_REV "Unknown"
 #endif
 
 /****************************************
@@ -269,3 +268,11 @@
 #define GET_G(color)            ((color >>  8) & 0xFF)
 #define GET_B(color)            ((color >>  0) & 0xFF)
 
+/****************
+ * default skin
+ ****************/
+#if defined(HAS_SKIN_TOUCHED) && defined(TARGET_DARWIN_IOS) && !defined(TARGET_DARWIN_IOS_ATV2)
+#define DEFAULT_SKIN          "skin.touched"
+#else
+#define DEFAULT_SKIN          "skin.confluence"
+#endif

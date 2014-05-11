@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -66,6 +66,12 @@ namespace PVR
      * @return All timers that are active (states scheduled or recording)
      */
     std::vector<CFileItemPtr> GetActiveTimers(void) const;
+
+    /*!
+     * Get all timers
+     * @param items The list to add the timers to
+     */
+    void GetAll(CFileItemList& items) const;
 
     /*!
      * @return True when there is at least one timer that is active (states scheduled or recording), false otherwise.
@@ -166,6 +172,13 @@ namespace PVR
 
     void Notify(const Observable &obs, const ObservableMessage msg);
 
+    /*!
+     * Get a timer tag given it's unique ID
+     * @param iTimerId The ID to find
+     * @return The tag, or an empty one when not found
+     */
+    CPVRTimerInfoTagPtr GetById(unsigned int iTimerId) const;
+
   private:
     void Unload(void);
     void UpdateEpgEvent(CPVRTimerInfoTagPtr timer);
@@ -175,5 +188,6 @@ namespace PVR
     CCriticalSection                                        m_critSection;
     bool                                                    m_bIsUpdating;
     std::map<CDateTime, std::vector<CPVRTimerInfoTagPtr>* > m_tags;
+    unsigned int                                            m_iLastId;
   };
 }

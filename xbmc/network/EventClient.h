@@ -3,7 +3,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include "threads/CriticalSection.h"
 #include "Socket.h"
 #include "EventPacket.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 
 #include <list>
 #include <map>
@@ -158,8 +158,8 @@ namespace EVENTCLIENT
 
     void RefreshSettings()
     {
-      m_iRepeatDelay = g_guiSettings.GetInt("services.esinitialdelay");
-      m_iRepeatSpeed = g_guiSettings.GetInt("services.escontinuousdelay");
+      m_iRepeatDelay = CSettings::Get().GetInt("services.esinitialdelay");
+      m_iRepeatSpeed = CSettings::Get().GetInt("services.escontinuousdelay");
     }
 
     SOCKETS::CAddress& Address()

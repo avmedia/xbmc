@@ -1,9 +1,6 @@
-#ifndef NETWORK_LINUX_H_
-#define NETWORK_LINUX_H_
-
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +17,9 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
-
+#ifndef NETWORK_LINUX_H_
+#define NETWORK_LINUX_H_
+ 
 #include <vector>
 #include "utils/StdString.h"
 #include "network/Network.h"
@@ -44,6 +43,8 @@ public:
 
    virtual CStdString GetMacAddress(void);
    virtual void GetMacAddressRaw(char rawMac[6]);
+
+   virtual bool GetHostMacAddress(unsigned long host, CStdString& mac);
 
    virtual CStdString GetCurrentIPAddress();
    virtual CStdString GetCurrentNetmask();
@@ -71,6 +72,9 @@ public:
 
    // Return the list of interfaces
    virtual std::vector<CNetworkInterface*>& GetInterfaceList(void);
+
+   // Ping remote host
+   virtual bool PingHost(unsigned long host, unsigned int timeout_ms = 2000);
 
    // Get/set the nameserver(s)
    virtual std::vector<CStdString> GetNameServers(void);

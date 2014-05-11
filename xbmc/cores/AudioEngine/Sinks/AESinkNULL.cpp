@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -75,20 +75,7 @@ void CAESinkNULL::Deinitialize()
   StopThread();
 }
 
-bool CAESinkNULL::IsCompatible(const AEAudioFormat format, const std::string &device)
-{
-  return ((m_format.m_sampleRate    == format.m_sampleRate) &&
-          (m_format.m_dataFormat    == format.m_dataFormat) &&
-          (m_format.m_channelLayout == format.m_channelLayout));
-}
-
 double CAESinkNULL::GetDelay()
-{
-  double sinkbuffer_seconds_to_empty = m_sinkbuffer_sec_per_byte * (double)m_sinkbuffer_level;
-  return sinkbuffer_seconds_to_empty;
-}
-
-double CAESinkNULL::GetCacheTime()
 {
   double sinkbuffer_seconds_to_empty = m_sinkbuffer_sec_per_byte * (double)m_sinkbuffer_level;
   return sinkbuffer_seconds_to_empty;
@@ -99,7 +86,7 @@ double CAESinkNULL::GetCacheTotal()
   return m_sinkbuffer_sec_per_byte * (double)m_sinkbuffer_size;
 }
 
-unsigned int CAESinkNULL::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio)
+unsigned int CAESinkNULL::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio, bool blocking)
 {
   unsigned int max_frames = (m_sinkbuffer_size - m_sinkbuffer_level) / m_sink_frameSize;
   if (frames > max_frames)
@@ -110,9 +97,6 @@ unsigned int CAESinkNULL::AddPackets(uint8_t *data, unsigned int frames, bool ha
     m_sinkbuffer_level += frames * m_sink_frameSize;
     m_wake.Set();
   }
-  // AddPackets runs under a non-idled AE thread we must block or sleep.
-  // Trying to calc the optimal sleep is tricky so just a minimal sleep.
-  Sleep(10);
 
   return frames;
 }
@@ -163,7 +147,7 @@ void CAESinkNULL::Process()
       // an approximate sleep time.
       int frames_written = read_bytes / m_sink_frameSize;
       double empty_ms = 1000.0 * (double)frames_written / m_format.m_sampleRate;
-      #if defined(_LINUX)
+      #if defined(TARGET_POSIX)
         usleep(empty_ms * 1000.0);
       #else
         Sleep((int)empty_ms);

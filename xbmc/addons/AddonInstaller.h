@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #include "addons/Addon.h"
 #include "utils/Stopwatch.h"
 #include "threads/Event.h"
+
+class CAddonDatabase;
 
 class CAddonInstaller : public IJobCallback
 {
@@ -68,9 +70,10 @@ public:
    Iterates through the addon's dependencies, checking they're installed or installable.
    Each dependency must also satisfies CheckDependencies in turn.
    \param addon the addon to check
+   \param database the database instance to update. Defaults to NULL.
    \return true if dependencies are available, false otherwise.
    */
-  bool CheckDependencies(const ADDON::AddonPtr &addon);
+  bool CheckDependencies(const ADDON::AddonPtr &addon, CAddonDatabase *database = NULL);
 
   /*! \brief Update all repositories (if needed)
    Runs through all available repositories and queues an update of them if they
@@ -127,10 +130,11 @@ private:
    Each dependency must also satisfies CheckDependencies in turn.
    \param addon the addon to check
    \param preDeps previous dependencies encountered during recursion. aids in avoiding infinite recursion
+   \param database database instance to update
    \return true if dependencies are available, false otherwise.
    */
   bool CheckDependencies(const ADDON::AddonPtr &addon,
-                         std::vector<std::string>& preDeps);
+                         std::vector<std::string>& preDeps, CAddonDatabase &database);
 
   void PrunePackageCache();
   int64_t EnumeratePackageFolder(std::map<CStdString,CFileItemList*>& result);
@@ -158,10 +162,16 @@ public:
    \param addonFolder - the folder to delete
    */
   static bool DeleteAddon(const CStdString &addonFolder);
+
+  /*! \brief Find which repository hosts an add-on
+   *  \param addon The add-on to find the repository for
+   *  \return The hosting repository
+   */
+  static ADDON::AddonPtr GetRepoForAddon(const ADDON::AddonPtr& addon);
 private:
   bool OnPreInstall();
   void OnPostInstall(bool reloadAddon);
-  bool Install(const CStdString &installFrom);
+  bool Install(const CStdString &installFrom, const ADDON::AddonPtr& repo=ADDON::AddonPtr());
   bool DownloadPackage(const CStdString &path, const CStdString &dest);
 
   /*! \brief Queue a notification for addon installation/update failure
@@ -169,12 +179,6 @@ private:
    \param fileName - filename which is shown in case the addon id is unknown
    */
   void ReportInstallError(const CStdString& addonID, const CStdString& fileName);
-
-  /*! \brief Check the hash of a downloaded addon with the hash in the repository
-   \param addonZip - filename of the zipped addon to check
-   \return true if the hash matches (or no hash is available on the repo), false otherwise
-   */
-  bool CheckHash(const CStdString& addonZip);
 
   ADDON::AddonPtr m_addon;
   CStdString m_hash;

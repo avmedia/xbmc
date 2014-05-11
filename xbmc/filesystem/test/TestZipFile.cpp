@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,9 +20,10 @@
 
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
-#include "settings/GUISettings.h"
+#include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "FileItem.h"
+#include "settings/Settings.h"
 #include "test/TestUtils.h"
 
 #include <errno.h>
@@ -37,19 +38,21 @@ protected:
     /* Add default settings for locale.
      * Settings here are taken from CGUISettings::Initialize()
      */
-    CSettingsCategory *loc = g_guiSettings.AddCategory(7, "locale", 14090);
-    g_guiSettings.AddString(loc, "locale.language",248,"english",
+    /* TODO
+    CSettingsCategory *loc = CSettings::Get().AddCategory(7, "locale", 14090);
+    CSettings::Get().AddString(loc, "locale.language",248,"english",
                             SPIN_CONTROL_TEXT);
-    g_guiSettings.AddString(loc, "locale.country", 20026, "USA",
+    CSettings::Get().AddString(loc, "locale.country", 20026, "USA",
                             SPIN_CONTROL_TEXT);
-    g_guiSettings.AddString(loc, "locale.charset", 14091, "DEFAULT",
+    CSettings::Get().AddString(loc, "locale.charset", 14091, "DEFAULT",
                             SPIN_CONTROL_TEXT); // charset is set by the
                                                 // language file
+    */
   }
 
   ~TestZipFile()
   {
-    g_guiSettings.Clear();
+    CSettings::Get().Unload();
   }
 };
 
@@ -187,12 +190,12 @@ TEST_F(TestZipFile, CorruptedFile)
   std::cout << "File contents:" << std::endl;
   while ((size = file->Read(buf, sizeof(buf))) > 0)
   {
-    str.Format("  %08X", count);
+    str = StringUtils::Format("  %08X", count);
     std::cout << str << "  ";
     count += size;
     for (i = 0; i < size; i++)
     {
-      str.Format("%02X ", buf[i]);
+      str = StringUtils::Format("%02X ", buf[i]);
       std::cout << str;
     }
     while (i++ < sizeof(buf))

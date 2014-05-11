@@ -48,7 +48,7 @@ struct SSubSettings
 public:
   bool forcePowerOfTwoTextures;
   bool disableAnimations;
-  uint32_t bufferAhead;
+  UINT32 bufferAhead;
   SIZE textureSize;
 
   SSubSettings()

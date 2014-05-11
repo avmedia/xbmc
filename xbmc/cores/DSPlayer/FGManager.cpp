@@ -38,7 +38,6 @@
 #include "DSUtil/DShowCommon.h"
 #include "DSUtil/SmartPtr.h"
 #include "utils/SystemInfo.h" //g_sysinfo
-#include "settings/GUISettings.h"//g_guiSettings
 
 
 #include "filters/VMR9AllocatorPresenter.h"

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "guilib/GUIWindowManager.h"
 #include "guilib/Key.h"
 #include "guilib/LocalizeStrings.h"
+#include "utils/StringUtils.h"
 
 #include "pvr/PVRManager.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
@@ -263,23 +264,6 @@ bool CGUIDialogPVRGroupManager::OnMessage(CGUIMessage& message)
 
   switch (iMessage)
   {
-    case GUI_MSG_WINDOW_DEINIT:
-    {
-      Clear();
-    }
-    break;
-
-    case GUI_MSG_WINDOW_INIT:
-    {
-      CGUIWindow::OnMessage(message);
-      m_iSelectedUngroupedChannel  = 0;
-      m_iSelectedGroupMember = 0;
-      m_iSelectedChannelGroup = 0;
-      Update();
-      return true;
-    }
-    break;
-
     case GUI_MSG_CLICKED:
     {
       OnMessageClick(message);
@@ -288,6 +272,21 @@ bool CGUIDialogPVRGroupManager::OnMessage(CGUIMessage& message)
   }
 
   return CGUIDialog::OnMessage(message);
+}
+
+void CGUIDialogPVRGroupManager::OnInitWindow()
+{
+  CGUIDialog::OnInitWindow();
+  m_iSelectedUngroupedChannel  = 0;
+  m_iSelectedGroupMember = 0;
+  m_iSelectedChannelGroup = 0;
+  Update();
+}
+
+void CGUIDialogPVRGroupManager::OnDeinitWindow(int nextWindowID)
+{
+  Clear();
+  CGUIDialog::OnDeinitWindow(nextWindowID);
 }
 
 void CGUIDialogPVRGroupManager::OnWindowLoaded()
@@ -342,19 +341,23 @@ void CGUIDialogPVRGroupManager::Update()
     if (m_selectedGroup->IsInternalGroup())
     {
       CStdString strNewLabel;
-      strNewLabel.Format("%s %s", g_localizeStrings.Get(19022), m_bIsRadio ? g_localizeStrings.Get(19024) : g_localizeStrings.Get(19023));
+      strNewLabel = StringUtils::Format("%s %s",
+                                        g_localizeStrings.Get(19022).c_str(),
+                                        m_bIsRadio ? g_localizeStrings.Get(19024).c_str() : g_localizeStrings.Get(19023).c_str());
       SET_CONTROL_LABEL(CONTROL_UNGROUPED_LABEL, strNewLabel);
 
-      strNewLabel.Format("%s %s", g_localizeStrings.Get(19218), m_bIsRadio ? g_localizeStrings.Get(19024) : g_localizeStrings.Get(19023));
+      strNewLabel = StringUtils::Format("%s %s",
+                                        g_localizeStrings.Get(19218).c_str(),
+                                        m_bIsRadio ? g_localizeStrings.Get(19024).c_str() : g_localizeStrings.Get(19023).c_str());
       SET_CONTROL_LABEL(CONTROL_IN_GROUP_LABEL, strNewLabel);
     }
     else
     {
       CStdString strNewLabel;
-      strNewLabel.Format("%s", g_localizeStrings.Get(19219));
+      strNewLabel = StringUtils::Format("%s", g_localizeStrings.Get(19219).c_str());
       SET_CONTROL_LABEL(CONTROL_UNGROUPED_LABEL, strNewLabel);
 
-      strNewLabel.Format("%s %s", g_localizeStrings.Get(19220), m_selectedGroup->GroupName());
+      strNewLabel = StringUtils::Format("%s %s", g_localizeStrings.Get(19220).c_str(), m_selectedGroup->GroupName().c_str());
       SET_CONTROL_LABEL(CONTROL_IN_GROUP_LABEL, strNewLabel);
     }
 

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@
  *
  */
 
-#if (defined HAVE_CONFIG_H) && (!defined WIN32)
+#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
   #include "config.h"
 #endif
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include "system.h" // just for HAS_LIBRTMP
 #endif
 
@@ -73,12 +73,15 @@ CDVDInputStreamRTMP::CDVDInputStreamRTMP() : CDVDInputStream(DVDSTREAM_TYPE_RTMP
     m_libRTMP.LogSetCallback(CDVDInputStreamRTMP_Log);
     switch (g_advancedSettings.m_logLevel)
     {
-      case LOG_LEVEL_DEBUG_SAMBA: level = RTMP_LOGDEBUG2; break;
       case LOG_LEVEL_DEBUG_FREEMEM:
       case LOG_LEVEL_DEBUG: level = RTMP_LOGDEBUG; break;
       case LOG_LEVEL_NORMAL: level = RTMP_LOGINFO; break;
       default: level = RTMP_LOGCRIT; break;
     }
+
+    if (g_advancedSettings.m_extraLogLevels & LOGRTMP)
+      level = RTMP_LOGDEBUG2;
+
     m_libRTMP.LogSetLevel(level);
     RTMP_level = level;
     
@@ -185,7 +188,7 @@ void CDVDInputStreamRTMP::Close()
   m_bPaused = false;
 }
 
-int CDVDInputStreamRTMP::Read(BYTE* buf, int buf_size)
+int CDVDInputStreamRTMP::Read(uint8_t* buf, int buf_size)
 {
   int i = m_libRTMP.Read(m_rtmp, (char *)buf, buf_size);
   if (i < 0)
@@ -223,6 +226,9 @@ bool CDVDInputStreamRTMP::Pause(double dTime)
   CSingleLock lock(m_RTMPSection);
 
   m_bPaused = !m_bPaused;
+
+  CLog::Log(LOGNOTICE, "RTMP Pause %s requested", m_bPaused ? "TRUE" : "FALSE");
+
   m_libRTMP.Pause(m_rtmp, m_bPaused);
 
   return true;

@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,8 @@
 #include <map>
 #include <string>
 
-#include "settings/ISubSettings.h"
+#include "settings/lib/ISettingCallback.h"
+#include "settings/lib/ISubSettings.h"
 #include "settings/VideoSettings.h"
 #include "threads/CriticalSection.h"
 
@@ -37,13 +38,15 @@ typedef enum {
   WatchedModeWatched
 } WatchedMode;
 
-class CMediaSettings : public ISubSettings
+class CMediaSettings : public ISettingCallback, public ISubSettings
 {
 public:
   static CMediaSettings& Get();
 
   virtual bool Load(const TiXmlNode *settings);
   virtual bool Save(TiXmlNode *settings) const;
+
+  virtual void OnSettingAction(const CSetting *setting);
 
   const CVideoSettings& GetDefaultVideoSettings() const { return m_defaultVideoSettings; }
   CVideoSettings& GetDefaultVideoSettings() { return m_defaultVideoSettings; }
@@ -93,7 +96,7 @@ public:
 protected:
   CMediaSettings();
   CMediaSettings(const CMediaSettings&);
-  CMediaSettings const& operator=(CMediaSettings const&);
+  CMediaSettings& operator=(CMediaSettings const&);
   virtual ~CMediaSettings();
 
   static std::string GetWatchedContent(const std::string &content);

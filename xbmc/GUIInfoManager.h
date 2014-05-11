@@ -8,7 +8,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include "inttypes.h"
 #include "XBDateTime.h"
 #include "utils/Observer.h"
+#include "interfaces/info/InfoBool.h"
 #include "interfaces/info/SkinVariable.h"
 #include "cores/IPlayer.h"
 
@@ -48,7 +49,6 @@ class CGUIListItem;
 class CDateTime;
 namespace INFO
 {
-  class InfoBool;
   class InfoSingle;
 }
 
@@ -109,6 +109,8 @@ namespace INFO
 #define PLAYER_CAN_SEEK              51
 #define PLAYER_START_TIME            52
 #define PLAYER_TITLE                 53
+#define PLAYER_ISINTERNETSTREAM      54
+#define PLAYER_FILENAME              55
 
 #define WEATHER_CONDITIONS          100
 #define WEATHER_TEMPERATURE         101
@@ -171,6 +173,7 @@ namespace INFO
 #define SYSTEM_HAS_SHUTDOWN         185
 #define SYSTEM_HAS_PVR              186
 #define SYSTEM_STARTUP_WINDOW       187
+#define SYSTEM_STEREOSCOPIC_MODE    188
 
 #define NETWORK_IP_ADDRESS          190
 #define NETWORK_MAC_ADDRESS         191
@@ -271,6 +274,10 @@ namespace INFO
 #define VIDEOPLAYER_PARENTAL_RATING   307
 #define VIDEOPLAYER_HAS_EPG           308
 #define VIDEOPLAYER_VOTES             309
+#define VIDEOPLAYER_IS_STEREOSCOPIC   310
+#define VIDEOPLAYER_STEREOSCOPIC_MODE 311
+#define VIDEOPLAYER_SUBTITLES_LANG    312
+#define VIDEOPLAYER_AUDIO_LANG        313
 
 #define CONTAINER_CAN_FILTER         342
 #define CONTAINER_CAN_FILTERADVANCED 343
@@ -381,6 +388,7 @@ namespace INFO
 #define SYSTEM_IDLE_TIME            715
 #define SYSTEM_FRIENDLY_NAME        716
 #define SYSTEM_SCREENSAVER_ACTIVE   717
+#define SYSTEM_ADDON_VERSION        718
 
 #define LIBRARY_HAS_MUSIC           720
 #define LIBRARY_HAS_VIDEO           721
@@ -399,6 +407,7 @@ namespace INFO
 #define SYSTEM_PLATFORM_DARWIN_IOS  745
 #define SYSTEM_PLATFORM_DARWIN_ATV2 746
 #define SYSTEM_PLATFORM_ANDROID     747
+#define SYSTEM_PLATFORM_LINUX_RASPBERRY_PI 748
 
 #define SYSTEM_CAN_POWERDOWN        750
 #define SYSTEM_CAN_SUSPEND          751
@@ -468,7 +477,10 @@ namespace INFO
 #define PVR_ACTUAL_STREAM_AUDIO_BR  (PVR_STRINGS_START + 31)
 #define PVR_ACTUAL_STREAM_DOLBY_BR  (PVR_STRINGS_START + 32)
 #define PVR_ACTUAL_STREAM_CRYPTION  (PVR_STRINGS_START + 33)
-#define PVR_STRINGS_END             PVR_ACTUAL_STREAM_CRYPTION
+#define PVR_ACTUAL_STREAM_SERVICE   (PVR_STRINGS_START + 34)
+#define PVR_ACTUAL_STREAM_MUX       (PVR_STRINGS_START + 35)
+#define PVR_ACTUAL_STREAM_PROVIDER  (PVR_STRINGS_START + 36)
+#define PVR_STRINGS_END             PVR_ACTUAL_STREAM_PROVIDER
 
 #define WINDOW_PROPERTY             9993
 #define WINDOW_IS_TOPMOST           9994
@@ -484,9 +496,9 @@ namespace INFO
 #define CONTROL_GROUP_HAS_FOCUS     29999
 #define CONTROL_HAS_FOCUS           30000
 
-#define VERSION_MAJOR 13
-#define VERSION_MINOR 0
-#define VERSION_TAG "-ALPHA3"
+#define VERSION_MAJOR               14
+#define VERSION_MINOR               0
+#define VERSION_TAG                 "-ALPHA1"
 
 #define LISTITEM_START              35000
 #define LISTITEM_THUMB              (LISTITEM_START)
@@ -633,8 +645,10 @@ namespace INFO
 #define LISTITEM_PROGRESS           (LISTITEM_START + 137)
 #define LISTITEM_HAS_EPG            (LISTITEM_START + 138)
 #define LISTITEM_VOTES              (LISTITEM_START + 139)
+#define LISTITEM_STEREOSCOPIC_MODE  (LISTITEM_START + 140)
+#define LISTITEM_IS_STEREOSCOPIC    (LISTITEM_START + 141)
 #ifdef HAS_DS_PLAYER
-#define LISTITEM_ITEM_TYPE          (LISTITEM_START + 140)
+#define LISTITEM_ITEM_TYPE          (LISTITEM_START + 142)
 #endif
 #define LISTITEM_PROPERTY_START     (LISTITEM_START + 200)
 #define LISTITEM_PROPERTY_END       (LISTITEM_PROPERTY_START + 1000)
@@ -711,22 +725,14 @@ public:
    \param expression the boolean condition or expression
    \param context the context window
    \return an identifier used to reference this expression
-
-   \sa GetBoolValue
    */
-  unsigned int Register(const CStdString &expression, int context = 0);
-
-  /*! \brief Get a previously registered boolean expression's value
-   Checks the cache and evaluates the boolean expression if required.
-   \sa Register
-   */
-  bool GetBoolValue(unsigned int expression, const CGUIListItem *item = NULL);
+  INFO::InfoPtr Register(const CStdString &expression, int context = 0);
 
   /*! \brief Evaluate a boolean expression
    \param expression the expression to evaluate
    \param context the context in which to evaluate the expression (currently windows)
    \return the value of the evaluated expression.
-   \sa Register, GetBoolValue
+   \sa Register
    */
   bool EvaluateBool(const CStdString &expression, int context = 0);
 
@@ -754,7 +760,7 @@ public:
   // Current song stuff
   /// \brief Retrieves tag info (if necessary) and fills in our current song path.
   void SetCurrentSong(CFileItem &item);
-  void SetCurrentAlbumThumb(const CStdString thumbFileName);
+  void SetCurrentAlbumThumb(const CStdString &thumbFileName);
   void SetCurrentMovie(CFileItem &item);
   void SetCurrentSlide(CFileItem &item);
   const CFileItem &GetCurrentSlide() const;
@@ -768,7 +774,7 @@ public:
   CStdString GetMusicLabel(int item);
   CStdString GetMusicTagLabel(int info, const CFileItem *item);
   CStdString GetVideoLabel(int item);
-  CStdString GetPlaylistLabel(int item) const;
+  CStdString GetPlaylistLabel(int item, int playlistid = -1 /* PLAYLIST_NONE */) const;
   CStdString GetMusicPartyModeLabel(int item);
   const CStdString GetMusicPlaylistInfo(const GUIInfo& info);
   CStdString GetPictureLabel(int item);
@@ -833,13 +839,14 @@ public:
   CStdString GetSkinVariableString(int info, bool preferImage = false, const CGUIListItem *item=NULL);
 
   /// \brief iterates through boolean conditions and compares their stored values to current values. Returns true if any condition changed value.
-  bool ConditionsChangedValues(const std::map<int, bool>& map);
+  bool ConditionsChangedValues(const std::map<INFO::InfoPtr, bool>& map);
 
   bool m_AVInfoValid;
 
 protected:
   friend class INFO::InfoSingle;
   bool GetBool(int condition, int contextWindow = 0, const CGUIListItem *item=NULL);
+  int TranslateSingleString(const CStdString &strCondition, bool &listItemDependent);
 
   // routines for window retrieval
   bool CheckWindowCondition(CGUIWindow *window, int condition) const;
@@ -930,9 +937,8 @@ protected:
   int m_nextWindowID;
   int m_prevWindowID;
 
-  std::vector<INFO::InfoBool*> m_bools;
+  std::vector<INFO::InfoPtr> m_bools;
   std::vector<INFO::CSkinVariableString> m_skinVariableStrings;
-  unsigned int m_updateTime;
 
   int m_libraryHasMusic;
   int m_libraryHasMovies;

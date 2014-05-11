@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "FileItem.h"
 #include "guilib/Key.h"
 #include "guilib/LocalizeStrings.h"
+#include "utils/StringUtils.h"
 
 #define CONTROL_LIST           2
 #define CONTROL_PRESETS_LABEL  3
@@ -127,7 +128,7 @@ void CGUIDialogVisualisationPresetList::Update()
   CStdString strHeading;
   if (m_viz)
   {
-    strHeading.Format(g_localizeStrings.Get(13407).c_str(), m_viz->Name().c_str());
+    strHeading = StringUtils::Format(g_localizeStrings.Get(13407).c_str(), m_viz->Name().c_str());
 
     //clear filelist
     CGUIMessage msg(GUI_MSG_LABEL_RESET, GetID(), CONTROL_LIST);

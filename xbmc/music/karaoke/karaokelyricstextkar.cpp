@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,8 +22,9 @@
 
 #include "utils/CharsetConverter.h"
 #include "filesystem/File.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
+#include "utils/Utf8Utils.h"
 #include <math.h>
 
 #include "karaokelyricstextkar.h"
@@ -315,11 +316,11 @@ void CKaraokeLyricsTextKAR::parseMIDI()
             // Keywords
             if ( tempbuf[0] == '@' && tempbuf[1] == 'T' && strlen( tempbuf + 2 ) > 0 )
             {
-              if ( m_songName.IsEmpty() )
+              if ( m_songName.empty() )
                 m_songName = convertText( tempbuf + 2 );
               else
               {
-                if ( !m_artist.IsEmpty() )
+                if ( !m_artist.empty() )
                   m_artist += "[CR]";
 
                 m_artist += convertText( tempbuf + 2 );
@@ -600,10 +601,10 @@ CStdString CKaraokeLyricsTextKAR::convertText( const char * data )
   CStdString strUTF8;
 
   // Use some heuristics; need to replace by real detection stuff later
-  if ( g_charsetConverter.isValidUtf8(data) || g_guiSettings.GetString("karaoke.charset") == "DEFAULT" )
+  if (CUtf8Utils::isValidUtf8(data) || CSettings::Get().GetString("karaoke.charset") == "DEFAULT")
     strUTF8 = data;
   else
-    g_charsetConverter.stringCharsetToUtf8( g_guiSettings.GetString("karaoke.charset"), data, strUTF8 );
+    g_charsetConverter.ToUtf8( CSettings::Get().GetString("karaoke.charset"), data, strUTF8 );
 
   if ( strUTF8.size() == 0 )
     strUTF8 = " ";

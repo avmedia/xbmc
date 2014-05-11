@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 
 #include "JSONRPC.h"
 #include "ServiceDescription.h"
+#include "dbwrappers/DatabaseQuery.h"
 #include "input/ButtonTranslator.h"
 #include "interfaces/AnnouncementManager.h"
 #include "playlists/SmartPlayList.h"
@@ -29,6 +30,7 @@
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
+#include "TextureDatabase.h"
 
 using namespace ANNOUNCEMENT;
 using namespace JSONRPC;
@@ -52,7 +54,7 @@ void CJSONRPC::Initialize()
 
   // filter-related enums
   vector<string> smartplaylistList;
-  CSmartPlaylist::GetAvailableOperators(smartplaylistList);
+  CDatabaseQueryRule::GetAvailableOperators(smartplaylistList);
   CJSONServiceDescription::AddEnum("List.Filter.Operators", smartplaylistList);
 
   smartplaylistList.clear();
@@ -82,6 +84,10 @@ void CJSONRPC::Initialize()
   smartplaylistList.clear();
   CSmartPlaylist::GetAvailableFields("songs", smartplaylistList);
   CJSONServiceDescription::AddEnum("List.Filter.Fields.Songs", smartplaylistList);
+
+  smartplaylistList.clear();
+  CTextureRule::GetAvailableFields(smartplaylistList);
+  CJSONServiceDescription::AddEnum("List.Filter.Fields.Textures", smartplaylistList);
 
   unsigned int size = sizeof(JSONRPC_SERVICE_TYPES) / sizeof(char*);
 
@@ -226,7 +232,9 @@ CStdString CJSONRPC::MethodCall(const CStdString &inputString, ITransportLayer *
   CVariant inputroot, outputroot, result;
   bool hasResponse = false;
 
-  CLog::Log(LOGDEBUG, "JSONRPC: Incoming request: %s", inputString.c_str());
+  if(g_advancedSettings.m_extraLogLevels & LOGJSONRPC)
+    CLog::Log(LOGDEBUG, "JSONRPC: Incoming request: %s", inputString.c_str());
+
   inputroot = CJSONVariantParser::Parse((unsigned char *)inputString.c_str(), inputString.length());
   if (!inputroot.isNull())
   {
@@ -276,12 +284,11 @@ bool CJSONRPC::HandleMethodCall(const CVariant& request, CVariant& response, ITr
     isNotification = !request.isMember("id");
 
     CStdString methodName = request["method"].asString();
-    methodName = methodName.ToLower();
+    StringUtils::ToLower(methodName);
 
     JSONRPC::MethodCall method;
     CVariant params;
 
-    CLog::Log(LOGDEBUG, "JSONRPC: Calling %s", methodName.c_str());
     if ((errorCode = CJSONServiceDescription::CheckCall(methodName, request["params"], transport, client, isNotification, method, params)) == OK)
       errorCode = method(methodName, transport, client, params, result);
     else

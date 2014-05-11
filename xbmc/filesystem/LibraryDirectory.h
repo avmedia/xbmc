@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,14 +37,14 @@ namespace XFILE
      \param path the library:// path to parse
      \return path to the XML file or directory corresponding to this path
      */
-    CStdString GetNode(const CStdString &path);
+    std::string GetNode(const std::string &path);
 
     /*! \brief load the XML file and return a pointer to the <node> root element.
      Checks visible attribute and only returns non-NULL for valid nodes that should be visible.
      \param xmlFile the XML file to load and parse
      \return the TiXmlElement pointer to the node, if it should be visible.
      */
-    TiXmlElement *LoadXML(const CStdString &xmlFile);
+    TiXmlElement *LoadXML(const std::string &xmlFile);
 
     CXBMCTinyXML m_doc;
   };

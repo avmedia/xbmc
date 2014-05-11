@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,16 +23,16 @@
 #include "GUIInfoManager.h"
 #include "Application.h"
 #include "music/tags/MusicInfoTag.h"
-#include "settings/DisplaySettings.h"
 #include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/DisplaySettings.h"
 #include "windowing/WindowingFactory.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
 #include "cores/IPlayer.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "cores/AudioEngine/Utils/AEConvert.h"
-#ifdef _LINUX
+#ifdef TARGET_POSIX
 #include <dlfcn.h>
 #include "filesystem/SpecialProtocol.h"
 #endif
@@ -77,7 +77,7 @@ bool CVisualisation::Create(int x, int y, int w, int h, void *device)
   m_pInfo->y = y;
   m_pInfo->width = w;
   m_pInfo->height = h;
-  m_pInfo->pixelRatio = CDisplaySettings::Get().GetResolutionInfo(g_graphicsContext.GetVideoResolution()).fPixelRatio;
+  m_pInfo->pixelRatio = g_graphicsContext.GetResInfo().fPixelRatio;
 
   m_pInfo->name = strdup(Name().c_str());
   m_pInfo->presets = strdup(CSpecialProtocol::TranslatePath(Path()).c_str());
@@ -108,15 +108,15 @@ bool CVisualisation::Create(int x, int y, int w, int h, void *device)
 
     CreateBuffers();
 
-    if (g_application.m_pPlayer)
-      g_application.m_pPlayer->RegisterAudioCallback(this);
+    g_application.m_pPlayer->RegisterAudioCallback(this);
+    CAEFactory::RegisterAudioCallback(this);
 
     return true;
   }
   return false;
 }
 
-void CVisualisation::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, const CStdString strSongName)
+void CVisualisation::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, const CStdString &strSongName)
 {
   // notify visz. that new song has been started
   // pass it the nr of audio channels, sample rate, bits/sample and offcourse the songname
@@ -173,7 +173,8 @@ void CVisualisation::Render()
 
 void CVisualisation::Stop()
 {
-  if (g_application.m_pPlayer) g_application.m_pPlayer->UnRegisterAudioCallback();
+  g_application.m_pPlayer->UnRegisterAudioCallback();
+  CAEFactory::UnregisterAudioCallback();
   if (Initialized())
   {
     CAddonDll<DllVisualisation, Visualisation, VIS_PROPS>::Stop();

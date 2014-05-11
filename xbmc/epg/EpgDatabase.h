@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ namespace EPG
      * @brief Get the minimal database version that is required to operate correctly.
      * @return The minimal database version.
      */
-    virtual int GetMinVersion(void) const { return 7; };
+    virtual int GetSchemaVersion(void) const { return 7; };
 
     /*!
      * @brief Get the default sqlite database filename.
@@ -148,15 +148,19 @@ namespace EPG
   protected:
     /*!
      * @brief Create the EPG database tables.
-     * @return True if the tables were created successfully, false otherwise.
      */
-    virtual bool CreateTables(void);
+    virtual void CreateTables();
+
+    /*!
+     * @brief Create the EPG database analytics.
+     */
+    virtual void CreateAnalytics();
 
     /*!
      * @brief Update an old version of the database.
      * @param version The version to update the database from.
-     * @return True if it was updated successfully, false otherwise.
      */
-    virtual bool UpdateOldVersion(int version);
+    virtual void UpdateTables(int version);
+    virtual int GetMinSchemaVersion() const { return 4; }
   };
 }

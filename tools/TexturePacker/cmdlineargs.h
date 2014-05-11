@@ -3,7 +3,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,13 +16,12 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
-#ifdef _LINUX
+#ifdef TARGET_POSIX
 #include "PlatformDefs.h"
 #include "xwinapi.h"
 typedef LPSTR PSZ;
@@ -47,7 +46,7 @@ public:
             strcpy (m_cmdline, cmdline);
             ParseCmdLine(); 
         } else {
-#ifdef _LINUX
+#ifdef TARGET_POSIX
           delete[] cmdline;
 #endif
         }
@@ -56,7 +55,7 @@ public:
     CmdLineArgs (const int argc, const char **argv)
     {
       std::string cmdline;
-#ifdef _LINUX
+#ifdef TARGET_POSIX
       cmdline = "\"";
 #endif
       for (int i = 0 ; i<argc ; i++)
@@ -64,14 +63,14 @@ public:
         cmdline += std::string(argv[i]);
         if ( i != (argc-1) )
         {
-#ifdef _LINUX
+#ifdef TARGET_POSIX
           cmdline += "\" \"";
 #else
           cmdline += " ";
 #endif
         }
       }
-#ifdef _LINUX
+#ifdef TARGET_POSIX
       cmdline += "\"";
 #endif
       m_cmdline = new char [cmdline.length() + 1];

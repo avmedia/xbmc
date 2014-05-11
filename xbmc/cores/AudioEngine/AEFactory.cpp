@@ -20,16 +20,14 @@
 #include "system.h"
 
 #include "AEFactory.h"
+#include "Utils/AEUtil.h"
 
-#if defined(TARGET_DARWIN)
-  #include "Engines/CoreAudio/CoreAudioAE.h"
-#else
-  #include "Engines/SoftAE/SoftAE.h"
-#endif
+#include "Engines/ActiveAE/ActiveAE.h"
 
-#if defined(HAS_PULSEAUDIO)
-  #include "Engines/PulseAE/PulseAE.h"
-#endif
+#include "guilib/LocalizeStrings.h"
+#include "settings/lib/Setting.h"
+#include "settings/Settings.h"
+#include "utils/StringUtils.h"
 
 IAE* CAEFactory::AE = NULL;
 static float  g_fVolume = 1.0f;
@@ -42,42 +40,7 @@ IAE *CAEFactory::GetEngine()
 
 bool CAEFactory::LoadEngine()
 {
-#if defined(TARGET_RASPBERRY_PI)
-  return true;
-#endif
-
-  bool loaded = false;
-
-#if defined(TARGET_LINUX)
-  std::string engine;
-  if (getenv("AE_ENGINE"))
-  {
-    engine = (std::string)getenv("AE_ENGINE");
-    std::transform(engine.begin(), engine.end(), engine.begin(), ::toupper);
-
-    #if defined(HAS_PULSEAUDIO)
-    if (!loaded && engine == "PULSE")
-      loaded = CAEFactory::LoadEngine(AE_ENGINE_PULSE);
-    #endif
-    if (!loaded && engine == "SOFT" )
-      loaded = CAEFactory::LoadEngine(AE_ENGINE_SOFT);
-  }
-#endif
-
-#if defined(HAS_PULSEAUDIO)
-  if (!loaded)
-    loaded = CAEFactory::LoadEngine(AE_ENGINE_PULSE);
-#endif
-
-#if defined(TARGET_DARWIN)
-  if (!loaded)
-    loaded = CAEFactory::LoadEngine(AE_ENGINE_COREAUDIO);
-#else
-  if (!loaded)
-    loaded = CAEFactory::LoadEngine(AE_ENGINE_SOFT);
-#endif
-
-  return loaded;
+  return CAEFactory::LoadEngine(AE_ENGINE_ACTIVE);
 }
 
 bool CAEFactory::LoadEngine(enum AEEngine engine)
@@ -89,15 +52,7 @@ bool CAEFactory::LoadEngine(enum AEEngine engine)
   switch(engine)
   {
     case AE_ENGINE_NULL     :
-#if defined(TARGET_DARWIN)
-    case AE_ENGINE_COREAUDIO: AE = new CCoreAudioAE(); break;
-#else
-    case AE_ENGINE_SOFT     : AE = new CSoftAE(); break;
-#endif
-#if defined(HAS_PULSEAUDIO)
-    case AE_ENGINE_PULSE    : AE = new CPulseAE(); break;
-#endif
-
+    case AE_ENGINE_ACTIVE   : AE = new ActiveAE::CActiveAE(); break;
     default:
       return false;
   }
@@ -123,10 +78,6 @@ void CAEFactory::UnLoadEngine()
 
 bool CAEFactory::StartEngine()
 {
-#if defined(TARGET_RASPBERRY_PI)
-  return true;
-#endif
-
   if (!AE)
     return false;
 
@@ -229,14 +180,56 @@ std::string CAEFactory::GetDefaultDevice(bool passthrough)
   return "default";
 }
 
-bool CAEFactory::SupportsRaw()
+bool CAEFactory::SupportsRaw(AEDataFormat format, int samplerate)
 {
+  // check if passthrough is enabled
+  if (!CSettings::Get().GetBool("audiooutput.passthrough"))
+    return false;
+
+  // fixed config disabled passthrough
+  if (CSettings::Get().GetInt("audiooutput.config") == AE_CONFIG_FIXED)
+    return false;
+
+  // check if the format is enabled in settings
+  if (format == AE_FMT_AC3 && !CSettings::Get().GetBool("audiooutput.ac3passthrough"))
+    return false;
+  if (format == AE_FMT_DTS && !CSettings::Get().GetBool("audiooutput.dtspassthrough"))
+    return false;
+  if (format == AE_FMT_EAC3 && !CSettings::Get().GetBool("audiooutput.eac3passthrough"))
+    return false;
+  if (format == AE_FMT_TRUEHD && !CSettings::Get().GetBool("audiooutput.truehdpassthrough"))
+    return false;
+  if (format == AE_FMT_DTSHD && !CSettings::Get().GetBool("audiooutput.dtshdpassthrough"))
+    return false;
+
   if(AE)
-    return AE->SupportsRaw();
+    return AE->SupportsRaw(format, samplerate);
 
   return false;
 }
 
+bool CAEFactory::SupportsSilenceTimeout()
+{
+  if(AE)
+    return AE->SupportsSilenceTimeout();
+
+  return false;
+}
+
+/**
+  * Returns true if current AudioEngine supports at lest two basic quality levels
+  * @return true if quality setting is supported, otherwise false
+  */
+bool CAEFactory::SupportsQualitySetting(void) 
+{
+  if (!AE)
+    return false;
+
+  return ((AE->SupportsQualityLevel(AE_QUALITY_LOW)? 1 : 0) + 
+          (AE->SupportsQualityLevel(AE_QUALITY_MID)? 1 : 0) +
+          (AE->SupportsQualityLevel(AE_QUALITY_HIGH)? 1 : 0)) >= 2; 
+}
+  
 void CAEFactory::SetMute(const bool enabled)
 {
   if(AE)
@@ -296,4 +289,107 @@ void CAEFactory::GarbageCollect()
 {
   if(AE)
     AE->GarbageCollect();
+}
+
+void CAEFactory::SettingOptionsAudioDevicesFiller(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current)
+{
+  SettingOptionsAudioDevicesFillerGeneral(setting, list, current, false);
+}
+
+void CAEFactory::SettingOptionsAudioDevicesPassthroughFiller(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current)
+{
+  SettingOptionsAudioDevicesFillerGeneral(setting, list, current, true);
+}
+
+void CAEFactory::SettingOptionsAudioQualityLevelsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current)
+{
+  if (!AE)
+    return;
+
+  if(AE->SupportsQualityLevel(AE_QUALITY_LOW))
+    list.push_back(std::make_pair(g_localizeStrings.Get(13506), AE_QUALITY_LOW));
+  if(AE->SupportsQualityLevel(AE_QUALITY_MID))
+    list.push_back(std::make_pair(g_localizeStrings.Get(13507), AE_QUALITY_MID));
+  if(AE->SupportsQualityLevel(AE_QUALITY_HIGH))
+    list.push_back(std::make_pair(g_localizeStrings.Get(13508), AE_QUALITY_HIGH));
+  if(AE->SupportsQualityLevel(AE_QUALITY_REALLYHIGH))
+    list.push_back(std::make_pair(g_localizeStrings.Get(13509), AE_QUALITY_REALLYHIGH));
+}
+
+void CAEFactory::SettingOptionsAudioStreamsilenceFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current)
+{
+  if (!AE)
+    return;
+
+  list.push_back(std::make_pair(g_localizeStrings.Get(20422), XbmcThreads::EndTime::InfiniteValue));
+  list.push_back(std::make_pair(g_localizeStrings.Get(13551), 0));
+
+  if (AE->SupportsSilenceTimeout())
+  {
+    list.push_back(std::make_pair(StringUtils::Format(g_localizeStrings.Get(13554).c_str(), 1), 1));
+    for (int i = 2; i <= 10; i++)
+    {
+      list.push_back(std::make_pair(StringUtils::Format(g_localizeStrings.Get(13555).c_str(), i), i));
+    }
+  }
+}
+
+void CAEFactory::SettingOptionsAudioDevicesFillerGeneral(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current, bool passthrough)
+{
+  current = ((const CSettingString*)setting)->GetValue();
+  std::string firstDevice;
+
+  bool foundValue = false;
+  AEDeviceList sinkList;
+  EnumerateOutputDevices(sinkList, passthrough);
+  if (sinkList.size() == 0)
+    list.push_back(std::make_pair("Error - no devices found", "error"));
+  else
+  {
+    for (AEDeviceList::const_iterator sink = sinkList.begin(); sink != sinkList.end(); ++sink)
+    {
+      if (sink == sinkList.begin())
+        firstDevice = sink->second;
+
+      list.push_back(std::make_pair(sink->first, sink->second));
+
+      if (StringUtils::EqualsNoCase(current, sink->second))
+        foundValue = true;
+    }
+  }
+
+  if (!foundValue)
+    current = firstDevice;
+}
+
+void CAEFactory::RegisterAudioCallback(IAudioCallback* pCallback)
+{
+  if (AE)
+    AE->RegisterAudioCallback(pCallback);
+}
+
+void CAEFactory::UnregisterAudioCallback()
+{
+  if (AE)
+    AE->UnregisterAudioCallback();
+}
+
+bool CAEFactory::IsSettingVisible(const std::string &condition, const std::string &value, const std::string &settingId)
+{
+  if (settingId.empty() || value.empty() || !AE)
+    return false;
+
+  return AE->IsSettingVisible(value);
+}
+
+void CAEFactory::KeepConfiguration(unsigned int millis)
+{
+  if (AE)
+    AE->KeepConfiguration(millis);
+}
+
+void CAEFactory::DeviceChange()
+{
+  if (AE)
+    AE->DeviceChange();
 }

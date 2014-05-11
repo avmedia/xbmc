@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 #if defined(TARGET_RASPBERRY_PI)
 #include "DllBCM.h"
 #include "OMXCore.h"
+#include "threads/CriticalSection.h"
 
 class CRBP
 {
@@ -47,12 +48,27 @@ public:
   bool Initialize();
   void LogFirmwareVerison();
   void Deinitialize();
+  int GetArmMem() { return m_arm_mem; }
+  int GetGpuMem() { return m_gpu_mem; }
+  bool GetCodecMpg2() { return m_codec_mpg2_enabled; }
+  bool GetCodecWvc1() { return m_codec_wvc1_enabled; }
+  void GetDisplaySize(int &width, int &height);
+  // stride can be null for packed output
+  unsigned char *CaptureDisplay(int width, int height, int *stride, bool swap_red_blue, bool video_only = true);
+  DllOMX *GetDllOMX() { return m_OMX ? m_OMX->GetDll() : NULL; }
 
 private:
   DllBcmHost *m_DllBcmHost;
   bool       m_initialized;
   bool       m_omx_initialized;
+  bool       m_omx_image_init;
+  int        m_arm_mem;
+  int        m_gpu_mem;
+  bool       m_codec_mpg2_enabled;
+  bool       m_codec_wvc1_enabled;
   COMXCore   *m_OMX;
+  class DllLibOMXCore;
+  CCriticalSection m_critSection;
 };
 
 extern CRBP g_RBP;

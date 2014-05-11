@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ private:
    \param options any options, such as "hideext" to hide extensions
    \return the filenames in the path that match the mask
    */
-  std::vector<CStdString> GetFileEnumValues(const CStdString &path, const CStdString &mask, const CStdString &options) const;
+  std::vector<std::string> GetFileEnumValues(const CStdString &path, const CStdString &mask, const CStdString &options) const;
 
   /*! \brief Translate list of addon IDs to list of addon names
    \param addonIDslist comma seperated list of addon IDs
@@ -80,7 +80,6 @@ private:
   const TiXmlElement *GetFirstSetting() const;
 
   ADDON::AddonPtr m_addon;
-  CStdString m_strHeading;
   std::map<CStdString,CStdString> m_buttonValues;
   bool m_changed;
   bool m_saveToDisk; // whether the addon settings should be saved to disk or just stored locally in the addon

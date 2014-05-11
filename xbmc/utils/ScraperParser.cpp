@@ -1,6 +1,6 @@
 /*
- *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      Copyright (C) 2012-2013 Team XBMC
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,9 +26,11 @@
 #include "addons/Scraper.h"
 #include "URL.h"
 #include "Util.h"
+#include "utils/StringUtils.h"
 #include "log.h"
 #include "CharsetConverter.h"
-
+#include "utils/StringUtils.h"
+#include "utils/XSLTUtils.h"
 #include <sstream>
 #include <cstring>
 
@@ -83,7 +85,7 @@ void CScraperParser::Clear()
   delete m_document;
 
   m_document = NULL;
-  m_strFile.Empty();
+  m_strFile.clear();
 }
 
 bool CScraperParser::Load(const CStdString& strXMLFile)
@@ -149,24 +151,23 @@ bool CScraperParser::LoadFromXML()
 void CScraperParser::ReplaceBuffers(CStdString& strDest)
 {
   // insert buffers
-  int iIndex;
+  size_t iIndex;
   for (int i=MAX_SCRAPER_BUFFERS-1; i>=0; i--)
   {
-    CStdString temp;
     iIndex = 0;
-    temp.Format("$$%i",i+1);
-    while ((size_t)(iIndex = strDest.find(temp,iIndex)) != CStdString::npos) // COPIED FROM CStdString WITH THE ADDITION OF $ ESCAPING
+    CStdString temp = StringUtils::Format("$$%i",i+1);
+    while ((iIndex = strDest.find(temp,iIndex)) != CStdString::npos) // COPIED FROM CStdString WITH THE ADDITION OF $ ESCAPING
     {
-      strDest.replace(strDest.begin()+iIndex,strDest.begin()+iIndex+temp.GetLength(),m_param[i]);
+      strDest.replace(strDest.begin()+iIndex,strDest.begin()+iIndex+temp.size(),m_param[i]);
       iIndex += m_param[i].length();
     }
   }
   // insert settings
   iIndex = 0;
-  while ((size_t)(iIndex = strDest.find("$INFO[",iIndex)) != CStdString::npos)
+  while ((iIndex = strDest.find("$INFO[", iIndex)) != CStdString::npos)
   {
-    int iEnd = strDest.Find("]",iIndex);
-    CStdString strInfo = strDest.Mid(iIndex+6,iEnd-iIndex-6);
+    size_t iEnd = strDest.find("]", iIndex);
+    CStdString strInfo = strDest.substr(iIndex+6, iEnd - iIndex - 6);
     CStdString strReplace;
     if (m_scraper)
       strReplace = m_scraper->GetSetting(strInfo);
@@ -175,10 +176,10 @@ void CScraperParser::ReplaceBuffers(CStdString& strDest)
   }
   // insert localize strings
   iIndex = 0;
-  while ((size_t)(iIndex = strDest.find("$LOCALIZE[",iIndex)) != CStdString::npos)
+  while ((iIndex = strDest.find("$LOCALIZE[", iIndex)) != CStdString::npos)
   {
-    int iEnd = strDest.Find("]",iIndex);
-    CStdString strInfo = strDest.Mid(iIndex+10,iEnd-iIndex-10);
+    size_t iEnd = strDest.find("]", iIndex);
+    CStdString strInfo = strDest.substr(iIndex+10, iEnd - iIndex - 10);
     CStdString strReplace;
     if (m_scraper)
       strReplace = m_scraper->GetString(strtol(strInfo.c_str(),NULL,10));
@@ -186,7 +187,7 @@ void CScraperParser::ReplaceBuffers(CStdString& strDest)
     iIndex += strReplace.length();
   }
   iIndex = 0;
-  while ((size_t)(iIndex = strDest.find("\\n",iIndex)) != CStdString::npos)
+  while ((iIndex = strDest.find("\\n",iIndex)) != CStdString::npos)
     strDest.replace(strDest.begin()+iIndex,strDest.begin()+iIndex+2,"\n");
 }
 
@@ -203,7 +204,19 @@ void CScraperParser::ParseExpression(const CStdString& input, CStdString& dest, 
       if (stricmp(sensitive,"yes") == 0)
         bInsensitive=false; // match case sensitive
 
-    CRegExp reg(bInsensitive);
+    CRegExp::utf8Mode eUtf8 = CRegExp::autoUtf8;
+    const char* const strUtf8 = pExpression->Attribute("utf8");
+    if (strUtf8)
+    {
+      if (stricmp(strUtf8, "yes") == 0)
+        eUtf8 = CRegExp::forceUtf8;
+      else if (stricmp(strUtf8, "no") == 0)
+        eUtf8 = CRegExp::asciiOnly;
+      else if (stricmp(strUtf8, "auto") == 0)
+        eUtf8 = CRegExp::autoUtf8;
+    }
+
+    CRegExp reg(bInsensitive, eUtf8);
     CStdString strExpression;
     if (pExpression->FirstChild())
       strExpression = pExpression->FirstChild()->Value();
@@ -246,7 +259,7 @@ void CScraperParser::ParseExpression(const CStdString& input, CStdString& dest, 
     int iCompare = -1;
     pExpression->QueryIntAttribute("compare",&iCompare);
     if (iCompare > -1)
-      m_param[iCompare-1].ToLower();
+      StringUtils::ToLower(m_param[iCompare-1]);
     CStdString curInput = input;
     for (int iBuf=0;iBuf<MAX_SCRAPER_BUFFERS;++iBuf)
     {
@@ -279,7 +292,7 @@ void CScraperParser::ParseExpression(const CStdString& input, CStdString& dest, 
         int i2=reg2.RegFind(strCurOutput.c_str());
         while (i2 > -1)
         {
-          std::string szRemove = reg2.GetReplaceString("\\2");
+          std::string szRemove(reg2.GetMatch(2));
           int iRemove = szRemove.size();
           int i3 = strCurOutput.find(szRemove);
           if (!szParam.empty())
@@ -296,19 +309,19 @@ void CScraperParser::ParseExpression(const CStdString& input, CStdString& dest, 
 
       int iLen = reg.GetFindLen();
       // nasty hack #1 - & means \0 in a replace string
-      strCurOutput.Replace("&","!!!AMPAMP!!!");
+      StringUtils::Replace(strCurOutput, "&","!!!AMPAMP!!!");
       std::string result = reg.GetReplaceString(strCurOutput.c_str());
       if (!result.empty())
       {
         CStdString strResult(result);
-        strResult.Replace("!!!AMPAMP!!!","&");
+        StringUtils::Replace(strResult, "!!!AMPAMP!!!","&");
         Clean(strResult);
         ReplaceBuffers(strResult);
         if (iCompare > -1)
         {
           CStdString strResultNoCase = strResult;
-          strResultNoCase.ToLower();
-          if (strResultNoCase.Find(m_param[iCompare-1]) != -1)
+          StringUtils::ToLower(strResultNoCase);
+          if (strResultNoCase.find(m_param[iCompare-1]) != std::string::npos)
             dest += strResult;
         }
         else
@@ -325,12 +338,52 @@ void CScraperParser::ParseExpression(const CStdString& input, CStdString& dest, 
   }
 }
 
+void CScraperParser::ParseXSLT(const CStdString& input, CStdString& dest, TiXmlElement* element, bool bAppend)
+{
+  TiXmlElement* pSheet = element->FirstChildElement();
+  if (pSheet)
+  {
+    XSLTUtils xsltUtils;
+    CStdString strXslt;
+    strXslt << *pSheet;
+    ReplaceBuffers(strXslt);
+
+    if (!xsltUtils.SetInput(input))
+      CLog::Log(LOGDEBUG, "could not parse input XML");
+
+    if (!xsltUtils.SetStylesheet(strXslt))
+      CLog::Log(LOGDEBUG, "could not parse stylesheet XML");
+
+    xsltUtils.XSLTTransform(dest);
+  }
+}
+
+TiXmlElement *FirstChildScraperElement(TiXmlElement *element)
+{
+  for (TiXmlElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement())
+  {
+    if (child->ValueStr() == "RegExp" || child->ValueStr() == "XSLT")
+      return child;
+  }
+  return NULL;
+}
+
+TiXmlElement *NextSiblingScraperElement(TiXmlElement *element)
+{
+  for (TiXmlElement *next = element->NextSiblingElement(); next; next = next->NextSiblingElement())
+  {
+    if (next->ValueStr() == "RegExp" || next->ValueStr() == "XSLT")
+      return next;
+  }
+  return NULL;
+}
+
 void CScraperParser::ParseNext(TiXmlElement* element)
 {
   TiXmlElement* pReg = element;
   while (pReg)
   {
-    TiXmlElement* pChildReg = pReg->FirstChildElement("RegExp");
+    TiXmlElement* pChildReg = FirstChildScraperElement(pReg);
     if (pChildReg)
       ParseNext(pChildReg);
     else
@@ -343,51 +396,54 @@ void CScraperParser::ParseNext(TiXmlElement* element)
     int iDest = 1;
     bool bAppend = false;
     const char* szDest = pReg->Attribute("dest");
-    if (szDest)
-      if (strlen(szDest))
-      {
-        if (szDest[strlen(szDest)-1] == '+')
-          bAppend = true;
+    if (szDest && strlen(szDest))
+    {
+      if (szDest[strlen(szDest)-1] == '+')
+        bAppend = true;
 
-        iDest = atoi(szDest);
+      iDest = atoi(szDest);
+    }
+
+    const char *szInput = pReg->Attribute("input");
+    CStdString strInput;
+    if (szInput)
+    {
+      strInput = szInput;
+      ReplaceBuffers(strInput);
+    }
+    else
+      strInput = m_param[0];
+
+    const char* szConditional = pReg->Attribute("conditional");
+    bool bExecute = true;
+    if (szConditional)
+    {
+      bool bInverse=false;
+      if (szConditional[0] == '!')
+      {
+        bInverse = true;
+        szConditional++;
       }
+      CStdString strSetting;
+      if (m_scraper && m_scraper->HasSettings())
+        strSetting = m_scraper->GetSetting(szConditional);
+      bExecute = bInverse != strSetting.Equals("true");
+    }
 
-      const char *szInput = pReg->Attribute("input");
-      CStdString strInput;
-      if (szInput)
+    if (bExecute)
+    {
+      if (iDest-1 < MAX_SCRAPER_BUFFERS && iDest-1 > -1)
       {
-        strInput = szInput;
-        ReplaceBuffers(strInput);
+        if (pReg->ValueStr() == "XSLT")
+          ParseXSLT(strInput, m_param[iDest - 1], pReg, bAppend);
+        else
+          ParseExpression(strInput, m_param[iDest - 1],pReg,bAppend);
       }
       else
-        strInput = m_param[0];
-
-      const char* szConditional = pReg->Attribute("conditional");
-      bool bExecute = true;
-      if (szConditional)
-      {
-        bool bInverse=false;
-        if (szConditional[0] == '!')
-        {
-          bInverse = true;
-          szConditional++;
-        }
-        CStdString strSetting;
-        if (m_scraper && m_scraper->HasSettings())
-           strSetting = m_scraper->GetSetting(szConditional);
-        bExecute = bInverse != strSetting.Equals("true");
-      }
-
-      if (bExecute)
-      {
-        if (iDest-1 < MAX_SCRAPER_BUFFERS && iDest-1 > -1)
-          ParseExpression(strInput, m_param[iDest-1],pReg,bAppend);
-        else
-          CLog::Log(LOGERROR,"CScraperParser::ParseNext: destination buffer "
-                             "out of bounds, skipping expression");
-      }
-
-      pReg = pReg->NextSiblingElement("RegExp");
+        CLog::Log(LOGERROR,"CScraperParser::ParseNext: destination buffer "
+                           "out of bounds, skipping expression");
+    }
+    pReg = NextSiblingScraperElement(pReg);
   }
 }
 
@@ -402,7 +458,7 @@ const CStdString CScraperParser::Parse(const CStdString& strTag,
   }
   int iResult = 1; // default to param 1
   pChildElement->QueryIntAttribute("dest",&iResult);
-  TiXmlElement* pChildStart = pChildElement->FirstChildElement("RegExp");
+  TiXmlElement* pChildStart = FirstChildScraperElement(pChildElement);
   m_scraper = scraper;
   ParseNext(pChildStart);
   CStdString tmp = m_param[iResult-1];
@@ -416,44 +472,42 @@ const CStdString CScraperParser::Parse(const CStdString& strTag,
 
 void CScraperParser::Clean(CStdString& strDirty)
 {
-  int i=0;
+  size_t i = 0;
   CStdString strBuffer;
-  while ((i=strDirty.Find("!!!CLEAN!!!",i)) != -1)
+  while ((i = strDirty.find("!!!CLEAN!!!",i)) != std::string::npos)
   {
-    int i2;
-    if ((i2=strDirty.Find("!!!CLEAN!!!",i+11)) != -1)
+    size_t i2;
+    if ((i2 = strDirty.find("!!!CLEAN!!!",i+11)) != std::string::npos)
     {
       strBuffer = strDirty.substr(i+11,i2-i-11);
       CStdString strConverted(strBuffer);
       HTML::CHTMLUtil::RemoveTags(strConverted);
-      RemoveWhiteSpace(strConverted);
-      strDirty.erase(i,i2-i+11);
-      strDirty.Insert(i,strConverted);
+      StringUtils::Trim(strConverted);
+      strDirty.replace(i, i2-i+11, strConverted);
       i += strConverted.size();
     }
     else
       break;
   }
   i=0;
-  while ((i=strDirty.Find("!!!TRIM!!!",i)) != -1)
+  while ((i = strDirty.find("!!!TRIM!!!",i)) != std::string::npos)
   {
-    int i2;
-    if ((i2=strDirty.Find("!!!TRIM!!!",i+10)) != -1)
+    size_t i2;
+    if ((i2 = strDirty.find("!!!TRIM!!!",i+10)) != std::string::npos)
     {
       strBuffer = strDirty.substr(i+10,i2-i-10);
-      RemoveWhiteSpace(strBuffer);
-      strDirty.erase(i,i2-i+10);
-      strDirty.Insert(i,strBuffer);
+      StringUtils::Trim(strBuffer);
+      strDirty.replace(i, i2-i+10, strBuffer);
       i += strBuffer.size();
     }
     else
       break;
   }
   i=0;
-  while ((i=strDirty.Find("!!!FIXCHARS!!!",i)) != -1)
+  while ((i = strDirty.find("!!!FIXCHARS!!!",i)) != std::string::npos)
   {
-    int i2;
-    if ((i2=strDirty.Find("!!!FIXCHARS!!!",i+14)) != -1)
+    size_t i2;
+    if ((i2 = strDirty.find("!!!FIXCHARS!!!",i+14)) != std::string::npos)
     {
       strBuffer = strDirty.substr(i+14,i2-i-14);
       CStdStringW wbuffer;
@@ -461,36 +515,27 @@ void CScraperParser::Clean(CStdString& strDirty)
       CStdStringW wConverted;
       HTML::CHTMLUtil::ConvertHTMLToW(wbuffer,wConverted);
       g_charsetConverter.fromW(wConverted,strBuffer,GetSearchStringEncoding());
-      RemoveWhiteSpace(strBuffer);
+      StringUtils::Trim(strBuffer);
       ConvertJSON(strBuffer);
-      strDirty.erase(i,i2-i+14);
-      strDirty.Insert(i,strBuffer);
+      strDirty.replace(i, i2-i+14, strBuffer);
       i += strBuffer.size();
     }
     else
       break;
   }
   i=0;
-  while ((i=strDirty.Find("!!!ENCODE!!!",i)) != -1)
+  while ((i=strDirty.find("!!!ENCODE!!!",i)) != std::string::npos)
   {
-    int i2;
-    if ((i2=strDirty.Find("!!!ENCODE!!!",i+12)) != -1)
+    size_t i2;
+    if ((i2 = strDirty.find("!!!ENCODE!!!",i+12)) != std::string::npos)
     {
-      strBuffer = strDirty.substr(i+12,i2-i-12);
-      CURL::Encode(strBuffer);
-      strDirty.erase(i,i2-i+12);
-      strDirty.Insert(i,strBuffer);
+      strBuffer = CURL::Encode(strDirty.substr(i + 12, i2 - i - 12));
+      strDirty.replace(i, i2-i+12, strBuffer);
       i += strBuffer.size();
     }
     else
       break;
   }
-}
-
-void CScraperParser::RemoveWhiteSpace(CStdString &string)
-{
-  string.TrimLeft(" \t\r\n");
-  string.TrimRight(" \t\r\n");
 }
 
 void CScraperParser::ConvertJSON(CStdString &string)
@@ -500,10 +545,9 @@ void CScraperParser::ConvertJSON(CStdString &string)
   while (reg.RegFind(string.c_str()) > -1)
   {
     int pos = reg.GetSubStart(1);
-    std::string szReplace = reg.GetReplaceString("\\1");
+    std::string szReplace(reg.GetMatch(1));
 
-    CStdString replace;
-    replace.Format("&#x%s;", szReplace.c_str());
+    CStdString replace = StringUtils::Format("&#x%s;", szReplace.c_str());
     string.replace(string.begin()+pos-2, string.begin()+pos+4, replace);
   }
 
@@ -513,14 +557,13 @@ void CScraperParser::ConvertJSON(CStdString &string)
   {
     int pos1 = reg2.GetSubStart(1);
     int pos2 = reg2.GetSubStart(2);
-    std::string szHexValue = reg2.GetReplaceString("\\1");
+    std::string szHexValue(reg2.GetMatch(1));
 
-    CStdString replace;
-    replace.Format("%c", strtol(szHexValue.c_str(), NULL, 16));
+    CStdString replace = StringUtils::Format("%c", strtol(szHexValue.c_str(), NULL, 16));
     string.replace(string.begin()+pos1-2, string.begin()+pos2+reg2.GetSubLength(2), replace);
   }
 
-  string.Replace("\\\"","\"");
+  StringUtils::Replace(string, "\\\"","\"");
 }
 
 void CScraperParser::ClearBuffers()
@@ -536,8 +579,8 @@ void CScraperParser::GetBufferParams(bool* result, const char* attribute, bool d
     result[iBuf] = defvalue;;
   if (attribute)
   {
-    vector<CStdString> vecBufs;
-    CUtil::Tokenize(attribute,vecBufs,",");
+    vector<std::string> vecBufs;
+    StringUtils::Tokenize(attribute,vecBufs,",");
     for (size_t nToken=0; nToken < vecBufs.size(); nToken++)
     {
       int index = atoi(vecBufs[nToken].c_str())-1;
@@ -551,13 +594,12 @@ void CScraperParser::InsertToken(CStdString& strOutput, int buf, const char* tok
 {
   char temp[4];
   sprintf(temp,"\\%i",buf);
-  int i2=0;
-  while ((i2 = strOutput.Find(temp,i2)) != -1)
+  size_t i2=0;
+  while ((i2 = strOutput.find(temp,i2)) != std::string::npos)
   {
-    strOutput.Insert(i2,token);
-    i2 += strlen(token);
-    strOutput.Insert(i2+strlen(temp),token);
-    i2 += strlen(temp);
+    strOutput.insert(i2,token);
+    i2 += strlen(token) + strlen(temp);
+    strOutput.insert(i2,token);
   }
 }
 

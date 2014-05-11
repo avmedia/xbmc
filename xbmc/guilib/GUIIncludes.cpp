@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,6 +49,14 @@ CGUIIncludes::CGUIIncludes()
   
   m_constantNodes.insert("posx");
   m_constantNodes.insert("posy");
+  m_constantNodes.insert("left");
+  m_constantNodes.insert("centerleft");
+  m_constantNodes.insert("right");
+  m_constantNodes.insert("centerright");
+  m_constantNodes.insert("top");
+  m_constantNodes.insert("centertop");
+  m_constantNodes.insert("bottom");
+  m_constantNodes.insert("centerbottom");
   m_constantNodes.insert("width");
   m_constantNodes.insert("height");
   m_constantNodes.insert("offsetx");
@@ -174,7 +182,7 @@ bool CGUIIncludes::HasIncludeFile(const CStdString &file) const
   return false;
 }
 
-void CGUIIncludes::ResolveIncludes(TiXmlElement *node, std::map<int, bool>* xmlIncludeConditions /* = NULL */)
+void CGUIIncludes::ResolveIncludes(TiXmlElement *node, std::map<INFO::InfoPtr, bool>* xmlIncludeConditions /* = NULL */)
 {
   if (!node)
     return;
@@ -188,7 +196,7 @@ void CGUIIncludes::ResolveIncludes(TiXmlElement *node, std::map<int, bool>* xmlI
   }
 }
 
-void CGUIIncludes::ResolveIncludesForNode(TiXmlElement *node, std::map<int, bool>* xmlIncludeConditions /* = NULL */)
+void CGUIIncludes::ResolveIncludesForNode(TiXmlElement *node, std::map<INFO::InfoPtr, bool>* xmlIncludeConditions /* = NULL */)
 {
   // we have a node, find any <include file="fileName">tagName</include> tags and replace
   // recursively with their real includes
@@ -202,12 +210,23 @@ void CGUIIncludes::ResolveIncludesForNode(TiXmlElement *node, std::map<int, bool
     map<CStdString, TiXmlElement>::const_iterator it = m_defaults.find(type);
     if (it != m_defaults.end())
     {
+      // we don't insert <left> et. al. if <posx> or <posy> is specified
+      bool hasPosX(node->FirstChild("posx") != NULL);
+      bool hasPosY(node->FirstChild("posy") != NULL);
+
       const TiXmlElement &element = (*it).second;
       const TiXmlElement *tag = element.FirstChildElement();
       while (tag)
       {
+        std::string value = tag->ValueStr();
+        bool skip(false);
+        if (hasPosX && (value == "left" || value == "right" || value == "centerleft" || value == "centerright"))
+          skip = true;
+        if (hasPosY && (value == "top" || value == "bottom" || value == "centertop" || value == "centerbottom"))
+          skip = true;
         // we insert at the end of block
-        node->InsertEndChild(*tag);
+        if (!skip)
+          node->InsertEndChild(*tag);
         tag = tag->NextSiblingElement();
       }
     }
@@ -225,8 +244,8 @@ void CGUIIncludes::ResolveIncludesForNode(TiXmlElement *node, std::map<int, bool
     const char *condition = include->Attribute("condition");
     if (condition)
     { // check this condition
-      int conditionID = g_infoManager.Register(condition);
-      bool value = g_infoManager.GetBoolValue(conditionID);
+      INFO::InfoPtr conditionID = g_infoManager.Register(condition);
+      bool value = conditionID->Get();
 
       if (xmlIncludeConditions)
         (*xmlIncludeConditions)[conditionID] = value;

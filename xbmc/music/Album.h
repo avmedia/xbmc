@@ -6,7 +6,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,39 +26,48 @@
 
 #include <map>
 #include <vector>
-
+#include "Artist.h"
 #include "Song.h"
 #include "utils/ScraperUrl.h"
 
 class TiXmlNode;
-
+class CFileItem;
 class CAlbum
 {
 public:
+  CAlbum(const CFileItem& item);
   CAlbum() { idAlbum = 0; iRating = 0; iYear = 0; iTimesPlayed = 0; };
   bool operator<(const CAlbum &a) const;
+  void MergeScrapedAlbum(const CAlbum& album, bool override = true);
 
   void Reset()
   {
     idAlbum = -1;
-    strAlbum.Empty();
+    strAlbum.clear();
+    strMusicBrainzAlbumID.clear();
     artist.clear();
+    artistCredits.clear();
     genre.clear();
     thumbURL.Clear();
     moods.clear();
     styles.clear();
     themes.clear();
     art.clear();
-    strReview.Empty();
-    strLabel.Empty();
-    strType.Empty();
-    m_strDateOfRelease.Empty();
+    strReview.clear();
+    strLabel.clear();
+    strType.clear();
+    strPath.clear();
+    m_strDateOfRelease.clear();
     iRating=-1;
     iYear=-1;
     bCompilation = false;
     iTimesPlayed = 0;
     songs.clear();
+    infoSongs.clear();
   }
+
+  CStdString GetArtistString() const;
+  CStdString GetGenreString() const;
 
   /*! \brief Load album information from an XML file.
    See CVideoInfoTag::Load for a description of the types of elements we load.
@@ -72,7 +81,9 @@ public:
 
   long idAlbum;
   CStdString strAlbum;
+  CStdString strMusicBrainzAlbumID;
   std::vector<std::string> artist;
+  VECARTISTCREDITS artistCredits;
   std::vector<std::string> genre;
   CScraperUrl thumbURL;
   std::vector<std::string> moods;
@@ -82,12 +93,14 @@ public:
   CStdString strReview;
   CStdString strLabel;
   CStdString strType;
+  CStdString strPath;
   CStdString m_strDateOfRelease;
   int iRating;
   int iYear;
   bool bCompilation;
   int iTimesPlayed;
-  VECSONGS songs;
+  VECSONGS songs;     ///< Local songs
+  VECSONGS infoSongs; ///< Scraped songs
 };
 
 typedef std::vector<CAlbum> VECALBUMS;

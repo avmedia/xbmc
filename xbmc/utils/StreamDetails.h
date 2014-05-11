@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *
  */
 
+#include "utils/StdString.h"
 #include "Archive.h"
 #include "ISerializable.h"
 #include <vector>
@@ -65,6 +66,7 @@ public:
   float m_fAspect;
   int m_iDuration;
   CStdString m_strCodec;
+  std::string m_strStereoMode;
 #ifdef HAS_DS_PLAYER
   unsigned long m_iFourcc;
 #endif
@@ -87,6 +89,7 @@ class CStreamDetailSubtitle : public CStreamDetail
 {
 public:
   CStreamDetailSubtitle();
+  CStreamDetailSubtitle& operator=(const CStreamDetailSubtitle &that);
   virtual void Archive(CArchive& ar);
   virtual void Serialize(CVariant& value) const;
   virtual bool IsWorseThan(CStreamDetail *that);
@@ -130,6 +133,8 @@ public:
   int GetVideoWidth(int idx = 0) const;
   int GetVideoHeight(int idx = 0) const;
   int GetVideoDuration(int idx = 0) const;
+  void SetVideoDuration(int idx, const int duration);
+  std::string GetStereoMode(int idx = 0) const;
 #ifdef HAS_DS_PLAYER
   CStdString GetVideoFourcc(int idx = 0) const;
 #endif
@@ -146,20 +151,10 @@ public:
   virtual void Archive(CArchive& ar);
   virtual void Serialize(CVariant& value) const;
 
-  // Language to use for "best" subtitle stream
-  CStdString m_strLanguage;
-
 private:
   CStreamDetail *NewStream(CStreamDetail::StreamType type);
   std::vector<CStreamDetail *> m_vecItems;
   CStreamDetailVideo *m_pBestVideo;
   CStreamDetailAudio *m_pBestAudio;
   CStreamDetailSubtitle *m_pBestSubtitle;
-};
-
-class IStreamDetailsObserver
-{
-public:
-  virtual ~IStreamDetailsObserver() {}
-  virtual void OnStreamDetails(const CStreamDetails &details, const CStdString &strFileName, long lFileId) = 0;
 };

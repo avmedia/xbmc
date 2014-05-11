@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
-
 
 #include "IDirectory.h"
 #include "utils/RegExp.h"
@@ -38,5 +37,6 @@ namespace XFILE
     static bool GetPaths(const CStdString& strPath, std::vector<CStdString>& vecPaths);
     static CStdString ConstructStackPath(const CFileItemList& items, const std::vector<int> &stack);
     static bool ConstructStackPath(const std::vector<CStdString> &paths, CStdString &stackedPath);
+    static bool ConstructStackPath(const std::vector<std::string> &paths, std::string &stackedPath);
   };
 }

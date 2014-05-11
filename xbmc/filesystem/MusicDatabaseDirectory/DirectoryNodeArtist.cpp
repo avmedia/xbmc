@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include "DirectoryNodeArtist.h"
 #include "QueryParams.h"
 #include "music/MusicDatabase.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 
 using namespace XFILE::MUSICDATABASEDIRECTORY;
 
@@ -55,7 +55,7 @@ bool CDirectoryNodeArtist::GetContent(CFileItemList& items) const
   CQueryParams params;
   CollectQueryParams(params);
 
-  bool bSuccess = musicdatabase.GetArtistsNav(BuildPath(), items, !g_guiSettings.GetBool("musiclibrary.showcompilationartists"), params.GetGenreId());
+  bool bSuccess = musicdatabase.GetArtistsNav(BuildPath(), items, !CSettings::Get().GetBool("musiclibrary.showcompilationartists"), params.GetGenreId());
 
   musicdatabase.Close();
 

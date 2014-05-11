@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2006-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,7 +48,6 @@ public:
     replace = false;
 
     m_references = 1;
-    iGroupId = 0;
     m_overlay = NULL;
   }
 
@@ -59,7 +58,6 @@ public:
     iPTSStopTime  = src.iPTSStopTime;
     bForced       = src.bForced;
     replace       = src.replace;
-    iGroupId      = src.iGroupId;
     if(src.m_overlay)
       m_overlay   = src.m_overlay->Acquire();
     else
@@ -113,7 +111,6 @@ public:
   double iPTSStopTime;
   bool bForced; // display, no matter what
   bool replace; // replace by next nomatter what stoptime it has
-  int iGroupId;
   OVERLAY::COverlay* m_overlay;
 protected:
   DVDOverlayType m_type;

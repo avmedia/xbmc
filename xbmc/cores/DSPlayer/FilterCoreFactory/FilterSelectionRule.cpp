@@ -24,8 +24,8 @@
 #include "URL.h"
 #include "FilterSelectionRule.h"
 #include "video/VideoInfoTag.h"
+#include "settings/Settings.h"
 #include "utils/StreamDetails.h"
-#include "settings/GUISettings.h"
 #include "utils/log.h"
 
 CFilterSelectionRule::CFilterSelectionRule(TiXmlElement* pRule, const CStdString &nodeName)
@@ -60,7 +60,7 @@ void CFilterSelectionRule::Initialize(TiXmlElement* pRule, const CStdString &nod
   m_bStreamDetails = m_audioCodec.length() > 0 || m_audioChannels.length() > 0 || m_videoFourcc.length() > 0 ||
     m_videoCodec.length() > 0 || m_videoResolution.length() > 0 || m_videoAspect.length() > 0;
 
-  if (m_bStreamDetails && !g_guiSettings.GetBool("myvideos.extractflags"))
+  if (m_bStreamDetails && !CSettings::Get().GetBool("myvideos.extractflags"))
   {
       CLog::Log(LOGWARNING, "CFilterSelectionRule::Initialize: rule: %s needs media flagging, which is disabled", m_name.c_str());
   }

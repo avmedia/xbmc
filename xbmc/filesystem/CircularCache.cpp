@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ CCircularCache::CCircularCache(size_t front, size_t back)
  , m_buf(NULL)
  , m_size(front + back)
  , m_size_back(back)
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
  , m_handle(INVALID_HANDLE_VALUE)
 #endif
 {
@@ -48,7 +48,7 @@ CCircularCache::~CCircularCache()
 
 int CCircularCache::Open()
 {
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
   m_handle = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, m_size, NULL);
   if(m_handle == NULL)
     return CACHE_RC_ERROR;
@@ -66,7 +66,7 @@ int CCircularCache::Open()
 
 void CCircularCache::Close()
 {
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
   UnmapViewOfFile(m_buf);
   CloseHandle(m_handle);
   m_handle = INVALID_HANDLE_VALUE;
@@ -211,11 +211,38 @@ int64_t CCircularCache::Seek(int64_t pos)
   return CACHE_RC_ERROR;
 }
 
-void CCircularCache::Reset(int64_t pos)
+void CCircularCache::Reset(int64_t pos, bool clearAnyway)
 {
   CSingleLock lock(m_sync);
+  if (!clearAnyway && IsCachedPosition(pos))
+  {
+    m_cur = pos;
+    return;
+  }
   m_end = pos;
   m_beg = pos;
   m_cur = pos;
+}
+
+int64_t CCircularCache::CachedDataEndPosIfSeekTo(int64_t iFilePosition)
+{
+  if (IsCachedPosition(iFilePosition))
+    return m_end;
+  return iFilePosition;
+}
+
+int64_t CCircularCache::CachedDataEndPos()
+{
+  return m_end;
+}
+
+bool CCircularCache::IsCachedPosition(int64_t iFilePosition)
+{
+  return iFilePosition >= m_beg && iFilePosition <= m_end;
+}
+
+CCacheStrategy *CCircularCache::CreateNew()
+{
+  return new CCircularCache(m_size - m_size_back, m_size_back);
 }
 

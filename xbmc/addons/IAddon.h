@@ -1,7 +1,7 @@
 #pragma once
 /*
 *      Copyright (C) 2005-2013 Team XBMC
-*      http://www.xbmc.org
+*      http://xbmc.org
 *
 *  This Program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ namespace ADDON
     ADDON_PVRDLL,
     ADDON_SCRIPT,
     ADDON_SCRIPT_WEATHER,
-    ADDON_SCRIPT_SUBTITLES,
+    ADDON_SUBTITLE_MODULE,
     ADDON_SCRIPT_LYRICS,
     ADDON_SCRAPER_ALBUMS,
     ADDON_SCRAPER_ARTISTS,
@@ -79,7 +79,7 @@ namespace ADDON
   {
   public:
     virtual ~IAddon() {};
-    virtual AddonPtr Clone(const AddonPtr& self) const =0;
+    virtual AddonPtr Clone() const =0;
     virtual TYPE Type() const =0;
     virtual bool IsType(TYPE type) const =0;
     virtual AddonProps Props() const =0;
@@ -113,7 +113,6 @@ namespace ADDON
     virtual bool ReloadSettings() =0;
 
   protected:
-    virtual const AddonPtr Parent() const =0;
     virtual bool LoadSettings(bool bForce = false) =0;
 
   private:

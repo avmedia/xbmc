@@ -30,6 +30,7 @@
 #error DSPlayer's header file included without HAS_DS_PLAYER defined
 #endif
 
+#include "utils\StdString.h"
 #include "..\Subtitles\libsubs\ISubManager.h"
 
 class CPixelShaderList;

@@ -24,7 +24,6 @@
 #include "FilterCoreFactory.h"
 #include "DSPlayer.h"
 #include "filters/XBMCFileSource.h"
-#include "settings/GUISettings.h"
 #include "utils/URIUtils.h"
 
 InternalFilters internalFilters[] =

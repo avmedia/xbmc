@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 #include "utils/CharsetConverter.h"
 #include "settings/DisplaySettings.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "guilib/GUITextLayout.h"
 #include "guilib/GUIFont.h"
 #include "karaokelyricstext.h"
@@ -34,6 +34,7 @@
 #include "addons/Skin.h"
 #include "utils/MathUtils.h"
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 
 typedef struct
 {
@@ -68,13 +69,13 @@ CKaraokeLyricsText::CKaraokeLyricsText()
   m_preambleLayout = 0;
   m_karaokeFont = 0;
 
-  int coloridx = g_guiSettings.GetInt("karaoke.fontcolors");
+  int coloridx = CSettings::Get().GetInt("karaoke.fontcolors");
   if ( coloridx < KARAOKE_COLOR_START || coloridx >= KARAOKE_COLOR_END )
     coloridx = 0;
 
   m_colorLyrics = gLyricColors[coloridx].text;
   m_colorLyricsOutline = gLyricColors[coloridx].outline;
-  m_colorSinging.Format( "%08X", gLyricColors[coloridx].active );
+  m_colorSinging = StringUtils::Format("%08X", gLyricColors[coloridx].active);
 
   m_delayAfter = 50; // 5 seconds
   m_showLyricsBeforeStart = 50; // 7.5 seconds
@@ -139,11 +140,13 @@ bool CKaraokeLyricsText::InitGraphics()
   if ( m_lyrics.empty() )
     return false;
 
-  CStdString fontPath = "special://xbmc/media/Fonts/" + g_guiSettings.GetString("karaoke.font");
+  CStdString fontPath = URIUtils::AddFileToFolder("special://home/media/Fonts/", CSettings::Get().GetString("karaoke.font"));
+  if (!XFILE::CFile::Exists(fontPath))
+      fontPath = URIUtils::AddFileToFolder("special://xbmc/media/Fonts/", CSettings::Get().GetString("karaoke.font"));
   m_karaokeFont = g_fontManager.LoadTTF("__karaoke__", fontPath,
-                  m_colorLyrics, 0, g_guiSettings.GetInt("karaoke.fontheight"), FONT_STYLE_BOLD );
+                  m_colorLyrics, 0, CSettings::Get().GetInt("karaoke.fontheight"), FONT_STYLE_BOLD );
   CGUIFont *karaokeBorder = g_fontManager.LoadTTF("__karaokeborder__", fontPath,
-                            m_colorLyrics, 0, g_guiSettings.GetInt("karaoke.fontheight"), FONT_STYLE_BOLD, true );
+                            m_colorLyrics, 0, CSettings::Get().GetInt("karaoke.fontheight"), FONT_STYLE_BOLD, true );
 
   if ( !m_karaokeFont )
   {
@@ -257,7 +260,9 @@ void CKaraokeLyricsText::Render()
     case STATE_PLAYING_PARAGRAPH:
       if ( songTime >= m_lyrics[ m_index ].timing )
       {
-        m_index++;
+        while ( songTime >= m_lyrics[ m_index ].timing && m_index <= m_indexEndPara )
+          m_index++;
+
         updateText = true;
 
         if ( m_index > m_indexEndPara )
@@ -313,9 +318,9 @@ void CKaraokeLyricsText::Render()
   }
 
   // Calculate drawing parameters
-  RESOLUTION resolution = g_graphicsContext.GetVideoResolution();
-  g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
-  float maxWidth = (float) CDisplaySettings::Get().GetResolutionInfo(resolution).Overscan.right - CDisplaySettings::Get().GetResolutionInfo(resolution).Overscan.left;
+  const RESOLUTION_INFO info = g_graphicsContext.GetResInfo();
+  g_graphicsContext.SetRenderingResolution(info, false);
+  float maxWidth = (float) info.Overscan.right - info.Overscan.left;
 
   // We must only fall through for STATE_DRAW_SYLLABLE or STATE_PREAMBLE
   if ( updateText )
@@ -375,15 +380,15 @@ void CKaraokeLyricsText::Render()
     m_preambleLayout->Update( m_currentPreamble, maxWidth * 0.9f );
   }
 
-  float x = maxWidth * 0.5f + CDisplaySettings::Get().GetResolutionInfo(resolution).Overscan.left;
-  float y = (float)CDisplaySettings::Get().GetResolutionInfo(resolution).Overscan.top +
-      (CDisplaySettings::Get().GetResolutionInfo(resolution).Overscan.bottom - CDisplaySettings::Get().GetResolutionInfo(resolution).Overscan.top) / 8;
+  float x = maxWidth * 0.5f + info.Overscan.left;
+  float y = (float)info.Overscan.top +
+      (info.Overscan.bottom - info.Overscan.top) / 8;
 
   float textWidth, textHeight;
   m_karaokeLayout->GetTextExtent(textWidth, textHeight);
   m_karaokeLayout->RenderOutline(x, y, 0, m_colorLyricsOutline, XBFONT_CENTER_X, maxWidth);
 
-  if ( !m_currentPreamble.IsEmpty() )
+  if ( !m_currentPreamble.empty() )
   {
     float pretextWidth, pretextHeight;
     m_preambleLayout->GetTextExtent(pretextWidth, pretextHeight);
@@ -441,7 +446,7 @@ void CKaraokeLyricsText::rescanLyrics()
   // and time difference between one line ends and second starts
   for ( unsigned int i = 0; i < m_lyrics.size(); i++ )
   {
-    if ( m_lyrics[i].text.Find( " " ) != -1 )
+    if (m_lyrics[i].text.find(" ") != std::string::npos)
       spaces++;
 
     if ( m_lyrics[i].flags & LYRICS_NEW_LINE )
@@ -460,8 +465,8 @@ void CKaraokeLyricsText::rescanLyrics()
 
   // Second, add spaces if less than 5%, and rescan to gather more data.
   bool add_spaces = (syllables && (spaces * 100 / syllables < 5)) ? true : false;
-  RESOLUTION res = g_graphicsContext.GetVideoResolution();
-  float maxWidth = (float) CDisplaySettings::Get().GetResolutionInfo(res).Overscan.right - CDisplaySettings::Get().GetResolutionInfo(res).Overscan.left;
+  const RESOLUTION_INFO info = g_graphicsContext.GetResInfo();
+  float maxWidth = (float) info.Overscan.right - info.Overscan.left;
 
   CStdString line_text;
   int prev_line_idx = -1;
@@ -499,7 +504,7 @@ void CKaraokeLyricsText::rescanLyrics()
       else
       {
         CStdString lower = m_lyrics[i].text;
-        lower.ToLower();
+        StringUtils::ToLower(lower);
         ld.upper_start = (m_lyrics[i].text == lower);
       }
 
@@ -574,7 +579,7 @@ void CKaraokeLyricsText::rescanLyrics()
   }
 
   // Prepare a new first lyric entry with song name and artist.
-  if ( m_songName.IsEmpty() )
+  if ( m_songName.empty() )
   {
     m_songName = URIUtils::GetFileName( getSongFile() );
     URIUtils::RemoveExtension( m_songName );
@@ -592,7 +597,7 @@ void CKaraokeLyricsText::rescanLyrics()
     ltitle.timing = 0;
     ltitle.text = m_songName;
 
-    if ( !m_artist.IsEmpty() )
+    if ( !m_artist.empty() )
       ltitle.text += "[CR][CR]" + m_artist;
 
     newlyrics.push_back( ltitle );
@@ -655,7 +660,7 @@ void CKaraokeLyricsText::rescanLyrics()
         l.flags = 0;
       l.timing = (unsigned int) MathUtils::round_int( m_lyrics[ i ].timing + j * time_per_char );
 
-      g_charsetConverter.wToUTF8( utf16.Mid( j, 1 ), l.text );
+      g_charsetConverter.wToUTF8( utf16.substr(j, 1), l.text);
 
       if ( l.text == " " )
       {
@@ -703,8 +708,10 @@ void CKaraokeLyricsText::saveLyrics()
 
   for ( unsigned int i = 0; i < m_lyrics.size(); i++ )
   {
-    CStdString timing;
-    timing.Format( "%02d:%02d.%d", m_lyrics[i].timing / 600, (m_lyrics[i].timing % 600) / 10, (m_lyrics[i].timing % 10) );
+    CStdString timing = StringUtils::Format("%02d:%02d.%d",
+                                            m_lyrics[i].timing / 600,
+                                            (m_lyrics[i].timing % 600) / 10,
+                                            (m_lyrics[i].timing % 10));
 
     if ( (m_lyrics[i].flags & LYRICS_NEW_PARAGRAPH) != 0 )
       out += "\n\n";
@@ -731,7 +738,7 @@ bool CKaraokeLyricsText::HasBackground()
 
 bool CKaraokeLyricsText::HasVideo()
 {
-  return m_videoFile.IsEmpty() ? false : true;
+  return m_videoFile.empty() ? false : true;
 }
 
 void CKaraokeLyricsText::GetVideoParameters(CStdString & path, int64_t & offset)

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@
 #include "URIUtils.h"
 #include "music/tags/MusicInfoTag.h"
 #include "video/VideoInfoTag.h"
+#include "URL.h"
+#include "utils/StringUtils.h"
+#include "filesystem/CurlFile.h"
 
 using namespace std;
 
@@ -59,7 +62,7 @@ map<string, string> fillMimeTypes()
   mimeTypes.insert(pair<string, string>("asp",       "text/asp"));
   mimeTypes.insert(pair<string, string>("asx",       "video/x-ms-asf"));
   mimeTypes.insert(pair<string, string>("au",        "audio/basic"));
-  mimeTypes.insert(pair<string, string>("avi",       "video/x-msvideo"));
+  mimeTypes.insert(pair<string, string>("avi",       "video/avi"));
   mimeTypes.insert(pair<string, string>("avs",       "video/avs-video"));
   mimeTypes.insert(pair<string, string>("bcpio",     "application/x-bcpio"));
   mimeTypes.insert(pair<string, string>("bin",       "application/octet-stream"));
@@ -193,7 +196,8 @@ map<string, string> fillMimeTypes()
   mimeTypes.insert(pair<string, string>("jpeg",      "image/jpeg"));
   mimeTypes.insert(pair<string, string>("jpg",       "image/jpeg"));
   mimeTypes.insert(pair<string, string>("jps",       "image/x-jps"));
-  mimeTypes.insert(pair<string, string>("js",        "application/x-javascript"));
+  mimeTypes.insert(pair<string, string>("js",        "application/javascript"));
+  mimeTypes.insert(pair<string, string>("json",      "application/json"));
   mimeTypes.insert(pair<string, string>("jut",       "image/jutvision"));
   mimeTypes.insert(pair<string, string>("kar",       "music/x-karaoke"));
   mimeTypes.insert(pair<string, string>("ksh",       "application/x-ksh"));
@@ -404,6 +408,7 @@ map<string, string> fillMimeTypes()
   mimeTypes.insert(pair<string, string>("text",      "text/plain"));
   mimeTypes.insert(pair<string, string>("tgz",       "application/x-compressed"));
   mimeTypes.insert(pair<string, string>("tif",       "image/tiff"));
+  mimeTypes.insert(pair<string, string>("tiff",      "image/tiff"));
   mimeTypes.insert(pair<string, string>("tr",        "application/x-troff"));
   mimeTypes.insert(pair<string, string>("ts",        "video/mp2t"));
   mimeTypes.insert(pair<string, string>("tsi",       "audio/tsp-audio"));
@@ -526,10 +531,166 @@ string CMime::GetMimeType(const string &extension)
 string CMime::GetMimeType(const CFileItem &item)
 {
   CStdString path = item.GetPath();
-  if (item.HasVideoInfoTag() && !item.GetVideoInfoTag()->GetPath().IsEmpty())
+  if (item.HasVideoInfoTag() && !item.GetVideoInfoTag()->GetPath().empty())
     path = item.GetVideoInfoTag()->GetPath();
-  else if (item.HasMusicInfoTag() && !item.GetMusicInfoTag()->GetURL().IsEmpty())
+  else if (item.HasMusicInfoTag() && !item.GetMusicInfoTag()->GetURL().empty())
     path = item.GetMusicInfoTag()->GetURL();
 
   return GetMimeType(URIUtils::GetExtension(path));
+}
+
+string CMime::GetMimeType(const CURL &url, bool lookup)
+{
+  
+  std::string strMimeType;
+
+  if( url.GetProtocol() == "shout" || url.GetProtocol() == "http" || url.GetProtocol() == "https")
+  {
+    // If lookup is false, bail out early to leave mime type empty
+    if (!lookup)
+      return strMimeType;
+
+    CStdString strmime;
+    XFILE::CCurlFile::GetMimeType(url, strmime);
+
+    // try to get mime-type again but with an NSPlayer User-Agent
+    // in order for server to provide correct mime-type.  Allows us
+    // to properly detect an MMS stream
+    if (StringUtils::StartsWithNoCase(strmime, "video/x-ms-"))
+      XFILE::CCurlFile::GetMimeType(url, strmime, "NSPlayer/11.00.6001.7000");
+
+    // make sure there are no options set in mime-type
+    // mime-type can look like "video/x-ms-asf ; charset=utf8"
+    size_t i = strmime.find(';');
+    if(i != std::string::npos)
+      strmime.erase(i, strmime.length() - i);
+    StringUtils::Trim(strmime);
+    strMimeType = strmime;
+  }
+  else
+    strMimeType = GetMimeType(url.GetFileType());
+
+  // if it's still empty set to an unknown type
+  if (strMimeType.empty())
+    strMimeType = "application/octet-stream";
+
+  return strMimeType;
+}
+
+CMime::EFileType CMime::GetFileTypeFromMime(const std::string& mimeType)
+{
+  // based on http://mimesniff.spec.whatwg.org/
+
+  std::string type, subtype;
+  if (!parseMimeType(mimeType, type, subtype))
+    return FileTypeUnknown;
+
+  if (type == "application")
+  {
+    if (subtype == "zip")
+      return FileTypeZip;
+    if (subtype == "x-gzip")
+      return FileTypeGZip;
+    if (subtype == "x-rar-compressed")
+      return FileTypeRar;
+
+    if (subtype == "xml")
+      return FileTypeXml;
+  }
+  else if (type == "text")
+  {
+    if (subtype == "xml")
+      return FileTypeXml;
+    if (subtype == "html")
+      return FileTypeHtml;
+    if (subtype == "plain")
+      return FileTypePlainText;
+  }
+  else if (type == "image")
+  {
+    if (subtype == "bmp")
+      return FileTypeBmp;
+    if (subtype == "gif")
+      return FileTypeGif;
+    if (subtype == "png")
+      return FileTypePng;
+    if (subtype == "jpeg" || subtype == "pjpeg")
+      return FileTypeJpeg;
+  }
+
+  if (StringUtils::EndsWith(subtype, "+zip"))
+    return FileTypeZip;
+  if (StringUtils::EndsWith(subtype, "+xml"))
+    return FileTypeXml;
+
+  return FileTypeUnknown;
+}
+
+CMime::EFileType CMime::GetFileTypeFromContent(const std::string& fileContent)
+{
+  // based on http://mimesniff.spec.whatwg.org/#matching-a-mime-type-pattern
+
+  const size_t len = fileContent.length();
+  if (len < 2)
+    return FileTypeUnknown;
+
+  const unsigned char* const b = (const unsigned char*)fileContent.c_str();
+
+  // TODO: add detection for text types
+
+  // check image types
+  if (b[0] == 'B' && b[1] == 'M')
+    return FileTypeBmp;
+  if (len >= 6 && b[0] == 'G' && b[1] == 'I' && b[2] == 'F' && b[3] == '8' && (b[4] == '7' || b[4] == '9') && b[5] == 'a')
+    return FileTypeGif;
+  if (len >= 8 && b[0] == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G' && b[4] == 0x0D && b[5] == 0x0A && b[6] == 0x1A && b[7] == 0x0A)
+    return FileTypePng;
+  if (len >= 3 && b[0] == 0xFF && b[1] == 0xD8 && b[2] == 0xFF)
+    return FileTypeJpeg;
+
+  // check archive types
+  if (len >= 3 && b[0] == 0x1F && b[1] == 0x8B && b[2] == 0x08)
+    return FileTypeGZip;
+  if (len >= 4 && b[0] == 'P' && b[1] == 'K' && b[2] == 0x03 && b[3] == 0x04)
+    return FileTypeZip;
+  if (len >= 7 && b[0] == 'R' && b[1] == 'a' && b[2] == 'r' && b[3] == ' ' && b[4] == 0x1A && b[5] == 0x07 && b[6] == 0x00)
+    return FileTypeRar;
+
+  // TODO: add detection for other types if required
+
+  return FileTypeUnknown;
+}
+
+bool CMime::parseMimeType(const std::string& mimeType, std::string& type, std::string& subtype)
+{
+  static const char* const whitespaceChars = "\x09\x0A\x0C\x0D\x20"; // tab, LF, FF, CR and space
+
+  type.clear();
+  subtype.clear();
+
+  const size_t slashPos = mimeType.find('/');
+  if (slashPos == std::string::npos)
+    return false;
+
+  type.assign(mimeType, 0, slashPos);
+  subtype.assign(mimeType, slashPos + 1, std::string::npos);
+
+  const size_t semicolonPos = subtype.find(';');
+  if (semicolonPos != std::string::npos)
+    subtype.erase(semicolonPos);
+
+  StringUtils::Trim(type, whitespaceChars);
+  StringUtils::Trim(subtype, whitespaceChars);
+
+  if (type.empty() || subtype.empty())
+  {
+    type.clear();
+    subtype.clear();
+    return false;
+  }
+
+  StringUtils::ToLower(type);
+  StringUtils::ToLower(subtype);
+
+  return true;
 }

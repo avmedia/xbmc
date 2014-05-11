@@ -3,7 +3,7 @@
 
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "xbmc/guilib/Shader.h"
 #include "settings/VideoSettings.h"
 #include "RenderFlags.h"
+#include "RenderFormats.h"
 #include "guilib/GraphicContext.h"
 #include "BaseRenderer.h"
 #include "xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
@@ -39,9 +40,9 @@ class CBaseTexture;
 namespace Shaders { class BaseYUV2RGBShader; }
 namespace Shaders { class BaseVideoFilterShader; }
 class COpenMaxVideo;
+class CDVDVideoCodecStageFright;
+class CDVDMediaCodecInfo;
 typedef std::vector<int>     Features;
-
-#define NUM_BUFFERS 3
 
 
 #undef ALIGN
@@ -86,7 +87,9 @@ enum RenderMethod
   RENDER_POT    = 0x010,
   RENDER_OMXEGL = 0x040,
   RENDER_CVREF  = 0x080,
-  RENDER_BYPASS = 0x100
+  RENDER_BYPASS = 0x100,
+  RENDER_EGLIMG = 0x200,
+  RENDER_MEDIACODEC = 0x400
 };
 
 enum RenderQuality
@@ -123,7 +126,7 @@ public:
   CLinuxRendererGLES();
   virtual ~CLinuxRendererGLES();
 
-  virtual void Update(bool bPauseDrawing);
+  virtual void Update();
   virtual void SetupScreenshot() {};
 
   bool RenderCapture(CRenderCapture* capture);
@@ -137,7 +140,12 @@ public:
   virtual unsigned int PreInit();
   virtual void         UnInit();
   virtual void         Reset(); /* resets renderer after seek for example */
+  virtual void         Flush();
   virtual void         ReorderDrawPoints();
+  virtual void         ReleaseBuffer(int idx);
+  virtual void         SetBufferSize(int numBuffers) { m_NumYV12Buffers = numBuffers; }
+  virtual unsigned int GetMaxBufferSize() { return NUM_BUFFERS; }
+  virtual unsigned int GetProcessorSize();
 
   virtual void RenderUpdate(bool clear, DWORD flags = 0, DWORD alpha = 255);
 
@@ -153,16 +161,22 @@ public:
   virtual std::vector<ERenderFormat> SupportedFormats() { return m_formats; }
 
 #ifdef HAVE_LIBOPENMAX
-  virtual void         AddProcessor(COpenMax* openMax, DVDVideoPicture *picture);
+  virtual void         AddProcessor(COpenMax* openMax, DVDVideoPicture *picture, int index);
 #endif
 #ifdef HAVE_VIDEOTOOLBOXDECODER
-  virtual void         AddProcessor(struct __CVBuffer *cvBufferRef);
+  virtual void         AddProcessor(struct __CVBuffer *cvBufferRef, int index);
+#endif
+#ifdef HAS_LIBSTAGEFRIGHT
+  virtual void         AddProcessor(CDVDVideoCodecStageFright* stf, EGLImageKHR eglimg, int index);
+#endif
+#if defined(TARGET_ANDROID)
+  // mediaCodec
+  virtual void         AddProcessor(CDVDMediaCodecInfo *mediacodec, int index);
 #endif
 
 protected:
   virtual void Render(DWORD flags, int index);
 
-  virtual void ManageTextures();
   int  NextYV12Texture();
   virtual bool ValidateRenderTarget();
   virtual void LoadShaders(int field=FIELD_FULL);
@@ -178,6 +192,10 @@ protected:
   void DeleteYV12Texture(int index);
   bool CreateYV12Texture(int index);
 
+  void UploadNV12Texture(int index);
+  void DeleteNV12Texture(int index);
+  bool CreateNV12Texture(int index);
+
   void UploadCVRefTexture(int index);
   void DeleteCVRefTexture(int index);
   bool CreateCVRefTexture(int index);
@@ -186,6 +204,14 @@ protected:
   void DeleteBYPASSTexture(int index);
   bool CreateBYPASSTexture(int index);
 
+  void UploadEGLIMGTexture(int index);
+  void DeleteEGLIMGTexture(int index);
+  bool CreateEGLIMGTexture(int index);
+
+  void UploadSurfaceTexture(int index);
+  void DeleteSurfaceTexture(int index);
+  bool CreateSurfaceTexture(int index);
+
   void CalculateTextureSourceRects(int source, int num_planes);
 
   // renderers
@@ -193,7 +219,9 @@ protected:
   void RenderSinglePass(int index, int field);    // single pass glsl renderer
   void RenderSoftware(int index, int field);      // single pass s/w yuv2rgb renderer
   void RenderOpenMax(int index, int field);       // OpenMAX rgb texture
+  void RenderEglImage(int index, int field);       // Android OES texture
   void RenderCoreVideoRef(int index, int field);  // CoreVideo reference
+  void RenderSurfaceTexture(int index, int field);// MediaCodec rendering using SurfaceTexture
 
   CFrameBufferObject m_fbo;
 
@@ -205,7 +233,6 @@ protected:
   bool m_bValidated;
   std::vector<ERenderFormat> m_formats;
   bool m_bImageReady;
-  ERenderFormat m_format;
   GLenum m_textureTarget;
   unsigned short m_renderMethod;
   unsigned short m_oldRenderMethod;
@@ -228,6 +255,10 @@ protected:
     unsigned texwidth;
     unsigned texheight;
 
+    //pixels per texel
+    unsigned pixpertex_x;
+    unsigned pixpertex_y;
+
     unsigned flipindex;
   };
 
@@ -247,9 +278,16 @@ protected:
     OpenMaxVideoBuffer *openMaxBuffer;
 #endif
 #ifdef HAVE_VIDEOTOOLBOXDECODER
-  struct __CVBuffer *cvBufferRef;
+    struct __CVBuffer *cvBufferRef;
 #endif
-
+#ifdef HAS_LIBSTAGEFRIGHT
+    CDVDVideoCodecStageFright* stf;
+    EGLImageKHR eglimg;
+#endif
+#if defined(TARGET_ANDROID)
+    // mediacodec
+    CDVDMediaCodecInfo *mediacodec;
+#endif
   };
 
   typedef YUVBUFFER          YUVBUFFERS[NUM_BUFFERS];
@@ -260,7 +298,7 @@ protected:
 
   void LoadPlane( YUVPLANE& plane, int type, unsigned flipindex
                 , unsigned width,  unsigned height
-                , int stride, void* data );
+                , unsigned int stride, int bpp, void* data );
 
   Shaders::BaseYUV2RGBShader     *m_pYUVShader;
   Shaders::BaseVideoFilterShader *m_pVideoFilterShader;
@@ -280,9 +318,7 @@ protected:
   struct SwsContext *m_sw_context;
   BYTE	      *m_rgbBuffer;  // if software scale is used, this will hold the result image
   unsigned int m_rgbBufferSize;
-
-  CEvent* m_eventTexturesDone[NUM_BUFFERS];
-
+  float        m_textureMatrix[16];
 };
 
 

@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,13 +20,15 @@
  *
  */
 
+#include <map>
+#include <vector>
+
+#include "settings/lib/ISettingCallback.h"
 #include "utils/StdString.h"
+#include "settings/lib/Setting.h"
 
 class CFileItem;
 class CMediaSource;
-
-#include <vector>
-#include <map>
 
 typedef std::vector<CMediaSource> VECSOURCES;
 
@@ -41,7 +43,21 @@ typedef enum
   LOCK_MODE_EEPROM_PARENTAL    =  5
 } LockType;
 
-class CGUIPassword
+namespace LOCK_LEVEL {
+  /**
+   Specifies, what Settings levels are locked for the user
+   **/
+  enum SETTINGS_LOCK
+  {
+    NONE,     //settings are unlocked => user can access all settings levels
+    ALL,      //all settings are locked => user always has to enter password, when entering the settings screen
+    STANDARD, //settings level standard and up are locked => user can still access the beginner levels
+    ADVANCED, 
+    EXPERT
+  };
+}
+
+class CGUIPassword : public ISettingCallback
 {
 public:
   CGUIPassword(void);
@@ -57,12 +73,21 @@ public:
 
   void UpdateMasterLockRetryCount(bool bResetCount);
   bool CheckStartUpLock();
+  /*! \brief Checks if the current profile is allowed to access the given settings level
+   \param level - The level to check
+   \param enforce - If false, CheckSettingLevelLock is allowed to lower the current settings level
+                    to a level we're allowed to access
+   \returns true if we're allowed to access the settings
+   */
+  bool CheckSettingLevelLock(const SettingLevel& level, bool enforce = false);
   bool CheckMenuLock(int iWindowID);
   bool SetMasterLockMode(bool bDetails=true);
   bool LockSource(const CStdString& strType, const CStdString& strName, bool bState);
   void LockSources(bool lock);
   void RemoveSourceLocks();
   bool IsDatabasePathUnlocked(const CStdString& strPath, VECSOURCES& vecSources);
+
+  virtual void OnSettingAction(const CSetting *setting);
 
   bool bMasterUser;
   int iMasterLockRetriesLeft;

@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@
 
 #include "XBDateTime.h"
 #include "addons/include/xbmc_pvr_types.h"
+#include "utils/ISerializable.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -61,8 +62,9 @@ namespace PVR
 
   class CPVRTimerInfoTag;
   typedef boost::shared_ptr<PVR::CPVRTimerInfoTag> CPVRTimerInfoTagPtr;
+  #define PVR_VIRTUAL_CHANNEL_UID (-1)
 
-  class CPVRTimerInfoTag
+  class CPVRTimerInfoTag : public ISerializable
   {
     friend class CPVRTimers;
     friend class CGUIDialogPVRTimerSettings;
@@ -75,6 +77,8 @@ namespace PVR
     bool operator ==(const CPVRTimerInfoTag& right) const;
     bool operator !=(const CPVRTimerInfoTag& right) const;
     CPVRTimerInfoTag &operator=(const CPVRTimerInfoTag &orig);
+
+    virtual void Serialize(CVariant &value) const;
 
     int Compare(const CPVRTimerInfoTag &timer) const;
 
@@ -172,6 +176,7 @@ namespace PVR
     CStdString            m_strFileNameAndPath; /*!< @brief filename is only for reference */
     int                   m_iChannelNumber;     /*!< @brief integer value of the channel number */
     bool                  m_bIsRadio;           /*!< @brief is radio channel if set */
+    unsigned int          m_iTimerId;           /*!< @brief id that won't change as long as XBMC is running */
 
     CPVRChannelPtr        m_channel;
     unsigned int          m_iMarginStart;       /*!< @brief (optional) if set, the backend starts the recording iMarginStart minutes before startTime. */

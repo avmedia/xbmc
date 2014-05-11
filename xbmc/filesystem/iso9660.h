@@ -1,22 +1,23 @@
 /*
-* XBMC
-* Copyright (C) 2003 by The Joker / Avalaunch team
-*
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ *      Copyright (C) 2003 by The Joker / Avalaunch team
+ *      Copyright (C) 2003-2013 Team XBMC
+ *      http://xbmc.org
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ */
 
 #ifndef ISO9660_H
 #define ISO9660_H
@@ -25,7 +26,7 @@
 #include <string>
 #include "system.h" // for win32 types
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 // Ideally we should just be including iso9660.h, but it's not win32-ified at this point,
 // and these are all we need
 typedef uint32_t iso723_t;
@@ -185,7 +186,7 @@ public:
   int64_t GetFilePosition(HANDLE hFile);
   int64_t Seek(HANDLE hFile, int64_t lOffset, int whence);
   HANDLE OpenFile( const char* filename );
-  long ReadFile(HANDLE fd, byte *pBuffer, long lSize);
+  long ReadFile(HANDLE fd, uint8_t *pBuffer, long lSize);
   void CloseFile(HANDLE hFile);
   void Reset();
   void Scan();
@@ -196,7 +197,7 @@ protected:
   struct iso_dirtree* ReadRecursiveDirFromSector( DWORD sector, const char * );
   struct iso_dirtree* FindFolder( char *Folder );
   std::string GetThinText(BYTE* strTxt, int iLen );
-  bool ReadSectorFromCache(iso9660::isofile* pContext, DWORD sector, byte** ppBuffer);
+  bool ReadSectorFromCache(iso9660::isofile* pContext, DWORD sector, uint8_t** ppBuffer);
   void ReleaseSectorFromCache(iso9660::isofile* pContext, DWORD sector);
   const std::string ParseName(struct iso9660_Directory& isodir);
   HANDLE AllocFileContext();

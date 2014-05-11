@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -78,6 +78,8 @@ color_t CGUILabel::GetColor() const
       return m_label.disabledColor;
     case COLOR_FOCUSED:
       return m_label.focusedColor ? m_label.focusedColor : m_label.textColor;
+    case COLOR_INVALID:
+      return m_label.invalidColor ? m_label.invalidColor : m_label.textColor;
     default:
       break;
   }
@@ -89,7 +91,12 @@ bool CGUILabel::Process(unsigned int currentTime)
   // TODO Add the correct processing
 
   bool overFlows = (m_renderRect.Width() + 0.5f < m_textLayout.GetTextWidth()); // 0.5f to deal with floating point rounding issues
-  return (overFlows && m_scrolling);
+  bool renderSolid = (m_color == COLOR_DISABLED);
+
+  if (overFlows && m_scrolling && !renderSolid)
+    return m_textLayout.UpdateScrollinfo(m_scrollInfo);
+
+  return false;
 }
 
 void CGUILabel::Render()
@@ -153,6 +160,13 @@ bool CGUILabel::SetAlign(uint32_t align)
   return changed;
 }
 
+bool CGUILabel::SetStyledText(const vecText &text, const vecColors &colors)
+{
+  m_textLayout.UpdateStyled(text, colors, m_maxRect.Width());
+  m_invalid = false;
+  return true;
+}
+
 bool CGUILabel::SetText(const CStdString &label)
 {
   if (m_textLayout.Update(label, m_maxRect.Width(), m_invalid))
@@ -211,12 +225,12 @@ bool CGUILabel::CheckAndCorrectOverlap(CGUILabel &label1, CGUILabel &label2)
   if (rect.Intersect(label2.m_renderRect).IsEmpty())
     return false; // nothing to do (though it could potentially encroach on the min_space requirement)
   
-  static const float min_space = 10;
   // overlap vertically and horizontally - check alignment
   CGUILabel &left = label1.m_renderRect.x1 <= label2.m_renderRect.x1 ? label1 : label2;
   CGUILabel &right = label1.m_renderRect.x1 <= label2.m_renderRect.x1 ? label2 : label1;
   if ((left.m_label.align & 3) == 0 && right.m_label.align & XBFONT_RIGHT)
   {
+    static const float min_space = 10;
     float chopPoint = (left.m_maxRect.x1 + left.GetMaxWidth() + right.m_maxRect.x2 - right.GetMaxWidth()) * 0.5f;
     // [1       [2...[2  1].|..........1]         2]
     // [1       [2.....[2   |      1]..1]         2]

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -125,7 +125,7 @@ void CMusicInfoScraper::LoadArtistInfo()
     return;
 
   CMusicArtistInfo& artist=m_vecArtists[m_iArtist];
-  artist.GetArtist().strArtist.Empty();
+  artist.GetArtist().strArtist.clear();
   if (artist.Load(*m_http,m_scraper,m_strSearch))
     m_bSucceeded=true;
 }
@@ -165,13 +165,13 @@ void CMusicInfoScraper::Process()
     if (m_strAlbum.size())
     {
       FindAlbumInfo();
-      m_strAlbum.Empty();
-      m_strArtist.Empty();
+      m_strAlbum.clear();
+      m_strArtist.clear();
     }
     else if (m_strArtist.size())
     {
       FindArtistInfo();
-      m_strArtist.Empty();
+      m_strArtist.clear();
     }
     if (m_iAlbum>-1)
     {

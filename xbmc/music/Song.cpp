@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,25 +21,52 @@
 #include "Song.h"
 #include "music/tags/MusicInfoTag.h"
 #include "utils/Variant.h"
+#include "FileItem.h"
+#include "settings/AdvancedSettings.h"
+#include "utils/StringUtils.h"
 
 using namespace std;
 using namespace MUSIC_INFO;
 
-CSong::CSong(CMusicInfoTag& tag)
+CSong::CSong(CFileItem& item)
 {
+  CMusicInfoTag& tag = *item.GetMusicInfoTag();
   SYSTEMTIME stTime;
   tag.GetReleaseDate(stTime);
   strTitle = tag.GetTitle();
   genre = tag.GetGenre();
-  strFileName = tag.GetURL();
   artist = tag.GetArtist();
+  if (!tag.GetMusicBrainzArtistID().empty())
+  { // have musicbrainz artist info, so use it
+    for (size_t i = 0; i < tag.GetMusicBrainzArtistID().size(); i++)
+    {
+      CStdString artistId = tag.GetMusicBrainzArtistID()[i];
+      CStdString artistName;
+      /*
+       We try and get the corresponding artist name from the album artist tag.
+       We match on the same index, and if that fails just use the first name we have.
+       */
+      if (!artist.empty())
+        artistName = (i < artist.size()) ? artist[i] : artist[0];
+      if (artistName.empty())
+        artistName = artistId;
+      CStdString strJoinPhrase = (i == tag.GetMusicBrainzArtistID().size()-1) ? "" : g_advancedSettings.m_musicItemSeparator;
+      CArtistCredit artistCredit(artistName, artistId, strJoinPhrase);
+      artistCredits.push_back(artistCredit);
+    }
+  }
+  else
+  { // no musicbrainz info, so fill in directly
+    for (vector<string>::const_iterator it = tag.GetArtist().begin(); it != tag.GetArtist().end(); ++it)
+    {
+      CStdString strJoinPhrase = (it == --tag.GetArtist().end() ? "" : g_advancedSettings.m_musicItemSeparator);
+      CArtistCredit artistCredit(*it, "", strJoinPhrase);
+      artistCredits.push_back(artistCredit);
+    }
+  }
   strAlbum = tag.GetAlbum();
   albumArtist = tag.GetAlbumArtist();
   strMusicBrainzTrackID = tag.GetMusicBrainzTrackID();
-  strMusicBrainzArtistID = tag.GetMusicBrainzArtistID();
-  strMusicBrainzAlbumID = tag.GetMusicBrainzAlbumID();
-  strMusicBrainzAlbumArtistID = tag.GetMusicBrainzAlbumArtistID();
-  strMusicBrainzTRMID = tag.GetMusicBrainzTRMID();
   strComment = tag.GetComment();
   rating = tag.GetRating();
   iYear = stTime.wYear;
@@ -47,19 +74,33 @@ CSong::CSong(CMusicInfoTag& tag)
   iDuration = tag.GetDuration();
   bCompilation = tag.GetCompilation();
   embeddedArt = tag.GetCoverArtInfo();
-  strThumb = "";
-  iStartOffset = 0;
-  iEndOffset = 0;
+  strFileName = tag.GetURL().empty() ? item.GetPath() : tag.GetURL();
+  strThumb = item.GetUserMusicThumb(true);
+  iStartOffset = item.m_lStartOffset;
+  iEndOffset = item.m_lEndOffset;
   idSong = -1;
   iTimesPlayed = 0;
   iKaraokeNumber = 0;
   iKaraokeDelay = 0;         //! Karaoke song lyrics-music delay in 1/10 seconds.
-  iAlbumId = -1;
+  idAlbum = -1;
 }
 
 CSong::CSong()
 {
   Clear();
+}
+
+void CSong::MergeScrapedSong(const CSong& source, bool override)
+{
+  if ((override && !source.strTitle.empty()) || strTitle.empty())
+    strTitle = source.strTitle;
+  if ((override && source.iTrack != 0) || iTrack == 0)
+    iTrack = source.iTrack;
+  // artist = source.artist; // artist is read-only from the database
+  if (override)
+    artistCredits = source.artistCredits;
+  else if (source.artistCredits.size() > artistCredits.size())
+    artistCredits.insert(artistCredits.end(), source.artistCredits.begin()+artistCredits.size(), source.artistCredits.end());
 }
 
 void CSong::Serialize(CVariant& value) const
@@ -74,33 +115,25 @@ void CSong::Serialize(CVariant& value) const
   value["track"] = iTrack;
   value["year"] = iYear;
   value["musicbrainztrackid"] = strMusicBrainzTrackID;
-  value["musicbrainzartistid"] = strMusicBrainzArtistID;
-  value["musicbrainzalbumid"] = strMusicBrainzAlbumID;
-  value["musicbrainzalbumartistid"] = strMusicBrainzAlbumArtistID;
-  value["musicbrainztrmid"] = strMusicBrainzTRMID;
   value["comment"] = strComment;
   value["rating"] = rating;
   value["timesplayed"] = iTimesPlayed;
   value["lastplayed"] = lastPlayed.IsValid() ? lastPlayed.GetAsDBDateTime() : "";
   value["karaokenumber"] = (int64_t) iKaraokeNumber;
-  value["albumid"] = iAlbumId;
+  value["albumid"] = idAlbum;
 }
 
 void CSong::Clear()
 {
-  strFileName.Empty();
-  strTitle.Empty();
+  strFileName.clear();
+  strTitle.clear();
   artist.clear();
-  strAlbum.Empty();
+  strAlbum.clear();
   albumArtist.clear();
   genre.clear();
-  strThumb.Empty();
-  strMusicBrainzTrackID.Empty();
-  strMusicBrainzArtistID.Empty();
-  strMusicBrainzAlbumID.Empty();
-  strMusicBrainzAlbumArtistID.Empty();
-  strMusicBrainzTRMID.Empty();
-  strComment.Empty();
+  strThumb.clear();
+  strMusicBrainzTrackID.clear();
+  strComment.clear();
   rating = '0';
   iTrack = 0;
   iDuration = 0;
@@ -111,9 +144,9 @@ void CSong::Clear()
   iTimesPlayed = 0;
   lastPlayed.Reset();
   iKaraokeNumber = 0;
-  strKaraokeLyrEncoding.Empty();
+  strKaraokeLyrEncoding.clear();
   iKaraokeDelay = 0;
-  iAlbumId = -1;
+  idAlbum = -1;
   bCompilation = false;
   embeddedArt.clear();
 }

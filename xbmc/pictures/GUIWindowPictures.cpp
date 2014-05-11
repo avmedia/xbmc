@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,14 +36,14 @@
 #include "dialogs/GUIDialogOK.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "playlists/PlayList.h"
-#include "settings/Settings.h"
-#include "settings/GUISettings.h"
 #include "settings/MediaSourceSettings.h"
+#include "settings/Settings.h"
 #include "utils/TimeUtils.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "Autorun.h"
 #include "interfaces/AnnouncementManager.h"
+#include "utils/StringUtils.h"
 
 #define CONTROL_BTNVIEWASICONS      2
 #define CONTROL_BTNSORTBY           3
@@ -63,6 +63,7 @@ CGUIWindowPictures::CGUIWindowPictures(void)
 {
   m_thumbLoader.SetObserver(this);
   m_slideShowStarted = false;
+  m_dlgProgress = NULL;
 }
 
 void CGUIWindowPictures::OnInitWindow()
@@ -73,7 +74,7 @@ void CGUIWindowPictures::OnInitWindow()
     CGUIWindowSlideShow* wndw = (CGUIWindowSlideShow*)g_windowManager.GetWindow(WINDOW_SLIDESHOW);
     CStdString path;
     if (wndw && wndw->GetCurrentSlide())
-      URIUtils::GetDirectory(wndw->GetCurrentSlide()->GetPath(),path);
+      path = URIUtils::GetDirectory(wndw->GetCurrentSlide()->GetPath());
     if (path.Equals(m_vecItems->GetPath()))
     {
       if (wndw && wndw->GetCurrentSlide())
@@ -107,7 +108,7 @@ bool CGUIWindowPictures::OnMessage(CGUIMessage& message)
   case GUI_MSG_WINDOW_INIT:
     {
       // is this the first time accessing this window?
-      if (m_vecItems->GetPath() == "?" && message.GetStringParam().IsEmpty())
+      if (m_vecItems->GetPath() == "?" && message.GetStringParam().empty())
         message.SetStringParam(CMediaSourceSettings::Get().GetDefaultSource("pictures"));
 
       m_dlgProgress = (CGUIDialogProgress*)g_windowManager.GetWindow(WINDOW_DIALOG_PROGRESS);
@@ -137,8 +138,8 @@ bool CGUIWindowPictures::OnMessage(CGUIMessage& message)
       }
       else if (iControl == CONTROL_SHUFFLE)
       {
-        g_guiSettings.ToggleBool("slideshow.shuffle");
-        g_settings.Save();
+        CSettings::Get().ToggleBool("slideshow.shuffle");
+        CSettings::Get().Save();
       }
       else if (m_viewControl.HasControl(iControl))  // list/thumb control
       {
@@ -149,7 +150,7 @@ bool CGUIWindowPictures::OnMessage(CGUIMessage& message)
         if (iAction == ACTION_DELETE_ITEM)
         {
           // is delete allowed?
-          if (g_guiSettings.GetBool("filelists.allowfiledeletion"))
+          if (CSettings::Get().GetBool("filelists.allowfiledeletion"))
             OnDeleteItem(iItem);
           else
             return false;
@@ -176,7 +177,7 @@ void CGUIWindowPictures::UpdateButtons()
   CGUIMediaWindow::UpdateButtons();
 
   // Update the shuffle button
-  if (g_guiSettings.GetBool("slideshow.shuffle"))
+  if (CSettings::Get().GetBool("slideshow.shuffle"))
   {
     CGUIMessage msg2(GUI_MSG_SELECTED, GetID(), CONTROL_SHUFFLE);
     g_windowManager.SendMessage(msg2);
@@ -213,11 +214,13 @@ void CGUIWindowPictures::UpdateButtons()
 
 void CGUIWindowPictures::OnPrepareFileItems(CFileItemList& items)
 {
+  CGUIMediaWindow::OnPrepareFileItems(items);
+
   for (int i=0;i<items.Size();++i )
     if (items[i]->GetLabel().Equals("folder.jpg"))
       items.Remove(i);
 
-  if (items.GetFolderCount()==items.Size() || !g_guiSettings.GetBool("pictures.usetags"))
+  if (items.GetFolderCount()==items.Size() || !CSettings::Get().GetBool("pictures.usetags"))
     return;
 
   // Start the music info loader thread
@@ -270,9 +273,12 @@ bool CGUIWindowPictures::Update(const CStdString &strDirectory, bool updateFilte
     return false;
 
   m_vecItems->SetArt("thumb", "");
-  if (g_guiSettings.GetBool("pictures.generatethumbs"))
+  if (CSettings::Get().GetBool("pictures.generatethumbs"))
     m_thumbLoader.Load(*m_vecItems);
-  m_vecItems->SetArt("thumb", CPictureThumbLoader::GetCachedImage(*m_vecItems, "thumb"));
+
+  CPictureThumbLoader thumbLoader;
+  CStdString thumb = thumbLoader.GetCachedImage(*m_vecItems, "thumb");
+  m_vecItems->SetArt("thumb", thumb);
 
   return true;
 }
@@ -305,7 +311,7 @@ bool CGUIWindowPictures::GetDirectory(const CStdString &strDirectory, CFileItemL
     return false;
 
   CStdString label;
-  if (items.GetLabel().IsEmpty() && m_rootDir.IsSource(items.GetPath(), CMediaSourceSettings::Get().GetSources("pictures"), &label)) 
+  if (items.GetLabel().empty() && m_rootDir.IsSource(items.GetPath(), CMediaSourceSettings::Get().GetSources("pictures"), &label)) 
     items.SetLabel(label);
 
   return true;
@@ -336,7 +342,7 @@ bool CGUIWindowPictures::ShowPicture(int iItem, bool startSlideShow)
   CGUIWindowSlideShow *pSlideShow = (CGUIWindowSlideShow *)g_windowManager.GetWindow(WINDOW_SLIDESHOW);
   if (!pSlideShow)
     return false;
-  if (g_application.IsPlayingVideo())
+  if (g_application.m_pPlayer->IsPlayingVideo())
     g_application.StopPlaying();
 
   pSlideShow->Reset();
@@ -345,7 +351,7 @@ bool CGUIWindowPictures::ShowPicture(int iItem, bool startSlideShow)
     CFileItemPtr pItem = m_vecItems->Get(i);
     if (!pItem->m_bIsFolder && !(URIUtils::IsRAR(pItem->GetPath()) || 
           URIUtils::IsZIP(pItem->GetPath())) && (pItem->IsPicture() || (
-                                g_guiSettings.GetBool("pictures.showvideos") &&
+                                CSettings::Get().GetBool("pictures.showvideos") &&
                                 pItem->IsVideo())))
     {
       pSlideShow->Add(pItem.get());
@@ -379,11 +385,12 @@ void CGUIWindowPictures::OnShowPictureRecursive(const CStdString& strPath)
   if (pSlideShow)
   {
     // stop any video
-    if (g_application.IsPlayingVideo())
+    if (g_application.m_pPlayer->IsPlayingVideo())
       g_application.StopPlaying();
+
+    SortDescription sorting = m_guiState->GetSortMethod();
     pSlideShow->AddFromPath(strPath, true,
-                            m_guiState->GetSortMethod(),
-                            m_guiState->GetSortOrder());
+                            sorting.sortBy, sorting.sortOrder, sorting.sortAttributes);
     if (pSlideShow->NumSlides())
     {
       m_slideShowStarted = true;
@@ -406,10 +413,12 @@ void CGUIWindowPictures::OnSlideShowRecursive(const CStdString &strPicture)
       delete viewState;
     }
     m_slideShowStarted = true;
+
+    SortDescription sorting = m_guiState->GetSortMethod();
     pSlideShow->RunSlideShow(strPicture, true,
-                             g_guiSettings.GetBool("slideshow.shuffle"),false,
-                             m_guiState->GetSortMethod(),
-                             m_guiState->GetSortOrder(),
+                             CSettings::Get().GetBool("slideshow.shuffle"),false,
+                             "", true,
+                             sorting.sortBy, sorting.sortOrder, sorting.sortAttributes,
                              strExtensions);
   }
 }
@@ -439,9 +448,11 @@ void CGUIWindowPictures::OnSlideShow(const CStdString &strPicture)
       delete viewState;
     }
     m_slideShowStarted = true;
+
+    SortDescription sorting = m_guiState->GetSortMethod();
     pSlideShow->RunSlideShow(strPicture, false ,false, false,
-                             m_guiState->GetSortMethod(),
-                             m_guiState->GetSortOrder(),
+                             "", true,
+                             sorting.sortBy, sorting.sortOrder, sorting.sortAttributes,
                              strExtensions);
   }
 }
@@ -461,13 +472,13 @@ void CGUIWindowPictures::GetContextButtons(int itemNumber, CContextButtons &butt
 
   if (item && !item->GetProperty("pluginreplacecontextitems").asBoolean())
   {
-    if ( m_vecItems->IsVirtualDirectoryRoot() && item)
+    if ( m_vecItems->IsVirtualDirectoryRoot() || m_vecItems->GetPath() == "sources://pictures/" )
     {
       CGUIDialogContextMenu::GetContextButtons("pictures", item, buttons);
     }
     else
     {
-      if (item && !item->GetPath().Left(14).Equals("addons://more/"))
+      if (item && !StringUtils::StartsWithNoCase(item->GetPath(), "addons://more/"))
       {
         if (!m_vecItems->IsPlugin() && (item->IsPlugin() || item->IsScript()))
           buttons.Add(CONTEXT_BUTTON_INFO, 24003); // Add-on info
@@ -481,7 +492,7 @@ void CGUIWindowPictures::GetContextButtons(int itemNumber, CContextButtons &butt
 
         if (!m_thumbLoader.IsLoading())
           buttons.Add(CONTEXT_BUTTON_REFRESH_THUMBS, 13315);         // Create Thumbnails
-        if (g_guiSettings.GetBool("filelists.allowfiledeletion") && !item->IsReadOnly())
+        if (CSettings::Get().GetBool("filelists.allowfiledeletion") && !item->IsReadOnly())
         {
           buttons.Add(CONTEXT_BUTTON_DELETE, 117);
           buttons.Add(CONTEXT_BUTTON_RENAME, 118);
@@ -505,13 +516,10 @@ void CGUIWindowPictures::GetContextButtons(int itemNumber, CContextButtons &butt
 bool CGUIWindowPictures::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
 {
   CFileItemPtr item = (itemNumber >= 0 && itemNumber < m_vecItems->Size()) ? m_vecItems->Get(itemNumber) : CFileItemPtr();
-  if (m_vecItems->IsVirtualDirectoryRoot() && item)
+  if (CGUIDialogContextMenu::OnContextButton("pictures", item, button))
   {
-    if (CGUIDialogContextMenu::OnContextButton("pictures", item, button))
-    {
-      Update("");
-      return true;
-    }
+    Update("");
+    return true;
   }
   switch (button)
   {
@@ -577,7 +585,7 @@ void CGUIWindowPictures::LoadPlayList(const CStdString& strPlayList)
     CGUIWindowSlideShow *pSlideShow = (CGUIWindowSlideShow *)g_windowManager.GetWindow(WINDOW_SLIDESHOW);
     if (!pSlideShow)
       return;
-    if (g_application.IsPlayingVideo())
+    if (g_application.m_pPlayer->IsPlayingVideo())
       g_application.StopPlaying();
 
     // convert playlist items into slideshow items

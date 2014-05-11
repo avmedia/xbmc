@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2007-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include "system.h"
 #include "utils/StdString.h"
+#include "utils/StringUtils.h"
 #include "input/XBMC_keysym.h"
 #include "input/XBMC_vkeys.h"
 #include "input/XBMC_keytable.h"
@@ -173,6 +174,8 @@ static const XBMCKEYTABLE XBMCKeyTable[] =
 , { XBMCK_MEDIA_PREV_TRACK,       0,    0, XBMCVK_MEDIA_PREV_TRACK,    "prev_track" }
 , { XBMCK_MEDIA_STOP,             0,    0, XBMCVK_MEDIA_STOP,          "stop" }
 , { XBMCK_MEDIA_PLAY_PAUSE,       0,    0, XBMCVK_MEDIA_PLAY_PAUSE,    "play_pause" }
+, { XBMCK_MEDIA_REWIND,           0,    0, XBMCVK_MEDIA_REWIND,        "rewind" }
+, { XBMCK_MEDIA_FASTFORWARD,      0,    0, XBMCVK_MEDIA_FASTFORWARD,   "fastforward" }
 , { XBMCK_LAUNCH_MAIL,            0,    0, XBMCVK_LAUNCH_MAIL,         "launch_mail" }
 , { XBMCK_LAUNCH_MEDIA_SELECT,    0,    0, XBMCVK_LAUNCH_MEDIA_SELECT, "launch_media_select" }
 , { XBMCK_LAUNCH_APP1,            0,    0, XBMCVK_LAUNCH_APP1,         "launch_app1_pc_icon" }
@@ -237,7 +240,7 @@ bool KeyTableLookupName(const char* keyname, XBMCKEYTABLE* keytable)
 
   // We need the button name to be in lowercase
   CStdString lkeyname = keyname;
-  lkeyname.ToLower();
+  StringUtils::ToLower(lkeyname);
 
   // Look up the key name in XBMCKeyTable
   for (int i = 0; i < XBMCKeyTableSize; i++)

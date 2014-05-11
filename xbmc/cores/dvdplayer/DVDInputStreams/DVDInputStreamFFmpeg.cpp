@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,10 @@
  */
 
 #include "DVDInputStreamFFmpeg.h"
+#include "xbmc/playlists/PlayListM3U.h"
+#include "settings/Settings.h"
+#include "Util.h"
+#include "utils/log.h"
 
 using namespace XFILE;
 
@@ -46,6 +50,22 @@ bool CDVDInputStreamFFmpeg::IsEOF()
 
 bool CDVDInputStreamFFmpeg::Open(const char* strFile, const std::string& content)
 {
+  CFileItem item(strFile, false);
+  std::string selected;
+  if (item.IsInternetStream() && item.IsType(".m3u8"))
+  {
+    // get the available bandwidth and  determine the most appropriate stream
+    int bandwidth = CSettings::Get().GetInt("network.bandwidth");
+    if(bandwidth <= 0)
+      bandwidth = INT_MAX;
+    selected = PLAYLIST::CPlayListM3U::GetBestBandwidthStream(strFile, bandwidth);
+    if (selected.compare(strFile) != 0)
+    {
+      CLog::Log(LOGINFO, "CDVDInputStreamFFmpeg: Auto-selecting %s based on configured bandwidth.", selected.c_str());
+      strFile = selected.c_str();
+    }
+  }
+
   if (!CDVDInputStream::Open(strFile, content))
     return false;
 
@@ -74,7 +94,7 @@ void CDVDInputStreamFFmpeg::Close()
   CDVDInputStream::Close();
 }
 
-int CDVDInputStreamFFmpeg::Read(BYTE* buf, int buf_size)
+int CDVDInputStreamFFmpeg::Read(uint8_t* buf, int buf_size)
 {
   return -1;
 }

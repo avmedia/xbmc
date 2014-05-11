@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <keymap>
   <global>
     <touch>
@@ -12,10 +13,26 @@
       <swipe direction="down">SwipeDown</swipe>
     </touch>
   </global>
+  <FullScreenVideo>
+    <touch>
+      <swipe direction="left">StepBack</swipe>
+      <swipe direction="right">StepForward</swipe>
+      <swipe direction="up">ChapterOrBigStepForward</swipe>
+      <swipe direction="down">ChapterOrBigStepBack</swipe>
+      <swipe direction="left" pointers="2">SmallStepBack</swipe>
+    </touch>
+  </FullScreenVideo>
   <SlideShow>
     <touch>
       <zoom>ZoomGesture</zoom>
       <rotate>RotateGesture</rotate>
     </touch>
   </SlideShow>
+  <MyFiles>
+    <touch>
+      <tap>Select</tap>
+      <swipe direction="left">Highlight</swipe>
+      <swipe direction="right">Highlight</swipe>
+    </touch>
+  </MyFiles>
 </keymap>

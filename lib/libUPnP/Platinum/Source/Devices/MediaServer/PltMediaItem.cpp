@@ -282,7 +282,6 @@ PLT_MediaObject::ToDidl(NPT_UInt64 mask, NPT_String& didl)
 
     // album art URI
     if ((mask & PLT_FILTER_MASK_ALBUMARTURI) && m_ExtraInfo.album_arts.GetItemCount()) {
-        NPT_List<PLT_AlbumArtInfo>::Iterator album_art = m_ExtraInfo.album_arts.GetFirstItem();
         for (NPT_List<PLT_AlbumArtInfo>::Iterator iter = m_ExtraInfo.album_arts.GetFirstItem();
              iter;
              iter++) {
@@ -511,7 +510,7 @@ PLT_MediaObject::FromDidl(NPT_XmlElementNode* entry)
     m_People.authors.FromDidl(children);
     
     children.Clear();
-    PLT_XmlHelper::GetChildren(entry, children, "actors", didl_namespace_upnp);
+    PLT_XmlHelper::GetChildren(entry, children, "actor", didl_namespace_upnp);
     m_People.actors.FromDidl(children);
 
     children.Clear();
@@ -560,7 +559,7 @@ PLT_MediaObject::FromDidl(NPT_XmlElementNode* entry)
     if (NPT_FAILED(str.ToInteger(value))) value = 0;
     m_MiscInfo.last_position = value;
 
-    PLT_XmlHelper::GetChildText(entry, "lastPlaybackTime", m_MiscInfo.last_time, didl_namespace_dc, 256);
+    PLT_XmlHelper::GetChildText(entry, "lastPlaybackTime", m_MiscInfo.last_time, didl_namespace_upnp, 256);
     NPT_String parsed_last_time;
     for (int format=0; format<=NPT_DateTime::FORMAT_RFC_1036; format++) {
         NPT_DateTime date;

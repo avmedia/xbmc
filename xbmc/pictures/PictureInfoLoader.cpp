@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 #include "PictureInfoLoader.h"
 #include "PictureInfoTag.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "FileItem.h"
 
 CPictureInfoLoader::CPictureInfoLoader()
@@ -42,13 +42,41 @@ void CPictureInfoLoader::OnLoaderStart()
   m_mapFileItems->SetFastLookup(true);
 
   m_tagReads = 0;
-  m_loadTags = g_guiSettings.GetBool("pictures.usetags");
+  m_loadTags = CSettings::Get().GetBool("pictures.usetags");
 
   if (m_pProgressCallback)
     m_pProgressCallback->SetProgressMax(m_pVecItems->GetFileCount());
 }
 
 bool CPictureInfoLoader::LoadItem(CFileItem* pItem)
+{
+  bool result  = LoadItemCached(pItem);
+       result |= LoadItemLookup(pItem);
+
+  return result;
+}
+
+bool CPictureInfoLoader::LoadItemCached(CFileItem* pItem)
+{
+  if (!pItem->IsPicture() || pItem->IsZIP() || pItem->IsRAR() || pItem->IsCBR() || pItem->IsCBZ() || pItem->IsInternetStream() || pItem->IsVideo())
+    return false;
+
+  if (pItem->HasPictureInfoTag())
+    return true;
+
+  // Check the cached item
+  CFileItemPtr mapItem = (*m_mapFileItems)[pItem->GetPath()];
+  if (mapItem && mapItem->m_dateTime==pItem->m_dateTime && mapItem->HasPictureInfoTag())
+  { // Query map if we previously cached the file on HD
+    *pItem->GetPictureInfoTag() = *mapItem->GetPictureInfoTag();
+    pItem->SetArt("thumb", mapItem->GetArt("thumb"));
+    return true;
+  }
+
+  return true;
+}
+
+bool CPictureInfoLoader::LoadItemLookup(CFileItem* pItem)
 {
   if (m_pProgressCallback && !pItem->m_bIsFolder)
     m_pProgressCallback->SetProgressAdvance();
@@ -57,16 +85,7 @@ bool CPictureInfoLoader::LoadItem(CFileItem* pItem)
     return false;
 
   if (pItem->HasPictureInfoTag())
-    return true;
-
-  // first check the cached item
-  CFileItemPtr mapItem = (*m_mapFileItems)[pItem->GetPath()];
-  if (mapItem && mapItem->m_dateTime==pItem->m_dateTime && mapItem->HasPictureInfoTag())
-  { // Query map if we previously cached the file on HD
-    *pItem->GetPictureInfoTag() = *mapItem->GetPictureInfoTag();
-    pItem->SetArt("thumb", mapItem->GetArt("thumb"));
-    return true;
-  }
+    return false;
 
   if (m_loadTags)
   { // Nothing found, load tag from file

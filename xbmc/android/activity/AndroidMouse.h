@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
+
 #include <android/input.h>
 
 class CAndroidMouse
@@ -32,5 +33,9 @@ protected:
 
 private:
   void MouseMove(float x, float y);
-  void MouseButton(float x, float y, int32_t type);
+  void MouseButton(float x, float y, int32_t type, int32_t buttons);
+  void MouseWheel(float x, float y, float value);
+
+private:
+  int32_t m_lastButtonState;
 };

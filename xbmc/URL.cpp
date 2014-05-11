@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,25 +22,20 @@
 #include "utils/RegExp.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
+#include "utils/StringUtils.h"
 #include "Util.h"
 #include "filesystem/File.h"
 #include "FileItem.h"
 #include "filesystem/StackDirectory.h"
 #include "addons/Addon.h"
-#ifndef _LINUX
+#include "utils/StringUtils.h"
+#ifndef TARGET_POSIX
 #include <sys\types.h>
 #include <sys\stat.h>
 #endif
 
 using namespace std;
 using namespace ADDON;
-
-CStdString URLEncodeInline(const CStdString& strData)
-{
-  CStdString buffer = strData;
-  CURL::Encode(buffer);
-  return buffer;
-}
 
 CURL::CURL(const CStdString& strURL1)
 {
@@ -93,48 +88,48 @@ void CURL::Parse(const CStdString& strURL1)
   // format 2: protocol://file
 
   // decode protocol
-  int iPos = strURL.Find("://");
-  if (iPos < 0)
+  size_t iPos = strURL.find("://");
+  if (iPos == std::string::npos)
   {
     // This is an ugly hack that needs some work.
     // example: filename /foo/bar.zip/alice.rar/bob.avi
     // This should turn into zip://rar:///foo/bar.zip/alice.rar/bob.avi
     iPos = 0;
-    bool is_apk = (strURL.Find(".apk/", iPos) > 0);
+    bool is_apk = (strURL.find(".apk/", iPos) != std::string::npos);
     while (1)
     {
       if (is_apk)
-        iPos = strURL.Find(".apk/", iPos);
+        iPos = strURL.find(".apk/", iPos);
       else
-        iPos = strURL.Find(".zip/", iPos);
+        iPos = strURL.find(".zip/", iPos);
 
       int extLen = 3;
-      if (iPos < 0)
+      if (iPos == std::string::npos)
       {
         /* set filename and update extension*/
         SetFileName(strURL);
         return ;
       }
       iPos += extLen + 1;
-      CStdString archiveName = strURL.Left(iPos);
+      std::string archiveName = strURL.substr(0, iPos);
       struct __stat64 s;
       if (XFILE::CFile::Stat(archiveName, &s) == 0)
       {
-#ifdef _LINUX
+#ifdef TARGET_POSIX
         if (!S_ISDIR(s.st_mode))
 #else
         if (!(s.st_mode & S_IFDIR))
 #endif
         {
-          Encode(archiveName);
+          archiveName = Encode(archiveName);
           if (is_apk)
           {
-            CURL c((CStdString)"apk" + "://" + archiveName + '/' + strURL.Right(strURL.size() - iPos - 1));
+            CURL c("apk://" + archiveName + "/" + strURL.substr(iPos + 1));
             *this = c;
           }
           else
           {
-            CURL c((CStdString)"zip" + "://" + archiveName + '/' + strURL.Right(strURL.size() - iPos - 1));
+            CURL c("zip://" + archiveName + "/" + strURL.substr(iPos + 1));
             *this = c;
           }
           return;
@@ -144,7 +139,7 @@ void CURL::Parse(const CStdString& strURL1)
   }
   else
   {
-    SetProtocol(strURL.Left(iPos));
+    SetProtocol(strURL.substr(0, iPos));
     iPos += 3;
   }
 
@@ -161,16 +156,16 @@ void CURL::Parse(const CStdString& strURL1)
     m_strProtocol.Equals("special")
     )
   {
-    SetFileName(strURL.Mid(iPos));
+    SetFileName(strURL.substr(iPos));
     return;
   }
 
   // check for username/password - should occur before first /
-  if (iPos == -1) iPos = 0;
+  if (iPos == std::string::npos) iPos = 0;
 
   // for protocols supporting options, chop that part off here
   // maybe we should invert this list instead?
-  int iEnd = strURL.length();
+  size_t iEnd = strURL.length();
   const char* sep = NULL;
 
   //TODO fix all Addon paths
@@ -199,12 +194,12 @@ void CURL::Parse(const CStdString& strURL1)
 
   if(sep)
   {
-    int iOptions = strURL.find_first_of(sep, iPos);
-    if (iOptions >= 0 )
+    size_t iOptions = strURL.find_first_of(sep, iPos);
+    if (iOptions != std::string::npos)
     {
       // we keep the initial char as it can be any of the above
-      int iProto = strURL.find_first_of("|",iOptions);
-      if (iProto >= 0)
+      size_t iProto = strURL.find_first_of("|",iOptions);
+      if (iProto != std::string::npos)
       {
         SetProtocolOptions(strURL.substr(iProto+1));
         SetOptions(strURL.substr(iOptions,iProto-iOptions));
@@ -215,37 +210,36 @@ void CURL::Parse(const CStdString& strURL1)
     }
   }
 
-  int iSlash = strURL.Find("/", iPos);
+  size_t iSlash = strURL.find("/", iPos);
   if(iSlash >= iEnd)
-    iSlash = -1; // was an invalid slash as it was contained in options
+    iSlash = std::string::npos; // was an invalid slash as it was contained in options
 
   if( !m_strProtocol.Equals("iso9660") )
   {
-    int iAlphaSign = strURL.Find("@", iPos);
-    if (iAlphaSign >= 0 && iAlphaSign < iEnd && (iAlphaSign < iSlash || iSlash < 0))
+    size_t iAlphaSign = strURL.find("@", iPos);
+    if (iAlphaSign != std::string::npos && iAlphaSign < iEnd && (iAlphaSign < iSlash || iSlash == std::string::npos))
     {
       // username/password found
-      CStdString strUserNamePassword = strURL.Mid(iPos, iAlphaSign - iPos);
+      CStdString strUserNamePassword = strURL.substr(iPos, iAlphaSign - iPos);
 
       // first extract domain, if protocol is smb
       if (m_strProtocol.Equals("smb"))
       {
-        int iSemiColon = strUserNamePassword.Find(";");
+        size_t iSemiColon = strUserNamePassword.find(";");
 
-        if (iSemiColon >= 0)
+        if (iSemiColon != std::string::npos)
         {
-          m_strDomain = strUserNamePassword.Left(iSemiColon);
-          strUserNamePassword.Delete(0, iSemiColon + 1);
+          m_strDomain = strUserNamePassword.substr(0, iSemiColon);
+          strUserNamePassword.erase(0, iSemiColon + 1);
         }
       }
 
       // username:password
-      int iColon = strUserNamePassword.Find(":");
-      if (iColon >= 0)
+      size_t iColon = strUserNamePassword.find(":");
+      if (iColon != std::string::npos)
       {
-        m_strUserName = strUserNamePassword.Left(iColon);
-        iColon++;
-        m_strPassword = strUserNamePassword.Right(strUserNamePassword.size() - iColon);
+        m_strUserName = strUserNamePassword.substr(0, iColon);
+        m_strPassword = strUserNamePassword.substr(iColon + 1);
       }
       // username
       else
@@ -254,24 +248,22 @@ void CURL::Parse(const CStdString& strURL1)
       }
 
       iPos = iAlphaSign + 1;
-      iSlash = strURL.Find("/", iAlphaSign);
+      iSlash = strURL.find("/", iAlphaSign);
 
       if(iSlash >= iEnd)
-        iSlash = -1;
+        iSlash = std::string::npos;
     }
   }
 
   // detect hostname:port/
-  if (iSlash < 0)
+  if (iSlash == std::string::npos)
   {
-    CStdString strHostNameAndPort = strURL.Mid(iPos, iEnd - iPos);
-    int iColon = strHostNameAndPort.Find(":");
-    if (iColon >= 0)
+    CStdString strHostNameAndPort = strURL.substr(iPos, iEnd - iPos);
+    size_t iColon = strHostNameAndPort.find(":");
+    if (iColon != std::string::npos)
     {
-      m_strHostName = strHostNameAndPort.Left(iColon);
-      iColon++;
-      CStdString strPort = strHostNameAndPort.Right(strHostNameAndPort.size() - iColon);
-      m_iPort = atoi(strPort.c_str());
+      m_strHostName = strHostNameAndPort.substr(0, iColon);
+      m_iPort = atoi(strHostNameAndPort.substr(iColon + 1).c_str());
     }
     else
     {
@@ -281,14 +273,12 @@ void CURL::Parse(const CStdString& strURL1)
   }
   else
   {
-    CStdString strHostNameAndPort = strURL.Mid(iPos, iSlash - iPos);
-    int iColon = strHostNameAndPort.Find(":");
-    if (iColon >= 0)
+    CStdString strHostNameAndPort = strURL.substr(iPos, iSlash - iPos);
+    size_t iColon = strHostNameAndPort.find(":");
+    if (iColon != std::string::npos)
     {
-      m_strHostName = strHostNameAndPort.Left(iColon);
-      iColon++;
-      CStdString strPort = strHostNameAndPort.Right(strHostNameAndPort.size() - iColon);
-      m_iPort = atoi(strPort.c_str());
+      m_strHostName = strHostNameAndPort.substr(0, iColon);
+      m_iPort = atoi(strHostNameAndPort.substr(iColon + 1).c_str());
     }
     else
     {
@@ -297,33 +287,32 @@ void CURL::Parse(const CStdString& strURL1)
     iPos = iSlash + 1;
     if (iEnd > iPos)
     {
-      m_strFileName = strURL.Mid(iPos, iEnd - iPos);
+      m_strFileName = strURL.substr(iPos, iEnd - iPos);
 
-      iSlash = m_strFileName.Find("/");
-      if(iSlash < 0)
+      iSlash = m_strFileName.find("/");
+      if(iSlash == std::string::npos)
         m_strShareName = m_strFileName;
       else
-        m_strShareName = m_strFileName.Left(iSlash);
+        m_strShareName = m_strFileName.substr(0, iSlash);
     }
   }
 
   // iso9960 doesnt have an hostname;-)
-  if (m_strProtocol.CompareNoCase("iso9660") == 0
-    || m_strProtocol.CompareNoCase("musicdb") == 0
-    || m_strProtocol.CompareNoCase("videodb") == 0
-    || m_strProtocol.CompareNoCase("sources") == 0
-    || m_strProtocol.CompareNoCase("pvr") == 0
-    || m_strProtocol.Left(3).CompareNoCase("mem") == 0)
+  if (m_strProtocol == "iso9660"
+    || m_strProtocol == "musicdb"
+    || m_strProtocol == "videodb"
+    || m_strProtocol == "sources"
+    || m_strProtocol == "pvr"
+    || StringUtils::StartsWith(m_strProtocol, "mem"))
   {
     if (m_strHostName != "" && m_strFileName != "")
     {
-      CStdString strFileName = m_strFileName;
-      m_strFileName.Format("%s/%s", m_strHostName.c_str(), strFileName.c_str());
+      m_strFileName = StringUtils::Format("%s/%s", m_strHostName.c_str(), m_strFileName.c_str());
       m_strHostName = "";
     }
     else
     {
-      if (!m_strHostName.IsEmpty() && strURL[iEnd-1]=='/')
+      if (!m_strHostName.empty() && strURL[iEnd-1]=='/')
         m_strFileName = m_strHostName + "/";
       else
         m_strFileName = m_strHostName;
@@ -331,7 +320,7 @@ void CURL::Parse(const CStdString& strURL1)
     }
   }
 
-  m_strFileName.Replace("\\", "/");
+  StringUtils::Replace(m_strFileName, '\\', '/');
 
   /* update extension */
   SetFileName(m_strFileName);
@@ -339,13 +328,12 @@ void CURL::Parse(const CStdString& strURL1)
   /* decode urlencoding on this stuff */
   if(URIUtils::ProtocolHasEncodedHostname(m_strProtocol))
   {
-    Decode(m_strHostName);
-    // Validate it as it is likely to contain a filename
-    SetHostName(CUtil::ValidatePath(m_strHostName));
+    m_strHostName = Decode(m_strHostName);
+    SetHostName(m_strHostName);
   }
 
-  Decode(m_strUserName);
-  Decode(m_strPassword);
+  m_strUserName = Decode(m_strUserName);
+  m_strPassword = Decode(m_strPassword);
 }
 
 void CURL::SetFileName(const CStdString& strFileName)
@@ -359,7 +347,8 @@ void CURL::SetFileName(const CStdString& strFileName)
   else
     m_strFileType = "";
 
-  m_strFileType.Normalize();
+  StringUtils::Trim(m_strFileType);
+  StringUtils::ToLower(m_strFileType);
 }
 
 void CURL::SetHostName(const CStdString& strHostName)
@@ -380,16 +369,19 @@ void CURL::SetPassword(const CStdString& strPassword)
 void CURL::SetProtocol(const CStdString& strProtocol)
 {
   m_strProtocol = strProtocol;
-  m_strProtocol.ToLower();
+  StringUtils::ToLower(m_strProtocol);
 }
 
 void CURL::SetOptions(const CStdString& strOptions)
 {
-  m_strOptions.Empty();
+  m_strOptions.clear();
   m_options.Clear();
   if( strOptions.length() > 0)
   {
-    if( strOptions[0] == '?' || strOptions[0] == '#' || strOptions[0] == ';' || strOptions.Find("xml") >=0 )
+    if(strOptions[0] == '?' ||
+       strOptions[0] == '#' ||
+       strOptions[0] == ';' ||
+       strOptions.find("xml") != std::string::npos)
     {
       m_strOptions = strOptions;
       m_options.AddOptions(m_strOptions);
@@ -401,12 +393,12 @@ void CURL::SetOptions(const CStdString& strOptions)
 
 void CURL::SetProtocolOptions(const CStdString& strOptions)
 {
-  m_strProtocolOptions.Empty();
+  m_strProtocolOptions.clear();
   m_protocolOptions.Clear();
   if (strOptions.length() > 0)
   {
     if (strOptions[0] == '|')
-      m_strProtocolOptions = strOptions.Mid(1);
+      m_strProtocolOptions = strOptions.substr(1);
     else
       m_strProtocolOptions = strOptions;
     m_protocolOptions.AddOptions(m_strProtocolOptions);
@@ -490,7 +482,7 @@ const CStdString CURL::GetFileNameWithoutPath() const
   if ((m_strProtocol == "rar"  || 
        m_strProtocol == "zip"  ||
        m_strProtocol == "apk") &&
-       m_strFileName.IsEmpty())
+       m_strFileName.empty())
     return URIUtils::GetFileName(m_strHostName);
 
   // otherwise, we've already got the filepath, so just grab the filename portion
@@ -501,7 +493,7 @@ const CStdString CURL::GetFileNameWithoutPath() const
 
 char CURL::GetDirectorySeparator() const
 {
-#ifndef _LINUX
+#ifndef TARGET_POSIX
   if ( IsLocal() )
     return '\\';
   else
@@ -530,33 +522,33 @@ CStdString CURL::Get() const
   strURL = GetWithoutFilename();
   strURL += m_strFileName;
 
-  if( m_strOptions.length() > 0 )
+  if( !m_strOptions.empty() )
     strURL += m_strOptions;
-  if (m_strProtocolOptions.length() > 0)
+  if (!m_strProtocolOptions.empty())
     strURL += "|"+m_strProtocolOptions;
 
   return strURL;
 }
 
-CStdString CURL::GetWithoutUserDetails() const
+std::string CURL::GetWithoutUserDetails(bool redact) const
 {
-  CStdString strURL;
+  std::string strURL;
 
   if (m_strProtocol.Equals("stack"))
   {
     CFileItemList items;
-    CStdString strURL2;
+    std::string strURL2;
     strURL2 = Get();
     XFILE::CStackDirectory dir;
     dir.GetDirectory(strURL2,items);
-    vector<CStdString> newItems;
+    vector<std::string> newItems;
     for (int i=0;i<items.Size();++i)
     {
       CURL url(items[i]->GetPath());
-      items[i]->SetPath(url.GetWithoutUserDetails());
+      items[i]->SetPath(url.GetWithoutUserDetails(redact));
       newItems.push_back(items[i]->GetPath());
     }
-    dir.ConstructStackPath(newItems,strURL);
+    dir.ConstructStackPath(newItems, strURL);
     return strURL;
   }
 
@@ -568,6 +560,9 @@ CStdString CURL::GetWithoutUserDetails() const
                         + m_strProtocolOptions.length()
                         + 10;
 
+  if (redact)
+    sizeneed += sizeof("USERNAME:PASSWORD@");
+
   strURL.reserve(sizeneed);
 
   if (m_strProtocol == "")
@@ -576,19 +571,33 @@ CStdString CURL::GetWithoutUserDetails() const
   strURL = m_strProtocol;
   strURL += "://";
 
-  if (m_strHostName != "")
+  if (redact && !m_strUserName.empty())
   {
+    strURL += "USERNAME";
+    if (!m_strPassword.empty())
+    {
+      strURL += ":PASSWORD";
+    }
+    strURL += "@";
+  }
+
+  if (!m_strHostName.empty())
+  {
+    std::string strHostName;
+
     if (URIUtils::ProtocolHasParentInHostname(m_strProtocol))
-      strURL += CURL(m_strHostName).GetWithoutUserDetails();
+      strHostName = CURL(m_strHostName).GetWithoutUserDetails();
     else
-      strURL += m_strHostName;
+      strHostName = m_strHostName;
+
+    if (URIUtils::ProtocolHasEncodedHostname(m_strProtocol))
+      strURL += Encode(strHostName);
+    else
+      strURL += strHostName;
 
     if ( HasPort() )
     {
-      CStdString strPort;
-      strPort.Format("%i", m_iPort);
-      strURL += ":";
-      strURL += strPort;
+      strURL += StringUtils::Format(":%i", m_iPort);
     }
     strURL += "/";
   }
@@ -625,13 +634,14 @@ CStdString CURL::GetWithoutFilename() const
     strURL += m_strDomain;
     strURL += ";";
   }
-  else if (m_strUserName != "")
+
+  if (m_strUserName != "")
   {
-    strURL += URLEncodeInline(m_strUserName);
+    strURL += Encode(m_strUserName);
     if (m_strPassword != "")
     {
       strURL += ":";
-      strURL += URLEncodeInline(m_strPassword);
+      strURL += Encode(m_strPassword);
     }
     strURL += "@";
   }
@@ -641,13 +651,12 @@ CStdString CURL::GetWithoutFilename() const
   if (m_strHostName != "")
   {
     if( URIUtils::ProtocolHasEncodedHostname(m_strProtocol) )
-      strURL += URLEncodeInline(m_strHostName);
+      strURL += Encode(m_strHostName);
     else
       strURL += m_strHostName;
     if (HasPort())
     {
-      CStdString strPort;
-      strPort.Format("%i", m_iPort);
+      CStdString strPort = StringUtils::Format("%i", m_iPort);
       strURL += ":";
       strURL += strPort;
     }
@@ -657,9 +666,19 @@ CStdString CURL::GetWithoutFilename() const
   return strURL;
 }
 
+std::string CURL::GetRedacted() const
+{
+  return GetWithoutUserDetails(true);
+}
+
+std::string CURL::GetRedacted(const std::string& path)
+{
+  return CURL(path).GetRedacted();
+}
+
 bool CURL::IsLocal() const
 {
-  return (IsLocalHost() || m_strProtocol.IsEmpty());
+  return (IsLocalHost() || m_strProtocol.empty());
 }
 
 bool CURL::IsLocalHost() const
@@ -675,17 +694,17 @@ bool CURL::IsFileOnly(const CStdString &url)
 bool CURL::IsFullPath(const CStdString &url)
 {
   if (url.size() && url[0] == '/') return true;     //   /foo/bar.ext
-  if (url.Find("://") >= 0) return true;                 //   foo://bar.ext
+  if (url.find("://") != std::string::npos) return true;                 //   foo://bar.ext
   if (url.size() > 1 && url[1] == ':') return true; //   c:\\foo\\bar\\bar.ext
-  if (url.compare(0,2,"\\\\") == 0) return true;    //   \\UNC\path\to\file
+  if (StringUtils::StartsWith(url, "\\\\")) return true;    //   \\UNC\path\to\file
   return false;
 }
 
-void CURL::Decode(CStdString& strURLData)
+std::string CURL::Decode(const std::string& strURLData)
 //modified to be more accomodating - if a non hex value follows a % take the characters directly and don't raise an error.
 // However % characters should really be escaped like any other non safe character (www.rfc-editor.org/rfc/rfc1738.txt)
 {
-  CStdString strResult;
+  std::string strResult;
 
   /* result will always be less than source */
   strResult.reserve( strURLData.length() );
@@ -698,10 +717,10 @@ void CURL::Decode(CStdString& strURLData)
     {
       if (i < strURLData.size() - 2)
       {
-        CStdString strTmp;
+        std::string strTmp;
         strTmp.assign(strURLData.substr(i + 1, 2));
         int dec_num=-1;
-        sscanf(strTmp,"%x",(unsigned int *)&dec_num);
+        sscanf(strTmp.c_str(), "%x", (unsigned int *)&dec_num);
         if (dec_num<0 || dec_num>255)
           strResult += kar;
         else
@@ -715,46 +734,30 @@ void CURL::Decode(CStdString& strURLData)
     }
     else strResult += kar;
   }
-  strURLData = strResult;
-}
-
-void CURL::Encode(CStdString& strURLData)
-{
-  CStdString strResult;
-
-  /* wonder what a good value is here is, depends on how often it occurs */
-  strResult.reserve( strURLData.length() * 2 );
-
-  for (int i = 0; i < (int)strURLData.size(); ++i)
-  {
-    int kar = (unsigned char)strURLData[i];
-    //if (kar == ' ') strResult += '+'; // obsolete
-    if (isalnum(kar) || strchr("-_.!()" , kar) ) // Don't URL encode these according to RFC1738
-    {
-      strResult += kar;
-    }
-    else
-    {
-      CStdString strTmp;
-      strTmp.Format("%%%02.2x", kar);
-      strResult += strTmp;
-    }
-  }
-  strURLData = strResult;
-}
-
-std::string CURL::Decode(const std::string& strURLData)
-{
-  CStdString url = strURLData;
-  Decode(url);
-  return url;
+  
+  return strResult;
 }
 
 std::string CURL::Encode(const std::string& strURLData)
 {
-  CStdString url = strURLData;
-  Encode(url);
-  return url;
+  std::string strResult;
+
+  /* wonder what a good value is here is, depends on how often it occurs */
+  strResult.reserve( strURLData.length() * 2 );
+
+  for (size_t i = 0; i < strURLData.size(); ++i)
+  {
+    const char kar = strURLData[i];
+    
+    // Don't URL encode "-_.!()" according to RFC1738
+    // TODO: Update it to "-_.~" after Gotham according to RFC3986
+    if (StringUtils::isasciialphanum(kar) || kar == '-' || kar == '.' || kar == '_' || kar == '!' || kar == '(' || kar == ')')
+      strResult.push_back(kar);
+    else
+      strResult += StringUtils::Format("%%%02.2x", (unsigned int)((unsigned char)kar)); // TODO: Change to "%%%02.2X" after Gotham
+  }
+
+  return strResult;
 }
 
 CStdString CURL::TranslateProtocol(const CStdString& prot)
@@ -854,6 +857,6 @@ void CURL::SetProtocolOption(const CStdString &key, const CStdString &value)
 
 void CURL::RemoveProtocolOption(const CStdString &key)
 {
-  m_options.RemoveOption(key);
+  m_protocolOptions.RemoveOption(key);
   m_strProtocolOptions = m_protocolOptions.GetOptionsString(false);
 }

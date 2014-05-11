@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,15 +13,14 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
 #pragma once
 
-#if (defined HAVE_CONFIG_H) && (!defined WIN32)
+#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
   #include "config.h"
 #endif
 
@@ -44,22 +43,19 @@ namespace XBMCAddon
      *  plugging into the API. It's got a static only implementation
      *  and uses the singleton pattern for access.
      */
-    class LanguageHook : public XBMCAddon::LanguageHook
+    class PythonLanguageHook : public XBMCAddon::LanguageHook
     {
       PyInterpreterState* m_interp;
       CCriticalSection crit;
       std::set<AddonClass*> currentObjects;
 
       // This constructor is only used to instantiate the global LanguageHook
-      inline LanguageHook() : 
-        XBMCAddon::LanguageHook("Python::LanguageHook(Global)"), m_interp(NULL)  {  }
+      inline PythonLanguageHook() : m_interp(NULL)  {  }
 
     public:
 
-      inline LanguageHook(PyInterpreterState* interp) : 
-        XBMCAddon::LanguageHook("Python::LanguageHook"), m_interp(interp)  {  }
-
-      virtual ~LanguageHook();
+      inline PythonLanguageHook(PyInterpreterState* interp) : m_interp(interp)  {  }
+      virtual ~PythonLanguageHook();
 
       virtual void DelayedCallOpen();
       virtual void DelayedCallClose();
@@ -88,13 +84,13 @@ namespace XBMCAddon
       virtual void UnregisterMonitorCallback(XBMCAddon::xbmc::Monitor* monitor);
       virtual bool WaitForEvent(CEvent& hEvent, unsigned int milliseconds);
 
-      static AddonClass::Ref<LanguageHook> GetIfExists(PyInterpreterState* interp);
+      static AddonClass::Ref<PythonLanguageHook> GetIfExists(PyInterpreterState* interp);
       static bool IsAddonClassInstanceRegistered(AddonClass* obj);
 
       void RegisterAddonClassInstance(AddonClass* obj);
       void UnregisterAddonClassInstance(AddonClass* obj);
       bool HasRegisteredAddonClassInstance(AddonClass* obj);
-      inline bool HasRegisteredAddonClasses() { Synchronize l(*this); return currentObjects.size() > 0; }
+      inline bool HasRegisteredAddonClasses() { CSingleLock l(*this); return !currentObjects.empty(); }
 
       // You should hold the lock on the LanguageHook itself if you're
       // going to do anything with the set that gets returned.

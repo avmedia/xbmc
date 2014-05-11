@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -208,8 +208,8 @@ void CGUIDialogNumeric::OnBackSpace()
   }
   if (m_mode == INPUT_NUMBER || m_mode == INPUT_PASSWORD)
   { // just go back one character
-    if (!m_number.IsEmpty())
-      m_number.Delete(m_number.GetLength() - 1);
+    if (!m_number.empty())
+      m_number.erase(m_number.size() - 1);
   }
   else if (m_mode == INPUT_IP_ADDRESS)
   {
@@ -304,19 +304,19 @@ void CGUIDialogNumeric::FrameMove()
   }
   else if (m_mode == INPUT_TIME)
   { // format up the time
-    strLabel.Format("%2d:%02d", m_datetime.wHour, m_datetime.wMinute);
+    strLabel = StringUtils::Format("%2d:%02d", m_datetime.wHour, m_datetime.wMinute);
     start = m_block * 3;
     end = m_block * 3 + 2;
   }
   else if (m_mode == INPUT_TIME_SECONDS)
   { // format up the time
-    strLabel.Format("%2d:%02d", m_datetime.wMinute, m_datetime.wSecond);
+    strLabel = StringUtils::Format("%2d:%02d", m_datetime.wMinute, m_datetime.wSecond);
     start = m_block * 3;
     end = m_block * 3 + 2;
   }
   else if (m_mode == INPUT_DATE)
   { // format up the date
-    strLabel.Format("%2d/%2d/%4d", m_datetime.wDay, m_datetime.wMonth, m_datetime.wYear);
+    strLabel = StringUtils::Format("%2d/%2d/%4d", m_datetime.wDay, m_datetime.wMonth, m_datetime.wYear);
     start = m_block * 3;
     end = m_block * 3 + 2;
     if (m_block == 2)
@@ -324,7 +324,7 @@ void CGUIDialogNumeric::FrameMove()
   }
   else if (m_mode == INPUT_IP_ADDRESS)
   { // format up the date
-    strLabel.Format("%3d.%3d.%3d.%3d", m_ip[0], m_ip[1], m_ip[2], m_ip[3]);
+    strLabel = StringUtils::Format("%3d.%3d.%3d.%3d", m_ip[0], m_ip[1], m_ip[2], m_ip[3]);
     start = m_block * 4;
     end = m_block * 4 + 3;
   }
@@ -575,7 +575,7 @@ void CGUIDialogNumeric::SetMode(INPUT_MODE mode, const CStdString &initial)
     else if (m_mode == INPUT_DATE)
     {
       CStdString tmp = initial;
-      tmp.Replace("/", ".");
+      StringUtils::Replace(tmp, '/', '.');
       dateTime.SetFromDBDate(tmp);
     }
 
@@ -595,26 +595,20 @@ void CGUIDialogNumeric::GetOutput(void *output) const
   if (m_mode == INPUT_TIME || m_mode == INPUT_TIME_SECONDS || m_mode == INPUT_DATE)
     memcpy(output, &m_datetime, sizeof(m_datetime));
   else if (m_mode == INPUT_IP_ADDRESS)
-  {
-    CStdString *ipaddress = (CStdString *)output;
-    ipaddress->Format("%d.%d.%d.%d", m_ip[0], m_ip[1], m_ip[2], m_ip[3]);
-  }
+    *(CStdString *)output = StringUtils::Format("%d.%d.%d.%d", m_ip[0], m_ip[1], m_ip[2], m_ip[3]);
   else if (m_mode == INPUT_NUMBER || m_mode == INPUT_PASSWORD)
-  {
-    CStdString *number = (CStdString *)output;
-    *number = m_number;
-  }
+    *(CStdString *)output = m_number;
 }
 
 CStdString CGUIDialogNumeric::GetOutput() const
 {
   CStdString output;
   if (m_mode == INPUT_DATE)
-    output.Format("%02i/%02i/%04i", m_datetime.wDay, m_datetime.wMonth, m_datetime.wYear);
+    output = StringUtils::Format("%02i/%02i/%04i", m_datetime.wDay, m_datetime.wMonth, m_datetime.wYear);
   else if (m_mode == INPUT_TIME)
-    output.Format("%i:%02i", m_datetime.wHour, m_datetime.wMinute);
+    output = StringUtils::Format("%i:%02i", m_datetime.wHour, m_datetime.wMinute);
   else if (m_mode == INPUT_TIME_SECONDS)
-    output.Format("%i:%02i", m_datetime.wMinute, m_datetime.wSecond);
+    output = StringUtils::Format("%i:%02i", m_datetime.wMinute, m_datetime.wSecond);
   else
     GetOutput(&output);
   return output;
@@ -699,7 +693,7 @@ bool CGUIDialogNumeric::ShowAndGetNumber(CStdString& strInput, const CStdString 
 
 // \brief Show numeric keypad twice to get and confirm a user-entered password string.
 // \param strNewPassword String to preload into the keyboard accumulator. Overwritten with user input if return=true.
-// \return true if successful display and user input entry/re-entry. false if unsucessful display, no user input, or canceled editing.
+// \return true if successful display and user input entry/re-entry. false if unsuccessful display, no user input, or canceled editing.
 bool CGUIDialogNumeric::ShowAndVerifyNewPassword(CStdString& strNewPassword)
 {
   // Prompt user for password input
@@ -711,7 +705,7 @@ bool CGUIDialogNumeric::ShowAndVerifyNewPassword(CStdString& strNewPassword)
     return false;
   }
 
-  if (strUserInput.IsEmpty())
+  if (strUserInput.empty())
     // user canceled out
     return false;
 
@@ -732,20 +726,20 @@ bool CGUIDialogNumeric::ShowAndVerifyNewPassword(CStdString& strNewPassword)
 // \param strPassword Value to compare against user input.
 // \param strHeading String shown on dialog title. Converts to localized string if contains a positive integer.
 // \param iRetries If greater than 0, shows "Incorrect password, %d retries left" on dialog line 2, else line 2 is blank.
-// \return 0 if successful display and user input. 1 if unsucessful input. -1 if no user input or canceled editing.
+// \return 0 if successful display and user input. 1 if unsuccessful input. -1 if no user input or canceled editing.
 int CGUIDialogNumeric::ShowAndVerifyPassword(CStdString& strPassword, const CStdString& strHeading, int iRetries)
 {
   CStdString strTempHeading = strHeading;
   if (0 < iRetries)
   {
     // Show a string telling user they have iRetries retries left
-    strTempHeading.Format("%s. %s %i %s", strHeading.c_str(), g_localizeStrings.Get(12342).c_str(), iRetries, g_localizeStrings.Get(12343).c_str());
+    strTempHeading = StringUtils::Format("%s. %s %i %s", strHeading.c_str(), g_localizeStrings.Get(12342).c_str(), iRetries, g_localizeStrings.Get(12343).c_str());
   }
   // make a copy of strPassword to prevent from overwriting it later
   CStdString strPassTemp = strPassword;
   if (ShowAndVerifyInput(strPassTemp, strTempHeading, true))
     return 0;   // user entered correct password
-  if (strPassTemp.IsEmpty()) return -1;   // user canceled out
+  if (strPassTemp.empty()) return -1;   // user canceled out
   return 1; // user must have entered an incorrect password
 }
 
@@ -753,7 +747,7 @@ int CGUIDialogNumeric::ShowAndVerifyPassword(CStdString& strPassword, const CStd
 // \param strToVerify Value to compare against user input.
 // \param dlgHeading String shown on dialog title.
 // \param bVerifyInput If set as true we verify the users input versus strToVerify.
-// \return true if successful display and user input. false if unsucessful display, no user input, or canceled editing.
+// \return true if successful display and user input. false if unsuccessful display, no user input, or canceled editing.
 bool CGUIDialogNumeric::ShowAndVerifyInput(CStdString& strToVerify, const CStdString& dlgHeading, bool bVerifyInput)
 {
   // Prompt user for password input
@@ -783,7 +777,7 @@ bool CGUIDialogNumeric::ShowAndVerifyInput(CStdString& strToVerify, const CStdSt
   if (!bVerifyInput)
   {
     strToVerify = md5pword2;
-    strToVerify.ToLower();
+    StringUtils::ToLower(strToVerify);
     return true;
   }
 

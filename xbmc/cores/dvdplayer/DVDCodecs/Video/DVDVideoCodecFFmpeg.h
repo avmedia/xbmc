@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@
 #include "DllAvFilter.h"
 #include "DllPostProc.h"
 
-class CVDPAU;
 class CCriticalSection;
 
 class CDVDVideoCodecFFmpeg : public CDVDVideoCodec
@@ -45,6 +44,7 @@ public:
     virtual bool GetPicture(AVCodecContext* avctx, AVFrame* frame, DVDVideoPicture* picture) = 0;
     virtual int  Check     (AVCodecContext* avctx) = 0;
     virtual void Reset     () {}
+    virtual unsigned GetAllowedReferences() { return 0; }
     virtual const std::string Name() = 0;
     virtual CCriticalSection* Section() { return NULL; }
   };
@@ -53,7 +53,7 @@ public:
   virtual ~CDVDVideoCodecFFmpeg();
   virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
   virtual void Dispose();
-  virtual int Decode(BYTE* pData, int iSize, double dts, double pts);
+  virtual int Decode(uint8_t* pData, int iSize, double dts, double pts);
   virtual void Reset();
   bool GetPictureCommon(DVDVideoPicture* pDvdVideoPicture);
   virtual bool GetPicture(DVDVideoPicture* pDvdVideoPicture);
@@ -61,6 +61,7 @@ public:
   virtual unsigned int SetFilters(unsigned int filters);
   virtual const char* GetName() { return m_name.c_str(); }; // m_name is never changed after open
   virtual unsigned GetConvergeCount();
+  virtual unsigned GetAllowedReferences();
 
   bool               IsHardwareAllowed()                     { return !m_bSoftware; }
   IHardwareDecoder * GetHardware()                           { return m_pHardware; };
@@ -97,7 +98,11 @@ protected:
   AVFilterGraph*   m_pFilterGraph;
   AVFilterContext* m_pFilterIn;
   AVFilterContext* m_pFilterOut;
+#if defined(LIBAVFILTER_AVFRAME_BASED)
+  AVFrame*         m_pFilterFrame;
+#else
   AVFilterBufferRef* m_pBufferRef;
+#endif
 
   int m_iPictureWidth;
   int m_iPictureHeight;

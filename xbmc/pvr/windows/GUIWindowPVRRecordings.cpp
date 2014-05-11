@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,7 +42,6 @@ CGUIWindowPVRRecordings::CGUIWindowPVRRecordings(CGUIWindowPVR *parent) :
   CGUIWindowPVRCommon(parent, PVR_WINDOW_RECORDINGS, CONTROL_BTNRECORDINGS, CONTROL_LIST_RECORDINGS)
 {
   m_strSelectedPath = "pvr://recordings/";
-  m_thumbLoader.SetNumOfWorkers(1);
 }
 
 void CGUIWindowPVRRecordings::UnregisterObservers(void)
@@ -100,7 +99,7 @@ CStdString CGUIWindowPVRRecordings::GetResumeString(const CFileItem& item)
 
     // Suppress resume from 0
     if (positionInSeconds > 0)
-      resumeString.Format(g_localizeStrings.Get(12022).c_str(), StringUtils::SecondsToTimeString(positionInSeconds).c_str());
+      resumeString = StringUtils::Format(g_localizeStrings.Get(12022).c_str(), StringUtils::SecondsToTimeString(positionInSeconds).c_str());
   }
   return resumeString;
 }
@@ -117,7 +116,7 @@ void CGUIWindowPVRRecordings::GetContextButtons(int itemNumber, CContextButtons 
     buttons.Add(CONTEXT_BUTTON_FIND, 19003);      /* Find similar program */
     buttons.Add(CONTEXT_BUTTON_PLAY_ITEM, 12021); /* Play this recording */
     CStdString resumeString = GetResumeString(*pItem);
-    if (!resumeString.IsEmpty())
+    if (!resumeString.empty())
     {
       buttons.Add(CONTEXT_BUTTON_RESUME_ITEM, resumeString);
     }
@@ -146,13 +145,13 @@ void CGUIWindowPVRRecordings::GetContextButtons(int itemNumber, CContextButtons 
     buttons.Add(CONTEXT_BUTTON_MENU_HOOKS, 19195);      /* PVR client specific action */
 
   // Update sort by button
-//if (m_guiState->GetSortMethod()!=SORT_METHOD_NONE)
+//if (m_guiState->GetSortMethod()!=SortByNone)
 //{
 //  CStdString sortLabel;
 //  sortLabel.Format(g_localizeStrings.Get(550).c_str(), g_localizeStrings.Get(m_guiState->GetSortMethodLabel()).c_str());
 //  buttons.Add(CONTEXT_BUTTON_SORTBY, sortLabel);   /* Sort method */
 //
-//  if (m_guiState->GetDisplaySortOrder()==SORT_ORDER_ASC)
+//  if (m_guiState->GetDisplaySortOrder()==SortOrderAscending)
 //    buttons.Add(CONTEXT_BUTTON_SORTASC, 584);        /* Sort up or down */
 //  else
 //    buttons.Add(CONTEXT_BUTTON_SORTASC, 585);        /* Sort up or down */
@@ -165,13 +164,11 @@ bool CGUIWindowPVRRecordings::OnAction(const CAction &action)
       action.GetID() == ACTION_NAV_BACK)
   {
     if (m_parent->m_vecItems->GetPath() != "pvr://recordings/")
+    {
       m_parent->GoParentFolder();
-    else if (action.GetID() == ACTION_NAV_BACK)
-      g_windowManager.PreviousWindow();
-
-    return true;
+      return true;
+    }
   }
-
   return CGUIWindowPVRCommon::OnAction(action);
 }
 
@@ -205,7 +202,7 @@ void CGUIWindowPVRRecordings::UpdateData(bool bUpdateSelectedFile /* = true */)
   CSingleLock graphicsLock(g_graphicsContext);
 
   m_iSelected = m_parent->m_viewControl.GetSelectedItem();
-  if (m_parent->m_vecItems->GetPath().Left(17) != "pvr://recordings/")
+  if (!StringUtils::StartsWith(m_parent->m_vecItems->GetPath(), "pvr://recordings/"))
     m_strSelectedPath = "pvr://recordings/";
   else
     m_strSelectedPath = m_parent->m_vecItems->GetPath();
@@ -278,7 +275,7 @@ bool CGUIWindowPVRRecordings::OnClickList(CGUIMessage &message)
     {
       int choice = CONTEXT_BUTTON_PLAY_ITEM;
       CStdString resumeString = GetResumeString(*pItem);
-      if (!resumeString.IsEmpty())
+      if (!resumeString.empty())
       {
         CContextButtons choices;
         choices.Add(CONTEXT_BUTTON_RESUME_ITEM, resumeString);
@@ -405,6 +402,9 @@ bool CGUIWindowPVRRecordings::OnContextButtonMarkWatched(const CFileItemPtr &ite
 
 void CGUIWindowPVRRecordings::BeforeUpdate(const CStdString &strDirectory)
 {
+  // set items path to current directory
+  m_parent->m_vecItems->SetPath(strDirectory);
+
   if (m_thumbLoader.IsLoading())
     m_thumbLoader.StopThread();
 }

@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public:
   const CAlbum &GetAlbum() const { return m_album; }
   CAlbum& GetAlbum() { return m_album; }
   void SetAlbum(CAlbum& album);
-  const VECSONGS &GetSongs() const { return m_album.songs; }
+  const VECSONGS &GetSongs() const { return m_album.infoSongs; }
   const CStdString& GetTitle2() const { return m_strTitle2; }
   void SetTitle(const CStdString& strTitle) { m_album.strAlbum = strTitle; }
   const CScraperUrl& GetAlbumURL() const { return m_albumURL; }

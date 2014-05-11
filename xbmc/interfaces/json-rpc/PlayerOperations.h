@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ namespace JSONRPC
     static int GetActivePlayers();
     static PlayerType GetPlayer(const CVariant &player);
     static int GetPlaylist(PlayerType player);
-    static JSONRPC_STATUS StartSlideshow(const std::string path, bool recursive, bool random);
+    static JSONRPC_STATUS StartSlideshow(const std::string& path, bool recursive, bool random);
     static void SendSlideshowAction(int actionID);
     static void OnPlaylistChanged();
     static JSONRPC_STATUS GetPropertyValue(PlayerType player, const CStdString &property, CVariant &result);

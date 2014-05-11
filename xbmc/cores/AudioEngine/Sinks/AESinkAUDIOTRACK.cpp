@@ -1,6 +1,6 @@
  /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,20 +19,24 @@
  */
 
 #include "AESinkAUDIOTRACK.h"
-#include "Utils/AEUtil.h"
-#include "Utils/AERingBuffer.h"
+#include "cores/AudioEngine/Utils/AEUtil.h"
+#include "cores/AudioEngine/Utils/AERingBuffer.h"
 #include "android/activity/XBMCApp.h"
-#include "utils/log.h"
-#if defined(HAS_AMLPLAYER)
-#include "cores/amlplayer/AMLUtils.h"
+#include "settings/Settings.h"
+#if defined(HAS_LIBAMCODEC)
+#include "utils/AMLUtils.h"
 #endif
+#include "utils/log.h"
 
-#include <jni.h>
+#include "android/jni/AudioFormat.h"
+#include "android/jni/AudioManager.h"
+#include "android/jni/AudioTrack.h"
 
-#if defined(__ARM_NEON__)
+using namespace jni;
+
+#if 0 //defined(__ARM_NEON__)
 #include <arm_neon.h>
 #include "utils/CPUInfo.h"
-#include "android/activity/JNIThreading.h"
 
 // LGPLv2 from PulseAudio
 // float values from AE are pre-clamped so we do not need to clamp again here
@@ -57,181 +61,150 @@ static void pa_sconv_s16le_from_f32ne_neon(unsigned n, const float32_t *a, int16
 }
 #endif
 
-static jint GetStaticIntField(JNIEnv *jenv, std::string class_name, std::string field_name)
-{
-  class_name.insert(0, "android/media/");
-  jclass cls = jenv->FindClass(class_name.c_str());
-  jfieldID field = jenv->GetStaticFieldID(cls, field_name.c_str(), "I");
-  jint int_field = jenv->GetStaticIntField(cls, field);
-  jenv->DeleteLocalRef(cls);
-  return int_field;
-}
-
 CAEDeviceInfo CAESinkAUDIOTRACK::m_info;
 ////////////////////////////////////////////////////////////////////////////////////////////
 CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
-  : CThread("AudioTrack")
 {
-  m_sinkbuffer = NULL;
-  m_alignedS16LE = NULL;
-  m_volume_changed = false;
+  m_alignedS16 = NULL;
   m_min_frames = 0;
   m_sink_frameSize = 0;
-  m_sinkbuffer_sec = 0.0;
-  m_sinkbuffer_sec_per_byte = 0.0;
-  m_draining = false;
   m_audiotrackbuffer_sec = 0.0;
-  m_audiotrack_empty_sec = 0.0;
-  m_volume = 0.0;
-#if defined(HAS_AMLPLAYER)
-  aml_cpufreq_limit(true);
-#endif
+  m_volume = 1.0;
+  m_at_jni = NULL;
+  m_frames_written = 0;
 }
 
 CAESinkAUDIOTRACK::~CAESinkAUDIOTRACK()
 {
-#if defined(HAS_AMLPLAYER)
-  aml_cpufreq_limit(false);
-#endif
+  Deinitialize();
 }
 
 bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 {
-  m_format = format;
+  m_lastFormat  = format;
+  m_format      = format;
 
-  // default to 44100, all android devices support it.
-  // then check if we can support the requested rate.
-  unsigned int sampleRate = 44100;
-  for (size_t i = 0; i < m_info.m_sampleRates.size(); i++)
-  {
-    if (m_format.m_sampleRate == m_info.m_sampleRates[i])
-    {
-      sampleRate = m_format.m_sampleRate;
-      break;
-    }
-  }
-  m_format.m_sampleRate = sampleRate;
+  if (AE_IS_RAW(m_format.m_dataFormat))
+    m_passthrough = true;
+  else
+    m_passthrough = false;
 
-  // default to AE_FMT_S16LE,
-  // then check if we can support the requested format.
-  AEDataFormat dataFormat = AE_FMT_S16LE;
-  for (size_t i = 0; i < m_info.m_dataFormats.size(); i++)
-  {
-    if (m_format.m_dataFormat == m_info.m_dataFormats[i])
-    {
-      dataFormat = m_format.m_dataFormat;
-      break;
-    }
-  }
-  m_format.m_dataFormat = dataFormat;
+#if defined(HAS_LIBAMCODEC)
+  if (CSettings::Get().GetBool("videoplayer.useamcodec"))
+    aml_set_audio_passthrough(m_passthrough);
+#endif
 
-  m_format.m_channelLayout = m_info.m_channels;
-  m_format.m_frameSize = m_format.m_channelLayout.Count() * (CAEUtil::DataFormatToBits(m_format.m_dataFormat) >> 3);
+  m_format.m_sampleRate     = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
+  m_format.m_dataFormat     = AE_FMT_S16LE;
+  m_format.m_channelLayout  = m_info.m_channels;
+  m_format.m_frameSize      = m_format.m_channelLayout.Count() *
+                              (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
+  int min_buffer_size       = CJNIAudioTrack::getMinBufferSize( m_format.m_sampleRate,
+                                                                CJNIAudioFormat::CHANNEL_OUT_STEREO,
+                                                                CJNIAudioFormat::ENCODING_PCM_16BIT);
+  m_sink_frameSize          = m_format.m_channelLayout.Count() *
+                              (CAEUtil::DataFormatToBits(AE_FMT_S16LE) / 8);
+  m_min_frames              = min_buffer_size / m_sink_frameSize;
+  m_audiotrackbuffer_sec    = (double)m_min_frames / (double)m_format.m_sampleRate;
+  m_at_jni                  = new CJNIAudioTrack( CJNIAudioManager::STREAM_MUSIC,
+                                                  m_format.m_sampleRate,
+                                                  CJNIAudioFormat::CHANNEL_OUT_STEREO,
+                                                  CJNIAudioFormat::ENCODING_PCM_16BIT,
+                                                  min_buffer_size,
+                                                  CJNIAudioTrack::MODE_STREAM);
+  m_format.m_frames         = m_min_frames / 2;
 
-  m_draining = false;
-  m_volume_changed = false;
-  // launch the process thread and wait for the
-  // AutoTrack jni object to get created and setup.
-  m_wake.Reset();
-  m_inited.Reset();
-  Create();
-  if(!m_inited.WaitMSec(100))
-  {
-    while(!m_inited.WaitMSec(1))
-      Sleep(10);
-  }
+  m_format.m_frameSamples   = m_format.m_frames * m_format.m_channelLayout.Count();
+  format                    = m_format;
 
-  // m_min_frames is volatile and has been setup by Process()
-  m_format.m_frames = m_min_frames;
-  m_format.m_frameSamples = m_format.m_frames * m_format.m_channelLayout.Count();
-  format = m_format;
+  JNIEnv* jenv = xbmc_jnienv();
+  // Set the initial volume
+  float volume = 1.0;
+  if (!m_passthrough)
+    volume = m_volume;
+  CXBMCApp::SetSystemVolume(jenv, volume);
 
   return true;
 }
 
 void CAESinkAUDIOTRACK::Deinitialize()
 {
-  // force m_bStop and set m_wake, if might be sleeping.
-  m_bStop = true;
-  m_wake.Set();
-  StopThread();
-  delete m_sinkbuffer, m_sinkbuffer = NULL;
-  if (m_alignedS16LE)
-    _aligned_free(m_alignedS16LE), m_alignedS16LE = NULL;
-}
+  if (!m_at_jni)
+    return;
 
-bool CAESinkAUDIOTRACK::IsCompatible(const AEAudioFormat format, const std::string &device)
-{
-  return ((m_format.m_sampleRate    == format.m_sampleRate) &&
-          (m_format.m_dataFormat    == format.m_dataFormat) &&
-          (m_format.m_channelLayout == format.m_channelLayout));
+  m_at_jni->stop();
+  m_at_jni->flush();
+  m_at_jni->release();
+  
+  m_frames_written = 0;
+
+  delete m_at_jni;
+  m_at_jni = NULL;
 }
 
 double CAESinkAUDIOTRACK::GetDelay()
 {
-  // this includes any latency due to AudioTrack buffer,
-  // AudioMixer (if any) and audio hardware driver.
+  if (!m_at_jni)
+    return 0.0;
 
-  double sinkbuffer_seconds_to_empty = m_sinkbuffer_sec_per_byte * (double)m_sinkbuffer->GetReadSize();
-  return sinkbuffer_seconds_to_empty + m_audiotrack_empty_sec;
+  // In their infinite wisdom, Google decided to make getPlaybackHeadPosition
+  // return a 32bit "int" that you should "interpret as unsigned."  As such,
+  // for wrap saftey, we need to do all ops on it in 32bit integer math.
+  uint32_t head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
+
+  double delay = (double)(m_frames_written - head_pos) / m_format.m_sampleRate;
+
+  return delay;
 }
 
-double CAESinkAUDIOTRACK::GetCacheTime()
+double CAESinkAUDIOTRACK::GetLatency()
 {
-  // returns the time in seconds that it will take
-  // to underrun the buffer if no sample is added.
-
-  double sinkbuffer_seconds_to_empty = m_sinkbuffer_sec_per_byte * (double)m_sinkbuffer->GetReadSize();
-  return sinkbuffer_seconds_to_empty + m_audiotrack_empty_sec;
+#if defined(HAS_LIBAMCODEC)
+  if (aml_present())
+    return 0.250;
+#endif
+  return 0.0;
 }
 
 double CAESinkAUDIOTRACK::GetCacheTotal()
 {
   // total amount that the audio sink can buffer in units of seconds
-
-  return m_sinkbuffer_sec + m_audiotrackbuffer_sec;
+  return m_audiotrackbuffer_sec;
 }
 
-unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio)
+// this method is supposed to block until all frames are written to the device buffer
+// when it returns ActiveAESink will take the next buffer out of a queue
+unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio, bool blocking)
 {
+  if (!m_at_jni)
+    return INT_MAX;
+
   // write as many frames of audio as we can fit into our internal buffer.
-
-  // our internal sink buffer is always AE_FMT_S16LE
-  unsigned int write_frames = (m_sinkbuffer->GetWriteSize() / m_sink_frameSize) % frames;
-  if (hasAudio && write_frames)
+  int written = 0;
+  if (frames)
   {
-    switch(m_format.m_dataFormat)
-    {
-      case AE_FMT_S16LE:
-        m_sinkbuffer->Write(data, write_frames * m_sink_frameSize);
-        m_wake.Set();
-        break;
-#if defined(__ARM_NEON__)
-      case AE_FMT_FLOAT:
-        if (!m_alignedS16LE)
-          m_alignedS16LE = (int16_t*)_aligned_malloc(m_format.m_frames * m_sink_frameSize, 16);
-        // neon convert AE_FMT_S16LE to AE_FMT_FLOAT
-        pa_sconv_s16le_from_f32ne_neon(write_frames * m_format.m_channelLayout.Count(), (const float32_t *)data, m_alignedS16LE);
-        m_sinkbuffer->Write((unsigned char*)m_alignedS16LE, write_frames * m_sink_frameSize);
-        m_wake.Set();
-        break;
-#endif
-      default:
-        break;
-    }
-  }
-  // AddPackets runs under a non-idled AE thread we must block or sleep.
-  // Trying to calc the optimal sleep is tricky so just a minimal sleep.
-  Sleep(10);
+    // android will auto pause the playstate when it senses idle,
+    // check it and set playing if it does this. Do this before
+    // writing into its buffer.
+    if (m_at_jni->getPlayState() != CJNIAudioTrack::PLAYSTATE_PLAYING)
+      m_at_jni->play();
 
-  return hasAudio ? write_frames:frames;
+    written = m_at_jni->write((char*)data, 0, frames * m_sink_frameSize);
+    m_frames_written += written / m_sink_frameSize;
+  }
+
+  return (unsigned int)(written/m_sink_frameSize);
 }
 
 void CAESinkAUDIOTRACK::Drain()
 {
-  CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::Drain");
-  m_draining = true;
-  m_wake.Set();
+  if (!m_at_jni)
+    return;
+
+  // TODO: does this block until last samples played out?
+  // we should not return from drain as long the device is in playing state
+  m_at_jni->stop();
+  m_frames_written = 0;
 }
 
 bool CAESinkAUDIOTRACK::HasVolume()
@@ -241,10 +214,14 @@ bool CAESinkAUDIOTRACK::HasVolume()
 
 void  CAESinkAUDIOTRACK::SetVolume(float scale)
 {
-  // Android uses fixed steps, reverse scale back to percent
-  float gain = CAEUtil::ScaleToGain(scale);
-  m_volume = CAEUtil::GainToPercent(gain);
-  m_volume_changed = true;
+  if (!m_at_jni)
+    return;
+
+  m_volume = scale;
+  if (!m_passthrough)
+  {
+    CXBMCApp::SetSystemVolume(xbmc_jnienv(), m_volume);
+  }
 }
 
 void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
@@ -253,16 +230,17 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   m_info.m_dataFormats.clear();
   m_info.m_sampleRates.clear();
 
-  m_info.m_deviceType = AE_DEVTYPE_PCM;
+  m_info.m_deviceType = AE_DEVTYPE_HDMI;
   m_info.m_deviceName = "AudioTrack";
   m_info.m_displayName = "android";
   m_info.m_displayNameExtra = "audiotrack";
   m_info.m_channels += AE_CH_FL;
   m_info.m_channels += AE_CH_FR;
-  m_info.m_sampleRates.push_back(44100);
-  m_info.m_sampleRates.push_back(48000);
+  m_info.m_sampleRates.push_back(CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC));
   m_info.m_dataFormats.push_back(AE_FMT_S16LE);
-#if defined(__ARM_NEON__)
+  m_info.m_dataFormats.push_back(AE_FMT_AC3);
+  m_info.m_dataFormats.push_back(AE_FMT_DTS);
+#if 0 //defined(__ARM_NEON__)
   if (g_cpuInfo.GetCPUFeatures() & CPU_FEATURE_NEON)
     m_info.m_dataFormats.push_back(AE_FMT_FLOAT);
 #endif
@@ -270,141 +248,3 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   list.push_back(m_info);
 }
 
-void CAESinkAUDIOTRACK::Process()
-{
-  CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::Process");
-
-  JNIEnv *jenv = xbmc_jnienv();
-
-  jclass jcAudioTrack = jenv->FindClass("android/media/AudioTrack");
-
-  jmethodID jmInit              = jenv->GetMethodID(jcAudioTrack, "<init>", "(IIIIII)V");
-  jmethodID jmPlay              = jenv->GetMethodID(jcAudioTrack, "play", "()V");
-  jmethodID jmStop              = jenv->GetMethodID(jcAudioTrack, "stop", "()V");
-  jmethodID jmFlush             = jenv->GetMethodID(jcAudioTrack, "flush", "()V");
-  jmethodID jmRelease           = jenv->GetMethodID(jcAudioTrack, "release", "()V");
-  jmethodID jmWrite             = jenv->GetMethodID(jcAudioTrack, "write", "([BII)I");
-  jmethodID jmPlayState         = jenv->GetMethodID(jcAudioTrack, "getPlayState", "()I");
-  jmethodID jmPlayHeadPosition  = jenv->GetMethodID(jcAudioTrack, "getPlaybackHeadPosition", "()I");
-  jmethodID jmGetMinBufferSize  = jenv->GetStaticMethodID(jcAudioTrack, "getMinBufferSize", "(III)I");
-
-  jint audioFormat    = GetStaticIntField(jenv, "AudioFormat", "ENCODING_PCM_16BIT");
-  jint channelConfig  = GetStaticIntField(jenv, "AudioFormat", "CHANNEL_OUT_STEREO");
-
-  jint min_buffer_size = jenv->CallStaticIntMethod(jcAudioTrack, jmGetMinBufferSize,
-    m_format.m_sampleRate, channelConfig, audioFormat);
-
-  m_sink_frameSize = m_format.m_channelLayout.Count() * CAEUtil::DataFormatToBits(AE_FMT_S16LE) >> 3;
-  m_min_frames = min_buffer_size / m_sink_frameSize;
-
-  m_audiotrackbuffer_sec = (double)m_min_frames / (double)m_format.m_sampleRate;
-  m_audiotrack_empty_sec = 0.0;
-
-  // setup a 1/4 second internal sink lockless ring buffer
-  m_sinkbuffer = new AERingBuffer(m_sink_frameSize * m_format.m_sampleRate / 4);
-  m_sinkbuffer_sec_per_byte = 1.0 / (double)(m_sink_frameSize * m_format.m_sampleRate);
-  m_sinkbuffer_sec = (double)m_sinkbuffer_sec_per_byte * m_sinkbuffer->GetMaxSize();
-
-  jobject joAudioTrack = jenv->NewObject(jcAudioTrack, jmInit,
-    GetStaticIntField(jenv, "AudioManager", "STREAM_MUSIC"),
-    m_format.m_sampleRate,
-    channelConfig,
-    audioFormat,
-    min_buffer_size,
-    GetStaticIntField(jenv, "AudioTrack", "MODE_STREAM"));
-
-  // The AudioTrack object has been created and waiting to play,
-  m_inited.Set();
-  // yield to give other threads a chance to do some work.
-  sched_yield();
-
-  // cache the playing int value.
-  jint playing = GetStaticIntField(jenv, "AudioTrack", "PLAYSTATE_PLAYING");
-
-  // create a java byte buffer for writing pcm data to AudioTrack.
-  jarray jbuffer = jenv->NewByteArray(min_buffer_size);
-
-  int64_t frames_written = 0;
-  int64_t frame_position = 0;
-
-  while (!m_bStop)
-  {
-    if (m_volume_changed)
-    {
-      // check of volume changes and make them,
-      // do it here to keep jni calls local to this thread.
-      CXBMCApp::SetSystemVolume(jenv, m_volume);
-      m_volume_changed = false;
-    }
-    if (m_draining)
-    {
-      unsigned char byte_drain[1024];
-      unsigned int  byte_drain_size = m_sinkbuffer->GetReadSize() % 1024;
-      while (byte_drain_size)
-      {
-        m_sinkbuffer->Read(byte_drain, byte_drain_size);
-        byte_drain_size = m_sinkbuffer->GetReadSize() % 1024;
-      }
-      jenv->CallVoidMethod(joAudioTrack, jmStop);
-      jenv->CallVoidMethod(joAudioTrack, jmFlush);
-    }
-
-    unsigned int read_bytes = m_sinkbuffer->GetReadSize() % min_buffer_size;
-    if (read_bytes > 0)
-    {
-      // android will auto pause the playstate when it senses idle,
-      // check it and set playing if it does this. Do this before
-      // writing into its buffer.
-      if (jenv->CallIntMethod(joAudioTrack, jmPlayState) != playing)
-        jenv->CallVoidMethod(joAudioTrack, jmPlay);
-
-      // Write a buffer of audio data to Java AudioTrack.
-      // Warning, no other JNI function can be called after
-      // GetPrimitiveArrayCritical until ReleasePrimitiveArrayCritical.
-      void *pBuffer = jenv->GetPrimitiveArrayCritical(jbuffer, NULL);
-      if (pBuffer)
-      {
-        m_sinkbuffer->Read((unsigned char*)pBuffer, read_bytes);
-        jenv->ReleasePrimitiveArrayCritical(jbuffer, pBuffer, 0);
-        // jmWrite is blocking and returns when the data has been transferred
-        // from the Java layer and queued for playback.
-        jenv->CallIntMethod(joAudioTrack, jmWrite, jbuffer, 0, read_bytes);
-      }
-    }
-    // calc the number of seconds until audiotrack buffer is empty.
-    frame_position = jenv->CallIntMethod(joAudioTrack, jmPlayHeadPosition);
-    if (frame_position == 0)
-      frames_written = 0;
-    frames_written += read_bytes / m_sink_frameSize;
-    m_audiotrack_empty_sec = (double)(frames_written - frame_position) / m_format.m_sampleRate;
-    // some times, we can get frame_position
-    // ahead of frames_written, not a clue why. clamp it.
-    if (m_audiotrack_empty_sec < 0.0f)
-      m_audiotrack_empty_sec = 0.0f;
-
-    if (m_sinkbuffer->GetReadSize() == 0)
-    {
-      // the sink buffer is empty, stop playback.
-      // Audiotrack will playout any written contents.
-      jenv->CallVoidMethod(joAudioTrack, jmStop);
-      // sleep this audio thread, we will get woken when we have audio data.
-      m_wake.WaitMSec(250);
-    }
-  }
-
-  jenv->CallVoidMethod(joAudioTrack, jmStop);
-  jenv->CallVoidMethod(joAudioTrack, jmFlush);
-  jenv->CallVoidMethod(joAudioTrack, jmRelease);
-
-  // might toss an exception on jmRelease so catch it.
-  jthrowable exception = jenv->ExceptionOccurred();
-  if (exception)
-  {
-    jenv->ExceptionDescribe();
-    jenv->ExceptionClear();
-  }
-
-  jenv->DeleteLocalRef(jbuffer);
-  jenv->DeleteLocalRef(joAudioTrack);
-  jenv->DeleteLocalRef(jcAudioTrack);
-}

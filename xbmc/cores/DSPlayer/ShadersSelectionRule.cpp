@@ -25,9 +25,9 @@
 #include "ShadersSelectionRule.h"
 #include "video/VideoInfoTag.h"
 #include "utils/StreamDetails.h"
-#include "settings/GUISettings.h"
 #include "utils/log.h"
 #include "utils/XMLUtils.h"
+#include "settings/Settings.h"
 
 CShadersSelectionRule::CShadersSelectionRule(TiXmlElement* pRule)
   : m_shaderId(-1)
@@ -62,7 +62,7 @@ void CShadersSelectionRule::Initialize(TiXmlElement* pRule)
   m_bStreamDetails = m_audioCodec.length() > 0 || m_audioChannels.length() > 0 || m_videoFourcc.length() > 0 ||
     m_videoCodec.length() > 0 || m_videoResolution.length() > 0 || m_videoAspect.length() > 0;
 
-  if (m_bStreamDetails && !g_guiSettings.GetBool("myvideos.extractflags"))
+  if (m_bStreamDetails && !CSettings::Get().GetBool("myvideos.extractflags"))
   {
       CLog::Log(LOGWARNING, "CFilterSelectionRule::Initialize: rule: %s needs media flagging, which is disabled", m_name.c_str());
   }

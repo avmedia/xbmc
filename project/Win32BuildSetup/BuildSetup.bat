@@ -1,9 +1,10 @@
 @ECHO OFF
+SETLOCAL ENABLEDELAYEDEXPANSION
 rem ----Usage----
 rem BuildSetup [gl|dx] [clean|noclean]
 rem vs2010 for compiling with visual studio 2010
-rem gl for opengl build (default)
-rem dx for directx build
+rem gl for opengl build
+rem dx for directx build (default)
 rem clean to force a full rebuild
 rem noclean to force a build without clean
 rem noprompt to avoid all prompts
@@ -25,6 +26,7 @@ SET promptlevel=prompt
 SET buildmingwlibs=true
 SET exitcode=0
 SET useshell=rxvt
+SET BRANCH=na
 FOR %%b in (%1, %2, %3, %4, %5) DO (
 	IF %%b==vs2010 SET comp=vs2010
 	IF %%b==dx SET target=dx
@@ -33,19 +35,36 @@ FOR %%b in (%1, %2, %3, %4, %5) DO (
 	IF %%b==noclean SET buildmode=noclean
 	IF %%b==noprompt SET promptlevel=noprompt
 	IF %%b==nomingwlibs SET buildmingwlibs=false
-    IF %%b==sh SET useshell=sh
+	IF %%b==sh SET useshell=sh
 )
 
 SET buildconfig=Release (DirectX)
 IF %target%==gl SET buildconfig=Release (OpenGL)
 
 IF %comp%==vs2010 (
-  IF "%VS100COMNTOOLS%"=="" (
-		set NET="%ProgramFiles%\Microsoft Visual Studio 10.0\Common7\IDE\VCExpress.exe"
-	) ELSE IF EXIST "%VS100COMNTOOLS%\..\IDE\VCExpress.exe" (
-		set NET="%VS100COMNTOOLS%\..\IDE\VCExpress.exe"
-	) ELSE IF EXIST "%VS100COMNTOOLS%\..\IDE\devenv.exe" (
-		set NET="%VS100COMNTOOLS%\..\IDE\devenv.exe"
+	REM look for MSBuild.exe in .NET Framework 4.x
+	FOR /F "tokens=3* delims=	" %%A IN ('REG QUERY HKLM\SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0 /v MSBuildToolsPath') DO SET NET=%%AMSBuild.exe
+	IF NOT EXIST "!NET!" (
+		FOR /F "tokens=3* delims= " %%A IN ('REG QUERY HKLM\SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0 /v MSBuildToolsPath') DO SET NET=%%AMSBuild.exe
+	)
+
+	IF EXIST "!NET!" (
+		set msbuildemitsolution=1
+		set OPTS_EXE="..\VS2010Express\XBMC for Windows.sln" /t:Build /p:Configuration="%buildconfig%"
+		set CLEAN_EXE="..\VS2010Express\XBMC for Windows.sln" /t:Clean /p:Configuration="%buildconfig%"
+	) ELSE (
+		IF EXIST "%VS100COMNTOOLS%\..\IDE\devenv.com" (
+			set NET="%VS100COMNTOOLS%\..\IDE\devenv.com"
+		) ELSE IF EXIST "%VS100COMNTOOLS%\..\IDE\devenv.exe" (
+			set NET="%VS100COMNTOOLS%\..\IDE\devenv.exe"
+		) ELSE IF "%VS100COMNTOOLS%"=="" (
+			set NET="%ProgramFiles%\Microsoft Visual Studio 10.0\Common7\IDE\VCExpress.exe"
+		) ELSE IF EXIST "%VS100COMNTOOLS%\..\IDE\VCExpress.exe" (
+			set NET="%VS100COMNTOOLS%\..\IDE\VCExpress.exe"
+		)
+
+		set OPTS_EXE="..\VS2010Express\XBMC for Windows.sln" /build "%buildconfig%"
+		set CLEAN_EXE="..\VS2010Express\XBMC for Windows.sln" /clean "%buildconfig%"
 	)
 )
 
@@ -54,11 +73,12 @@ IF %comp%==vs2010 (
 	 goto DIE
   )
   
-  set OPTS_EXE="..\VS2010Express\XBMC for Windows.sln" /build "%buildconfig%"
-  set CLEAN_EXE="..\VS2010Express\XBMC for Windows.sln" /clean "%buildconfig%"
   set EXE= "..\VS2010Express\XBMC\%buildconfig%\XBMC.exe"
   set PDB= "..\VS2010Express\XBMC\%buildconfig%\XBMC.pdb"
-	
+  
+  :: sets the BRANCH env var
+  call getbranch.bat
+
   rem	CONFIG END
   rem -------------------------------------------------------------
 
@@ -112,9 +132,9 @@ IF %comp%==vs2010 (
   ECHO ------------------------------------------------------------
   ECHO Cleaning Solution...
   %NET% %CLEAN_EXE%
-  ECHO Compiling XBMC...
+  ECHO Compiling XBMC branch %BRANCH%...
   %NET% %OPTS_EXE%
-  IF NOT EXIST %EXE% (
+  IF %errorlevel%==1 (
   	set DIETEXT="XBMC.EXE failed to build!  See %CD%\..\vs2010express\XBMC\%buildconfig%\objs\XBMC.log"
 	IF %promptlevel%==noprompt (
 		type "%CD%\..\vs2010express\XBMC\%buildconfig%\objs\XBMC.log"
@@ -129,9 +149,9 @@ IF %comp%==vs2010 (
 :COMPILE_NO_CLEAN_EXE
   ECHO Wait while preparing the build.
   ECHO ------------------------------------------------------------
-  ECHO Compiling Solution...
+  ECHO Compiling XBMC branch %BRANCH%...
   %NET% %OPTS_EXE%
-  IF NOT EXIST %EXE% (
+  IF %errorlevel%==1 (
   	set DIETEXT="XBMC.EXE failed to build!  See %CD%\..\vs2010express\XBMC\%buildconfig%\objs\XBMC.log"
 	IF %promptlevel%==noprompt (
 		type "%CD%\..\vs2010express\XBMC\%buildconfig%\objs\XBMC.log"
@@ -164,26 +184,42 @@ IF %comp%==vs2010 (
   
   ECHO Copying files...
   IF EXIST BUILD_WIN32 rmdir BUILD_WIN32 /S /Q
-
-  Echo .svn>exclude.txt
-  Echo CVS>>exclude.txt
+  rem Add files to exclude.txt that should not be included in the installer
+  
   Echo Thumbs.db>>exclude.txt
   Echo Desktop.ini>>exclude.txt
   Echo dsstdfx.bin>>exclude.txt
   Echo exclude.txt>>exclude.txt
-  rem and exclude potential leftovers
-  Echo mediasources.xml>>exclude.txt
-  Echo advancedsettings.xml>>exclude.txt
-  Echo guisettings.xml>>exclude.txt
-  Echo profiles.xml>>exclude.txt
-  Echo sources.xml>>exclude.txt
+  Echo xbmc.log>>exclude.txt
+  Echo xbmc.old.log>>exclude.txt
+  rem Exclude userdata files
+  Echo userdata\advancedsettings.xml>>exclude.txt
+  Echo userdata\guisettings.xml>>exclude.txt
+  Echo userdata\mediasources.xml>>exclude.txt
+  Echo userdata\passwords.xml>>exclude.txt
+  Echo userdata\profiles.xml>>exclude.txt
+  Echo userdata\sources.xml>>exclude.txt
+  Echo userdata\upnpserver.xml>>exclude.txt
+  rem Exclude userdata folders
+  Echo userdata\addon_data\>>exclude.txt
   Echo userdata\cache\>>exclude.txt
   Echo userdata\database\>>exclude.txt
   Echo userdata\playlists\>>exclude.txt
-  Echo userdata\script_data\>>exclude.txt
   Echo userdata\thumbnails\>>exclude.txt
-  rem UserData\visualisations contains currently only xbox visualisationfiles
-  Echo userdata\visualisations\>>exclude.txt
+  rem Exclude non Windows addons
+  Echo addons\repository.pvr-android.xbmc.org\>>exclude.txt
+  Echo addons\repository.pvr-ios.xbmc.org\>>exclude.txt
+  Echo addons\repository.pvr-osx32.xbmc.org\>>exclude.txt
+  Echo addons\repository.pvr-osx64.xbmc.org\>>exclude.txt
+  Echo addons\screensaver.rsxs.euphoria\>>exclude.txt
+  Echo addons\screensaver.rsxs.plasma\>>exclude.txt
+  Echo addons\screensaver.rsxs.solarwinds\>>exclude.txt
+  Echo addons\visualization.fishbmc\>>exclude.txt
+  Echo addons\visualization.projectm\>>exclude.txt
+  Echo addons\visualization.glspectrum\>>exclude.txt
+  rem Exclude skins as they're copied by their own script
+  Echo addons\skin.touched\>>exclude.txt
+  Echo addons\skin.confluence\>>exclude.txt
   rem other platform stuff
   Echo lib-osx>>exclude.txt
   Echo players\mplayer>>exclude.txt
@@ -200,7 +236,6 @@ IF %comp%==vs2010 (
   copy ..\..\LICENSE.GPL BUILD_WIN32\Xbmc > NUL
   copy ..\..\known_issues.txt BUILD_WIN32\Xbmc > NUL
   xcopy dependencies\*.* BUILD_WIN32\Xbmc /Q /I /Y /EXCLUDE:exclude.txt  > NUL
-  copy sources.xml BUILD_WIN32\Xbmc\userdata > NUL
   
   xcopy ..\..\language BUILD_WIN32\Xbmc\language /E /Q /I /Y /EXCLUDE:exclude.txt  > NUL
   xcopy ..\..\addons BUILD_WIN32\Xbmc\addons /E /Q /I /Y /EXCLUDE:exclude.txt > NUL
@@ -210,6 +245,10 @@ IF %comp%==vs2010 (
   
   ECHO ------------------------------------------------------------
   call buildpvraddons.bat %NET%
+  IF %errorlevel%==1 (
+    set DIETEXT="failed to build pvr addons"
+    goto DIE
+  )
     
   IF EXIST error.log del error.log > NUL
   SET build_path=%CD%
@@ -218,6 +257,14 @@ IF %comp%==vs2010 (
   cd ..\..\addons\skin.confluence
   call build.bat > NUL
   cd %build_path%
+  
+  IF EXIST  ..\..\addons\skin.touched\build.bat (
+    ECHO Building Touched Skin...
+    cd ..\..\addons\skin.touched
+    call build.bat > NUL
+    cd %build_path%
+  )
+  
   rem restore color and title, some scripts mess these up
   COLOR 1B
   TITLE XBMC for Windows Build Script
@@ -240,8 +287,8 @@ IF %comp%==vs2010 (
   ECHO ------------------------------------------------------------
   call getdeploydependencies.bat
   CALL extract_git_rev.bat > NUL
-  SET XBMC_SETUPFILE=XBMCSetup-%GIT_REV%-%target%.exe
-  SET XBMC_PDBFILE=XBMCSetup-%GIT_REV%-%target%.pdb
+  SET XBMC_SETUPFILE=XBMCSetup-%GIT_REV%-%BRANCH%.exe
+  SET XBMC_PDBFILE=XBMCSetup-%GIT_REV%-%BRANCH%.pdb
   ECHO Creating installer %XBMC_SETUPFILE%...
   IF EXIST %XBMC_SETUPFILE% del %XBMC_SETUPFILE% > NUL
   rem get path to makensis.exe from registry, first try tab delim
@@ -280,7 +327,7 @@ IF %comp%==vs2010 (
   )
 
   SET NSISExe=%NSISExePath%\makensis.exe
-  "%NSISExe%" /V1 /X"SetCompressor /FINAL lzma" /Dxbmc_root="%CD%\BUILD_WIN32" /Dxbmc_revision="%GIT_REV%" /Dxbmc_target="%target%" "XBMC for Windows.nsi"
+  "%NSISExe%" /V1 /X"SetCompressor /FINAL lzma" /Dxbmc_root="%CD%\BUILD_WIN32" /Dxbmc_revision="%GIT_REV%" /Dxbmc_target="%target%" /Dxbmc_branch="%BRANCH%" "XBMC for Windows.nsi"
   IF NOT EXIST "%XBMC_SETUPFILE%" (
 	  set DIETEXT=Failed to create %XBMC_SETUPFILE%. NSIS installed?
 	  goto DIE
@@ -301,6 +348,7 @@ IF %comp%==vs2010 (
   echo %DIETEXT%
   SET exitcode=1
   ECHO ------------------------------------------------------------
+  GOTO END
 
 :VIEWLOG_EXE
   SET log="%CD%\..\vs2010express\XBMC\%buildconfig%\objs\XBMC.log"

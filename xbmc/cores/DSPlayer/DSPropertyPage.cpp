@@ -36,7 +36,6 @@
 #include "windowing/WindowingFactory.h"
 #include "utils/CharsetConverter.h"
 #include "guilib/GraphicContext.h"
-#include "settings/GUISettings.h"
 #include "Application.h"
 #include "settings/Settings.h"
 
@@ -134,7 +133,7 @@ static INT_PTR CALLBACK prop_sheet_proc(HWND hwnd, UINT msg, WPARAM wparam,
 void CDSPropertyPage::Process()
 {
   bool wasfullscreen = false;
-  if (g_Windowing.IsFullScreen() && !g_guiSettings.GetBool("videoscreen.fakefullscreen"))
+  if (g_Windowing.IsFullScreen() && !CSettings::Get().GetBool("videoscreen.fakefullscreen"))
   {
     wasfullscreen = true;
     CLog::Log(LOGERROR,"true fullscreen and com property page don't mix so switching to windowed");

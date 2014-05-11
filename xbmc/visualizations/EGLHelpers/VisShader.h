@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,13 +19,13 @@
  *
  */
 
-#if defined(__APPLE__)                                                                                                                                                                                           
+#if defined(TARGET_DARWIN)                                                                                                                                                                                           
 #include <OpenGLES/ES2/gl.h>                                                                                                                                                                                     
 #include <OpenGLES/ES2/glext.h>                                                                                                                                                                                  
 #else                                                                                                                                                                                                            
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#endif//__APPLE__
+#endif
 
 #include <vector>
 #include <string>

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ bool CGUIWindowHome::OnAction(const CAction &action)
   static unsigned int min_hold_time = 1000;
   if (action.GetID() == ACTION_NAV_BACK &&
       action.GetHoldTime() < min_hold_time &&
-      g_application.IsPlaying())
+      g_application.m_pPlayer->IsPlaying())
   {
     g_application.SwitchToFullScreen();
     return true;
@@ -179,8 +179,6 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
         AddRecentlyAddedJobs(updateRA);
       else
         m_updateRA |= updateRA;
-
-      return true;
     }
     break;
 

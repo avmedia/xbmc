@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ using namespace std;
 
 CGUIStaticItem::CGUIStaticItem(const TiXmlElement *item, int parentID) : CFileItem()
 {
-  m_visCondition = 0;
   m_visState = false;
 
   assert(item);
@@ -45,7 +44,7 @@ CGUIStaticItem::CGUIStaticItem(const TiXmlElement *item, int parentID) : CFileIt
     const char *id = item->Attribute("id");
     CStdString condition;
     CGUIControlFactory::GetConditionalVisibility(item, condition);
-    m_visCondition = g_infoManager.Register(condition, parentID);
+    SetVisibleCondition(condition, parentID);
     CGUIControlFactory::GetActions(item, "onclick", m_clickActions);
     SetLabel(label.GetLabel(parentID));
     SetLabel2(label2.GetLabel(parentID));
@@ -62,7 +61,7 @@ CGUIStaticItem::CGUIStaticItem(const TiXmlElement *item, int parentID) : CFileIt
     {
       CStdString name = property->Attribute("name");
       CGUIInfoLabel prop;
-      if (!name.IsEmpty() && CGUIControlFactory::GetInfoLabelFromElement(property, prop, parentID))
+      if (!name.empty() && CGUIControlFactory::GetInfoLabelFromElement(property, prop, parentID))
       {
         SetProperty(name, prop.GetLabel(parentID, true).c_str());
         if (!prop.IsConstant())
@@ -87,10 +86,16 @@ CGUIStaticItem::CGUIStaticItem(const TiXmlElement *item, int parentID) : CFileIt
     m_iprogramCount = id ? atoi(id) : 0;
   }
 }
-    
+
+CGUIStaticItem::CGUIStaticItem(const CFileItem &item)
+: CFileItem(item)
+{
+  m_visState = false;
+}
+
 void CGUIStaticItem::UpdateProperties(int contextWindow)
 {
-  for (InfoVector::const_iterator i = m_info.begin(); i != m_info.end(); i++)
+  for (InfoVector::const_iterator i = m_info.begin(); i != m_info.end(); ++i)
   {
     const CGUIInfoLabel &info = i->first;
     const CStdString &name = i->second;
@@ -113,7 +118,7 @@ bool CGUIStaticItem::UpdateVisibility(int contextWindow)
 {
   if (!m_visCondition)
     return false;
-  bool state = g_infoManager.GetBoolValue(m_visCondition);
+  bool state = m_visCondition->Get();
   if (state != m_visState)
   {
     m_visState = state;
@@ -127,4 +132,10 @@ bool CGUIStaticItem::IsVisible() const
   if (m_visCondition)
     return m_visState;
   return true;
+}
+
+void CGUIStaticItem::SetVisibleCondition(const std::string &condition, int context)
+{
+  m_visCondition = g_infoManager.Register(condition, context);
+  m_visState = false;
 }

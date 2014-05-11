@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ CStdString CInfoLoader::GetInfo(int info)
     m_busy = true;
     CJobManager::GetInstance().AddJob(GetJob(), this);
   }
-  if (m_busy)
+  if (m_busy && CTimeUtils::GetFrameTime() - m_refreshTime > 1000)
   {
     return BusyInfo(info);
   }

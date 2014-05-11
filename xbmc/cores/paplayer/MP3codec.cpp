@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ MP3Codec::MP3Codec()
   m_InputBufferPos = 0;
 
   memset(&m_Formatdata,0,sizeof(m_Formatdata));
-  m_DataFormat = AE_FMT_S32NE;
+  m_DataFormat = AE_FMT_FLOAT;
 
   // create our output buffer
   m_OutputBufferSize = OUTPUTFRAMESIZE * 4;        // enough for 4 frames
@@ -175,7 +175,7 @@ bool MP3Codec::Init(const CStdString &strFile, unsigned int filecache)
   if (length != 0)
   {
     CTagLoaderTagLib tagLoaderTagLib; //opens the file so needs to be after m_file.Open 
-    bTags = tagLoaderTagLib.Load(strFile, m_tag);
+    bTags = tagLoaderTagLib.Load(strFile, m_tag, "mp3");
 
     if (bTags)
       ReadDuration();
@@ -557,15 +557,15 @@ madx_sig MP3Codec::madx_read(madx_house *mxhouse, madx_stat *mxstat, int maxwrit
   mxhouse->frame_cnt++;
   m_dll.mad_timer_add( &mxhouse->timer, mxhouse->frame.header.duration );
 
-  int32_t *dest = (int32_t*)mxhouse->output_ptr;
+  float *dest = (float *)mxhouse->output_ptr;
   for(int i=0; i < mxhouse->synth.pcm.length; i++)
   {
     // Left channel
-    *dest++ = (int32_t)(mxhouse->synth.pcm.samples[0][i] << 2);
+    *dest++ = (float)mad_f_todouble(mxhouse->synth.pcm.samples[0][i]);
 
     // Right channel
     if(MAD_NCHANNELS(&mxhouse->frame.header) == 2)
-      *dest++ = (int32_t)(mxhouse->synth.pcm.samples[1][i] << 2);
+      *dest++ = (float)mad_f_todouble(mxhouse->synth.pcm.samples[1][i]);
   }
 
   // Tell calling code buffer size
@@ -886,12 +886,13 @@ int MP3Codec::ReadDuration()
 
       double tpfbs[] = { 0, 384.0f, 1152.0f, 1152.0f };
       frequency = freqtab[version][freqindex];
-      tpf = tpfbs[layer] / (double) frequency;
-      if (version == MPEG_VERSION2_5 || version == MPEG_VERSION2)
-        tpf /= 2;
 
       if (frequency == 0)
         return 0;
+
+      tpf = tpfbs[layer] / (double) frequency;
+      if (version == MPEG_VERSION2_5 || version == MPEG_VERSION2)
+        tpf /= 2;
 
       /* Channel mode (stereo/mono) */
       int chmode = (mpegheader & 0xc0) >> 6;

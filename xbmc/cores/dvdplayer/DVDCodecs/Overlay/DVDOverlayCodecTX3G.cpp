@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,8 +24,9 @@
 #include "DVDOverlayText.h"
 #include "DVDStreamInfo.h"
 #include "DVDCodecs/DVDCodecs.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 
 // 3GPP/TX3G (aka MPEG-4 Timed Text) Subtitle support
 // 3GPP -> 3rd Generation Partnership Program
@@ -64,7 +65,7 @@ CDVDOverlayCodecTX3G::CDVDOverlayCodecTX3G() : CDVDOverlayCodec("TX3G Subtitle D
   m_pOverlay = NULL;
   // stupid, this comes from a static global in GUIWindowFullScreen.cpp
   uint32_t colormap[8] = { 0xFFFFFF00, 0xFFFFFFFF, 0xFF0099FF, 0xFF00FF00, 0xFFCCFF00, 0xFF00FFFF, 0xFFE5E5E5, 0xFFC0C0C0 };
-  m_textColor = colormap[g_guiSettings.GetInt("subtitles.color")];
+  m_textColor = colormap[CSettings::Get().GetInt("subtitles.color")];
 }
 
 CDVDOverlayCodecTX3G::~CDVDOverlayCodecTX3G()
@@ -75,7 +76,7 @@ CDVDOverlayCodecTX3G::~CDVDOverlayCodecTX3G()
 
 bool CDVDOverlayCodecTX3G::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
-  if (hints.codec == CODEC_ID_MOV_TEXT)
+  if (hints.codec == AV_CODEC_ID_MOV_TEXT)
     return true;
   return false;
 }
@@ -91,7 +92,7 @@ int CDVDOverlayCodecTX3G::Decode(DemuxPacket *pPacket)
   if (m_pOverlay)
     SAFE_RELEASE(m_pOverlay);
 
-  BYTE *data = pPacket->pData;
+  uint8_t *data = pPacket->pData;
   int size = pPacket->iSize;
 
   m_pOverlay = new CDVDOverlayText();
@@ -111,8 +112,9 @@ int CDVDOverlayCodecTX3G::Decode(DemuxPacket *pPacket)
   uint8_t *text = READ_ARRAY(textLength);
 
   int numStyleRecords = 0;
-  uint8_t *bgnStyle   = (uint8_t*)calloc(textLength, 1);
-  uint8_t *endStyle   = (uint8_t*)calloc(textLength, 1);
+  // reserve one more style slot for broken encoders
+  uint8_t *bgnStyle   = (uint8_t*)calloc(textLength+1, 1);
+  uint8_t *endStyle   = (uint8_t*)calloc(textLength+1, 1);
   int bgnColorIndex = 0, endColorIndex = 0;
   uint32_t textColorRGBA = m_textColor;
   while (pos < end)
@@ -153,6 +155,14 @@ int CDVDOverlayCodecTX3G::Decode(DemuxPacket *pPacket)
         curRecord.faceStyleFlags  = READ_U8();
         curRecord.fontSize        = READ_U8();
         curRecord.textColorRGBA   = READ_U32();
+        // clamp bgnChar/bgnChar to textLength,
+        // we alloc enough space above and this
+        // fixes borken encoders that do not handle
+        // endChar correctly.
+        if (curRecord.bgnChar > textLength)
+          curRecord.bgnChar = textLength;
+        if (curRecord.endChar > textLength)
+          curRecord.endChar = textLength;
 
         bgnStyle[curRecord.bgnChar] |= curRecord.faceStyleFlags;
         endStyle[curRecord.endChar] |= curRecord.faceStyleFlags;
@@ -171,7 +181,9 @@ int CDVDOverlayCodecTX3G::Decode(DemuxPacket *pPacket)
   // Copy text to out and add HTML markup for the style records
   int charIndex = 0;
   CStdStringA strUTF8;
-  for (pos = text, end = text + textLength; pos < end; pos++)
+  // index over textLength chars to include broken encoders,
+  // so we pickup closing styles on broken encoders
+  for (pos = text, end = text + textLength; pos <= end; pos++)
   {
     if ((*pos & 0xC0) == 0x80)
     {
@@ -200,7 +212,7 @@ int CDVDOverlayCodecTX3G::Decode(DemuxPacket *pPacket)
 
     // invert the order from above so we bracket the text correctly.
     if (bgnColorIndex == charIndex && textColorRGBA != m_textColor)
-      strUTF8.AppendFormat("[COLOR %8x]", textColorRGBA);
+      strUTF8 += StringUtils::Format("[COLOR %8x]", textColorRGBA);
     // we do not support underline
     //if (bgnStyles & UNDERLINE)
     //  strUTF8.append("[U]");
@@ -219,11 +231,11 @@ int CDVDOverlayCodecTX3G::Decode(DemuxPacket *pPacket)
   free(bgnStyle);
   free(endStyle);
     
-  if (strUTF8.IsEmpty())
+  if (strUTF8.empty())
     return OC_BUFFER;
 
   if (strUTF8[strUTF8.size()-1] == '\n')
-    strUTF8.Delete(strUTF8.size()-1);
+    strUTF8.erase(strUTF8.size()-1);
 
   // add a new text element to our container
   m_pOverlay->AddElement(new CDVDOverlayText::CElementText(strUTF8.c_str()));

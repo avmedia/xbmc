@@ -12,9 +12,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    You should have received a copy of the GNU General Public License
+    along with XBMC; see the file COPYING.  If not, see
+    <http://www.gnu.org/licenses/>.
 
     Sam Lantinga
     slouken@libsdl.org
@@ -140,6 +140,8 @@ typedef enum {
   XBMCK_LAUNCH_APP2          = 0xB7,
   XBMCK_LAUNCH_FILE_BROWSER  = 0xB8,
   XBMCK_LAUNCH_MEDIA_CENTER  = 0xB9,
+  XBMCK_MEDIA_REWIND         = 0xBA,
+  XBMCK_MEDIA_FASTFORWARD    = 0xBB,
 
   // Numeric keypad
   XBMCK_KP0         = 0x100,

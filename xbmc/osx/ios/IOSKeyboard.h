@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ class CIOSKeyboard : public CGUIKeyboard
     virtual void Cancel();
     void fireCallback(const std::string &str);
     void invalidateCallback(){m_pCharCallback = NULL;}
+    virtual bool SetTextToKeyboard(const std::string &text, bool closeKeyboard = false);
 
   private:
     char_callback_t m_pCharCallback;

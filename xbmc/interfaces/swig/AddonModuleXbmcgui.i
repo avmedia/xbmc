@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -29,6 +28,7 @@
 #include "interfaces/legacy/WindowDialog.h"
 #include "interfaces/legacy/Dialog.h"
 #include "interfaces/legacy/WindowXML.h"
+#include "guilib/Key.h"
 
 using namespace XBMCAddon;
 using namespace xbmcgui;
@@ -44,14 +44,16 @@ using namespace xbmcgui;
 %feature("knownbasetypes") XBMCAddon::xbmcgui "AddonClass,AddonCallback"
 
 %include "interfaces/legacy/swighelper.h"
+%include "interfaces/legacy/AddonString.h"
 
 %include "interfaces/legacy/ModuleXbmcgui.h"
 
 %include "interfaces/legacy/Exception.h"
 
+%include "interfaces/legacy/Dictionary.h"
+
 %include "interfaces/legacy/ListItem.h"
 
-%include "ControlListAddItemMethods.i"
 %feature("python:coerceToUnicode") XBMCAddon::xbmcgui::ControlButton::getLabel "true"
 %feature("python:coerceToUnicode") XBMCAddon::xbmcgui::ControlButton::getLabel2 "true"
 %include "interfaces/legacy/Control.h"
@@ -71,14 +73,14 @@ using namespace xbmcgui;
 
 // This is such a damn hack it makes me nauseous
 %feature("python:rcmp") XBMCAddon::xbmcgui::Action
-  { TRACE;
+  { XBMC_TRACE;
     if (method == Py_EQ)
     {
-      XBMCAddon::xbmcgui::Action* a1 = (Action*)retrieveApiInstance(obj1,&PyXBMCAddon_xbmcgui_Action_Type,"rcmp","XBMCAddon::xbmcgui::Action");
-      if (PyObject_TypeCheck(obj2, &PyXBMCAddon_xbmcgui_Action_Type))
+      XBMCAddon::xbmcgui::Action* a1 = (Action*)retrieveApiInstance(obj1,&TyXBMCAddon_xbmcgui_Action_Type,"rcmp","XBMCAddon::xbmcgui::Action");
+      if (PyObject_TypeCheck(obj2, &(TyXBMCAddon_xbmcgui_Action_Type.pythonType)))
       {
         // both are Action objects
-        XBMCAddon::xbmcgui::Action* a2 = (Action*)retrieveApiInstance(obj2,&PyXBMCAddon_xbmcgui_Action_Type,"rcmp","XBMCAddon::xbmcgui::Action");
+        XBMCAddon::xbmcgui::Action* a2 = (Action*)retrieveApiInstance(obj2,&TyXBMCAddon_xbmcgui_Action_Type,"rcmp","XBMCAddon::xbmcgui::Action");
 
         if (a1->id == a2->id &&
             a1->buttonCode == a2->buttonCode &&
@@ -110,69 +112,6 @@ using namespace xbmcgui;
 %include "interfaces/legacy/WindowDialog.h"
 %include "interfaces/legacy/Dialog.h"
 
-%rename ("addItemString") XBMCAddon::xbmcgui::WindowXML::addItem;
-%feature("python:method:addItem") XBMCAddon::xbmcgui::WindowXML
-{
-  TRACE;
-
-  static const char *keywords[] = {
-    "item",
-    NULL};
-
-  String  item;
-  PyObject* pyitem = NULL;
-  if (!PyArg_ParseTupleAndKeywords(
-                                   args,
-                                   kwds,
-                                   (char*)"O",
-                                   (char**)keywords,
-                                   &pyitem
-                                   ))
-    return NULL;
-
-  const char* callName = "addItem";
-  try
-  {
-    XBMCAddon::xbmcgui::WindowXML* apiobj = ((XBMCAddon::xbmcgui::WindowXML*)retrieveApiInstance((PyObject*)self,
-                                        &PyXBMCAddon_xbmcgui_WindowXML_Type,"addItem","XBMCAddon::xbmcgui::WindowXML"));
-
-    if (PyUnicode_Check(pyitem) || PyString_Check(pyitem))
-    {
-      callName = "addItemString";
-      PyXBMCGetUnicodeString(item,pyitem,false,"item","addItem"); 
-      apiobj->addItem(item);
-    }
-    else
-    {
-      callName = "addListItem";
-      // assume it's a ListItem. retrieveApiInstance will throw an exception if it's not
-      XBMCAddon::xbmcgui::ListItem* listItem = ((XBMCAddon::xbmcgui::ListItem*)retrieveApiInstance((PyObject*)pyitem,
-                                              &PyXBMCAddon_xbmcgui_ListItem_Type,"addItem","XBMCAddon::xbmcgui::ListItem"));
-      apiobj->addListItem(listItem);
-    }
-  }
-  catch (const XbmcCommons::Exception& e)
-  { 
-    CLog::Log(LOGERROR,"EXCEPTION: from call to '%s' '%s' ... returning NULL", callName,e.GetMessage());
-    PyErr_SetString(PyExc_RuntimeError, e.GetMessage()); 
-    return NULL; 
-  }
-  catch (...)
-  {
-    CLog::Log(LOGERROR,"EXCEPTION: Unknown exception thrown from the call '%s'",callName);
-    PyErr_SetString(PyExc_RuntimeError, "Unknown exception thrown from the call 'addItem'"); 
-    return NULL; 
-  }
-
-  PyObject* result;
-
-  // transform the result
-  Py_INCREF(Py_None);
-  result = Py_None;
-
-  return result; 
-} 
-
-
 %include "interfaces/legacy/WindowXML.h"
 
+%include "guilib/Key.h"

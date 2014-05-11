@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,8 +36,12 @@ typedef map<int, set<CFileItemPtr> > SetMap;
 
 bool GroupUtils::Group(GroupBy groupBy, const std::string &baseDir, const CFileItemList &items, CFileItemList &groupedItems, GroupAttribute groupAttributes /* = GroupAttributeNone */)
 {
-  if (items.Size() <= 0 || groupBy == GroupByNone)
+  if (groupBy == GroupByNone)
     return false;
+
+  // nothing to do if there are no items to group
+  if (items.Size() <= 0)
+    return true;
 
   SetMap setMap;
   for (int index = 0; index < items.Size(); index++)
@@ -57,7 +61,7 @@ bool GroupUtils::Group(GroupBy groupBy, const std::string &baseDir, const CFileI
       groupedItems.Add(item);
   }
 
-  if ((groupBy & GroupBySet) && setMap.size() > 0)
+  if ((groupBy & GroupBySet) && !setMap.empty())
   {
     CVideoDbUrl itemsUrl;
     if (!itemsUrl.FromString(baseDir))

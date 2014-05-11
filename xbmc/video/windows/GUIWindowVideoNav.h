@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,11 +34,7 @@ public:
   virtual bool OnAction(const CAction &action);
   virtual bool OnMessage(CGUIMessage& message);
 
-  virtual void OnPrepareFileItems(CFileItemList &items);
-
   virtual void OnInfo(CFileItem* pItem, ADDON::ScraperPtr &info);
-  static bool CanDelete(const CStdString& strPath);
-  static bool DeleteItem(CFileItem* pItem, bool bUnavailable=false);
 
   /*! \brief Load video information from the database for these items (public static version)
    Useful for grabbing information for file listings, from watched status to full metadata
@@ -55,16 +51,10 @@ protected:
    */
   void LoadVideoInfo(CFileItemList &items);
 
-  /*! \brief Pop up a fanart chooser. Does not utilise remote URLs.
-   \param videoItem the item to choose fanart for.
-   */
-  void OnChooseFanart(const CFileItem &videoItem);
-
   bool ApplyWatchedFilter(CFileItemList &items);
   virtual bool GetFilteredItems(const CStdString &filter, CFileItemList &items);
 
   virtual void OnItemLoaded(CFileItem* pItem) {};
-  void OnLinkMovieToTvShow(int itemnumber, bool bRemove);
   // override base class methods
   virtual bool GetDirectory(const CStdString &strDirectory, CFileItemList &items);
   virtual void UpdateButtons();
@@ -77,13 +67,6 @@ protected:
   virtual CStdString GetStartFolder(const CStdString &dir);
 
   virtual CStdString GetQuickpathName(const CStdString& strPath) const;
-
-  bool GetItemsForTag(const CStdString &strHeading, const std::string &type, CFileItemList &items, int idTag = -1, bool showAll = true);
-  static CStdString GetLocalizedType(const std::string &strType);
-
-  bool GetSetForMovie(CFileItemPtr &movieItem, CFileItemPtr &selectedSet);
-  bool GetMoviesForSet(CFileItemPtr &setItem, CFileItemList &originalMovies, CFileItemList &selectedMovies);
-  bool SetMovieSet(CFileItemPtr &movieItem, CFileItemPtr &selectedSet);
 
   VECSOURCES m_shares;
 };

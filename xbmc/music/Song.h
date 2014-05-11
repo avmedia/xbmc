@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include "utils/ISerializable.h"
 #include "XBDateTime.h"
 #include "music/tags/MusicInfoTag.h" // for EmbeddedArt
-
+#include "Artist.h"
 #include <map>
 #include <vector>
 
@@ -44,6 +44,7 @@ public:
   CStdString strGenre;
 };
 
+class CFileItem;
 
 /*!
  \ingroup music
@@ -54,9 +55,10 @@ class CSong: public ISerializable
 {
 public:
   CSong() ;
-  CSong(MUSIC_INFO::CMusicInfoTag& tag);
+  CSong(CFileItem& item);
   virtual ~CSong(){};
   void Clear() ;
+  void MergeScrapedSong(const CSong& source, bool override);
   virtual void Serialize(CVariant& value) const;
 
   bool operator<(const CSong &song) const
@@ -78,19 +80,17 @@ public:
   bool ArtMatches(const CSong &right) const;
 
   long idSong;
+  int idAlbum;
   CStdString strFileName;
   CStdString strTitle;
   std::vector<std::string> artist;
+  VECARTISTCREDITS artistCredits;
   CStdString strAlbum;
   std::vector<std::string> albumArtist;
   std::vector<std::string> genre;
   CStdString strThumb;
   MUSIC_INFO::EmbeddedArtInfo embeddedArt;
   CStdString strMusicBrainzTrackID;
-  CStdString strMusicBrainzArtistID;
-  CStdString strMusicBrainzAlbumID;
-  CStdString strMusicBrainzAlbumArtistID;
-  CStdString strMusicBrainzTRMID;
   CStdString strComment;
   char rating;
   int iTrack;
@@ -100,7 +100,6 @@ public:
   CDateTime lastPlayed;
   int iStartOffset;
   int iEndOffset;
-  int iAlbumId;
   bool bCompilation;
 
   // Karaoke-specific information

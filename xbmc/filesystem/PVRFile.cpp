@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,7 +52,8 @@ bool CPVRFile::Open(const CURL& url)
 
   CStdString strURL = url.Get();
 
-  if (strURL.Left(18) == "pvr://channels/tv/" || strURL.Left(21) == "pvr://channels/radio/")
+  if (StringUtils::StartsWith(strURL, "pvr://channels/tv/") ||
+      StringUtils::StartsWith(strURL, "pvr://channels/radio/"))
   {
     CFileItemPtr tag = g_PVRChannelGroups->GetByPath(strURL);
     if (tag && tag->HasPVRChannelInfoTag())
@@ -69,7 +70,7 @@ bool CPVRFile::Open(const CURL& url)
       return false;
     }
   }
-  else if (strURL.Left(17) == "pvr://recordings/")
+  else if (StringUtils::StartsWith(strURL, "pvr://recordings/"))
   {
     CFileItemPtr tag = g_PVRRecordings->GetByPath(strURL);
     if (tag && tag->HasPVRRecordingInfoTag())
@@ -78,7 +79,7 @@ bool CPVRFile::Open(const CURL& url)
         return false;
 
       m_isPlayRecording = true;
-      CLog::Log(LOGDEBUG, "%s - Recording has started on filename %s", __FUNCTION__, strURL.c_str());
+      CLog::Log(LOGDEBUG, "%s - playback has started on recording %s (%s)", __FUNCTION__, strURL.c_str(), tag->GetPVRRecordingInfoTag()->m_strIconPath.c_str());
     }
     else
     {
@@ -220,7 +221,7 @@ CStdString CPVRFile::TranslatePVRFilename(const CStdString& pathFile)
     if (channel && channel->HasPVRChannelInfoTag())
     {
       CStdString stream = channel->GetPVRChannelInfoTag()->StreamURL();
-      if(!stream.IsEmpty())
+      if(!stream.empty())
       {
         if (stream.compare(6, 7, "stream/") == 0)
         {
@@ -264,7 +265,7 @@ bool CPVRFile::Delete(const CURL& url)
     return false;
 
   CStdString path(url.GetFileName());
-  if (path.Left(11) == "recordings/" && path[path.size()-1] != '/')
+  if (StringUtils::StartsWith(path, "recordings/") && path[path.size()-1] != '/')
   {
     CStdString strURL = url.Get();
     CFileItemPtr tag = g_PVRRecordings->GetByPath(strURL);
@@ -286,7 +287,7 @@ bool CPVRFile::Rename(const CURL& url, const CURL& urlnew)
   if (found != CStdString::npos)
     newname = newname.substr(found+1);
 
-  if (path.Left(11) == "recordings/" && path[path.size()-1] != '/')
+  if (StringUtils::StartsWith(path, "recordings/") && path[path.size()-1] != '/')
   {
     CStdString strURL = url.Get();
     CFileItemPtr tag = g_PVRRecordings->GetByPath(strURL);
@@ -308,7 +309,7 @@ int CPVRFile::IoControl(EIoControl request, void *param)
   {
     if (!g_PVRManager.IsStarted())
       return 0;
-    else if (g_PVRClients->GetStreamLength() && g_PVRClients->SeekStream(0, SEEK_CUR) >= 0)
+    else if (g_PVRClients->CanSeekStream())
       return 1;
     else
       return 0;

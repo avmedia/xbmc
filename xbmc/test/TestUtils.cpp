@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "filesystem/SpecialProtocol.h"
 #include "utils/StringUtils.h"
 
-#ifndef _LINUX
+#ifdef TARGET_WINDOWS
 #include <windows.h>
 #else
 #include <cstdlib>
@@ -45,8 +45,8 @@ public:
     char tmp[MAX_PATH];
     int fd;
 
-    m_ptempFilePath = CSpecialProtocol::TranslatePath("special://temp/");
-    m_ptempFilePath += "xbmctempfileXXXXXX";
+    m_ptempFileDirectory = CSpecialProtocol::TranslatePath("special://temp/");
+    m_ptempFilePath = m_ptempFileDirectory + "xbmctempfileXXXXXX";
     m_ptempFilePath += suffix;
     if (m_ptempFilePath.length() >= MAX_PATH)
     {
@@ -55,7 +55,7 @@ public:
     }
     strcpy(tmp, m_ptempFilePath.c_str());
 
-#ifndef _LINUX
+#ifdef TARGET_WINDOWS
     if (!GetTempFileName(CSpecialProtocol::TranslatePath("special://temp/"),
                          "xbmctempfile", 0, tmp))
     {
@@ -85,8 +85,13 @@ public:
   {
     return m_ptempFilePath;
   }
+  CStdString getTempFileDirectory() const
+  {
+    return m_ptempFileDirectory;
+  }
 private:
   CStdString m_ptempFilePath;
+  CStdString m_ptempFileDirectory;
 };
 
 CXBMCTestUtils::CXBMCTestUtils()
@@ -109,7 +114,7 @@ bool CXBMCTestUtils::SetReferenceFileBasePath()
 {
   CStdString xbmcPath;
   CUtil::GetHomePath(xbmcPath);
-  if (xbmcPath.IsEmpty())
+  if (xbmcPath.empty())
     return false;
 
   /* Set xbmc path and xbmcbin path */
@@ -144,6 +149,14 @@ CStdString CXBMCTestUtils::TempFilePath(XFILE::CFile const* const tempfile)
     return "";
   CTempFile const* const f = static_cast<CTempFile const* const>(tempfile);
   return f->getTempFilePath();
+}
+
+CStdString CXBMCTestUtils::TempFileDirectory(XFILE::CFile const* const tempfile)
+{
+  if (!tempfile)
+    return "";
+  CTempFile const* const f = static_cast<CTempFile const* const>(tempfile);
+  return f->getTempFileDirectory();
 }
 
 XFILE::CFile *CXBMCTestUtils::CreateCorruptedFile(CStdString const& strFileName,
@@ -186,11 +199,6 @@ XFILE::CFile *CXBMCTestUtils::CreateCorruptedFile(CStdString const& strFileName,
 }
 
 
-std::vector<CStdString> &CXBMCTestUtils::getTestDownloadQueueUrls()
-{
-  return TestDownloadQueueUrls;
-}
-
 std::vector<CStdString> &CXBMCTestUtils::getTestFileFactoryReadUrls()
 {
   return TestFileFactoryReadUrls;
@@ -226,13 +234,6 @@ static const char usage[] =
 "Usage: xbmc-test [options]\n"
 "\n"
 "The following options are recognized by the xbmc-test program.\n"
-"\n"
-"  --add-testdownloadqueue-url [URL]\n"
-"    Add a url to be used in the TestDownloadQueue tests.\n"
-"\n"
-"  --add-testdownloadqueue-urls [URLS]\n"
-"    Add multiple urls from a ',' delimited string of urls. to be used\n"
-"    in the TestDownloadQueue tests.\n"
 "\n"
 "  --add-testfilefactory-readurl [URL]\n"
 "    Add a url to be used int the TestFileFactory read tests.\n"
@@ -279,19 +280,7 @@ void CXBMCTestUtils::ParseArgs(int argc, char **argv)
   for (i = 1; i < argc; i++)
   {
     arg = argv[i];
-    if (arg == "--add-testdownloadqueue-url")
-    {
-      TestDownloadQueueUrls.push_back(argv[++i]);
-    }
-    else if (arg == "--add-testdownloadqueue-urls")
-    {
-      arg = argv[++i];
-      std::vector<std::string> urls = StringUtils::Split(arg, ",");
-      std::vector<std::string>::iterator it;
-      for (it = urls.begin(); it < urls.end(); it++)
-        TestDownloadQueueUrls.push_back(*it);
-    }
-    else if (arg == "--add-testfilefactory-readurl")
+    if (arg == "--add-testfilefactory-readurl")
     {
       TestFileFactoryReadUrls.push_back(argv[++i]);
     }

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@
 #include "pvr/addons/PVRClients.h"
 #include "pvr/timers/PVRTimers.h"
 #include "epg/EpgContainer.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "storage/MediaManager.h"
 #include "utils/log.h"
 #include "threads/SingleLock.h"
@@ -49,18 +49,14 @@ CGUIWindowPVRChannels::CGUIWindowPVRChannels(CGUIWindowPVR *parent, bool bRadio)
   CGUIWindowPVRCommon(parent,
                       bRadio ? PVR_WINDOW_CHANNELS_RADIO : PVR_WINDOW_CHANNELS_TV,
                       bRadio ? CONTROL_BTNCHANNELS_RADIO : CONTROL_BTNCHANNELS_TV,
-                      bRadio ? CONTROL_LIST_CHANNELS_RADIO: CONTROL_LIST_CHANNELS_TV),
-  CThread("PVRChannelWin")
+                      bRadio ? CONTROL_LIST_CHANNELS_RADIO: CONTROL_LIST_CHANNELS_TV)
 {
   m_bRadio              = bRadio;
   m_bShowHiddenChannels = false;
-  m_bThreadCreated      = false;
 }
 
 CGUIWindowPVRChannels::~CGUIWindowPVRChannels(void)
 {
-  if (m_bThreadCreated)
-    StopThread(true);
 }
 
 void CGUIWindowPVRChannels::ResetObservers(void)
@@ -98,7 +94,7 @@ void CGUIWindowPVRChannels::GetContextButtons(int itemNumber, CContextButtons &b
     buttons.Add(CONTEXT_BUTTON_FIND, 19003);                                          /* find similar program */
     buttons.Add(CONTEXT_BUTTON_PLAY_ITEM, 19000);                                     /* switch to channel */
     buttons.Add(CONTEXT_BUTTON_RECORD_ITEM, channel->IsRecording() ? 19256 : 19255);  /* start/stop recording on channel */
-    buttons.Add(CONTEXT_BUTTON_SET_THUMB, 20019);                                     /* change icon */
+    buttons.Add(CONTEXT_BUTTON_SET_THUMB, 19284);                                     /* change icon */
     buttons.Add(CONTEXT_BUTTON_GROUP_MANAGER, 19048);                                 /* group manager */
     buttons.Add(CONTEXT_BUTTON_HIDE, m_bShowHiddenChannels ? 19049 : 19054);          /* show/hide channel */
 
@@ -227,9 +223,9 @@ void CGUIWindowPVRChannels::UpdateData(bool bUpdateSelectedFile /* = true */)
   SetSelectedGroup(currentGroup);
 
   CStdString strPath;
-  strPath.Format("pvr://channels/%s/%s/",
+  strPath = StringUtils::Format("pvr://channels/%s/%s/",
       m_bRadio ? "radio" : "tv",
-      m_bShowHiddenChannels ? ".hidden" : currentGroup->GroupName());
+      m_bShowHiddenChannels ? ".hidden" : currentGroup->GroupName().c_str());
 
   m_parent->m_vecItems->SetPath(strPath);
   m_parent->Update(m_parent->m_vecItems->GetPath());
@@ -266,13 +262,6 @@ void CGUIWindowPVRChannels::UpdateData(bool bUpdateSelectedFile /* = true */)
     m_parent->SetLabel(CONTROL_LABELGROUP, g_localizeStrings.Get(19022));
   else
     m_parent->SetLabel(CONTROL_LABELGROUP, currentGroup->GroupName());
-
-  if (!m_bThreadCreated)
-  {
-    m_bThreadCreated = true;
-    Create();
-    SetPriority(-1);
-  }
 }
 
 bool CGUIWindowPVRChannels::OnClickButton(CGUIMessage &message)
@@ -423,7 +412,7 @@ bool CGUIWindowPVRChannels::OnContextButtonMove(CFileItem *item, CONTEXT_BUTTON 
       return bReturn;
 
     CStdString strIndex;
-    strIndex.Format("%i", channel->ChannelNumber());
+    strIndex = StringUtils::Format("%i", channel->ChannelNumber());
     CGUIDialogNumeric::ShowAndGetNumber(strIndex, g_localizeStrings.Get(19052));
     int newIndex = atoi(strIndex.c_str());
 
@@ -446,7 +435,7 @@ bool CGUIWindowPVRChannels::OnContextButtonPlay(CFileItem *item, CONTEXT_BUTTON 
   if (button == CONTEXT_BUTTON_PLAY_ITEM)
   {
     /* play channel */
-    bReturn = PlayFile(item, g_guiSettings.GetBool("pvrplayback.playminimized"));
+    bReturn = PlayFile(item, CSettings::Get().GetBool("pvrplayback.playminimized"));
   }
 
   return bReturn;
@@ -467,12 +456,12 @@ bool CGUIWindowPVRChannels::OnContextButtonSetThumb(CFileItem *item, CONTEXT_BUT
     CFileItemList items;
     CPVRChannel *channel = item->GetPVRChannelInfoTag();
 
-    if (!channel->IconPath().IsEmpty())
+    if (!channel->IconPath().empty())
     {
-      /* add the current thumb, if available */
+      /* add the current icon, if available */
       CFileItemPtr current(new CFileItem("thumb://Current", false));
       current->SetArt("thumb", channel->IconPath());
-      current->SetLabel(g_localizeStrings.Get(20016));
+      current->SetLabel(g_localizeStrings.Get(19282));
       items.Add(current);
     }
     else if (item->HasArt("thumb"))
@@ -480,27 +469,27 @@ bool CGUIWindowPVRChannels::OnContextButtonSetThumb(CFileItem *item, CONTEXT_BUT
       /* already have a thumb that the share doesn't know about - must be a local one, so we may as well reuse it */
       CFileItemPtr current(new CFileItem("thumb://Current", false));
       current->SetArt("thumb", item->GetArt("thumb"));
-      current->SetLabel(g_localizeStrings.Get(20016));
+      current->SetLabel(g_localizeStrings.Get(19282));
       items.Add(current);
     }
 
     /* and add a "no thumb" entry as well */
     CFileItemPtr nothumb(new CFileItem("thumb://None", false));
     nothumb->SetIconImage(item->GetIconImage());
-    nothumb->SetLabel(g_localizeStrings.Get(20018));
+    nothumb->SetLabel(g_localizeStrings.Get(19283));
     items.Add(nothumb);
 
     CStdString strThumb;
     VECSOURCES shares;
-    if (g_guiSettings.GetString("pvrmenu.iconpath") != "")
+    if (CSettings::Get().GetString("pvrmenu.iconpath") != "")
     {
       CMediaSource share1;
-      share1.strPath = g_guiSettings.GetString("pvrmenu.iconpath");
-      share1.strName = g_localizeStrings.Get(19018);
+      share1.strPath = CSettings::Get().GetString("pvrmenu.iconpath");
+      share1.strName = g_localizeStrings.Get(19066);
       shares.push_back(share1);
     }
     g_mediaManager.GetLocalDrives(shares);
-    if (!CGUIDialogFileBrowser::ShowAndGetImage(items, shares, g_localizeStrings.Get(1030), strThumb))
+    if (!CGUIDialogFileBrowser::ShowAndGetImage(items, shares, g_localizeStrings.Get(19285), strThumb, NULL, 19285))
       return bReturn;
 
     if (strThumb != "thumb://Current")
@@ -508,8 +497,11 @@ bool CGUIWindowPVRChannels::OnContextButtonSetThumb(CFileItem *item, CONTEXT_BUT
       if (strThumb == "thumb://None")
         strThumb = "";
 
-      channel->SetIconPath(strThumb, true);
-      channel->Persist();
+      CPVRChannelGroupPtr group = g_PVRChannelGroups->GetGroupAll(channel->IsRadio());
+      CPVRChannelPtr channelPtr = group->GetByUniqueID(channel->UniqueID());
+
+      channelPtr->SetIconPath(strThumb, true);
+      channelPtr->Persist();
       UpdateData();
     }
 
@@ -586,8 +578,7 @@ bool CGUIWindowPVRChannels::OnContextButtonUpdateEpg(CFileItem *item, CONTEXT_BU
 
     bReturn = UpdateEpgForChannel(item);
 
-    CStdString strMessage;
-    strMessage.Format("%s: '%s'", g_localizeStrings.Get(bReturn ? 19253 : 19254), channel->ChannelName());
+    CStdString strMessage = StringUtils::Format("%s: '%s'", g_localizeStrings.Get(bReturn ? 19253 : 19254).c_str(), channel->ChannelName().c_str());
     CGUIDialogKaiToast::QueueNotification(bReturn ? CGUIDialogKaiToast::Info : CGUIDialogKaiToast::Error,
         g_localizeStrings.Get(19166),
         strMessage);
@@ -607,19 +598,4 @@ void CGUIWindowPVRChannels::ShowGroupManager(void)
   pDlgInfo->DoModal();
 
   return;
-}
-
-void CGUIWindowPVRChannels::Process(void)
-{
-  // ugly hack to refresh the progress bars and item contents every 5 seconds
-  int iCount(0);
-  while (!m_bStop)
-  {
-    if (++iCount == 100)
-    {
-      iCount = 0;
-      SetInvalid();
-    }
-    Sleep(50);
-  }
 }

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -66,79 +66,102 @@ bool CHTTPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &item
   reSize.RegComp("> *([0-9.]+)(B|K|M|G| )</td>");
 
   CRegExp reSizeNginx(true);
-  reSizeNginx.RegComp("([0-9]+)(B|K|M|G)?$");
+  reSizeNginx.RegComp(" +([0-9]+)(B|K|M|G)?$");
 
   /* read response from server into string buffer */
   char buffer[MAX_PATH + 1024];
   while(http.ReadString(buffer, sizeof(buffer)-1))
   {
     CStdString strBuffer = buffer;
+    std::string fileCharset(http.GetServerReportedCharset());
+    if (!fileCharset.empty() && fileCharset != "UTF-8")
+    {
+      std::string converted;
+      if (g_charsetConverter.ToUtf8(fileCharset, strBuffer, converted) && !converted.empty())
+        strBuffer = converted;
+    }
+
     StringUtils::RemoveCRLF(strBuffer);
 
     if (reItem.RegFind(strBuffer.c_str()) >= 0)
     {
-      strLink = reItem.GetReplaceString("\\1");
-      strName = reItem.GetReplaceString("\\2");
+      strLink = reItem.GetMatch(1);
+      strName = reItem.GetMatch(2);
 
       if(strLink[0] == '/')
-        strLink = strLink.Mid(1);
+        strLink = strLink.substr(1);
 
-      CStdString strNameTemp = strName.Trim();
+      CStdString strNameTemp = StringUtils::Trim(strName);
 
       CStdStringW wName, wLink, wConverted;
-      g_charsetConverter.unknownToUTF8(strNameTemp);
+      if (fileCharset.empty())
+        g_charsetConverter.unknownToUTF8(strNameTemp);
       g_charsetConverter.utf8ToW(strNameTemp, wName, false);
       HTML::CHTMLUtil::ConvertHTMLToW(wName, wConverted);
       g_charsetConverter.wToUTF8(wConverted, strNameTemp);
       URIUtils::RemoveSlashAtEnd(strNameTemp);
 
-      CStdString strLinkTemp = strLink;
+      CStdString strLinkBase = strLink;
+      CStdString strLinkOptions;
+
+      // split link with url options
+      size_t pos = strLinkBase.find('?');
+      if (pos != std::string::npos) {
+        strLinkOptions = strLinkBase.substr(pos);
+        strLinkBase.erase(pos);
+      }
+      CStdString strLinkTemp = strLinkBase;
+
       URIUtils::RemoveSlashAtEnd(strLinkTemp);
-      CURL::Decode(strLinkTemp);
-      g_charsetConverter.unknownToUTF8(strLinkTemp);
+      strLinkTemp = CURL::Decode(strLinkTemp);
+      if (fileCharset.empty())
+        g_charsetConverter.unknownToUTF8(strLinkTemp);
       g_charsetConverter.utf8ToW(strLinkTemp, wLink, false);
       HTML::CHTMLUtil::ConvertHTMLToW(wLink, wConverted);
       g_charsetConverter.wToUTF8(wConverted, strLinkTemp);
 
-      if (strNameTemp.Right(3).Equals("..>") && 
-          strLinkTemp.Left(strNameTemp.GetLength()-3).Equals(strNameTemp.Left(strNameTemp.GetLength()-3)))
+      if (StringUtils::EndsWith(strNameTemp, "..>") &&
+          StringUtils::StartsWith(strLinkTemp, strNameTemp.substr(0, strNameTemp.length() - 3)))
         strName = strNameTemp = strLinkTemp;
 
+      // we detect http directory items by its display name and its stripped link
+      // if same, we consider it as a valid item.
       if (strNameTemp == strLinkTemp && strLinkTemp != "..")
       {
         CFileItemPtr pItem(new CFileItem(strNameTemp));
         pItem->SetProperty("IsHTTPDirectory", true);
-        url.SetFileName(strBasePath + strLink);
+        url.SetFileName(strBasePath + strLinkBase);
+        url.SetOptions(strLinkOptions);
         pItem->SetPath(url.Get());
 
-        if(URIUtils::HasSlashAtEnd(pItem->GetPath()))
+        if(URIUtils::HasSlashAtEnd(pItem->GetPath(), true))
           pItem->m_bIsFolder = true;
 
         CStdString day, month, year, hour, minute;
 
         if (reDateTime.RegFind(strBuffer.c_str()) >= 0)
         {
-          day = reDateTime.GetReplaceString("\\1");
-          month = reDateTime.GetReplaceString("\\2");
-          year = reDateTime.GetReplaceString("\\3");
-          hour = reDateTime.GetReplaceString("\\4");
-          minute = reDateTime.GetReplaceString("\\5");
+          day = reDateTime.GetMatch(1);
+          month = reDateTime.GetMatch(2);
+          year = reDateTime.GetMatch(3);
+          hour = reDateTime.GetMatch(4);
+          minute = reDateTime.GetMatch(5);
         }
         else if (reDateTimeNginx.RegFind(strBuffer.c_str()) >= 0)
         {
-          day = reDateTimeNginx.GetReplaceString("\\1");
-          month = reDateTimeNginx.GetReplaceString("\\2");
-          year = reDateTimeNginx.GetReplaceString("\\3");
-          hour = reDateTimeNginx.GetReplaceString("\\4");
-          minute = reDateTimeNginx.GetReplaceString("\\5");
+          day = reDateTimeNginx.GetMatch(1);
+          month = reDateTimeNginx.GetMatch(2);
+          year = reDateTimeNginx.GetMatch(3);
+          hour = reDateTimeNginx.GetMatch(4);
+          minute = reDateTimeNginx.GetMatch(5);
         }
         else if (reDateTimeLighttp.RegFind(strBuffer.c_str()) >= 0)
         {
-          day = reDateTimeLighttp.GetReplaceString("\\3");
-          month = reDateTimeLighttp.GetReplaceString("\\2");
-          year = reDateTimeLighttp.GetReplaceString("\\1");
-          hour = reDateTimeLighttp.GetReplaceString("\\4");
-          minute = reDateTimeLighttp.GetReplaceString("\\5");
+          day = reDateTimeLighttp.GetMatch(3);
+          month = reDateTimeLighttp.GetMatch(2);
+          year = reDateTimeLighttp.GetMatch(1);
+          hour = reDateTimeLighttp.GetMatch(4);
+          minute = reDateTimeLighttp.GetMatch(5);
         }
 
         if (day.length() > 0 && month.length() > 0 && year.length() > 0)
@@ -150,8 +173,8 @@ bool CHTTPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &item
         {
           if (reSize.RegFind(strBuffer.c_str()) >= 0)
           {
-            double Size = atof(reSize.GetReplaceString("\\1").c_str());
-            CStdString strUnit = reSize.GetReplaceString("\\2");
+            double Size = atof(reSize.GetMatch(1).c_str());
+            std::string strUnit(reSize.GetMatch(2));
 
             if (strUnit == "K")
               Size = Size * 1024;
@@ -164,8 +187,8 @@ bool CHTTPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &item
           }
           else if (reSizeNginx.RegFind(strBuffer.c_str()) >= 0)
           {
-            double Size = atof(reSizeNginx.GetReplaceString("\\1").c_str());
-            CStdString strUnit = reSizeNginx.GetReplaceString("\\2");
+            double Size = atof(reSizeNginx.GetMatch(1).c_str());
+            std::string strUnit(reSizeNginx.GetMatch(2));
 
             if (strUnit == "K")
               Size = Size * 1024;

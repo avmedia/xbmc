@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 #include "StreamDetails.h"
 #include "StreamUtils.h"
 #include "Variant.h"
+#include "LangInfo.h"
+#include "utils/LangCodeExpander.h"
 
 const float VIDEOASPECT_EPSILON = 0.025f;
 
@@ -49,6 +51,7 @@ void CStreamDetailVideo::Archive(CArchive& ar)
     ar << m_iHeight;
     ar << m_iWidth;
     ar << m_iDuration;
+    ar << m_strStereoMode;
   }
   else
   {
@@ -57,6 +60,7 @@ void CStreamDetailVideo::Archive(CArchive& ar)
     ar >> m_iHeight;
     ar >> m_iWidth;
     ar >> m_iDuration;
+    ar >> m_strStereoMode;
   }
 }
 void CStreamDetailVideo::Serialize(CVariant& value) const
@@ -66,6 +70,7 @@ void CStreamDetailVideo::Serialize(CVariant& value) const
   value["height"] = m_iHeight;
   value["width"] = m_iWidth;
   value["duration"] = m_iDuration;
+  value["stereomode"] = m_strStereoMode;
 }
 
 bool CStreamDetailVideo::IsWorseThan(CStreamDetail *that)
@@ -149,15 +154,23 @@ bool CStreamDetailSubtitle::IsWorseThan(CStreamDetail *that)
   if (that->m_eType != CStreamDetail::SUBTITLE)
     return true;
 
-  // the preferred subtitle should be the one in the user's language
-  if (m_pParent)
+  if (g_LangCodeExpander.CompareLangCodes(m_strLanguage, ((CStreamDetailSubtitle *)that)->m_strLanguage))
+    return false;
+
+  // the best subtitle should be the one in the user's preferred language
+  // If preferred language is set to "original" this is "eng"
+  return m_strLanguage.empty() ||
+    g_LangCodeExpander.CompareLangCodes(((CStreamDetailSubtitle *)that)->m_strLanguage, g_langInfo.GetSubtitleLanguage());
+}
+
+CStreamDetailSubtitle& CStreamDetailSubtitle::operator=(const CStreamDetailSubtitle &that)
+{
+  if (this != &that)
   {
-    if (m_pParent->m_strLanguage == m_strLanguage)
-      return false;  // already the best
-    else
-      return (m_pParent->m_strLanguage == ((CStreamDetailSubtitle *)that)->m_strLanguage);
+    this->m_pParent = that.m_pParent;
+    this->m_strLanguage = that.m_strLanguage;
   }
-  return false;
+  return *this;
 }
 #ifdef HAS_DS_PLAYER
 CStreamDetailEditon::CStreamDetailEditon():CStreamDetail(CStreamDetail::EDITION)
@@ -416,6 +429,22 @@ int CStreamDetails::GetVideoDuration(int idx) const
     return 0;
 }
 
+void CStreamDetails::SetVideoDuration(int idx, const int duration)
+{
+  CStreamDetailVideo *item = (CStreamDetailVideo *)GetNthStream(CStreamDetail::VIDEO, idx);
+  if (item)
+    item->m_iDuration = duration;
+}
+
+std::string CStreamDetails::GetStereoMode(int idx) const
+{
+  CStreamDetailVideo *item = (CStreamDetailVideo *)GetNthStream(CStreamDetail::VIDEO, idx);
+  if (item)
+    return item->m_strStereoMode;
+  else
+    return "";
+}
+
 CStdString CStreamDetails::GetAudioCodec(int idx) const
 {
   CStreamDetailAudio *item = (CStreamDetailAudio *)GetNthStream(CStreamDetail::AUDIO, idx);
@@ -565,8 +594,13 @@ CStdString CStreamDetails::VideoDimsToResolutionDescription(int iWidth, int iHei
   else if (iWidth <= 1280 && iHeight <= 720)
     return "720";
   // 1920x1080
-  else
+  else if (iWidth <= 1920 && iHeight <= 1080)
     return "1080";
+  // 4K
+  else if (iWidth * iHeight >= 6000000)
+    return "4K";
+  else
+    return "";
 }
 
 CStdString CStreamDetails::VideoAspectToAspectDescription(float fAspect)
@@ -578,8 +612,10 @@ CStdString CStreamDetails::VideoAspectToAspectDescription(float fAspect)
   // aspect ratios, particularly when cropping prior to video encoding is taken into account
   // the best we can do is take the "common" aspect ratios, and return the closest one available.
   // The cutoffs are the geometric mean of the two aspect ratios either side.
-  if (fAspect < 1.4859f) // sqrt(1.33*1.66)
+  if (fAspect < 1.3499f) // sqrt(1.33*1.37)
     return "1.33";
+  else if (fAspect < 1.5080f) // sqrt(1.37*1.66)
+    return "1.37";
   else if (fAspect < 1.7190f) // sqrt(1.66*1.78)
     return "1.66";
   else if (fAspect < 1.8147f) // sqrt(1.78*1.85)
@@ -588,5 +624,11 @@ CStdString CStreamDetails::VideoAspectToAspectDescription(float fAspect)
     return "1.85";
   else if (fAspect < 2.2738f) // sqrt(2.20*2.35)
     return "2.20";
-  return "2.35";
+  else if (fAspect < 2.3749f) // sqrt(2.35*2.40)
+    return "2.35";
+  else if (fAspect < 2.4739f) // sqrt(2.40*2.55)
+    return "2.40";
+  else if (fAspect < 2.6529f) // sqrt(2.55*2.76)
+    return "2.55";
+  return "2.76";
 }

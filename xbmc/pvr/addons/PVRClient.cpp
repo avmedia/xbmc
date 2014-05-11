@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  */
 
 #include <vector>
+#include "Application.h"
 #include "PVRClient.h"
 #include "pvr/PVRManager.h"
 #include "epg/Epg.h"
@@ -27,8 +28,8 @@
 #include "pvr/timers/PVRTimerInfoTag.h"
 #include "pvr/recordings/PVRRecordings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
-#include "settings/GUISettings.h"
 
 using namespace std;
 using namespace ADDON;
@@ -319,7 +320,7 @@ bool CPVRClient::GetAddonProperties(void)
   catch (exception &e) { LogException(e, "GetConnectionString()"); return false;  }
 
   /* display name = backend name:connection string */
-  strFriendlyName.Format("%s:%s", strBackendName.c_str(), strConnectionString.c_str());
+  strFriendlyName = StringUtils::Format("%s:%s", strBackendName.c_str(), strConnectionString.c_str());
 
   /* backend version number */
   try { strBackendVersion = m_pStruct->GetBackendVersion(); }
@@ -394,12 +395,41 @@ PVR_ERROR CPVRClient::StartChannelScan(void)
   return PVR_ERROR_UNKNOWN;
 }
 
-void CPVRClient::CallMenuHook(const PVR_MENUHOOK &hook)
+void CPVRClient::CallMenuHook(const PVR_MENUHOOK &hook, const CFileItem *item)
 {
   if (!m_bReadyToUse)
     return;
 
-  try { m_pStruct->MenuHook(hook); }
+  try {
+    PVR_MENUHOOK_DATA hookData;
+    hookData.cat = PVR_MENUHOOK_UNKNOWN;
+
+    if (item)
+    {
+      if (item->IsEPG())
+      {
+        hookData.cat = PVR_MENUHOOK_EPG;
+        hookData.data.iEpgUid = item->GetEPGInfoTag()->BroadcastId();
+      }
+      else if (item->IsPVRChannel())
+      {
+        hookData.cat = PVR_MENUHOOK_CHANNEL;
+        WriteClientChannelInfo(*item->GetPVRChannelInfoTag(), hookData.data.channel);
+      }
+      else if (item->IsPVRRecording())
+      {
+        hookData.cat = PVR_MENUHOOK_RECORDING;
+        WriteClientRecordingInfo(*item->GetPVRRecordingInfoTag(), hookData.data.recording);
+      }
+      else if (item->IsPVRTimer())
+      {
+        hookData.cat = PVR_MENUHOOK_TIMER;
+        WriteClientTimerInfo(*item->GetPVRTimerInfoTag(), hookData.data.timer);
+      }
+    }
+
+    m_pStruct->MenuHook(hook, hookData);
+  }
   catch (exception &e) { LogException(e, __FUNCTION__); }
 }
 
@@ -1292,7 +1322,7 @@ bool CPVRClient::OpenStream(const CPVRChannel &channel, bool bIsSwitchingChannel
   {
     CLog::Log(LOGDEBUG, "add-on '%s' can not play channel '%s'", GetFriendlyName().c_str(), channel.ChannelName().c_str());
   }
-  else if (!channel.StreamURL().IsEmpty())
+  else if (!channel.StreamURL().empty())
   {
     CLog::Log(LOGDEBUG, "opening live stream on url '%s'", channel.StreamURL().c_str());
     bReturn = true;
@@ -1431,7 +1461,7 @@ bool CPVRClient::CanSeekStream(void) const
 void CPVRClient::ResetQualityData(PVR_SIGNAL_STATUS &qualityInfo)
 {
   memset(&qualityInfo, 0, sizeof(qualityInfo));
-  if (g_guiSettings.GetBool("pvrplayback.signalquality"))
+  if (CSettings::Get().GetBool("pvrplayback.signalquality"))
   {
     strncpy(qualityInfo.strAdapterName, g_localizeStrings.Get(13205).c_str(), PVR_ADDON_NAME_STRING_LENGTH - 1);
     strncpy(qualityInfo.strAdapterStatus, g_localizeStrings.Get(13205).c_str(), PVR_ADDON_NAME_STRING_LENGTH - 1);
@@ -1466,9 +1496,56 @@ void CPVRClient::UpdateCharInfoSignalStatus(void)
   PVR_SIGNAL_STATUS qualityInfo;
   ResetQualityData(qualityInfo);
 
-  if (g_guiSettings.GetBool("pvrplayback.signalquality"))
+  if (CSettings::Get().GetBool("pvrplayback.signalquality"))
     SignalQuality(qualityInfo);
 
   CSingleLock lock(m_critSection);
   m_qualityInfo = qualityInfo;
+}
+
+time_t CPVRClient::GetPlayingTime(void) const
+{
+  time_t time = 0;
+  if (IsPlaying())
+  {
+    try
+    {
+      time = m_pStruct->GetPlayingTime();
+    }
+    catch (exception &e) { LogException(e, __FUNCTION__); }
+  }
+  // fallback if not implemented by addon
+  if (time == 0)
+  {
+    CDateTime::GetUTCDateTime().GetAsTime(time);
+  }
+  return time;
+}
+
+time_t CPVRClient::GetBufferTimeStart(void) const
+{
+  time_t time = 0;
+  if (IsPlaying())
+  {
+    try
+    {
+      time = m_pStruct->GetBufferTimeStart();
+    }
+    catch (exception &e) { LogException(e, __FUNCTION__); }
+  }
+  return time;
+}
+
+time_t CPVRClient::GetBufferTimeEnd(void) const
+{
+  time_t time = 0;
+  if (IsPlaying())
+  {
+    try
+    {
+      time = m_pStruct->GetBufferTimeEnd();
+    }
+    catch (exception &e) { LogException(e, __FUNCTION__); }
+  }
+  return time;
 }

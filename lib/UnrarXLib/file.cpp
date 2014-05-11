@@ -109,11 +109,16 @@ bool File::Open(const char *Name,const wchar *NameW,bool OpenShared,bool Update)
   HandleType=FILE_HANDLENORMAL;
   SkipClose=false;
   bool success=hNewFile!=BAD_HANDLE;*/
+  char _name[NM];
+  if (NameW!=NULL)
+    WideToUtf(NameW, _name, sizeof(_name));
+  else
+    strcpy(_name, Name);
   bool success;
   if (Update)
-    success = m_File.OpenForWrite(Name);
+    success = m_File.OpenForWrite(_name);
   else
-    success = m_File.Open(Name);
+    success = m_File.Open(_name);
   if (success)
   {
 //    hFile=hNewFile;
@@ -165,10 +170,14 @@ bool File::Create(const char *Name,const wchar *NameW)
 #else
   hFile=fopen(Name,CREATEBINARY);
 #endif*/
-  CStdString strPath;
-  URIUtils::GetDirectory(Name,strPath);
+  char _name[NM];
+  if (NameW!=NULL)
+    WideToUtf(NameW, _name, sizeof(_name));
+  else
+    strcpy(_name, Name);
+  CStdString strPath = URIUtils::GetDirectory(_name);
   CUtil::CreateDirectoryEx(strPath);
-  m_File.OpenForWrite(Name,true);
+  m_File.OpenForWrite(_name,true);
   NewFile=true;
   HandleType=FILE_HANDLENORMAL;
   SkipClose=false;
@@ -230,7 +239,7 @@ bool File::Close()
     {*/
       if (!SkipClose)
       {
-#if defined(_WIN_32) || defined(_LINUX)
+#if defined(_WIN_32) || defined(TARGET_POSIX)
         //success=CloseHandle(hFile) != FALSE;
         m_File.Close();
 #else
@@ -320,7 +329,7 @@ void File::Write(const void *Data,int Size)
   while (1)
   {
     bool success = true;
-#if defined(_WIN_32) || defined(_LINUX)
+#if defined(_WIN_32) || defined(TARGET_POSIX)
     DWORD Written=0;
     if (HandleType!=FILE_HANDLENORMAL)
     {
@@ -350,7 +359,7 @@ void File::Write(const void *Data,int Size)
 #endif
       if (ErrHandler.AskRepeatWrite(FileName))
       {
-#if !defined(_WIN_32) && !defined(_LINUX)
+#if !defined(_WIN_32) && !defined(TARGET_POSIX)
         clearerr(hFile);
 #endif
       if (Written<(unsigned int)Size && Written>0)
@@ -485,7 +494,7 @@ bool File::RawSeek(Int64 Offset,int Method)
     Offset=(Method==SEEK_CUR ? Tell():FileLength())+Offset;
     Method=SEEK_SET;
   }*/
-#if defined(_WIN_32) || defined(_LINUX)
+#if defined(_WIN_32) || defined(TARGET_POSIX)
   //LONG HighDist=int64to32(Offset>>32);
   //if (SetFilePointer(hFile,int64to32(Offset),&HighDist,Method)==0xffffffff &&
   if (Offset > FileLength())
@@ -510,7 +519,7 @@ bool File::RawSeek(Int64 Offset,int Method)
 
 Int64 File::Tell()
 {
-#if defined(_WIN_32) || defined(_LINUX)
+#if defined(_WIN_32) || defined(TARGET_POSIX)
   //LONG HighDist=0;
   //uint LowDist=SetFilePointer(hFile,0,&HighDist,FILE_CURRENT);
   //Int64 pos = m_File.GetPosition();
@@ -620,7 +629,7 @@ void File::SetCloseFileTimeByName(const char *Name,RarTime *ftm,RarTime *fta)
 
 void File::GetOpenFileTime(RarTime *ft)
 {
-#if defined(_WIN_32) || defined(_LINUX)
+#if defined(_WIN_32) || defined(TARGET_POSIX)
 /*  FILETIME FileTime;
   GetFileTime(hFile,NULL,NULL,&FileTime);
   *ft=FileTime;*/
@@ -675,7 +684,7 @@ bool File::IsDevice()
 {
   /*if (hFile==BAD_HANDLE)
     return(false);*/
-#if defined(_XBOX) || defined(_LINUX) || defined(_XBMC)
+#if defined(_XBOX) || defined(TARGET_POSIX) || defined(_XBMC)
   return false;
 //#ifdef _WIN_32
 #elif defined(_WIN_32)

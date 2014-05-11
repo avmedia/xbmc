@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 
 #include "GUIWindowPVRCommon.h"
 #include "epg/GUIEPGGridContainer.h"
+#include "utils/Stopwatch.h"
 #include "threads/CriticalSection.h"
 
 namespace PVR
@@ -56,6 +57,7 @@ namespace PVR
     virtual bool OnMessage(CGUIMessage& message);
     virtual void OnWindowLoaded(void);
     virtual void OnWindowUnload(void);
+    virtual void FrameMove();
     virtual void Reset(void);
     virtual void Cleanup(void);
 
@@ -66,6 +68,7 @@ namespace PVR
     virtual void SetLabel(int iControl, int iLabel);
     virtual void UpdateButtons(void);
     virtual bool Update(const CStdString &strDirectory, bool updateFilterPath = true);
+    virtual bool OnBack(int actionID);
 
   private:
     virtual bool OnMessageFocus(CGUIMessage &message);
@@ -85,5 +88,7 @@ namespace PVR
     bool                     m_bWasReset;
 
     CCriticalSection         m_critSection;
+
+    CStopWatch               m_refreshWatch;
   };
 }

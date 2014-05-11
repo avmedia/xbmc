@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ public:
   virtual bool OnBack(int actionID);
 
   void Reset();
-  void Add(const CStdString& strLabel);
-  void Add(const CFileItem* pItem);
+  int  Add(const CStdString& strLabel);
+  int  Add(const CFileItem* pItem);
   void Add(const CFileItemList& items);
   void SetItems(CFileItemList* items);
   int GetSelectedLabel() const;

@@ -2,8 +2,8 @@
 #define SCRAPER_PARSER_H
 
 /*
- *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      Copyright (C) 2012-2013 Team XBMC
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -62,12 +62,19 @@ private:
   bool LoadFromXML();
   void ReplaceBuffers(CStdString& strDest);
   void ParseExpression(const CStdString& input, CStdString& dest, TiXmlElement* element, bool bAppend);
+
+  /*! \brief Parse an 'XSLT' declaration from the scraper
+   This allow us to transform an inbound XML document using XSLT
+   to a different type of XML document, ready to be output direct
+   to the album loaders or similar
+   \param input the input document
+   \param dest the output destation for the conversion
+   \param element the current XML element
+   \param bAppend append or clear the buffer
+   */
+  void ParseXSLT(const CStdString& input, CStdString& dest, TiXmlElement* element, bool bAppend);
   void ParseNext(TiXmlElement* element);
   void Clean(CStdString& strDirty);
-  /*! \brief Remove spaces, tabs, and newlines from a string
-   \param string the string in question, which will be modified.
-   */
-  void RemoveWhiteSpace(CStdString &string);
   void ConvertJSON(CStdString &string);
   void ClearBuffers();
   void GetBufferParams(bool* result, const char* attribute, bool defvalue);

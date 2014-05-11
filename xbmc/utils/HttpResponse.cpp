@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ unsigned int CHttpResponse::Create(char *&response)
     m_buffer.append(HEADER_CONTENT_LENGTH);
     m_buffer.append(SEPARATOR);
     char lengthBuffer[11];
-    sprintf(lengthBuffer, "%d", m_contentLength);
+    sprintf(lengthBuffer, "%u", m_contentLength);
     m_buffer.append(lengthBuffer);
     m_buffer.append(LINEBREAK);
   }

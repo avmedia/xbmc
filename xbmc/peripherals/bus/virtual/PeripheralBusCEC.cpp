@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -53,11 +53,11 @@ class PERIPHERALS::DllLibCEC : public DllDynamic, DllLibCECInterface
 };
 
 CPeripheralBusCEC::CPeripheralBusCEC(CPeripherals *manager) :
-    CPeripheralBus(manager, PERIPHERAL_BUS_CEC),
+    CPeripheralBus("PeripBusCEC", manager, PERIPHERAL_BUS_CEC),
     m_dll(new DllLibCEC),
     m_cecAdapter(NULL)
 {
-  m_iRescanTime = 1000;
+  m_iRescanTime = 5000;
   if (!m_dll->Load() || !m_dll->IsLoaded())
   {
     delete m_dll;

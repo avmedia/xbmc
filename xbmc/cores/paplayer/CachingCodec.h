@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,14 +21,10 @@
  */
 
 #include "ICodec.h"
-#include "filesystem/File.h"
 
 class CachingCodec : public ICodec
 {
 public:
   virtual ~CachingCodec() {}
   virtual int GetCacheLevel() const { return -1; }
-
-protected:
-  XFILE::CFile m_file;
 };

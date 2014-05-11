@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,11 +18,9 @@
  *
  */
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #ifndef _WIN32_POWER_SYSCALL_H_
 #define _WIN32_POWER_SYSCALL_H_
 #include "powermanagement/IPowerSyscall.h"
@@ -47,6 +45,7 @@ public:
 
   static void SetOnResume() { m_OnResume = true; }
   static void SetOnSuspend() { m_OnSuspend = true; }
+  static bool IsSuspending() { return m_OnSuspend; }
 
 private:
 

@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,9 +21,18 @@
  */
 
 #include "system.h"
+#include "DllAvFormat.h"
+#include "DllAvCodec.h"
 
 #include <vector>
+#include <string>
 #include "cores/VideoRenderers/RenderFormats.h"
+
+struct DVDCodecAvailableType 
+{
+  AVCodecID codec;
+  const char* setting;
+};
 
 // when modifying these structures, make sure you update all codecs accordingly
 #define FRAME_TYPE_UNDEF 0
@@ -34,10 +43,14 @@
 
 namespace DXVA { class CSurfaceContext; }
 namespace VAAPI { struct CHolder; }
-class CVDPAU;
+namespace VDPAU { class CVdpauRenderPicture; }
 class COpenMax;
 class COpenMaxVideo;
 struct OpenMaxVideoBuffer;
+class CDVDVideoCodecStageFright;
+class CDVDMediaCodecInfo;
+typedef void* EGLImageKHR;
+
 
 // should be entirely filled by all codecs
 struct DVDVideoPicture
@@ -48,14 +61,14 @@ struct DVDVideoPicture
   union
   {
     struct {
-      BYTE* data[4];      // [4] = alpha channel, currently not used
+      uint8_t* data[4];      // [4] = alpha channel, currently not used
       int iLineSize[4];   // [4] = alpha channel, currently not used
     };
     struct {
       DXVA::CSurfaceContext* context;
     };
     struct {
-      CVDPAU* vdpau;
+      VDPAU::CVdpauRenderPicture* vdpau;
     };
     struct {
       VAAPI::CHolder* vaapi;
@@ -68,6 +81,15 @@ struct DVDVideoPicture
 
     struct {
       struct __CVBuffer *cvBufferRef;
+    };
+
+    struct {
+      CDVDVideoCodecStageFright* stf;
+      EGLImageKHR eglimg;
+    };
+
+    struct {
+      CDVDMediaCodecInfo *mediacodec;
     };
   };
 
@@ -82,7 +104,7 @@ struct DVDVideoPicture
   unsigned int color_primaries;
   unsigned int color_transfer;
   unsigned int extended_format;
-  int iGroupId;
+  char         stereo_mode[32];
 
   int8_t* qscale_table; // Quantization parameters, primarily used by filters
   int qscale_stride;
@@ -98,7 +120,7 @@ struct DVDVideoPicture
 
 struct DVDVideoUserData
 {
-  BYTE* data;
+  uint8_t* data;
   int size;
 };
 
@@ -148,7 +170,7 @@ public:
    * returns one or a combination of VC_ messages
    * pData and iSize can be NULL, this means we should flush the rest of the data.
    */
-  virtual int Decode(BYTE* pData, int iSize, double dts, double pts) = 0;
+  virtual int Decode(uint8_t* pData, int iSize, double dts, double pts) = 0;
 
  /*
    * Reset the decoder.
@@ -243,4 +265,22 @@ public:
   {
     return 0;
   }
+
+
+  /**
+   * Number of references to old pictures that are allowed to
+   * be retained when calling decode on the next demux packet
+   */
+  virtual unsigned GetAllowedReferences() { return 0; }
+
+  /**
+   * Hide or Show Settings depending on the currently running hardware 
+   *
+   */
+   static bool IsSettingVisible(const std::string &condition, const std::string &value, const std::string &settingId);
+
+  /**
+  * Interact with user settings so that user disabled codecs are disabled
+  */
+  static bool IsCodecDisabled(DVDCodecAvailableType* map, unsigned int size, AVCodecID id);
 };

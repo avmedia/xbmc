@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,11 +39,11 @@ namespace PVR
 {
   class CPVRGUIInfo;
 
-  typedef std::map< int, boost::shared_ptr<CPVRClient> >                 PVR_CLIENTMAP;
-  typedef std::map< int, boost::shared_ptr<CPVRClient> >::iterator       PVR_CLIENTMAP_ITR;
-  typedef std::map< int, boost::shared_ptr<CPVRClient> >::const_iterator PVR_CLIENTMAP_CITR;
-  typedef std::map< int, PVR_STREAM_PROPERTIES >                         STREAMPROPS;
   typedef boost::shared_ptr<CPVRClient> PVR_CLIENT;
+  typedef std::map< int, PVR_CLIENT >                 PVR_CLIENTMAP;
+  typedef std::map< int, PVR_CLIENT >::iterator       PVR_CLIENTMAP_ITR;
+  typedef std::map< int, PVR_CLIENT >::const_iterator PVR_CLIENTMAP_CITR;
+  typedef std::map< int, PVR_STREAM_PROPERTIES >      STREAMPROPS;
 
   class CPVRClients : public ADDON::IAddonMgrCallback,
                       public Observer,
@@ -519,8 +519,9 @@ namespace PVR
     /*!
      * @brief Open selection and progress PVR actions.
      * @param iClientId The ID of the client to process the menu entries for. Process the menu entries for the active channel if iClientId < 0.
+     * @param item The selected file item for which the hook was called.
      */
-    void ProcessMenuHooks(int iClientID, PVR_MENUHOOK_CAT cat);
+    void ProcessMenuHooks(int iClientID, PVR_MENUHOOK_CAT cat, const CFileItem *item);
 
     //@}
 
@@ -540,7 +541,7 @@ namespace PVR
     /*!
      * @return All clients that support channel scanning.
      */
-    std::vector< boost::shared_ptr<CPVRClient> > GetClientsSupportingChannelScan(void) const;
+    std::vector<PVR_CLIENT> GetClientsSupportingChannelScan(void) const;
 
     //@}
 
@@ -560,6 +561,10 @@ namespace PVR
     bool HandlesInputStream(int iClientId) const;
 
     bool GetPlayingClient(PVR_CLIENT &client) const;
+
+    time_t GetPlayingTime() const;
+    time_t GetBufferTimeStart() const;
+    time_t GetBufferTimeEnd() const;
 
   private:
     /*!
@@ -592,7 +597,7 @@ namespace PVR
      * @param addon The client.
      * @return True if the client was found, false otherwise.
      */
-    bool GetClient(int iClientId, boost::shared_ptr<CPVRClient> &addon) const;
+    bool GetClient(int iClientId, PVR_CLIENT &addon) const;
 
     /*!
      * @brief Get the instance of the client, if it's connected.
@@ -600,7 +605,7 @@ namespace PVR
      * @param addon The client.
      * @return True if the client is connected, false otherwise.
      */
-    bool GetConnectedClient(int iClientId, boost::shared_ptr<CPVRClient> &addon) const;
+    bool GetConnectedClient(int iClientId, PVR_CLIENT &addon) const;
 
     /*!
      * @brief Check whether a client is registered.

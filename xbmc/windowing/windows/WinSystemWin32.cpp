@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,12 +22,13 @@
 #include "WinEventsWin32.h"
 #include "resource.h"
 #include "guilib/gui3d.h"
-#include "settings/DisplaySettings.h"
-#include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/DisplaySettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
+#include "utils/CharsetConverter.h"
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include <tpcshrd.h>
 
 CWinSystemWin32::CWinSystemWin32()
@@ -60,6 +61,12 @@ bool CWinSystemWin32::InitWindowSystem()
   if(!CWinSystemBase::InitWindowSystem())
     return false;
 
+  if(m_MonitorsInfo.empty())
+  {
+    CLog::Log(LOGERROR, "%s - no suitable monitor found, aborting...", __FUNCTION__);
+    return false;
+  }
+
   return true;
 }
 
@@ -73,6 +80,9 @@ bool CWinSystemWin32::CreateNewWindow(const CStdString& name, bool fullScreen, R
 {
   m_hInstance = ( HINSTANCE )GetModuleHandle( NULL );
 
+  if(m_hInstance == NULL)
+    CLog::Log(LOGDEBUG, "%s : GetModuleHandle failed with %d", __FUNCTION__, GetLastError());
+
   m_nWidth  = res.iWidth;
   m_nHeight = res.iHeight;
   m_bFullScreen = fullScreen;
@@ -83,7 +93,7 @@ bool CWinSystemWin32::CreateNewWindow(const CStdString& name, bool fullScreen, R
   // Register the windows class
   WNDCLASS wndClass;
   wndClass.style = CS_OWNDC; // For OpenGL
-  wndClass.lpfnWndProc = CWinEvents::WndProc;
+  wndClass.lpfnWndProc = CWinEventsWin32::WndProc;
   wndClass.cbClsExtra = 0;
   wndClass.cbWndExtra = 0;
   wndClass.hInstance = m_hInstance;
@@ -95,6 +105,7 @@ bool CWinSystemWin32::CreateNewWindow(const CStdString& name, bool fullScreen, R
 
   if( !RegisterClass( &wndClass ) )
   {
+    CLog::Log(LOGERROR, "%s : RegisterClass failed with %d", __FUNCTION__, GetLastError());
     return false;
   }
 
@@ -103,6 +114,7 @@ bool CWinSystemWin32::CreateNewWindow(const CStdString& name, bool fullScreen, R
     NULL, m_hInstance, userFunction );
   if( hWnd == NULL )
   {
+    CLog::Log(LOGERROR, "%s : CreateWindow failed with %d", __FUNCTION__, GetLastError());
     return false;
   }
 
@@ -155,7 +167,11 @@ bool CWinSystemWin32::CreateBlankWindows()
   wcex.hIconSm= 0;
 
   // Now we can go ahead and register our new window class
-  int reg = RegisterClassEx(&wcex);
+  if(!RegisterClassEx(&wcex))
+  {
+    CLog::Log(LOGERROR, "%s : RegisterClass failed with %d", __FUNCTION__, GetLastError());
+    return false;
+  }
 
   // We need as many blank windows as there are screens (minus 1)
   int BlankWindowsCount = m_MonitorsInfo.size() -1;
@@ -166,7 +182,10 @@ bool CWinSystemWin32::CreateBlankWindows()
     CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, NULL, NULL);
 
     if(hBlankWindow ==  NULL)
+    {
+      CLog::Log(LOGERROR, "%s : CreateWindowEx failed with %d", __FUNCTION__, GetLastError());
       return false;
+    }
 
     m_hBlankWindows.push_back(hBlankWindow);
   }
@@ -176,7 +195,7 @@ bool CWinSystemWin32::CreateBlankWindows()
 
 bool CWinSystemWin32::BlankNonActiveMonitors(bool bBlank)
 {
-  if(m_hBlankWindows.size() == 0)
+  if(m_hBlankWindows.empty())
     return false;
 
   if(bBlank == false)
@@ -257,7 +276,7 @@ bool CWinSystemWin32::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool 
 {
   m_IsAlteringWindow = true;
 
-  CLog::Log(LOGDEBUG, "%s (%s) on screen %d with size %dx%d, refresh %f%s", __FUNCTION__, !fullScreen ? "windowed" : (g_guiSettings.GetBool("videoscreen.fakefullscreen") ? "windowed fullscreen" : "true fullscreen"), res.iScreen, res.iWidth, res.iHeight, res.fRefreshRate, (res.dwFlags & D3DPRESENTFLAG_INTERLACED) ? "i" : "");
+  CLog::Log(LOGDEBUG, "%s (%s) on screen %d with size %dx%d, refresh %f%s", __FUNCTION__, !fullScreen ? "windowed" : (CSettings::Get().GetBool("videoscreen.fakefullscreen") ? "windowed fullscreen" : "true fullscreen"), res.iScreen, res.iWidth, res.iHeight, res.fRefreshRate, (res.dwFlags & D3DPRESENTFLAG_INTERLACED) ? "i" : "");
 
   bool forceResize = false;
 
@@ -267,15 +286,19 @@ bool CWinSystemWin32::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool 
     RestoreDesktopResolution(m_nScreen);
   }
 
-  if(!m_bFullScreen && fullScreen)
+  if(m_hWnd && !m_bFullScreen && fullScreen)
   {
     // save position of windowed mode
     WINDOWINFO wi;
     wi.cbSize = sizeof(WINDOWINFO);
-    GetWindowInfo(m_hWnd, &wi);
-    m_nLeft = wi.rcClient.left;
-    m_nTop = wi.rcClient.top;
-    m_ValidWindowedPosition = true;
+    if(GetWindowInfo(m_hWnd, &wi))
+    {
+      m_nLeft = wi.rcClient.left;
+      m_nTop = wi.rcClient.top;
+      m_ValidWindowedPosition = true;
+    }
+    else
+      CLog::Log(LOGERROR, "%s : GetWindowInfo failed with %d", __FUNCTION__, GetLastError());
   }
 
   m_bFullScreen = fullScreen;
@@ -284,7 +307,7 @@ bool CWinSystemWin32::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool 
   m_nHeight = res.iHeight;
   m_bBlankOtherDisplay = blankOtherDisplays;
 
-  if (fullScreen && g_guiSettings.GetBool("videoscreen.fakefullscreen"))
+  if (fullScreen && CSettings::Get().GetBool("videoscreen.fakefullscreen"))
     ChangeResolution(res);
 
   ResizeInternal(forceResize);
@@ -334,10 +357,11 @@ RECT CWinSystemWin32::ScreenRect(int screen)
 {
   const MONITOR_DETAILS &details = GetMonitor(screen);
 
-  DEVMODE sDevMode;
-  ZeroMemory(&sDevMode, sizeof(DEVMODE));
-  sDevMode.dmSize = sizeof(DEVMODE);
-  EnumDisplaySettings(details.DeviceName, ENUM_CURRENT_SETTINGS, &sDevMode);
+  DEVMODEW sDevMode;
+  ZeroMemory(&sDevMode, sizeof(sDevMode));
+  sDevMode.dmSize = sizeof(sDevMode);
+  if(!EnumDisplaySettingsW(details.DeviceNameW.c_str(), ENUM_CURRENT_SETTINGS, &sDevMode))
+    CLog::Log(LOGERROR, "%s : EnumDisplaySettings failed with %d", __FUNCTION__, GetLastError());
 
   RECT rc;
   rc.left = sDevMode.dmPosition.x;
@@ -350,6 +374,8 @@ RECT CWinSystemWin32::ScreenRect(int screen)
 
 bool CWinSystemWin32::ResizeInternal(bool forceRefresh)
 {
+  if (m_hWnd == NULL)
+    return false;
   DWORD dwStyle = WS_CLIPCHILDREN;
   HWND windowAfter;
   RECT rc;
@@ -389,7 +415,11 @@ bool CWinSystemWin32::ResizeInternal(bool forceRefresh)
 
   WINDOWINFO wi;
   wi.cbSize = sizeof (WINDOWINFO);
-  GetWindowInfo(m_hWnd, &wi);
+  if(!GetWindowInfo(m_hWnd, &wi))
+  {
+    CLog::Log(LOGERROR, "%s : GetWindowInfo failed with %d", __FUNCTION__, GetLastError());
+    return false;
+  }
   RECT wr = wi.rcWindow;
 
   if (forceRefresh || wr.bottom  - wr.top != rc.bottom - rc.top || wr.right - wr.left != rc.right - rc.left ||
@@ -414,19 +444,19 @@ bool CWinSystemWin32::ChangeResolution(RESOLUTION_INFO res)
 {
   const MONITOR_DETAILS &details = GetMonitor(res.iScreen);
 
-  DEVMODE sDevMode;
-  ZeroMemory(&sDevMode, sizeof(DEVMODE));
-  sDevMode.dmSize = sizeof(DEVMODE);
+  DEVMODEW sDevMode;
+  ZeroMemory(&sDevMode, sizeof(sDevMode));
+  sDevMode.dmSize = sizeof(sDevMode);
 
   // If we can't read the current resolution or any detail of the resolution is different than res
-  if (!EnumDisplaySettings(details.DeviceName, ENUM_CURRENT_SETTINGS, &sDevMode) ||
+  if (!EnumDisplaySettingsW(details.DeviceNameW.c_str(), ENUM_CURRENT_SETTINGS, &sDevMode) ||
       sDevMode.dmPelsWidth != res.iWidth || sDevMode.dmPelsHeight != res.iHeight ||
       sDevMode.dmDisplayFrequency != (int)res.fRefreshRate ||
       ((sDevMode.dmDisplayFlags & DM_INTERLACED) && !(res.dwFlags & D3DPRESENTFLAG_INTERLACED)) ||
       (!(sDevMode.dmDisplayFlags & DM_INTERLACED) && (res.dwFlags & D3DPRESENTFLAG_INTERLACED)) )
   {
-    ZeroMemory(&sDevMode, sizeof(DEVMODE));
-    sDevMode.dmSize = sizeof(DEVMODE);
+    ZeroMemory(&sDevMode, sizeof(sDevMode));
+    sDevMode.dmSize = sizeof(sDevMode);
     sDevMode.dmDriverExtra = 0;
     sDevMode.dmPelsWidth = res.iWidth;
     sDevMode.dmPelsHeight = res.iHeight;
@@ -436,10 +466,10 @@ bool CWinSystemWin32::ChangeResolution(RESOLUTION_INFO res)
 
     // CDS_FULLSCREEN is for temporary fullscreen mode and prevents icons and windows from moving
     // to fit within the new dimensions of the desktop
-    LONG rc = ChangeDisplaySettingsEx(details.DeviceName, &sDevMode, NULL, CDS_FULLSCREEN, NULL);
+    LONG rc = ChangeDisplaySettingsExW(details.DeviceNameW.c_str(), &sDevMode, NULL, CDS_FULLSCREEN, NULL);
     if (rc != DISP_CHANGE_SUCCESSFUL)
     {
-      CLog::Log(LOGERROR, "%s: error, code %d", __FUNCTION__, rc);
+      CLog::Log(LOGERROR, "%s : ChangeDisplaySettingsEx failed with %d", __FUNCTION__, rc);
       return false;
     }
     else
@@ -459,7 +489,7 @@ void CWinSystemWin32::UpdateResolutions()
 
   UpdateResolutionsInternal();
 
-  if(m_MonitorsInfo.size() < 1)
+  if(m_MonitorsInfo.empty())
     return;
 
   float refreshRate = 0;
@@ -511,10 +541,10 @@ void CWinSystemWin32::UpdateResolutions()
   {
     for(int mode = 0;; mode++)
     {
-      DEVMODE devmode;
+      DEVMODEW devmode;
       ZeroMemory(&devmode, sizeof(devmode));
       devmode.dmSize = sizeof(devmode);
-      if(EnumDisplaySettings(m_MonitorsInfo[monitor].DeviceName, mode, &devmode) == 0)
+      if(EnumDisplaySettingsW(m_MonitorsInfo[monitor].DeviceNameW.c_str(), mode, &devmode) == 0)
         break;
       if(devmode.dmBitsPerPel != 32)
         continue;
@@ -554,25 +584,25 @@ void CWinSystemWin32::AddResolution(const RESOLUTION_INFO &res)
 bool CWinSystemWin32::UpdateResolutionsInternal()
 {
 
-  DISPLAY_DEVICE ddAdapter;
+  DISPLAY_DEVICEW ddAdapter;
   ZeroMemory(&ddAdapter, sizeof(ddAdapter));
   ddAdapter.cb = sizeof(ddAdapter);
   DWORD adapter = 0;
 
-  while (EnumDisplayDevices(NULL, adapter, &ddAdapter, 0))
+  while (EnumDisplayDevicesW(NULL, adapter, &ddAdapter, 0))
   {
     // Exclude displays that are not part of the windows desktop. Using them is too different: no windows,
     // direct access with GDI CreateDC() or DirectDraw for example. So it may be possible to play video, but GUI?
     if (!(ddAdapter.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER) && (ddAdapter.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP))
     {
-      DISPLAY_DEVICE ddMon;
+      DISPLAY_DEVICEW ddMon;
       ZeroMemory(&ddMon, sizeof(ddMon));
       ddMon.cb = sizeof(ddMon);
       bool foundScreen = false;
       DWORD screen = 0;
 
       // Just look for the first active output, we're actually only interested in the information at the adapter level.
-      while (EnumDisplayDevices(ddAdapter.DeviceName, screen, &ddMon, 0))
+      while (EnumDisplayDevicesW(ddAdapter.DeviceName, screen, &ddMon, 0))
       {
         if (ddMon.StateFlags & (DISPLAY_DEVICE_ACTIVE | DISPLAY_DEVICE_ATTACHED))
         {
@@ -586,33 +616,35 @@ bool CWinSystemWin32::UpdateResolutionsInternal()
       // Remoting returns no screens. Handle with a dummy screen.
       if (!foundScreen && screen == 0)
       {
-        lstrcpy(ddMon.DeviceString, _T("Dummy Monitor")); // safe: large static array
+        lstrcpyW(ddMon.DeviceString, L"Dummy Monitor"); // safe: large static array
         foundScreen = true;
       }
 
       if (foundScreen)
       {
-        CLog::Log(LOGNOTICE, "Found screen: %s on %s, adapter %d.", ddMon.DeviceString, ddAdapter.DeviceString, adapter);
+        std::string monitorStr, adapterStr;
+        g_charsetConverter.wToUTF8(ddMon.DeviceString, monitorStr);
+        g_charsetConverter.wToUTF8(ddAdapter.DeviceString, adapterStr);
+        CLog::Log(LOGNOTICE, "Found screen: %s on %s, adapter %d.", monitorStr.c_str(), adapterStr.c_str(), adapter);
 
         // get information about the display's current position and display mode
         // TODO: for Windows 7/Server 2008 and up, Microsoft recommends QueryDisplayConfig() instead, the API used by the control panel.
-        DEVMODE dm;
+        DEVMODEW dm;
         ZeroMemory(&dm, sizeof(dm));
         dm.dmSize = sizeof(dm);
-        if (EnumDisplaySettingsEx(ddAdapter.DeviceName, ENUM_CURRENT_SETTINGS, &dm, 0) == FALSE)
-          EnumDisplaySettingsEx(ddAdapter.DeviceName, ENUM_REGISTRY_SETTINGS, &dm, 0);
+        if (EnumDisplaySettingsExW(ddAdapter.DeviceName, ENUM_CURRENT_SETTINGS, &dm, 0) == FALSE)
+          EnumDisplaySettingsExW(ddAdapter.DeviceName, ENUM_REGISTRY_SETTINGS, &dm, 0);
 
         // get the monitor handle and workspace
         HMONITOR hm = 0;
         POINT pt = { dm.dmPosition.x, dm.dmPosition.y };
         hm = MonitorFromPoint(pt, MONITOR_DEFAULTTONULL);
 
-        MONITOR_DETAILS md;
-        memset(&md, 0, sizeof(MONITOR_DETAILS));
+        MONITOR_DETAILS md = {};
 
-        strcpy(md.MonitorName, ddMon.DeviceString);
-        strcpy(md.CardName, ddAdapter.DeviceString);
-        strcpy(md.DeviceName, ddAdapter.DeviceName);
+        md.MonitorNameW = ddMon.DeviceString;
+        md.CardNameW = ddAdapter.DeviceString;
+        md.DeviceNameW = ddAdapter.DeviceName;
 
         // width x height @ x,y - bpp - refresh rate
         // note that refresh rate information is not available on Win9x

@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -161,6 +161,12 @@ namespace PVR
      * @return True if it was deleted successfully, false if not.
      */
     bool DeleteGroup(const CPVRChannelGroup &group);
+
+    /*!
+     * @brief Create EPG tags for all channels of the internal group.
+     * @return True if EPG tags where created successfully, false if not.
+     */
+    bool CreateChannelEpgs(void);
 
     /*!
      * @brief Remove a channel from all non-system groups.

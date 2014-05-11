@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ namespace XFILE
       virtual bool Remove(const char* strPath);
     private:
       bool GetServerList(CFileItemList &items);
-      bool GetDirectoryFromExportList(const CStdString& strPath, CFileItemList &items);
+      bool GetDirectoryFromExportList(const std::string& strPath, CFileItemList &items);
       bool ResolveSymlink( const CStdString &dirName, struct nfsdirent *dirent, CURL &resolvedUrl);
   };
 }

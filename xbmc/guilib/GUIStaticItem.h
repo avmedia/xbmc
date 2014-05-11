@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -58,6 +58,7 @@ public:
    \param contextWindow window context to use for any info labels
    */
   CGUIStaticItem(const TiXmlElement *element, int contextWindow);
+  CGUIStaticItem(const CFileItem &item); // for python
   virtual ~CGUIStaticItem() {};
   virtual CGUIListItem *Clone() const { return new CGUIStaticItem(*this); };
   
@@ -78,11 +79,17 @@ public:
    */
   bool IsVisible() const;
 
+  /*! \brief set a visible condition for this item.
+   \param condition the condition to use.
+   \param context the context for the condition (typically a window id).
+   */
+  void SetVisibleCondition(const std::string &condition, int context);
+
   const CGUIAction &GetClickActions() const { return m_clickActions; };
 private:
   typedef std::vector< std::pair<CGUIInfoLabel, CStdString> > InfoVector;
   InfoVector m_info;
-  unsigned int m_visCondition;
+  INFO::InfoPtr m_visCondition;
   bool m_visState;
   CGUIAction m_clickActions;
 };

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include "filesystem/SpecialProtocol.h"
 #include "powermanagement/PowerManager.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "Util.h"
 
 #include <cstdio>
@@ -59,12 +59,12 @@ void TestBasicEnvironment::SetUp()
    * that the initialization of these components won't be needed.
    */
   g_powerManager.Initialize();
-  g_guiSettings.Initialize();
+  CSettings::Get().Initialize();
 
   /* Create a temporary directory and set it to be used throughout the
    * test suite run.
    */
-#ifndef _LINUX
+#ifdef TARGET_WINDOWS
   TCHAR lpTempPathBuffer[MAX_PATH];
   if (!GetTempPath(MAX_PATH, lpTempPathBuffer))
     SetUpError();

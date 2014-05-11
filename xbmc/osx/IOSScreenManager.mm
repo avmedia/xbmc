@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,14 +28,19 @@
 #include "threads/Event.h"
 #include "Application.h"
 #include "WindowingFactory.h"
-#include "Settings.h"
+#include "settings/DisplaySettings.h"
+#include "cores/AudioEngine/AEFactory.h"
 #undef BOOL
 
 #import <Foundation/Foundation.h>
 #include <objc/runtime.h>
 
 #import "IOSScreenManager.h"
-#import "XBMCController.h"
+#if defined(TARGET_DARWIN_IOS_ATV2)
+#import "xbmc/osx/atv2/XBMCController.h"
+#elif defined(TARGET_DARWIN_IOS)
+#import "xbmc/osx/ios/XBMCController.h"
+#endif
 #import "IOSExternalTouchController.h"
 #import "IOSEAGLView.h"
 
@@ -49,6 +54,7 @@ static CEvent screenChangeEvent;
 @synthesize _screenIdx;
 @synthesize _externalScreen;
 @synthesize _glView;
+@synthesize _lastTouchControllerOrientation;
 
 //--------------------------------------------------------------
 - (void) fadeFromBlack:(CGFloat) delaySecs
@@ -86,7 +92,16 @@ static CEvent screenChangeEvent;
 
     [_glView setScreen:newScreen withFrameBufferResize:TRUE];//will also resize the framebuffer
 
-    [g_xbmcController activateScreen:newScreen];// will attach the screen to xbmc mainwindow
+    if (toExternal)
+    {
+      // portrait on external screen means its landscape for xbmc
+      [g_xbmcController activateScreen:newScreen withOrientation:UIInterfaceOrientationPortrait];// will attach the screen to xbmc mainwindow
+    }
+    else
+    {
+      // switching back to internal - use same orientation as we used for the touch controller
+      [g_xbmcController activateScreen:newScreen withOrientation:_lastTouchControllerOrientation];// will attach the screen to xbmc mainwindow
+    }
 
     if(toExternal)//changing the external screen might need some time ...
     {
@@ -138,6 +153,7 @@ static CEvent screenChangeEvent;
 
   if([self willSwitchToInternal:screenIdx] && _externalTouchController != nil)
   {
+    _lastTouchControllerOrientation = [_externalTouchController interfaceOrientation];
     [_externalTouchController release];
     _externalTouchController = nil;
   }
@@ -190,6 +206,10 @@ static CEvent screenChangeEvent;
   {
     [self changeScreenSelector:dict];
   }
+
+  // re-enumerate audio devices in that case too
+  // as we might gain passthrough capabilities via HDMI
+  CAEFactory::DeviceChange();
   return true;
 }
 //--------------------------------------------------------------

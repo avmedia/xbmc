@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  *
  */
 
+#include "system.h"
 #include "GUIListItemLayout.h"
 #include "FileItem.h"
 #include "GUIControlFactory.h"
@@ -33,7 +34,6 @@ CGUIListItemLayout::CGUIListItemLayout()
 {
   m_width = 0;
   m_height = 0;
-  m_condition = 0;
   m_focused = false;
   m_invalidated = true;
   m_group.SetPushUpdates(true);
@@ -107,16 +107,22 @@ unsigned int CGUIListItemLayout::GetFocusedItem() const
 
 void CGUIListItemLayout::SetWidth(float width)
 {
-  m_group.EnlargeWidth(width - m_width);
-  m_width = width;
-  SetInvalid();
+  if (m_width != width)
+  {
+    m_group.EnlargeWidth(width - m_width);
+    m_width = width;
+    SetInvalid();
+  }
 }
 
 void CGUIListItemLayout::SetHeight(float height)
 {
-  m_group.EnlargeHeight(height - m_height);
-  m_height = height;
-  SetInvalid();
+  if (m_height != height)
+  {
+    m_group.EnlargeHeight(height - m_height);
+    m_height = height;
+    SetInvalid();
+  }
 }
 
 void CGUIListItemLayout::SelectItemFromPoint(const CPoint &point)
@@ -136,7 +142,7 @@ bool CGUIListItemLayout::MoveRight()
 
 bool CGUIListItemLayout::CheckCondition()
 {
-  return !m_condition || g_infoManager.GetBoolValue(m_condition);
+  return !m_condition || m_condition->Get();
 }
 
 void CGUIListItemLayout::LoadControl(TiXmlElement *child, CGUIControlGroup *group)

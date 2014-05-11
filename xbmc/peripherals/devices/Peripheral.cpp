@@ -22,7 +22,7 @@
 #include "peripherals/Peripherals.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
-#include "settings/GUISettings.h"
+#include "settings/lib/Setting.h"
 #include "utils/XBMCTinyXML.h"
 #include "utils/URIUtils.h"
 #include "guilib/LocalizeStrings.h"
@@ -32,9 +32,9 @@ using namespace std;
 
 struct SortBySettingsOrder
 {
-  bool operator()(const CSetting *left, const CSetting *right)
+  bool operator()(const PeripheralDeviceSetting &left, const PeripheralDeviceSetting& right)
   {
-    return left->GetOrder() < right->GetOrder();
+    return left.m_order < right.m_order;
   }
 };
 
@@ -54,7 +54,10 @@ CPeripheral::CPeripheral(const PeripheralScanResult& scanResult) :
 {
   PeripheralTypeTranslator::FormatHexString(scanResult.m_iVendorId, m_strVendorId);
   PeripheralTypeTranslator::FormatHexString(scanResult.m_iProductId, m_strProductId);
-  m_strFileLocation.Format(scanResult.m_iSequence > 0 ? "peripherals://%s/%s_%d.dev" : "peripherals://%s/%s.dev", PeripheralTypeTranslator::BusTypeToString(scanResult.m_busType), scanResult.m_strLocation.c_str(), scanResult.m_iSequence);
+  m_strFileLocation = StringUtils::Format(scanResult.m_iSequence > 0 ? "peripherals://%s/%s_%d.dev" : "peripherals://%s/%s.dev",
+                                          PeripheralTypeTranslator::BusTypeToString(scanResult.m_busType),
+                                          scanResult.m_strLocation.c_str(),
+                                          scanResult.m_iSequence);
 }
 
 CPeripheral::~CPeripheral(void)
@@ -130,7 +133,10 @@ bool CPeripheral::Initialise(void)
     return bReturn;
 
   g_peripherals.GetSettingsFromMapping(*this);
-  m_strSettingsFile.Format("special://profile/peripheral_data/%s_%s_%s.xml", PeripheralTypeTranslator::BusTypeToString(m_mappedBusType), m_strVendorId.c_str(), m_strProductId.c_str());
+  m_strSettingsFile = StringUtils::Format("special://profile/peripheral_data/%s_%s_%s.xml",
+                                          PeripheralTypeTranslator::BusTypeToString(m_mappedBusType),
+                                          m_strVendorId.c_str(),
+                                          m_strProductId.c_str());
   LoadPersistedSettings();
 
   for (unsigned int iFeaturePtr = 0; iFeaturePtr < m_features.size(); iFeaturePtr++)
@@ -165,14 +171,18 @@ bool CPeripheral::IsMultiFunctional(void) const
 
 vector<CSetting *> CPeripheral::GetSettings(void) const
 {
+  vector<PeripheralDeviceSetting> tmpSettings;
+  for (map<CStdString, PeripheralDeviceSetting>::const_iterator it = m_settings.begin(); it != m_settings.end(); ++it)
+    tmpSettings.push_back(it->second);
+  sort(tmpSettings.begin(), tmpSettings.end(), SortBySettingsOrder());
+
   vector<CSetting *> settings;
-  for (map<CStdString, CSetting *>::const_iterator it = m_settings.begin(); it != m_settings.end(); it++)
-    settings.push_back(it->second);
-  sort(settings.begin(), settings.end(), SortBySettingsOrder());
+  for (vector<PeripheralDeviceSetting>::const_iterator it = tmpSettings.begin(); it != tmpSettings.end(); ++it)
+    settings.push_back(it->m_setting);
   return settings;
 }
 
-void CPeripheral::AddSetting(const CStdString &strKey, const CSetting *setting)
+void CPeripheral::AddSetting(const CStdString &strKey, const CSetting *setting, int order)
 {
   if (!setting)
   {
@@ -182,57 +192,50 @@ void CPeripheral::AddSetting(const CStdString &strKey, const CSetting *setting)
 
   if (!HasSetting(strKey))
   {
+    PeripheralDeviceSetting deviceSetting = { NULL, order };
     switch(setting->GetType())
     {
-    case SETTINGS_TYPE_BOOL:
+    case SettingTypeBool:
       {
         const CSettingBool *mappedSetting = (const CSettingBool *) setting;
-        CSettingBool *boolSetting = new CSettingBool(mappedSetting->GetOrder(), strKey.c_str(), mappedSetting->GetLabel(), mappedSetting->GetData(), mappedSetting->GetControlType());
+        CSettingBool *boolSetting = new CSettingBool(strKey, *mappedSetting);
         if (boolSetting)
         {
           boolSetting->SetVisible(mappedSetting->IsVisible());
-          m_settings.insert(make_pair(strKey, boolSetting));
+          deviceSetting.m_setting = boolSetting;
         }
       }
       break;
-    case SETTINGS_TYPE_INT:
+    case SettingTypeInteger:
       {
         const CSettingInt *mappedSetting = (const CSettingInt *) setting;
-        CSettingInt *intSetting(NULL);
-        if (mappedSetting->GetControlType() == SPIN_CONTROL_INT)
-        {
-          intSetting = new CSettingInt(mappedSetting->GetOrder(), strKey.c_str(), mappedSetting->GetLabel(), mappedSetting->GetData(), mappedSetting->m_iMin, mappedSetting->m_iStep, mappedSetting->m_iMax, mappedSetting->GetControlType(), mappedSetting->m_strFormat);
-        }
-        else if (mappedSetting->GetControlType() == SPIN_CONTROL_TEXT)
-        {
-          intSetting = new CSettingInt(mappedSetting->GetOrder(), strKey.c_str(), mappedSetting->GetLabel(), mappedSetting->GetData(), mappedSetting->m_entries, mappedSetting->GetControlType());
-        }
+        CSettingInt *intSetting = new CSettingInt(strKey, *mappedSetting);
         if (intSetting)
         {
           intSetting->SetVisible(mappedSetting->IsVisible());
-          m_settings.insert(make_pair(strKey, intSetting));
+          deviceSetting.m_setting = intSetting;
         }
       }
       break;
-    case SETTINGS_TYPE_FLOAT:
+    case SettingTypeNumber:
       {
-        const CSettingFloat *mappedSetting = (const CSettingFloat *) setting;
-        CSettingFloat *floatSetting = new CSettingFloat(mappedSetting->GetOrder(), strKey.c_str(), mappedSetting->GetLabel(), mappedSetting->GetData(), mappedSetting->m_fMin, mappedSetting->m_fStep, mappedSetting->m_fMax, mappedSetting->GetControlType());
+        const CSettingNumber *mappedSetting = (const CSettingNumber *) setting;
+        CSettingNumber *floatSetting = new CSettingNumber(strKey, *mappedSetting);
         if (floatSetting)
         {
           floatSetting->SetVisible(mappedSetting->IsVisible());
-          m_settings.insert(make_pair(strKey, floatSetting));
+          deviceSetting.m_setting = floatSetting;
         }
       }
       break;
-    case SETTINGS_TYPE_STRING:
+    case SettingTypeString:
       {
         const CSettingString *mappedSetting = (const CSettingString *) setting;
-        CSettingString *stringSetting = new CSettingString(mappedSetting->GetOrder(), strKey.c_str(), mappedSetting->GetLabel(), mappedSetting->GetData().c_str(), mappedSetting->GetControlType(), mappedSetting->m_bAllowEmpty, mappedSetting->m_iHeadingString);
+        CSettingString *stringSetting = new CSettingString(strKey, *mappedSetting);
         if (stringSetting)
         {
           stringSetting->SetVisible(mappedSetting->IsVisible());
-          m_settings.insert(make_pair(strKey, stringSetting));
+          deviceSetting.m_setting = stringSetting;
         }
       }
       break;
@@ -240,27 +243,30 @@ void CPeripheral::AddSetting(const CStdString &strKey, const CSetting *setting)
       //TODO add more types if needed
       break;
     }
+
+    if (deviceSetting.m_setting != NULL)
+      m_settings.insert(make_pair(strKey, deviceSetting));
   }
 }
 
 bool CPeripheral::HasSetting(const CStdString &strKey) const
 {
-  map<CStdString, CSetting *>:: const_iterator it = m_settings.find(strKey);
+  map<CStdString, PeripheralDeviceSetting>:: const_iterator it = m_settings.find(strKey);
   return it != m_settings.end();
 }
 
 bool CPeripheral::HasSettings(void) const
 {
-  return m_settings.size() > 0;
+  return !m_settings.empty();
 }
 
 bool CPeripheral::HasConfigurableSettings(void) const
 {
   bool bReturn(false);
-  map<CStdString, CSetting *>::const_iterator it = m_settings.begin();
+  map<CStdString, PeripheralDeviceSetting>::const_iterator it = m_settings.begin();
   while (it != m_settings.end() && !bReturn)
   {
-    if ((*it).second->IsVisible())
+    if ((*it).second.m_setting->IsVisible())
     {
       bReturn = true;
       break;
@@ -274,12 +280,12 @@ bool CPeripheral::HasConfigurableSettings(void) const
 
 bool CPeripheral::GetSettingBool(const CStdString &strKey) const
 {
-  map<CStdString, CSetting *>::const_iterator it = m_settings.find(strKey);
-  if (it != m_settings.end() && (*it).second->GetType() == SETTINGS_TYPE_BOOL)
+  map<CStdString, PeripheralDeviceSetting>::const_iterator it = m_settings.find(strKey);
+  if (it != m_settings.end() && (*it).second.m_setting->GetType() == SettingTypeBool)
   {
-    CSettingBool *boolSetting = (CSettingBool *) (*it).second;
+    CSettingBool *boolSetting = (CSettingBool *) (*it).second.m_setting;
     if (boolSetting)
-      return boolSetting->GetData();
+      return boolSetting->GetValue();
   }
 
   return false;
@@ -287,12 +293,12 @@ bool CPeripheral::GetSettingBool(const CStdString &strKey) const
 
 int CPeripheral::GetSettingInt(const CStdString &strKey) const
 {
-  map<CStdString, CSetting *>::const_iterator it = m_settings.find(strKey);
-  if (it != m_settings.end() && (*it).second->GetType() == SETTINGS_TYPE_INT)
+  map<CStdString, PeripheralDeviceSetting>::const_iterator it = m_settings.find(strKey);
+  if (it != m_settings.end() && (*it).second.m_setting->GetType() == SettingTypeInteger)
   {
-    CSettingInt *intSetting = (CSettingInt *) (*it).second;
+    CSettingInt *intSetting = (CSettingInt *) (*it).second.m_setting;
     if (intSetting)
-      return intSetting->GetData();
+      return intSetting->GetValue();
   }
 
   return 0;
@@ -300,12 +306,12 @@ int CPeripheral::GetSettingInt(const CStdString &strKey) const
 
 float CPeripheral::GetSettingFloat(const CStdString &strKey) const
 {
-  map<CStdString, CSetting *>::const_iterator it = m_settings.find(strKey);
-  if (it != m_settings.end() && (*it).second->GetType() == SETTINGS_TYPE_FLOAT)
+  map<CStdString, PeripheralDeviceSetting>::const_iterator it = m_settings.find(strKey);
+  if (it != m_settings.end() && (*it).second.m_setting->GetType() == SettingTypeNumber)
   {
-    CSettingFloat *floatSetting = (CSettingFloat *) (*it).second;
+    CSettingNumber *floatSetting = (CSettingNumber *) (*it).second.m_setting;
     if (floatSetting)
-      return floatSetting->GetData();
+      return (float)floatSetting->GetValue();
   }
 
   return 0;
@@ -313,12 +319,12 @@ float CPeripheral::GetSettingFloat(const CStdString &strKey) const
 
 const CStdString CPeripheral::GetSettingString(const CStdString &strKey) const
 {
-  map<CStdString, CSetting *>::const_iterator it = m_settings.find(strKey);
-  if (it != m_settings.end() && (*it).second->GetType() == SETTINGS_TYPE_STRING)
+  map<CStdString, PeripheralDeviceSetting>::const_iterator it = m_settings.find(strKey);
+  if (it != m_settings.end() && (*it).second.m_setting->GetType() == SettingTypeString)
   {
-    CSettingString *stringSetting = (CSettingString *) (*it).second;
+    CSettingString *stringSetting = (CSettingString *) (*it).second.m_setting;
     if (stringSetting)
-      return stringSetting->GetData();
+      return stringSetting->GetValue();
   }
 
   return StringUtils::EmptyString;
@@ -327,14 +333,14 @@ const CStdString CPeripheral::GetSettingString(const CStdString &strKey) const
 bool CPeripheral::SetSetting(const CStdString &strKey, bool bValue)
 {
   bool bChanged(false);
-  map<CStdString, CSetting *>::iterator it = m_settings.find(strKey);
-  if (it != m_settings.end() && (*it).second->GetType() == SETTINGS_TYPE_BOOL)
+  map<CStdString, PeripheralDeviceSetting>::iterator it = m_settings.find(strKey);
+  if (it != m_settings.end() && (*it).second.m_setting->GetType() == SettingTypeBool)
   {
-    CSettingBool *boolSetting = (CSettingBool *) (*it).second;
+    CSettingBool *boolSetting = (CSettingBool *) (*it).second.m_setting;
     if (boolSetting)
     {
-      bChanged = boolSetting->GetData() != bValue;
-      boolSetting->SetData(bValue);
+      bChanged = boolSetting->GetValue() != bValue;
+      boolSetting->SetValue(bValue);
       if (bChanged && m_bInitialised)
         m_changedSettings.insert(strKey);
     }
@@ -345,14 +351,14 @@ bool CPeripheral::SetSetting(const CStdString &strKey, bool bValue)
 bool CPeripheral::SetSetting(const CStdString &strKey, int iValue)
 {
   bool bChanged(false);
-  map<CStdString, CSetting *>::iterator it = m_settings.find(strKey);
-  if (it != m_settings.end() && (*it).second->GetType() == SETTINGS_TYPE_INT)
+  map<CStdString, PeripheralDeviceSetting>::iterator it = m_settings.find(strKey);
+  if (it != m_settings.end() && (*it).second.m_setting->GetType() == SettingTypeInteger)
   {
-    CSettingInt *intSetting = (CSettingInt *) (*it).second;
+    CSettingInt *intSetting = (CSettingInt *) (*it).second.m_setting;
     if (intSetting)
     {
-      bChanged = intSetting->GetData() != iValue;
-      intSetting->SetData(iValue);
+      bChanged = intSetting->GetValue() != iValue;
+      intSetting->SetValue(iValue);
       if (bChanged && m_bInitialised)
         m_changedSettings.insert(strKey);
     }
@@ -363,14 +369,14 @@ bool CPeripheral::SetSetting(const CStdString &strKey, int iValue)
 bool CPeripheral::SetSetting(const CStdString &strKey, float fValue)
 {
   bool bChanged(false);
-  map<CStdString, CSetting *>::iterator it = m_settings.find(strKey);
-  if (it != m_settings.end() && (*it).second->GetType() == SETTINGS_TYPE_FLOAT)
+  map<CStdString, PeripheralDeviceSetting>::iterator it = m_settings.find(strKey);
+  if (it != m_settings.end() && (*it).second.m_setting->GetType() == SettingTypeNumber)
   {
-    CSettingFloat *floatSetting = (CSettingFloat *) (*it).second;
+    CSettingNumber *floatSetting = (CSettingNumber *) (*it).second.m_setting;
     if (floatSetting)
     {
-      bChanged = floatSetting->GetData() != fValue;
-      floatSetting->SetData(fValue);
+      bChanged = floatSetting->GetValue() != fValue;
+      floatSetting->SetValue(fValue);
       if (bChanged && m_bInitialised)
         m_changedSettings.insert(strKey);
     }
@@ -380,41 +386,41 @@ bool CPeripheral::SetSetting(const CStdString &strKey, float fValue)
 
 void CPeripheral::SetSettingVisible(const CStdString &strKey, bool bSetTo)
 {
-  map<CStdString, CSetting *>::iterator it = m_settings.find(strKey);
+  map<CStdString, PeripheralDeviceSetting>::iterator it = m_settings.find(strKey);
   if (it != m_settings.end())
-    (*it).second->SetVisible(bSetTo);
+    (*it).second.m_setting->SetVisible(bSetTo);
 }
 
 bool CPeripheral::IsSettingVisible(const CStdString &strKey) const
 {
-  map<CStdString, CSetting *>::const_iterator it = m_settings.find(strKey);
+  map<CStdString, PeripheralDeviceSetting>::const_iterator it = m_settings.find(strKey);
   if (it != m_settings.end())
-    return (*it).second->IsVisible();
+    return (*it).second.m_setting->IsVisible();
   return false;
 }
 
 bool CPeripheral::SetSetting(const CStdString &strKey, const CStdString &strValue)
 {
   bool bChanged(false);
-  map<CStdString, CSetting *>::iterator it = m_settings.find(strKey);
+  map<CStdString, PeripheralDeviceSetting>::iterator it = m_settings.find(strKey);
   if (it != m_settings.end())
   {
-    if ((*it).second->GetType() == SETTINGS_TYPE_STRING)
+    if ((*it).second.m_setting->GetType() == SettingTypeString)
     {
-      CSettingString *stringSetting = (CSettingString *) (*it).second;
+      CSettingString *stringSetting = (CSettingString *) (*it).second.m_setting;
       if (stringSetting)
       {
-        bChanged = !stringSetting->GetData().Equals(strValue);
-        stringSetting->SetData(strValue);
+        bChanged = !StringUtils::EqualsNoCase(stringSetting->GetValue(), strValue);
+        stringSetting->SetValue(strValue);
         if (bChanged && m_bInitialised)
           m_changedSettings.insert(strKey);
       }
     }
-    else if ((*it).second->GetType() == SETTINGS_TYPE_INT)
-      bChanged = SetSetting(strKey, (int) (strValue.IsEmpty() ? 0 : atoi(strValue.c_str())));
-    else if ((*it).second->GetType() == SETTINGS_TYPE_FLOAT)
-      bChanged = SetSetting(strKey, (float) (strValue.IsEmpty() ? 0 : atof(strValue.c_str())));
-    else if ((*it).second->GetType() == SETTINGS_TYPE_BOOL)
+    else if ((*it).second.m_setting->GetType() == SettingTypeInteger)
+      bChanged = SetSetting(strKey, (int) (strValue.empty() ? 0 : atoi(strValue.c_str())));
+    else if ((*it).second.m_setting->GetType() == SettingTypeNumber)
+      bChanged = SetSetting(strKey, (float) (strValue.empty() ? 0 : atof(strValue.c_str())));
+    else if ((*it).second.m_setting->GetType() == SettingTypeBool)
       bChanged = SetSetting(strKey, strValue.Equals("1"));
   }
   return bChanged;
@@ -425,39 +431,39 @@ void CPeripheral::PersistSettings(bool bExiting /* = false */)
   CXBMCTinyXML doc;
   TiXmlElement node("settings");
   doc.InsertEndChild(node);
-  for (map<CStdString, CSetting *>::const_iterator itr = m_settings.begin(); itr != m_settings.end(); itr++)
+  for (map<CStdString, PeripheralDeviceSetting>::const_iterator itr = m_settings.begin(); itr != m_settings.end(); ++itr)
   {
     TiXmlElement nodeSetting("setting");
     nodeSetting.SetAttribute("id", itr->first.c_str());
     CStdString strValue;
-    switch ((*itr).second->GetType())
+    switch ((*itr).second.m_setting->GetType())
     {
-    case SETTINGS_TYPE_STRING:
+    case SettingTypeString:
       {
-        CSettingString *stringSetting = (CSettingString *) (*itr).second;
+        CSettingString *stringSetting = (CSettingString *) (*itr).second.m_setting;
         if (stringSetting)
-          strValue = stringSetting->GetData();
+          strValue = stringSetting->GetValue();
       }
       break;
-    case SETTINGS_TYPE_INT:
+    case SettingTypeInteger:
       {
-        CSettingInt *intSetting = (CSettingInt *) (*itr).second;
+        CSettingInt *intSetting = (CSettingInt *) (*itr).second.m_setting;
         if (intSetting)
-          strValue.Format("%d", intSetting->GetData());
+          strValue = StringUtils::Format("%d", intSetting->GetValue());
       }
       break;
-    case SETTINGS_TYPE_FLOAT:
+    case SettingTypeNumber:
       {
-        CSettingFloat *floatSetting = (CSettingFloat *) (*itr).second;
+        CSettingNumber *floatSetting = (CSettingNumber *) (*itr).second.m_setting;
         if (floatSetting)
-          strValue.Format("%.2f", floatSetting->GetData());
+          strValue = StringUtils::Format("%.2f", floatSetting->GetValue());
       }
       break;
-    case SETTINGS_TYPE_BOOL:
+    case SettingTypeBool:
       {
-        CSettingBool *boolSetting = (CSettingBool *) (*itr).second;
+        CSettingBool *boolSetting = (CSettingBool *) (*itr).second.m_setting;
         if (boolSetting)
-          strValue.Format("%d", boolSetting->GetData() ? 1:0);
+          strValue = StringUtils::Format("%d", boolSetting->GetValue() ? 1:0);
       }
       break;
     default:
@@ -471,7 +477,7 @@ void CPeripheral::PersistSettings(bool bExiting /* = false */)
 
   if (!bExiting)
   {
-    for (set<CStdString>::const_iterator it = m_changedSettings.begin(); it != m_changedSettings.end(); it++)
+    for (set<CStdString>::const_iterator it = m_changedSettings.begin(); it != m_changedSettings.end(); ++it)
       OnSettingChanged(*it);
   }
   m_changedSettings.clear();
@@ -499,7 +505,7 @@ void CPeripheral::ResetDefaultSettings(void)
   ClearSettings();
   g_peripherals.GetSettingsFromMapping(*this);
 
-  map<CStdString, CSetting *>::iterator it = m_settings.begin();
+  map<CStdString, PeripheralDeviceSetting>::iterator it = m_settings.begin();
   while (it != m_settings.end())
   {
     m_changedSettings.insert((*it).first);
@@ -511,10 +517,10 @@ void CPeripheral::ResetDefaultSettings(void)
 
 void CPeripheral::ClearSettings(void)
 {
-  map<CStdString, CSetting *>::iterator it = m_settings.begin();
+  map<CStdString, PeripheralDeviceSetting>::iterator it = m_settings.begin();
   while (it != m_settings.end())
   {
-    delete (*it).second;
+    delete (*it).second.m_setting;
     ++it;
   }
   m_settings.clear();

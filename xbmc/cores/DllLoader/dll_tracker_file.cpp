@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,8 +24,9 @@
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 #include "utils/CharsetConverter.h"
+#include "utils/StdString.h"
 
-#ifdef _LINUX
+#ifdef TARGET_POSIX
 #define dll_open open
 #define dll_fopen fopen
 #define dll_close close
@@ -56,10 +57,9 @@ extern "C" void tracker_file_free(uintptr_t caller, uintptr_t handle, TrackedFil
   if (pInfo)
   {
     CSingleLock lock(g_trackerLock);
-    TrackedFile* file;
     for (FileListIter it = pInfo->fileList.begin(); it != pInfo->fileList.end(); ++it)
     {
-      file = *it;
+      TrackedFile* file = *it;
       if (file->handle == handle && file->type == type)
       {
         free(file->name);
@@ -77,11 +77,10 @@ extern "C" void tracker_file_free_all(DllTrackInfo* pInfo)
   if (!pInfo->fileList.empty())
   {
     CSingleLock lock(g_trackerLock);
-    TrackedFile* file;
     CLog::Log(LOGDEBUG, "%s: Detected open files: %"PRIdS"", pInfo->pDll->GetFileName(), pInfo->fileList.size());
     for (FileListIter it = pInfo->fileList.begin(); it != pInfo->fileList.end(); ++it)
     {
-      file = *it;
+      TrackedFile* file = *it;
       CLog::Log(LOGDEBUG, "%s", file->name);
       free(file->name);
 

@@ -1,7 +1,6 @@
-#pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +17,7 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -44,6 +44,8 @@ protected:
                         const std::string& fcr_name,
                         unsigned int f_port,
                         const std::vector<std::pair<std::string, std::string> >& txt);
+
+  bool doForceReAnnounceService(const std::string& fcr_identifier);
 
   bool doRemoveService(const std::string& fcr_ident);
 

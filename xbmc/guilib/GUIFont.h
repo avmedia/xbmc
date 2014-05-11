@@ -9,7 +9,7 @@
 
 /*
  *      Copyright (C) 2003-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -124,7 +124,9 @@ public:
                  const vecText &text, uint32_t alignment, float maxPixelWidth);
 
   void DrawScrollingText( float x, float y, const vecColors &colors, color_t shadowColor,
-                 const vecText &text, uint32_t alignment, float maxPixelWidth, CScrollInfo &scrollInfo);
+                 const vecText &text, uint32_t alignment, float maxPixelWidth, const CScrollInfo &scrollInfo);
+
+  bool UpdateScrollInfo(const vecText &text, CScrollInfo &scrollInfo);
 
   float GetTextWidth( const vecText &text );
   float GetCharWidth( character_t ch );

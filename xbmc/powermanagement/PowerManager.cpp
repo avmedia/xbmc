@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@
 #include "Application.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "input/KeyboardStat.h"
-#include "settings/GUISettings.h"
+#include "settings/lib/Setting.h"
+#include "settings/Settings.h"
 #include "windowing/WindowingFactory.h"
 #include "utils/log.h"
 #include "utils/Weather.h"
@@ -39,15 +40,18 @@
 #include "osx/CocoaPowerSyscall.h"
 #elif defined(TARGET_ANDROID)
 #include "android/AndroidPowerSyscall.h"
-#elif defined(_LINUX) && defined(HAS_DBUS)
+#elif defined(TARGET_POSIX)
+#include "linux/FallbackPowerSyscall.h"
+#if defined(HAS_DBUS)
 #include "linux/ConsoleUPowerSyscall.h"
 #include "linux/ConsoleDeviceKitPowerSyscall.h"
-#include "linux/SystemdUPowerSyscall.h"
+#include "linux/LogindUPowerSyscall.h"
 #include "linux/UPowerSyscall.h"
-#ifdef HAS_HAL
+#if defined(HAS_HAL)
 #include "linux/HALPowerSyscall.h"
-#endif
-#elif defined(_WIN32)
+#endif // HAS_HAL
+#endif // HAS_DBUS
+#elif defined(TARGET_WINDOWS)
 #include "powermanagement/windows/Win32PowerSyscall.h"
 extern HWND g_hWnd;
 #endif
@@ -72,20 +76,24 @@ void CPowerManager::Initialize()
   m_instance = new CCocoaPowerSyscall();
 #elif defined(TARGET_ANDROID)
   m_instance = new CAndroidPowerSyscall();
-#elif defined(_LINUX) && defined(HAS_DBUS)
+#elif defined(TARGET_POSIX)
+#if defined(HAS_DBUS)
   if (CConsoleUPowerSyscall::HasConsoleKitAndUPower())
     m_instance = new CConsoleUPowerSyscall();
   else if (CConsoleDeviceKitPowerSyscall::HasDeviceConsoleKit())
     m_instance = new CConsoleDeviceKitPowerSyscall();
-  else if (CSystemdUPowerSyscall::HasSystemdAndUPower())
-    m_instance = new CSystemdUPowerSyscall();
+  else if (CLogindUPowerSyscall::HasLogind())
+    m_instance = new CLogindUPowerSyscall();
   else if (CUPowerSyscall::HasUPower())
     m_instance = new CUPowerSyscall();
-#ifdef HAS_HAL
-  else
+#if defined(HAS_HAL)
+  else if(1)
     m_instance = new CHALPowerSyscall();
-#endif
-#elif defined(_WIN32)
+#endif // HAS_HAL
+  else
+#endif // HAS_DBUS
+    m_instance = new CFallbackPowerSyscall();
+#elif defined(TARGET_WINDOWS)
   m_instance = new CWin32PowerSyscall();
 #endif
 
@@ -95,7 +103,7 @@ void CPowerManager::Initialize()
 
 void CPowerManager::SetDefaults()
 {
-  int defaultShutdown = g_guiSettings.GetInt("powermanagement.shutdownstate");
+  int defaultShutdown = CSettings::Get().GetInt("powermanagement.shutdownstate");
 
   switch (defaultShutdown)
   {
@@ -134,7 +142,7 @@ void CPowerManager::SetDefaults()
     break;
   }
 
-  g_guiSettings.SetInt("powermanagement.shutdownstate", defaultShutdown);
+  ((CSettingInt*)CSettings::Get().GetSetting("powermanagement.shutdownstate"))->SetDefault(defaultShutdown);
 }
 
 bool CPowerManager::Powerdown()
@@ -216,7 +224,12 @@ int CPowerManager::BatteryLevel()
 }
 void CPowerManager::ProcessEvents()
 {
-  m_instance->PumpPowerEvents(this);
+  static int nesting = 0;
+
+  if (++nesting == 1)
+    m_instance->PumpPowerEvents(this);
+
+  nesting--;
 }
 
 void CPowerManager::OnSleep()
@@ -234,6 +247,7 @@ void CPowerManager::OnSleep()
   g_application.StopPlaying();
   g_application.StopShutdownTimer();
   g_application.StopScreenSaverTimer();
+  g_application.CloseNetworkShares();
   CAEFactory::Suspend();
 }
 
@@ -251,7 +265,7 @@ void CPowerManager::OnWake()
 #if defined(HAS_SDL) || defined(TARGET_WINDOWS)
   if (g_Windowing.IsFullScreen())
   {
-#if defined(_WIN32)
+#if defined(TARGET_WINDOWS)
     ShowWindow(g_hWnd,SW_RESTORE);
     SetForegroundWindow(g_hWnd);
 #elif !defined(TARGET_DARWIN_OSX)
@@ -284,4 +298,21 @@ void CPowerManager::OnLowBattery()
   CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(13050), "");
 
   CAnnouncementManager::Announce(System, "xbmc", "OnLowBattery");
+}
+
+void CPowerManager::SettingOptionsShutdownStatesFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current)
+{
+  if (g_powerManager.CanPowerdown())
+    list.push_back(make_pair(g_localizeStrings.Get(13005), POWERSTATE_SHUTDOWN));
+  if (g_powerManager.CanHibernate())
+    list.push_back(make_pair(g_localizeStrings.Get(13010), POWERSTATE_HIBERNATE));
+  if (g_powerManager.CanSuspend())
+    list.push_back(make_pair(g_localizeStrings.Get(13011), POWERSTATE_SUSPEND));
+  if (!g_application.IsStandAlone())
+  {
+    list.push_back(make_pair(g_localizeStrings.Get(13009), POWERSTATE_QUIT));
+#if !defined(TARGET_DARWIN_IOS)
+    list.push_back(make_pair(g_localizeStrings.Get(13014), POWERSTATE_MINIMIZE));
+#endif
+  }
 }

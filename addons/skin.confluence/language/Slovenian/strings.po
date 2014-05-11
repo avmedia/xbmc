@@ -1,16 +1,15 @@
 # XBMC Media Center language file
 # Addon Name: Confluence
 # Addon id: skin.confluence
-# Addon version: 2.1.3
 # Addon Provider: Jezz_X, Team XBMC
 msgid ""
 msgstr ""
-"Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
+"Project-Id-Version: XBMC Main\n"
 "Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: XBMC Translation Team\n"
-"Language-Team: Slovenian (http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/sl/)\n"
+"Language-Team: Slovenian (http://www.transifex.com/projects/p/xbmc-main/language/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -27,7 +26,7 @@ msgstr "Zapusti"
 
 msgctxt "#31004"
 msgid "Working..."
-msgstr "Počakajte..."
+msgstr "Počakajte ..."
 
 msgctxt "#31005"
 msgid "Hide Information"
@@ -38,8 +37,8 @@ msgid "View Options"
 msgstr "Možnosti pogleda"
 
 msgctxt "#31008"
-msgid "Fullscreen"
-msgstr "Celozaslonski način"
+msgid "Full screen"
+msgstr "Celozaslonsko"
 
 msgctxt "#31009"
 msgid "Total Duration"
@@ -75,7 +74,7 @@ msgstr "Plakati"
 
 msgctxt "#31029"
 msgid "Fanart"
-msgstr "Ozadja"
+msgstr "Grafike"
 
 msgctxt "#31031"
 msgid "Pic Thumbs"
@@ -88,6 +87,10 @@ msgstr "Slike"
 msgctxt "#31033"
 msgid "Info"
 msgstr "Informacije"
+
+msgctxt "#31039"
+msgid "Actions"
+msgstr "Dejanja"
 
 msgctxt "#31040"
 msgid "Now Playing"
@@ -109,8 +112,12 @@ msgctxt "#31045"
 msgid "REWIND"
 msgstr "NAZAJ"
 
+msgctxt "#31046"
+msgid "SEEKING"
+msgstr "ISKANJE"
+
 msgctxt "#31048"
-msgid "Visualization Presets"
+msgid "Visualisation Presets"
 msgstr "Prednastavitve vizualizacije"
 
 msgctxt "#31049"
@@ -147,7 +154,7 @@ msgstr "Trenutni seznam predvajanja"
 
 msgctxt "#31060"
 msgid "This file is stacked, select the part you want to play from."
-msgstr "Ta datoteka je razdeljena. Izberite del za predvajanje."
+msgstr "Ta datoteka je združena. Izberite del za predvajanje."
 
 msgctxt "#31061"
 msgid "Current Selected"
@@ -155,7 +162,7 @@ msgstr "Trenutno izbrano"
 
 msgctxt "#31101"
 msgid "Home screen options"
-msgstr "Nastavitve domačega okna"
+msgstr "Možnosti domačega okna"
 
 msgctxt "#31102"
 msgid "Background"
@@ -166,8 +173,8 @@ msgid "Show \"Paused\" in picture slide show"
 msgstr "Prikaži \"Prekinitev\" v projekciji slik"
 
 msgctxt "#31104"
-msgid "Play Trailers in a window [COLOR=grey3](Video Information Dialog Only)[/COLOR]"
-msgstr "Predvajaj napovednike v oknu [COLOR=grey3](Le okno z informacijami o videu)[/COLOR]"
+msgid "Play Trailers in a window [COLOR=grey3](Video Information Dialogue Only)[/COLOR]"
+msgstr "Predvajaj napovednike v oknu [COLOR=grey3](Samo okno z informacijami o videu)[/COLOR]"
 
 msgctxt "#31106"
 msgid "Miscellaneous options"
@@ -206,23 +213,19 @@ msgid "Show Recently added Videos"
 msgstr "Prikaži nedavno dodane videe"
 
 msgctxt "#31118"
-msgid "Home Page Programs Submenu"
+msgid "Home Page Programs Sub-menu"
 msgstr "Podmeni programov na domačem oknu"
 
 msgctxt "#31119"
 msgid "Hide Background Fanart"
 msgstr "Skrij ozadja"
 
-msgctxt "#31122"
-msgid "Weather Page"
-msgstr "Vreme"
-
 msgctxt "#31124"
 msgid "Show Background \"Now Playing\" Video"
-msgstr "V ozadjnu prikaži video \"Trenutno predvajam\""
+msgstr "V ozadju prikaži video \"Trenutno predvajam\""
 
 msgctxt "#31125"
-msgid "Show Background \"Now Playing\" Visualization"
+msgid "Show Background \"Now Playing\" Visualisation"
 msgstr "V ozadju prikaži vizualizacijo \"Trenutno predvajam\""
 
 msgctxt "#31126"
@@ -238,27 +241,23 @@ msgid "Lyrics"
 msgstr "Besedilo pesmi"
 
 msgctxt "#31129"
-msgid "Hide Fanart in full screen visualization"
-msgstr "Skrij ozadja v celozaslonski vizualizaciji"
+msgid "Hide Fanart in full screen visualisation"
+msgstr "Skrij grafike v vizualizaciji v celozaslonskem načinu"
 
 msgctxt "#31132"
 msgid "Lyrics Add-on"
 msgstr "Dodatek besedil pesmi"
 
-msgctxt "#31133"
-msgid "Subtitle Add-on"
-msgstr "Dodatek podnapisov"
-
 msgctxt "#31134"
-msgid "Home Page Videos Submenu"
-msgstr "Podmeni videev na domačem oknu"
+msgid "Home Page Videos Sub-menu"
+msgstr "Podmeni videa na domačem oknu"
 
 msgctxt "#31135"
-msgid "Home Page Music Submenu"
+msgid "Home Page Music Sub-menu"
 msgstr "Podmeni glasbe na domačem oknu"
 
 msgctxt "#31136"
-msgid "Home Page Pictures Submenu"
+msgid "Home Page Pictures Sub-menu"
 msgstr "Podmeni slik na domačem oknu"
 
 msgctxt "#31140"
@@ -268,6 +267,10 @@ msgstr "Glasbeni OSD"
 msgctxt "#31141"
 msgid "Video OSD"
 msgstr "Video OSD"
+
+msgctxt "#31142"
+msgid "Settings level"
+msgstr "Nivo nastavitev"
 
 msgctxt "#31200"
 msgid "Shortcuts"
@@ -307,7 +310,7 @@ msgstr "Ponudnik"
 
 msgctxt "#31307"
 msgid "Hide Fanart"
-msgstr "Skrij ozadje"
+msgstr "Skrij grafike"
 
 msgctxt "#31308"
 msgid "Movie Details"
@@ -323,7 +326,7 @@ msgstr "Številka pesmi"
 
 msgctxt "#31311"
 msgid "Fanart image[CR][CR]Unavailable[CR][CR] Click button to set"
-msgstr "Ozadje[CR][CR]Ni na voljo[CR][CR] Kliknite na gumb in ga nastavite"
+msgstr "Grafika[CR][CR]Ni na voljo[CR][CR] Kliknite na gumb za nastavitev"
 
 msgctxt "#31312"
 msgid "Current Scraper"
@@ -335,11 +338,11 @@ msgstr "Izberi ponudnika"
 
 msgctxt "#31314"
 msgid "Content Scanning Options"
-msgstr "Možnosti iskanja vsebine"
+msgstr "Možnosti pregledovanja vsebin"
 
 msgctxt "#31317"
 msgid "Set Fanart Path"
-msgstr "Nastavi pot ozadij"
+msgstr "Nastavi pot grafik"
 
 msgctxt "#31319"
 msgid "Selected Profile"
@@ -375,7 +378,7 @@ msgstr "Nedavno dodano"
 
 msgctxt "#31329"
 msgid "[B]Timer set![/B] [COLOR=grey2] - System auto shutdown in[/COLOR]"
-msgstr "[B]Zakasnitev nastavljena![/B] [COLOR=grey2] - Sistem se bo izključil po[/COLOR]"
+msgstr "[B]Zakasnitev nastavljena![/B] [COLOR=grey2] - Sistem se bo izklopil po[/COLOR]"
 
 msgctxt "#31330"
 msgid "Click button to play[CR][CR]Movie trailer"
@@ -409,6 +412,18 @@ msgctxt "#31356"
 msgid "Download Subtitles"
 msgstr "Prenesi podnapise"
 
+msgctxt "#31360"
+msgid "Watch as 2D"
+msgstr "Glej kot 2D"
+
+msgctxt "#31361"
+msgid "Change mode"
+msgstr "Spremeni način"
+
+msgctxt "#31362"
+msgid "Enabled"
+msgstr "Vključen"
+
 msgctxt "#31390"
 msgid "Skin default"
 msgstr "Privzeto"
@@ -435,7 +450,7 @@ msgstr "[B]PRILAGODITE NASTAVITVE GLASBE[/B][CR][CR]Upravljajte s knjižnico gla
 
 msgctxt "#31403"
 msgid "[B]CONFIGURE PICTURE SETTINGS[/B][CR][CR]Set picture listing options · Configure slideshows"
-msgstr "[B]PRILAGODITE NASTAVITVE SLIK[/B][CR][CR]Spremenite možnosti seznamov · Nastavite diaprojekcije slik"
+msgstr "[B]PRILAGODITE NASTAVITVE SLIK[/B][CR][CR]Spremenite možnosti seznamov · Nastavite projekcije slik"
 
 msgctxt "#31404"
 msgid "[B]CONFIGURE WEATHER SETTINGS[/B][CR][CR]Set three cities to collect weather information"
@@ -450,28 +465,40 @@ msgid "[B]CONFIGURE ADD-ONS[/B][CR][CR]Manage your installed Add-ons · Browse f
 msgstr "[B]PRILAGODITE DODATKE[/B][CR][CR]Upravljajte nameščene dodatke · Brskajte in namestite nove dodatke iz xbmc.org[CR]Nastavite dodatke"
 
 msgctxt "#31409"
-msgid "[B]CONFIGURE TV SETTINGS[/B][CR][CR]Change fullscreen info · Manage EPG data settings"
+msgid "[B]CONFIGURE TV SETTINGS[/B][CR][CR]Change full screen info · Manage EPG data settings"
 msgstr "[B]PRILAGODITVE NASTAVITVE TV[/B][CR][CR]Spremenite informacije v celozaslonskem načinu · Upravljajte z nastavitvami EPG"
 
 msgctxt "#31410"
 msgid "[B]CONFIGURE SERVICE SETTINGS[/B][CR][CR]Setup control of XBMC via UPnP and HTTP · Configure file sharing[CR]Enable Zeroconf · Configure AirPlay"
-msgstr "[B]PRILAGODITE NASTAVITVE STORITEV[/B][CR][CR]Nastavite upravljanje XBMC preko UPnP in HTTP · Nastavite deljenje datotek[CR]Vključite Zeroconf · Prilagodite AirPlay"
+msgstr "[B]PRILAGODITE NASTAVITVE STORITEV[/B][CR][CR]Nastavite upravljanje XBMC-ja preko UPnP-ja in HTTP-ja · Nastavite deljenje datotek[CR]Vključite Zeroconf · Prilagodite AirPlay"
 
 msgctxt "#31411"
 msgid "First run help...."
-msgstr "Pomoč ob prvem zagonu..."
+msgstr "Pomoč ob prvem zagonu ..."
 
 msgctxt "#31412"
-msgid "This tab signifies that there is a menu off to the side of this window that contains extra options for this section.  To access the menu, navigate to the left with your remote control or keyboard or place your mouse pointer over the tab. [CR][CR]Click \"Ok\" to close this dialog. It will not appear again."
-msgstr "Ta zavihek nakazuje, da se tu skriva meni z dodatnimi možnostmi trenutnega pogleda.  Za dostop do menija pritisnite levo na vašem daljinskem upravljalcu ali tipkovnici ali pa postavite miško na zavihek. [CR][CR]Kliknite \"Ok\", da zaprete to okno. Ne bo se več prikazalo."
+msgid "This tab signifies that there is a menu off to the side of this window that contains extra options for this section.  To access the menu, navigate to the left with your remote control or keyboard or place your mouse pointer over the tab. [CR][CR]Click \"Ok\" to close this dialogue. It will not appear again."
+msgstr "Ta zavihek nakazuje, da se tu skriva meni z dodatnimi možnostmi trenutnega pogleda. Za dostop do menija pritisnite levo na vašem daljinskem upravljalniku ali tipkovnici, ali pa postavite miško na zavihek. [CR][CR]Kliknite \"Ok\", da zaprete to okno. Ne bo se več prikazalo."
+
+msgctxt "#31413"
+msgid "Local subtitle available"
+msgstr "Na voljo so krajevni podnapisi"
+
+msgctxt "#31420"
+msgid "Login"
+msgstr "Prijava"
 
 msgctxt "#31421"
 msgid "Select your XBMC user Profile[CR]to login and continue"
 msgstr "Izberite vaš XBMC uporabniški profil[CR]za prijavo in nadaljujte"
 
-msgctxt "#31500"
-msgid "Recording Timers"
-msgstr "Trenutna snemanja"
+msgctxt "#31422"
+msgid "Show or hide the login screen at startup."
+msgstr "Ob zagonu prikažite ali skrijte okno za prijavo."
+
+msgctxt "#31423"
+msgid "Select the profile that will be used at startup when the login screen is disabled."
+msgstr "Izberite profil, ki bo uporabljen ob zagonu, ko je okno za prijavo onemogočeno."
 
 msgctxt "#31501"
 msgid "Scheduled Time"
@@ -519,7 +546,7 @@ msgstr "Urna napoved"
 
 msgctxt "#31903"
 msgid "Weekend Forecast"
-msgstr "Tedenska napoved"
+msgstr "Vikend napoved"
 
 msgctxt "#31904"
 msgid "10 Day Forecast"
@@ -535,8 +562,48 @@ msgstr "Možnost padavin"
 
 msgctxt "#31909"
 msgid "Fetching forecast info..."
-msgstr "Prenašam vremenske informacije..."
+msgstr "Prenašam vremenske informacije ..."
 
 msgctxt "#31910"
 msgid "Map & Alerts"
 msgstr "Karte & Opozorila"
+
+msgctxt "#31950"
+msgid "WEATHER"
+msgstr "VREME"
+
+msgctxt "#31951"
+msgid "PICTURES"
+msgstr "SLIKE"
+
+msgctxt "#31952"
+msgid "LIVE TV"
+msgstr "TV V ŽIVO"
+
+msgctxt "#31953"
+msgid "VIDEOS"
+msgstr "VIDEO"
+
+msgctxt "#31954"
+msgid "MOVIES"
+msgstr "FILMI"
+
+msgctxt "#31955"
+msgid "TV SHOWS"
+msgstr "TV SERIJE"
+
+msgctxt "#31956"
+msgid "MUSIC"
+msgstr "GLASBA"
+
+msgctxt "#31957"
+msgid "PROGRAMS"
+msgstr "PROGRAMI"
+
+msgctxt "#31958"
+msgid "PLAY DISC"
+msgstr "PREDVAJAJ DISK"
+
+msgctxt "#31959"
+msgid "SYSTEM"
+msgstr "SISTEM"

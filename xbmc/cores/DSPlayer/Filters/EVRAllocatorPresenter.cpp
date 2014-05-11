@@ -2307,7 +2307,7 @@ void CEVRAllocatorPresenter::PaintInternal()
   }
 
   m_drawingIsDone.Reset();
-  g_application.NewFrame();
+
   m_drawingIsDone.Wait(); // Wait until the drawing is done
 
   {

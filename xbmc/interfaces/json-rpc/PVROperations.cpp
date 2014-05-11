@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/timers/PVRTimers.h"
 #include "pvr/timers/PVRTimerInfoTag.h"
+#include "pvr/recordings/PVRRecordings.h"
+#include "pvr/timers/PVRTimers.h"
 #include "epg/Epg.h"
 #include "epg/EpgContainer.h"
 
@@ -127,7 +129,7 @@ JSONRPC_STATUS CPVROperations::GetChannels(const CStdString &method, ITransportL
   if (channelGroup->GetMembers(channels) < 0)
     return InvalidParams;
   
-  HandleFileItemList("channelid", false, "channels", channels, parameterObject, result, false);
+  HandleFileItemList("channelid", false, "channels", channels, parameterObject, result, true);
     
   return OK;
 }
@@ -149,6 +151,55 @@ JSONRPC_STATUS CPVROperations::GetChannelDetails(const CStdString &method, ITran
     
   return OK;
 }
+
+JSONRPC_STATUS CPVROperations::GetBroadcasts(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+{
+  if (!g_PVRManager.IsStarted())
+    return FailedToExecute;
+
+  CPVRChannelGroupsContainer *channelGroupContainer = g_PVRManager.ChannelGroups();
+  if (channelGroupContainer == NULL)
+    return FailedToExecute;
+
+  CPVRChannelPtr channel = channelGroupContainer->GetChannelById((int)parameterObject["channelid"].asInteger());
+  if (channel == NULL)
+    return InvalidParams;
+
+  CEpg *channelEpg = channel->GetEPG();
+  if (channelEpg == NULL)
+    return InternalError;
+
+  CFileItemList programFull;
+  channelEpg->Get(programFull);
+
+  HandleFileItemList("broadcastid", false, "broadcasts", programFull, parameterObject, result, programFull.Size(), true);
+
+  return OK;
+}
+
+JSONRPC_STATUS CPVROperations::GetBroadcastDetails(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+{
+  if (!g_PVRManager.IsStarted())
+    return FailedToExecute;
+
+  EpgSearchFilter filter;
+  filter.Reset();
+  filter.m_iUniqueBroadcastId = (int)parameterObject["broadcastid"].asInteger();
+
+  CFileItemList broadcasts;
+  int resultSize = g_EpgContainer.GetEPGSearch(broadcasts, filter);
+
+  if (resultSize <= 0)
+    return InvalidParams;
+  else if (resultSize > 1)
+    return InternalError;
+
+  CFileItemPtr broadcast = broadcasts.Get(0);
+  HandleFileItem("broadcastid", false, "broadcastdetails", broadcast, parameterObject, parameterObject["properties"], result, false);
+
+  return OK;
+}
+
 
 JSONRPC_STATUS CPVROperations::Record(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
@@ -188,7 +239,7 @@ JSONRPC_STATUS CPVROperations::Record(const CStdString &method, ITransportLayer 
     if (!g_PVRManager.ToggleRecordingOnChannel(pChannel->ChannelID()))
       return FailedToExecute;
   }
-  
+
   return ACK;
 }
 
@@ -250,4 +301,74 @@ void CPVROperations::FillChannelGroupDetails(const CPVRChannelGroupPtr &channelG
 
     result = object;
   }
+}
+
+JSONRPC_STATUS CPVROperations::GetTimers(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+{
+  if (!g_PVRManager.IsStarted())
+    return FailedToExecute;
+
+  CPVRTimers* timers = g_PVRTimers;
+  if (!timers)
+    return FailedToExecute;
+
+  CFileItemList timerList;
+  timers->GetAll(timerList);
+
+  HandleFileItemList("timerid", false, "timers", timerList, parameterObject, result, true);
+
+  return OK;
+}
+
+JSONRPC_STATUS CPVROperations::GetTimerDetails(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+{
+  if (!g_PVRManager.IsStarted())
+    return FailedToExecute;
+
+  CPVRTimers* timers = g_PVRTimers;
+  if (!timers)
+    return FailedToExecute;
+
+  CPVRTimerInfoTagPtr timer = timers->GetById((int)parameterObject["timerid"].asInteger());
+  if (!timer)
+    return InvalidParams;
+
+  HandleFileItem("timerid", false, "timerdetails", CFileItemPtr(new CFileItem(*timer)), parameterObject, parameterObject["properties"], result, false);
+
+  return OK;
+}
+
+JSONRPC_STATUS CPVROperations::GetRecordings(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+{
+  if (!g_PVRManager.IsStarted())
+    return FailedToExecute;
+
+  CPVRRecordings* recordings = g_PVRRecordings;
+  if (!recordings)
+    return FailedToExecute;
+
+  CFileItemList recordingsList;
+  recordings->GetAll(recordingsList);
+
+  HandleFileItemList("recordingid", true, "recordings", recordingsList, parameterObject, result, true);
+
+  return OK;
+}
+
+JSONRPC_STATUS CPVROperations::GetRecordingDetails(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+{
+  if (!g_PVRManager.IsStarted())
+    return FailedToExecute;
+
+  CPVRRecordings* recordings = g_PVRRecordings;
+  if (!recordings)
+    return FailedToExecute;
+
+  CFileItemPtr recording = recordings->GetById((int)parameterObject["recordingid"].asInteger());
+  if (!recording)
+    return InvalidParams;
+
+  HandleFileItem("recordingid", true, "recordingdetails", recording, parameterObject, parameterObject["properties"], result, false);
+
+  return OK;
 }

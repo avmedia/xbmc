@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -124,9 +124,10 @@ bool CWebSocketV13::Handshake(const char* data, size_t length, std::string &resp
   {
     CStdStringArray protocols;
     StringUtils::SplitString(value, ",", protocols);
-    for (unsigned int index = 0; index < protocols.size(); index++)
+    for (CStdStringArray::iterator protocol = protocols.begin(); protocol != protocols.end(); ++protocol)
     {
-      if (protocols.at(index).Trim().Equals(WS_PROTOCOL_JSONRPC))
+      StringUtils::Trim(*protocol);
+      if (*protocol == WS_PROTOCOL_JSONRPC)
       {
         websocketProtocol = WS_PROTOCOL_JSONRPC;
         break;

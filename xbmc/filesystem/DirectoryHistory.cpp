@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -118,6 +118,16 @@ void CDirectoryHistory::ClearPathHistory()
   m_vecPathHistory.clear();
 }
 
+bool CDirectoryHistory::IsMusicSearchUrl(CPathHistoryItem &i)
+{
+  return StringUtils::StartsWith(i.GetPath(), "musicsearch://");
+}
+
+void CDirectoryHistory::ClearSearchHistory()
+{
+  m_vecPathHistory.erase(remove_if(m_vecPathHistory.begin(), m_vecPathHistory.end(), IsMusicSearchUrl), m_vecPathHistory.end());
+}
+
 void CDirectoryHistory::DumpPathHistory()
 {
   // debug log
@@ -130,7 +140,8 @@ CStdString CDirectoryHistory::preparePath(const CStdString &strDirectory, bool t
 {
   CStdString strDir = strDirectory;
   if (tolower)
-    strDir.ToLower();
+    StringUtils::ToLower(strDir);
+
   URIUtils::RemoveSlashAtEnd(strDir);
 
   return strDir;

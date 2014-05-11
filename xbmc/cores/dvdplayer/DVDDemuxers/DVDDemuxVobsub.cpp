@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@
 #include "DVDClock.h"
 #include "DVDSubtitles/DVDSubtitleStream.h"
 
+#include <string.h>
+
 using namespace std;
 
 CDVDDemuxVobsub::CDVDDemuxVobsub()
@@ -38,8 +40,6 @@ CDVDDemuxVobsub::~CDVDDemuxVobsub()
 {
   for(unsigned i=0;i<m_Streams.size();i++)
   {
-    if(m_Streams[i]->ExtraData)
-      free(m_Streams[i]->ExtraData);
     delete m_Streams[i];
   }
   m_Streams.clear();
@@ -71,7 +71,7 @@ bool CDVDDemuxVobsub::Open(const string& filename, const string& subfilename)
 
   CDVDStreamInfo hints;
   CDVDCodecOptions options;
-  hints.codec = CODEC_ID_DVD_SUBTITLE;
+  hints.codec = AV_CODEC_ID_DVD_SUBTITLE;
 
   char line[2048];
   DECLARE_UNUSED(bool,res)
@@ -112,7 +112,8 @@ bool CDVDDemuxVobsub::Open(const string& filename, const string& subfilename)
   for(unsigned i=0;i<m_Streams.size();i++)
   {
     m_Streams[i]->ExtraSize = state.extra.length()+1;
-    m_Streams[i]->ExtraData = strdup(state.extra.c_str());
+    m_Streams[i]->ExtraData = new uint8_t[m_Streams[i]->ExtraSize];
+    strcpy((char*)m_Streams[i]->ExtraData, state.extra.c_str());
   }
 
   return true;
@@ -132,14 +133,14 @@ bool CDVDDemuxVobsub::SeekTime(int time, bool backwords, double* startpts)
 {
   double pts = DVD_MSEC_TO_TIME(time);
   m_Timestamp = m_Timestamps.begin();
-  for(;m_Timestamp != m_Timestamps.end();m_Timestamp++)
+  for(;m_Timestamp != m_Timestamps.end();++m_Timestamp)
   {
     if(m_Timestamp->pts > pts)
       break;
   }
   for(unsigned i=0;i<m_Streams.size() && m_Timestamps.begin() != m_Timestamp;i++)
   {
-    m_Timestamp--;
+    --m_Timestamp;
   }
   return true;
 }
@@ -211,7 +212,7 @@ bool CDVDDemuxVobsub::ParseId(SState& state, char* line)
   else
     stream->iPhysicalId = -1;
 
-  stream->codec = CODEC_ID_DVD_SUBTITLE;
+  stream->codec = AV_CODEC_ID_DVD_SUBTITLE;
   stream->iId = m_Streams.size();
 
   state.id = stream->iId;

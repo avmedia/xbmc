@@ -2,6 +2,9 @@
  *      Copyright (C) 2010 Team Boxee
  *      http://www.boxee.tv
  *
+ *      Copyright (C) 2010-2013 Team XBMC
+ *      http://xbmc.org
+ *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
@@ -17,7 +20,6 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
-
 #include "UDFDirectory.h"
 #include "udf25.h"
 #include "Util.h"
@@ -40,7 +42,7 @@ bool CUDFDirectory::GetDirectory(const CStdString& strPath,
 {
   CStdString strRoot, strSub;
   CURL url;
-  if(strPath.Left(6) == "udf://")
+  if(StringUtils::StartsWith(strPath, "udf://"))
   {
     url.Parse(strPath);
     CURL url(strPath);
@@ -57,7 +59,10 @@ bool CUDFDirectory::GetDirectory(const CStdString& strPath,
   URIUtils::AddSlashAtEnd(strSub);
 
   udf25 udfIsoReader;
-  udf_dir_t *dirp = udfIsoReader.OpenDir(url.GetHostName(), strSub);
+  if(!udfIsoReader.Open(url.GetHostName()))
+     return false;
+
+  udf_dir_t *dirp = udfIsoReader.OpenDir(strSub);
 
   if (dirp == NULL)
     return false;

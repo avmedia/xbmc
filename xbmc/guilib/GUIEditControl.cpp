@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include "Key.h"
 #include "LocalizeStrings.h"
 #include "XBDateTime.h"
+#include "windowing/WindowingFactory.h"
 #include "utils/md5.h"
 
 #if defined(TARGET_DARWIN)
@@ -38,7 +39,7 @@ const unsigned int CGUIEditControl::smsDelay = 1000;
 
 using namespace std;
 
-#ifdef WIN32
+#ifdef TARGET_WINDOWS
 extern HWND g_hWnd;
 #endif
 
@@ -65,6 +66,9 @@ void CGUIEditControl::DefaultConstructor()
   m_label.SetAlign(m_label.GetLabelInfo().align & XBFONT_CENTER_Y); // left align
   m_label2.GetLabelInfo().offsetX = 0;
   m_isMD5 = false;
+  m_invalidInput = false;
+  m_inputValidator = NULL;
+  m_inputValidatorData = NULL;
 }
 
 CGUIEditControl::CGUIEditControl(const CGUIButtonControl &button)
@@ -142,6 +146,7 @@ bool CGUIEditControl::OnAction(const CAction &action)
     {
       ClearMD5();
       OnPasteClipboard();
+      return true;
     }
     else if (action.GetID() >= KEY_VKEY && action.GetID() < KEY_ASCII)
     {
@@ -333,6 +338,8 @@ void CGUIEditControl::UpdateText(bool sendUpdate)
   m_smsTimer.Stop();
   if (sendUpdate)
   {
+    ValidateInput();
+
     SEND_CLICK_MESSAGE(GetID(), GetParentID(), 0);
 
     m_textChangeActions.ExecuteActions(GetID(), GetParentID());
@@ -354,8 +361,8 @@ void CGUIEditControl::RecalcLabelPosition()
 
   CStdStringW text = GetDisplayedText();
   m_textWidth = m_label.CalcTextWidth(text + L'|');
-  float beforeCursorWidth = m_label.CalcTextWidth(text.Left(m_cursorPos));
-  float afterCursorWidth = m_label.CalcTextWidth(text.Left(m_cursorPos) + L'|');
+  float beforeCursorWidth = m_label.CalcTextWidth(text.substr(0, m_cursorPos));
+  float afterCursorWidth = m_label.CalcTextWidth(text.substr(0, m_cursorPos) + L'|');
   float leftTextWidth = m_label.GetRenderRect().Width();
   float maxTextWidth = m_label.GetMaxWidth();
   if (leftTextWidth > 0)
@@ -440,11 +447,11 @@ void CGUIEditControl::ProcessText(unsigned int currentTime)
         col = L"|";
       else
         col = L"[COLOR 00FFFFFF]|[/COLOR]";
-      text.Insert(m_cursorPos, col);
+      text.insert(m_cursorPos, col);
     }
 
     changed |= m_label2.SetMaxRect(m_clipRect.x1 + m_textOffset, m_posY, m_clipRect.Width() - m_textOffset, m_height);
-    if (text.IsEmpty())
+    if (text.empty())
       changed |= m_label2.SetText(m_hintInfo.GetLabel(GetParentID()));
     else
       changed |= m_label2.SetTextW(text);
@@ -467,6 +474,15 @@ void CGUIEditControl::RenderText()
     m_label2.Render();
     g_graphicsContext.RestoreClipRegion();
   }
+}
+
+CGUILabel::COLOR CGUIEditControl::GetTextColor() const
+{
+  CGUILabel::COLOR color = CGUIButtonControl::GetTextColor();
+  if (color != CGUILabel::COLOR_DISABLED && HasInvalidInput())
+    return CGUILabel::COLOR_INVALID;
+
+  return color;
 }
 
 void CGUIEditControl::SetHint(const CGUIInfoLabel& hint)
@@ -506,6 +522,7 @@ void CGUIEditControl::SetLabel2(const std::string &text)
     m_isMD5 = (m_inputType == INPUT_TYPE_PASSWORD_MD5 || m_inputType == INPUT_TYPE_PASSWORD_NUMBER_VERIFY_NEW);
     m_text2 = newText;
     m_cursorPos = m_text2.size();
+    ValidateInput();
     SetInvalid();
   }
 }
@@ -524,7 +541,7 @@ bool CGUIEditControl::ClearMD5()
   if (!(m_inputType == INPUT_TYPE_PASSWORD_MD5 || m_inputType == INPUT_TYPE_PASSWORD_NUMBER_VERIFY_NEW) || !m_isMD5)
     return false;
   
-  m_text2.Empty();
+  m_text2.clear();
   m_cursorPos = 0;
   if (m_inputType != INPUT_TYPE_PASSWORD_NUMBER_VERIFY_NEW)
     m_isMD5 = false;
@@ -576,29 +593,60 @@ void CGUIEditControl::OnSMSCharacter(unsigned int key)
 
 void CGUIEditControl::OnPasteClipboard()
 {
-#if defined(TARGET_DARWIN_OSX)
-  const char *szStr = Cocoa_Paste();
-  if (szStr)
+  CStdStringW unicode_text;
+  CStdStringA utf8_text;
+
+// Get text from the clipboard
+  utf8_text = g_Windowing.GetClipboardText();
+  g_charsetConverter.utf8ToW(utf8_text, unicode_text);
+
+  // Insert the pasted text at the current cursor position.
+  if (unicode_text.length() > 0)
   {
-    m_text2 += szStr;
-    m_cursorPos+=strlen(szStr);
+    CStdStringW left_end = m_text2.substr(0, m_cursorPos);
+    CStdStringW right_end = m_text2.substr(m_cursorPos);
+
+    m_text2 = left_end;
+    m_text2.append(unicode_text);
+    m_text2.append(right_end);
+    m_cursorPos += unicode_text.length();
     UpdateText();
   }
-#elif defined _WIN32
-  if (OpenClipboard(g_hWnd))
+}
+
+void CGUIEditControl::SetInputValidation(StringValidation::Validator inputValidator, void *data /* = NULL */)
+{
+  if (m_inputValidator == inputValidator)
+    return;
+  
+  m_inputValidator = inputValidator;
+  m_inputValidatorData = data;
+  // the input validator has changed, so re-validate the current data
+  ValidateInput();
+}
+
+bool CGUIEditControl::ValidateInput(const CStdStringW &data) const
+{
+  if (m_inputValidator == NULL)
+    return true;
+
+  return m_inputValidator(GetLabel2(), (void*)(m_inputValidatorData != NULL ? m_inputValidatorData : this));
+}
+
+void CGUIEditControl::ValidateInput()
+{
+  // validate the input
+  bool invalid = !ValidateInput(m_text2);
+  // nothing to do if still valid/invalid
+  if (invalid != m_invalidInput)
   {
-    HGLOBAL hglb = GetClipboardData(CF_TEXT);
-    if (hglb != NULL)
-    {
-      LPTSTR lptstr = (LPTSTR)GlobalLock(hglb);
-      if (lptstr != NULL)
-      {
-        m_text2 = (char*)lptstr;
-        GlobalUnlock(hglb);
-      }
-    }
-    CloseClipboard();
-    UpdateText();
+    // the validity state has changed so we need to update the control
+    m_invalidInput = invalid;
+
+    // let the window/dialog know that the validity has changed
+    CGUIMessage msg(GUI_MSG_VALIDITY_CHANGED, GetID(), GetID(), m_invalidInput ? 0 : 1);
+    SendWindowMessage(msg);
+
+    SetInvalid();
   }
-#endif
 }

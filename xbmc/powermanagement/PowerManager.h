@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,25 @@
 
 #ifndef _POWER_MANAGER_H_
 #define _POWER_MANAGER_H_
+
+#include <string>
+#include <vector>
+
 #include "IPowerSyscall.h"
+
+class CSetting;
+
+enum PowerState
+{
+  POWERSTATE_QUIT       = 0,
+  POWERSTATE_SHUTDOWN,
+  POWERSTATE_HIBERNATE,
+  POWERSTATE_SUSPEND,
+  POWERSTATE_REBOOT,
+  POWERSTATE_MINIMIZE,
+  POWERSTATE_NONE,
+  POWERSTATE_ASK
+};
 
 // For systems without PowerSyscalls we have a NullObject
 class CNullPowerSyscall : public IPowerSyscall
@@ -66,6 +84,9 @@ public:
   int  BatteryLevel();
 
   void ProcessEvents();
+
+  static void SettingOptionsShutdownStatesFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current);
+
 private:
   void OnSleep();
   void OnWake();

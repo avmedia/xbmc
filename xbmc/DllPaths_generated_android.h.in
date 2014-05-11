@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@
 #define DLL_PATH_LIBAFP        "@AFPCLIENT_SONAME@"
 #define DLL_PATH_LIBPLIST      "@PLIST_SONAME@"
 #define DLL_PATH_LIBSHAIRPORT  "@SHAIRPORT_SONAME@"
+#define DLL_PATH_LIBSHAIRPLAY  "@SHAIRPLAY_SONAME@"
 #define DLL_PATH_LIBCEC        "@LIBCEC_SONAME@"
 
 #ifndef DLL_PATH_LIBCURL
@@ -72,14 +73,15 @@
 #define DLL_PATH_LIBDVDNAV     "libdvdnav-@ARCH@.so"
 #define DLL_PATH_LIBMPEG2      "@MPEG2_SONAME@"
 #define DLL_PATH_LIBMAD        "@MAD_SONAME@"
+#define DLL_PATH_LIBSTAGEFRIGHTICS    "libXBMCvcodec_stagefrightICS-@ARCH@.so"
 
 /* ffmpeg */
-#define DLL_PATH_LIBAVCODEC    "libavcodec-53-@ARCH@.so"
-#define DLL_PATH_LIBAVFORMAT   "libavformat-53-@ARCH@.so"
-#define DLL_PATH_LIBAVUTIL     "libavutil-51-@ARCH@.so"
+#define DLL_PATH_LIBAVCODEC    "libavcodec-54-@ARCH@.so"
+#define DLL_PATH_LIBAVFORMAT   "libavformat-54-@ARCH@.so"
+#define DLL_PATH_LIBAVUTIL     "libavutil-52-@ARCH@.so"
 #define DLL_PATH_LIBPOSTPROC   "libpostproc-52-@ARCH@.so"
 #define DLL_PATH_LIBSWSCALE    "libswscale-2-@ARCH@.so"
-#define DLL_PATH_LIBAVFILTER   "libavfilter-2-@ARCH@.so"
+#define DLL_PATH_LIBAVFILTER   "libavfilter-3-@ARCH@.so"
 #define DLL_PATH_LIBSWRESAMPLE "libswresample-0-@ARCH@.so"
 
 /* cdrip */

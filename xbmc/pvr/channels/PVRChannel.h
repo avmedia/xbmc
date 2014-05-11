@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ namespace PVR
   typedef boost::shared_ptr<PVR::CPVRChannel> CPVRChannelPtr;
 
   /** PVR Channel class */
-  class CPVRChannel : public Observable, public ISerializable
+  class CPVRChannel : public Observable, public ISerializable, public ISortable
   {
     friend class CPVRDatabase;
     friend class CPVRChannelGroupInternal;
@@ -155,7 +155,12 @@ namespace PVR
      * @return True if this user changed icon via GUI. False if not.
      */
     bool IsUserSetIcon(void) const;
-	  
+
+    /*!
+     * @return True if the channel icon path exists
+     */
+    bool IsIconExists(void) const;
+
     /*!
      * @brief Set the path to the icon for this channel.
      * @param strIconPath The new path.
@@ -320,7 +325,7 @@ namespace PVR
      */
     CStdString Path(void) const;
 
-    void ToSortable(SortItem& sortable) const;
+    virtual void ToSortable(SortItem& sortable, Field field) const;
 
     /*!
      * @brief Update the path after the channel number in the internal group changed.

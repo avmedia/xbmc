@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -24,6 +23,7 @@
 #include "cores/VideoRenderers/RenderManager.h"
 #include "cores/VideoRenderers/RenderCapture.h"
 #include "AddonClass.h"
+#include "LanguageHook.h"
 #include "Exception.h"
 #include "commons/Buffer.h"
 
@@ -37,7 +37,7 @@ namespace XBMCAddon
     {
       CRenderCapture* m_capture;
     public:
-      inline RenderCapture() : AddonClass("RenderCapture"), m_capture(g_renderManager.AllocRenderCapture()) {}
+      inline RenderCapture() : m_capture(g_renderManager.AllocRenderCapture()) {}
       inline virtual ~RenderCapture() { g_renderManager.ReleaseRenderCapture(m_capture); }
 
       /**
@@ -54,9 +54,9 @@ namespace XBMCAddon
        * getCaptureState() -- returns processing state of capture request.
        *
        * The returned value could be compared against the following constants:
-       * xbmc.CAPTURE_STATE_WORKING  : Capture request in progress.
-       * xbmc.CAPTURE_STATE_DONE     : Capture request done. The image could be retrieved with getImage()
-       * xbmc.CAPTURE_STATE_FAILED   : Capture request failed.
+       * - xbmc.CAPTURE_STATE_WORKING  : Capture request in progress.
+       * - xbmc.CAPTURE_STATE_DONE     : Capture request done. The image could be retrieved with getImage()
+       * - xbmc.CAPTURE_STATE_FAILED   : Capture request failed.
        */
       inline int getCaptureState() { return m_capture->GetUserState(); }
 
@@ -91,13 +91,13 @@ namespace XBMCAddon
       /**
        * capture(width, height [, flags]) -- issue capture request.
        * 
-       * width    : Width capture image should be rendered to
-       * height   : Height capture image should should be rendered to
+       * width    : Width capture image should be rendered to\n
+       * height   : Height capture image should should be rendered to\n
        * flags    : Optional. Flags that control the capture processing.
        * 
        * The value for 'flags' could be or'ed from the following constants:
-       * xbmc.CAPTURE_FLAG_CONTINUOUS    : after a capture is done, issue a new capture request immediately
-       * xbmc.CAPTURE_FLAG_IMMEDIATELY   : read out immediately when capture() is called, this can cause a busy wait
+       * - xbmc.CAPTURE_FLAG_CONTINUOUS    : after a capture is done, issue a new capture request immediately
+       * - xbmc.CAPTURE_FLAG_IMMEDIATELY   : read out immediately when capture() is called, this can cause a busy wait
        */
       inline void capture(int width, int height, int flags = 0)
       {

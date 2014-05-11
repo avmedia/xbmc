@@ -25,9 +25,18 @@
 
 class TiXmlDocument;
 
+class CSetting;
+
 namespace PERIPHERALS
 {
   class CGUIDialogPeripheralSettings;
+
+  typedef enum
+  {
+    STATE_SWITCH_TOGGLE,
+    STATE_ACTIVATE_SOURCE,
+    STATE_STANDBY
+  } CecStateChange;
 
   class CPeripheral
   {
@@ -108,7 +117,7 @@ namespace PERIPHERALS
      * @param strKey The key of the setting.
      * @param setting The setting.
      */
-    virtual void AddSetting(const CStdString &strKey, const CSetting *setting);
+    virtual void AddSetting(const CStdString &strKey, const CSetting *setting, int order);
 
     /*!
      * @brief Check whether a setting is known with the given key.
@@ -174,7 +183,7 @@ namespace PERIPHERALS
     bool                             m_bError;
     std::vector<PeripheralFeature>   m_features;
     std::vector<CPeripheral *>       m_subDevices;
-    std::map<CStdString, CSetting *> m_settings;
+    std::map<CStdString, PeripheralDeviceSetting> m_settings;
     std::set<CStdString>             m_changedSettings;
   };
 }

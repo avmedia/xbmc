@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -220,7 +220,7 @@ void CGUIDialogVideoBookmarks::OnRefreshList()
     
     CStdString bookmarkTime;
     if (m_bookmarks[i].type == CBookmark::EPISODE)
-      bookmarkTime.Format("%s %i %s %i", g_localizeStrings.Get(20373), m_bookmarks[i].seasonNumber, g_localizeStrings.Get(20359).c_str(), m_bookmarks[i].episodeNumber);
+      bookmarkTime = StringUtils::Format("%s %i %s %i", g_localizeStrings.Get(20373).c_str(), m_bookmarks[i].seasonNumber, g_localizeStrings.Get(20359).c_str(), m_bookmarks[i].episodeNumber);
     else
       bookmarkTime = StringUtils::SecondsToTimeString((long)m_bookmarks[i].timeInSeconds, TIME_FORMAT_HH_MM_SS);
     
@@ -278,7 +278,7 @@ void CGUIDialogVideoBookmarks::Clear()
 void CGUIDialogVideoBookmarks::GotoBookmark(int item)
 {
   if (item < 0 || item >= (int)m_bookmarks.size()) return;
-  if (g_application.m_pPlayer)
+  if (g_application.m_pPlayer->HasPlayer())
   {
     g_application.m_pPlayer->SetPlayerState(m_bookmarks[item].playerState);
     g_application.SeekTime((double)m_bookmarks[item].timeInSeconds);
@@ -307,10 +307,10 @@ bool CGUIDialogVideoBookmarks::AddBookmark(CVideoInfoTag* tag)
   bookmark.timeInSeconds = (int)g_application.GetTime();
   bookmark.totalTimeInSeconds = (int)g_application.GetTotalTime();
 
-  if( g_application.m_pPlayer )
+  if( g_application.m_pPlayer->HasPlayer() )
     bookmark.playerState = g_application.m_pPlayer->GetPlayerState();
   else
-    bookmark.playerState.Empty();
+    bookmark.playerState.clear();
 
   bookmark.player = CPlayerCoreFactory::Get().GetPlayerName(g_application.GetCurrentPlayer());
 
@@ -339,11 +339,11 @@ bool CGUIDialogVideoBookmarks::AddBookmark(CVideoInfoTag* tag)
       {
         Crc32 crc;
         crc.ComputeFromLowerCase(g_application.CurrentFile());
-        bookmark.thumbNailImage.Format("%08x_%i.jpg", (unsigned __int32) crc, (int)bookmark.timeInSeconds);
+        bookmark.thumbNailImage = StringUtils::Format("%08x_%i.jpg", (unsigned __int32) crc, (int)bookmark.timeInSeconds);
         bookmark.thumbNailImage = URIUtils::AddFileToFolder(CProfilesManager::Get().GetBookmarksThumbFolder(), bookmark.thumbNailImage);
         if (!CPicture::CreateThumbnailFromSurface(thumbnail->GetPixels(), width, height, thumbnail->GetWidth() * 4,
                                             bookmark.thumbNailImage))
-          bookmark.thumbNailImage.Empty();
+          bookmark.thumbNailImage.clear();
       }
       else
         CLog::Log(LOGERROR,"CGUIDialogVideoBookmarks: failed to create thumbnail");
@@ -400,8 +400,9 @@ bool CGUIDialogVideoBookmarks::AddEpisodeBookmark()
     CContextButtons choices;
     for (unsigned int i=0; i < episodes.size(); ++i)
     {
-      CStdString strButton;
-      strButton.Format("%s %i, %s %i", g_localizeStrings.Get(20373), episodes[i].m_iSeason, g_localizeStrings.Get(20359).c_str(), episodes[i].m_iEpisode);
+      CStdString strButton = StringUtils::Format("%s %i, %s %i",
+                                                 g_localizeStrings.Get(20373).c_str(), episodes[i].m_iSeason,
+                                                 g_localizeStrings.Get(20359).c_str(), episodes[i].m_iEpisode);
       choices.Add(i, strButton);
     }
 

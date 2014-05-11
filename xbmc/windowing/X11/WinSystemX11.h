@@ -5,7 +5,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,14 +25,16 @@
 
 #include "system_gl.h"
 #include <GL/glx.h>
+#include <SDL/SDL.h>
 
 #include "windowing/WinSystem.h"
 #include "utils/Stopwatch.h"
 #include "threads/CriticalSection.h"
+#include "settings/lib/ISettingCallback.h"
 
 class IDispResource;
 
-class CWinSystemX11 : public CWinSystemBase
+class CWinSystemX11 : public CWinSystemBase, public ISettingCallback
 {
 public:
   CWinSystemX11();
@@ -63,6 +65,8 @@ public:
   // Local to WinSystemX11 only
   Display*  GetDisplay() { return m_dpy; }
   GLXWindow GetWindow() { return m_glWindow; }
+  GLXContext GetGlxContext() { return m_glContext; }
+  virtual void OnSettingChanged(const CSetting *setting);
 
 protected:
   bool RefreshGlxContext();
@@ -84,6 +88,7 @@ protected:
 private:
   bool IsSuitableVisual(XVisualInfo *vInfo);
   static int XErrorHandler(Display* dpy, XErrorEvent* error);
+  void SetGrabMode(const CSetting *setting = NULL);
 
   CStopWatch m_screensaverReset;
 };

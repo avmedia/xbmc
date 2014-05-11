@@ -29,10 +29,10 @@
 #include "utils/log.h"
 #include "util.h"
 #include "profiles/ProfilesManager.h"
-#include "settings/GuiSettings.h"
 #include "utils/XMLUtils.h"
 #include "utils/SystemInfo.h"
 #include "PixelShaderList.h"
+#include "settings/Settings.h"
 
 using namespace XFILE;
 CDSSettings::CDSSettings(void)
@@ -54,14 +54,14 @@ CDSSettings::CDSSettings(void)
 void CDSSettings::Initialize()
 {
   // TODO: Use a listbox instead of a checkbox on the GUI. Simpler and easier
-  if (g_sysinfo.IsVistaOrHigher())
+  if (CSysInfo::IsWindowsVersionAtLeast(CSysInfo::WindowsVersionVista))
   {
-    if (!g_guiSettings.GetBool("dsplayer.forcenondefaultrenderer"))
+    if (!CSettings::Get().GetBool("dsplayer.forcenondefaultrenderer"))
       isEVR = true;
   }
   else
   {
-    if (g_guiSettings.GetBool("dsplayer.forcenondefaultrenderer"))
+    if (CSettings::Get().GetBool("dsplayer.forcenondefaultrenderer"))
       isEVR = true;
   }
 

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include <list>
 #include "SectionLoader.h"
 #include <map>
+#include "DllLibNfs.h" // for define NFSSTAT
 
 #ifdef TARGET_WINDOWS
 #define S_IRGRP 0
@@ -72,14 +73,15 @@ public:
   uint64_t          GetMaxReadChunkSize(){return m_readChunkSize;}
   uint64_t          GetMaxWriteChunkSize(){return m_writeChunkSize;} 
   DllLibNfs        *GetImpl(){return m_pLibNfs;}
-  std::list<CStdString> GetExportList(const CURL &url);
+  std::list<std::string> GetExportList(const CURL &url);
   //this functions splits the url into the exportpath (feed to mount) and the rest of the path
   //relative to the mounted export
+  bool splitUrlIntoExportAndPath(const CURL& url, CStdString &exportPath, CStdString &relativePath, std::list<std::string> &exportList);
   bool splitUrlIntoExportAndPath(const CURL& url, CStdString &exportPath, CStdString &relativePath);
   
   //special stat which uses its own context
   //needed for getting intervolume symlinks to work
-  int stat(const CURL &url, struct stat *statbuff);
+  int stat(const CURL &url, NFSSTAT *statbuff);
 
   void AddActiveConnection();
   void AddIdleConnection();
@@ -109,7 +111,7 @@ private:
   tOpenContextMap m_openContextMap;//unique map for tracking all open contexts
   uint64_t m_lastAccessedTime;//last access time for m_pNfsContext
   DllLibNfs *m_pLibNfs;//the lib
-  std::list<CStdString> m_exportList;//list of exported pathes of current connected servers
+  std::list<std::string> m_exportList;//list of exported pathes of current connected servers
   CCriticalSection keepAliveLock;
   CCriticalSection openContextLock;
  
@@ -117,6 +119,7 @@ private:
   struct nfs_context *getContextFromMap(const CStdString &exportname, bool forceCacheHit = false);
   int  getContextForExport(const CStdString &exportname);//get context for given export and add to open contexts map - sets m_pNfsContext (my return a already mounted cached context)
   void destroyOpenContexts();
+  void destroyContext(const CStdString &exportName);
   void resolveHost(const CURL &url);//resolve hostname by dnslookup
   void keepAlive(std::string _exportPath, struct nfsfh  *_pFileHandle);
 };

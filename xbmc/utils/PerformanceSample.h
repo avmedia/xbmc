@@ -3,7 +3,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,11 +21,13 @@
  *
  */
 
-#ifdef _LINUX
+#ifdef TARGET_POSIX
 #include "linux/PlatformDefs.h"
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/resource.h>
+#elif TARGET_WINDOWS
+#include "win32/PlatformDefs.h"
 #endif
 
 #include <string>
@@ -55,7 +57,7 @@ protected:
   std::string m_statName;
   bool m_bCheckWhenDone;
 
-#ifdef _LINUX
+#ifdef TARGET_POSIX
   struct rusage m_usage;
 #endif
 

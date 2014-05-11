@@ -36,8 +36,9 @@
 #include "video/VideoInfoTag.h"
 #include "music/MusicDatabase.h"
 #include "music/tags/MusicInfoTag.h"
-#include "TextureCache.h"
+#include "TextureDatabase.h"
 #include "ThumbLoader.h"
+#include "utils/URIUtils.h"
 
 using namespace MUSIC_INFO;
 using namespace XFILE;
@@ -75,6 +76,22 @@ EClientQuirks GetClientQuirks(const PLT_HttpRequestContext* context)
 }
 
 /*----------------------------------------------------------------------
+|  GetMediaControllerQuirks
++---------------------------------------------------------------------*/
+EMediaControllerQuirks GetMediaControllerQuirks(const PLT_DeviceData *device)
+{
+    if (device == NULL)
+        return EMEDIACONTROLLERQUIRKS_NONE;
+
+    unsigned int quirks = 0;
+
+    if (device->m_Manufacturer.Find("Samsung Electronics") >= 0)
+        quirks |= EMEDIACONTROLLERQUIRKS_X_MKV;
+
+    return (EMediaControllerQuirks)quirks;
+}
+
+/*----------------------------------------------------------------------
 |   GetMimeType
 +---------------------------------------------------------------------*/
 NPT_String
@@ -96,9 +113,9 @@ GetMimeType(const CFileItem& item,
             const PLT_HttpRequestContext* context /* = NULL */)
 {
     CStdString path = item.GetPath();
-    if (item.HasVideoInfoTag() && !item.GetVideoInfoTag()->GetPath().IsEmpty()) {
+    if (item.HasVideoInfoTag() && !item.GetVideoInfoTag()->GetPath().empty()) {
         path = item.GetVideoInfoTag()->GetPath();
-    } else if (item.HasMusicInfoTag() && !item.GetMusicInfoTag()->GetURL().IsEmpty()) {
+    } else if (item.HasMusicInfoTag() && !item.GetMusicInfoTag()->GetURL().empty()) {
         path = item.GetMusicInfoTag()->GetURL();
     }
 
@@ -202,7 +219,7 @@ PopulateObjectFromTag(CMusicInfoTag&         tag,
                       PLT_MediaItemResource* resource,  /* = NULL */
                       EClientQuirks          quirks)
 {
-    if (!tag.GetURL().IsEmpty() && file_path)
+    if (!tag.GetURL().empty() && file_path)
       *file_path = tag.GetURL();
 
     std::vector<std::string> genres = tag.GetGenre();
@@ -248,7 +265,7 @@ PopulateObjectFromTag(CVideoInfoTag&         tag,
     // some usefull buffers
     CStdStringArray strings;
 
-    if (!tag.m_strFileNameAndPath.IsEmpty() && file_path)
+    if (!tag.m_strFileNameAndPath.empty() && file_path)
       *file_path = tag.m_strFileNameAndPath;
 
     if (tag.m_iDbId != -1 ) {
@@ -540,7 +557,7 @@ BuildObject(CFileItem&                    item,
 
     // set a title for the object
     if (object->m_Title.IsEmpty()) {
-        if (!item.GetLabel().IsEmpty()) {
+        if (!item.GetLabel().empty()) {
             CStdString title = item.GetLabel();
             if (item.IsPlayList() || !item.m_bIsFolder) URIUtils::RemoveExtension(title);
             object->m_Title = title;
@@ -558,11 +575,10 @@ BuildObject(CFileItem&                    item,
         art.uri = upnp_server->BuildSafeResourceUri(
             rooturi,
             (*ips.GetFirstItem()).ToString(),
-            CTextureCache::GetWrappedImageURL(thumb).c_str());
+            CTextureUtils::GetWrappedImageURL(thumb).c_str());
 
         // Set DLNA profileID by extension, defaulting to JPEG.
-        NPT_String ext = URIUtils::GetExtension(thumb).c_str();
-        if (strcmp(ext, ".png") == 0) {
+        if (URIUtils::HasExtension(thumb, ".png")) {
             art.dlna_profile = "PNG_TN";
         } else {
             art.dlna_profile = "JPEG_TN";
@@ -572,7 +588,7 @@ BuildObject(CFileItem&                    item,
 
     fanart = item.GetArt("fanart");
     if (upnp_server && !fanart.empty())
-        upnp_server->AddSafeResourceUri(object, rooturi, ips, CTextureCache::GetWrappedImageURL(fanart), "xbmc.org:*:fanart:*");
+        upnp_server->AddSafeResourceUri(object, rooturi, ips, CTextureUtils::GetWrappedImageURL(fanart), "xbmc.org:*:fanart:*");
 
     return object;
 
@@ -631,7 +647,7 @@ PopulateTagFromObject(CVideoInfoTag&         tag,
                       PLT_MediaItemResource* resource /* = NULL */)
 {
     CDateTime date;
-    date.SetFromDateString((const char*)object.m_Date);
+    date.SetFromW3CDate((const char*)object.m_Date);
 
     if(!object.m_Recorded.program_title.IsEmpty())
     {
@@ -810,38 +826,67 @@ CFileItemPtr BuildObject(PLT_MediaObject* entry)
   return pItem;
 }
 
+struct ResourcePrioritySort
+{
+  ResourcePrioritySort(const PLT_MediaObject* entry)
+  {
+    if (entry->m_ObjectClass.type.StartsWith("object.item.audioItem"))
+        m_content = "audio";
+    else if (entry->m_ObjectClass.type.StartsWith("object.item.imageItem"))
+        m_content = "image";
+    else if (entry->m_ObjectClass.type.StartsWith("object.item.videoItem"))
+        m_content = "video";
+  }
+
+  int  GetPriority(const PLT_MediaItemResource& res) const
+  {
+    int prio = 0;
+
+    if (m_content != "" && res.m_ProtocolInfo.GetContentType().StartsWith(m_content))
+        prio += 400;
+
+    NPT_Url url(res.m_Uri);
+    if (URIUtils::IsHostOnLAN((const char*)url.GetHost(), false))
+        prio += 300;
+
+    if (res.m_ProtocolInfo.GetProtocol() == "xbmc-get")
+        prio += 200;
+    else if (res.m_ProtocolInfo.GetProtocol() == "http-get")
+        prio += 100;
+
+    return prio;
+  }
+
+  int operator()(const PLT_MediaItemResource& lh, const PLT_MediaItemResource& rh) const
+  {
+    if(GetPriority(lh) < GetPriority(rh))
+        return 1;
+    else
+        return 0;
+  }
+
+  NPT_String m_content;
+};
+
 bool GetResource(const PLT_MediaObject* entry, CFileItem& item)
 {
   PLT_MediaItemResource resource;
 
   // store original path so we remember it
   item.SetProperty("original_listitem_url",  item.GetPath());
-  item.SetProperty("original_listitem_mime", item.GetMimeType(false));
+  item.SetProperty("original_listitem_mime", item.GetMimeType());
 
-  // look for a resource with "xbmc-get" protocol
-  // if we can't find one, try to find a valid resource
-  if(NPT_FAILED(NPT_ContainerFind(entry->m_Resources,
-                                  CResourceFinder("xbmc-get"), resource))) {
-    const char* content = NULL;
-    if (entry->m_ObjectClass.type.StartsWith("object.item.audioItem"))
-      content = "audio";
-    else if (entry->m_ObjectClass.type.StartsWith("object.item.imageItem"))
-      content = "image";
-    else if (entry->m_ObjectClass.type.StartsWith("object.item.videoItem"))
-      content = "video";
-
-    if(NPT_FAILED(NPT_ContainerFind(entry->m_Resources,
-                                    CResourceFinder("http-get", content), resource))) {
-      if(entry->m_Resources.GetItemCount()) {
-        // last attempt to find something suitable
-        resource = entry->m_Resources[0];
-      }
-      else {
-        CLog::Log(LOGERROR, "CUPnPDirectory::GetResource - no resources available for object %s", (const char*)entry->m_ObjectID);
-        return false;
-      }
-    }
+  // get a sorted list based on our preference
+  NPT_List<PLT_MediaItemResource> sorted;
+  for (NPT_Cardinal i = 0; i < entry->m_Resources.GetItemCount(); ++i) {
+      sorted.Add(entry->m_Resources[i]);
   }
+  sorted.Sort(ResourcePrioritySort(entry));
+
+  if(sorted.GetItemCount() == 0)
+    return false;
+
+  resource = *sorted.GetFirstItem();
 
   // if it's an item, path is the first url to the item
   // we hope the server made the first one reachable for us
@@ -875,8 +920,7 @@ bool GetResource(const PLT_MediaObject* entry, CFileItem& item)
     {
       if(info.Match(PLT_ProtocolInfo("*", "*", allowed[type], "*")))
       {
-        CStdString prop;
-        prop.Format("upnp:subtitle:%d", ++subs);
+        CStdString prop = StringUtils::Format("upnp:subtitle:%d", ++subs);
         item.SetProperty(prop, (const char*)res.m_Uri);
         break;
       }

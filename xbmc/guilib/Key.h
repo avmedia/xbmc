@@ -10,7 +10,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,10 @@
  */
 
 #include "utils/StdString.h"
+
+// Reserved 0 - 255
+//  XBIRRemote.h
+//  XINPUT_IR_REMOTE-*
 
 // Analogue - don't change order
 #define KEY_BUTTON_A                        256
@@ -193,6 +197,9 @@
 #define ACTION_CREATE_EPISODE_BOOKMARK 95 //Creates an episode bookmark on the currently playing video file containing more than one episode
 #define ACTION_CREATE_BOOKMARK         96 //Creates a bookmark of the currently playing video file
 
+#define ACTION_CHAPTER_OR_BIG_STEP_FORWARD       97 // Goto the next chapter, if not available perform a big step forward
+#define ACTION_CHAPTER_OR_BIG_STEP_BACK          98 // Goto the previous chapter, if not available perform a big step back
+
 #define ACTION_MOUSE_START            100
 #define ACTION_MOUSE_LEFT_CLICK       100
 #define ACTION_MOUSE_RIGHT_CLICK      101
@@ -315,6 +322,16 @@
 
 #define ACTION_SWITCH_PLAYER          234
 
+#define ACTION_STEREOMODE_NEXT        235
+#define ACTION_STEREOMODE_PREVIOUS    236
+#define ACTION_STEREOMODE_TOGGLE      237 // turns 3d mode on/off
+#define ACTION_STEREOMODE_SELECT      238
+#define ACTION_STEREOMODE_TOMONO      239
+#define ACTION_STEREOMODE_SET         240
+
+#define ACTION_SETTINGS_RESET         241
+#define ACTION_SETTINGS_LEVEL_CHANGE  242
+
 // touch actions
 #define ACTION_TOUCH_TAP              401
 #define ACTION_TOUCH_TAP_TEN          410
@@ -352,6 +369,8 @@
 #define ICON_TYPE_WEATHER       107
 #define ICON_TYPE_SETTINGS      109
 
+#ifndef SWIG
+
 class CKey;
 
 /*!
@@ -365,6 +384,7 @@ public:
   CAction(int actionID, wchar_t unicode);
   CAction(int actionID, unsigned int state, float posX, float posY, float offsetX, float offsetY, const CStdString &name = "");
   CAction(int actionID, const CStdString &name, const CKey &key);
+  CAction(int actionID, const std::string &name);
 
   /*! \brief Identifier of the action
    \return id of the action
@@ -457,7 +477,7 @@ public:
   CKey(const CKey& key);
 
   virtual ~CKey(void);
-  const CKey& operator=(const CKey& key);
+  CKey& operator=(const CKey& key);
   uint8_t GetLeftTrigger() const;
   uint8_t GetRightTrigger() const;
   float GetLeftThumbX() const;
@@ -483,7 +503,8 @@ public:
     MODIFIER_SHIFT = 0x00020000,
     MODIFIER_ALT   = 0x00040000,
     MODIFIER_RALT  = 0x00080000,
-    MODIFIER_SUPER = 0x00100000
+    MODIFIER_SUPER = 0x00100000,
+    MODIFIER_META  = 0X00200000
   };
 
 private:
@@ -505,5 +526,7 @@ private:
   float m_repeat; // time since last keypress
   bool m_fromService;
 };
+#endif //undef SWIG
+
 #endif
 

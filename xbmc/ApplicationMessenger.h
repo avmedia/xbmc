@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -89,6 +89,10 @@ namespace MUSIC_INFO
 #define TMSG_RENDERER_FLUSH       312
 #define TMSG_INHIBITIDLESHUTDOWN  313
 #define TMSG_LOADPROFILE          314
+#define TMSG_ACTIVATESCREENSAVER  315
+#define TMSG_CECTOGGLESTATE       316
+#define TMSG_CECACTIVATESOURCE    317
+#define TMSG_CECSTANDBY           318
 
 #define TMSG_NETWORKMESSAGE         500
 
@@ -202,9 +206,10 @@ public:
   void RestartApp();
   void Reset();
   void InhibitIdleShutdown(bool inhibit);
+  void ActivateScreensaver();
   void SwitchToFullscreen(); //
   void Minimize(bool wait = false);
-  void ExecOS(const CStdString command, bool waitExit = false);
+  void ExecOS(const CStdString &command, bool waitExit = false);
   void UserEvent(int code);
   //! \brief Set the tag for the currently playing song
   void SetCurrentSongTag(const MUSIC_INFO::CMusicInfoTag& tag);
@@ -214,6 +219,9 @@ public:
   void SetCurrentItem(const CFileItem& item);
 
   void LoadProfile(unsigned int idx);
+  bool CECToggleState();
+  bool CECActivateSource();
+  bool CECStandby();
 
   CStdString GetResponse();
   int SetResponse(CStdString response);
@@ -226,6 +234,9 @@ public:
   void Close(CGUIWindow *window, bool forceClose, bool waitResult = true, int nextWindowID = 0, bool enableSound = true);
   void ActivateWindow(int windowID, const std::vector<CStdString> &params, bool swappingWindows);
   void SendAction(const CAction &action, int windowID = WINDOW_INVALID, bool waitResult=true);
+
+  //! \brief Send text to currently focused window / keyboard.
+  void SendText(const std::string &aTextString, bool closeKeyboard = false);
 
   /*! \brief Send a GUIMessage, optionally waiting before it's processed to return.
    Should be used to send messages to the GUI from other threads.

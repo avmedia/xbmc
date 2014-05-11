@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@
  *
  */
 
-#if (defined HAVE_CONFIG_H) && (!defined WIN32)
+#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
   #include "config.h"
 #endif
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include "system.h"
 #endif
 
@@ -212,7 +212,7 @@ bool CDVDStateSerializer::XMLToDVDState( dvd_state_t *state, const std::string &
 {
   CXBMCTinyXML xmlDoc;
 
-  xmlDoc.Parse(xmlstate.c_str());
+  xmlDoc.Parse(xmlstate);
 
   if( xmlDoc.Error() )
     return false;

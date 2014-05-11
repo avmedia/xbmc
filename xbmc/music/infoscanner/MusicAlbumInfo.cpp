@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ CMusicAlbumInfo::CMusicAlbumInfo(const CStdString& strAlbum, const CStdString& s
 void CMusicAlbumInfo::SetAlbum(CAlbum& album)
 {
   m_album = album;
-  m_album.m_strDateOfRelease.Format("%i", album.iYear);
+  m_album.m_strDateOfRelease = StringUtils::Format("%i", album.iYear);
   m_strTitle2 = "";
   m_bLoaded = true;
 }

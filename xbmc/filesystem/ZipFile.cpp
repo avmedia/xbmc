@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -266,7 +266,15 @@ int CZipFile::Stat(struct __stat64 *buffer)
 int CZipFile::Stat(const CURL& url, struct __stat64* buffer)
 {
   if (!g_ZipManager.GetZipEntry(url.Get(),mZipItem))
-    return -1;
+  {
+    if (url.GetFileName().empty() && CFile::Exists(url.GetHostName()))
+    { // when accessing the zip "root" recognize it as a directory
+      buffer->st_mode = _S_IFDIR;
+      return 0;
+    }
+    else
+      return -1;
+  }
 
   memset(buffer, 0, sizeof(struct __stat64));
   buffer->st_gid = 0;

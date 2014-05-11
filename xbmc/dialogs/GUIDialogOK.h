@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ public:
   CGUIDialogOK(void);
   virtual ~CGUIDialogOK(void);
   virtual bool OnMessage(CGUIMessage& message);
+  static void ShowAndGetInput(const CVariant &heading, const CVariant &text);
   static void ShowAndGetInput(const CVariant &heading, const CVariant &line0, const CVariant &line1, const CVariant &line2);
 protected:
   virtual int GetDefaultLabelID(int controlId) const;

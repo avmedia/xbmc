@@ -35,6 +35,7 @@ namespace PERIPHERALS
     void VolumeDown(void) {}
     bool IsMuted(void) { return false; }
     void ToggleMute(void) {}
+    bool ToggleDeviceState(CecStateChange mode = STATE_SWITCH_TOGGLE, bool forceType = false) { return false; }
 
     int GetButton(void) { return 0; }
     unsigned int GetHoldTime(void) { return 0; }
@@ -110,6 +111,7 @@ namespace PERIPHERALS
     // public CEC methods
     void ActivateSource(void);
     void StandbyDevices(void);
+    bool ToggleDeviceState(CecStateChange mode = STATE_SWITCH_TOGGLE, bool forceType = false);
 
   private:
     bool InitialiseFeature(const PeripheralFeature feature);
@@ -154,7 +156,7 @@ namespace PERIPHERALS
     bool                              m_bIsReady;
     bool                              m_bHasConnectedAudioSystem;
     CStdString                        m_strMenuLanguage;
-    CDateTime                         m_screensaverLastActivated;
+    CDateTime                         m_standbySent;
     std::vector<CecButtonPress>       m_buttonQueue;
     CecButtonPress                    m_currentButton;
     std::queue<CecVolumeChange>       m_volumeChangeQueue;

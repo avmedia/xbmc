@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,10 +19,9 @@
  */
 #include "Service.h"
 #include "AddonManager.h"
+#include "interfaces/generic/ScriptInvocationManager.h"
 #include "utils/log.h"
-#ifdef HAS_PYTHON
-#include "interfaces/python/XBPython.h"
-#endif
+#include "system.h"
 
 using namespace std;
 
@@ -46,6 +45,11 @@ CService::CService(const AddonProps &props)
   BuildServiceType();
 }
 
+AddonPtr CService::Clone() const
+{
+  return AddonPtr(new CService(*this));
+}
+
 bool CService::Start()
 {
   bool ret = true;
@@ -53,7 +57,7 @@ bool CService::Start()
   {
 #ifdef HAS_PYTHON
   case PYTHON:
-    ret = (g_pythonParser.evalFile(LibPath(), this->shared_from_this()) != -1);
+    ret = (CScriptInvocationManager::Get().Execute(LibPath(), this->shared_from_this()) != -1);
     break;
 #endif
 
@@ -74,7 +78,7 @@ bool CService::Stop()
   {
 #ifdef HAS_PYTHON
   case PYTHON:
-    ret = g_pythonParser.StopScript(LibPath());
+    ret = CScriptInvocationManager::Get().Stop(LibPath());
     break;
 #endif
 

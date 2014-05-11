@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-#if (defined HAVE_CONFIG_H) && (!defined WIN32)
+#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
   #include "config.h"
 #endif
 #include "network/Network.h"
@@ -33,6 +33,7 @@
 #include "MusicDatabaseDirectory.h"
 #include "MusicSearchDirectory.h"
 #include "VideoDatabaseDirectory.h"
+#include "FavouritesDirectory.h"
 #include "LibraryDirectory.h"
 #include "AddonsDirectory.h"
 #include "SourcesDirectory.h"
@@ -43,9 +44,10 @@
 #include "Application.h"
 #include "addons/Addon.h"
 #include "utils/log.h"
+#include "network/WakeOnAccess.h"
 
 #ifdef HAS_FILESYSTEM_SMB
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include "windows/WINSMBDirectory.h"
 #else
 #include "SMBDirectory.h"
@@ -123,6 +125,8 @@ using namespace XFILE;
 IDirectory* CDirectoryFactory::Create(const CStdString& strPath)
 {
   CURL url(strPath);
+  if (!CWakeOnAccess::Get().WakeUpHost(url))
+    return NULL;
 
   CFileItem item(strPath, false);
   IFileDirectory* pDir=CFileDirectoryFactory::Create(strPath, &item);
@@ -163,8 +167,12 @@ IDirectory* CDirectoryFactory::Create(const CStdString& strPath)
   if (strProtocol == "musicsearch") return new CMusicSearchDirectory();
   if (strProtocol == "videodb") return new CVideoDatabaseDirectory();
   if (strProtocol == "library") return new CLibraryDirectory();
+  if (strProtocol == "favourites") return new CFavouritesDirectory();
   if (strProtocol == "filereader")
     return CDirectoryFactory::Create(url.GetFileName());
+#if defined(TARGET_ANDROID)
+  if (strProtocol == "androidapp") return new CAndroidAppDirectory();
+#endif
 
   if( g_application.getNetwork().IsAvailable(true) )  // true to wait for the network (if possible)
   {
@@ -176,7 +184,7 @@ IDirectory* CDirectoryFactory::Create(const CStdString& strPath)
     if (strProtocol == "sftp" || strProtocol == "ssh") return new CSFTPDirectory();
 #endif
 #ifdef HAS_FILESYSTEM_SMB
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
     if (strProtocol == "smb") return new CWINSMBDirectory();
 #else
     if (strProtocol == "smb") return new CSMBDirectory();
@@ -221,9 +229,6 @@ IDirectory* CDirectoryFactory::Create(const CStdString& strPath)
 #endif
 #ifdef HAVE_LIBBLURAY
       if (strProtocol == "bluray") return new CBlurayDirectory();
-#endif
-#if defined(TARGET_ANDROID)
-      if (strProtocol == "androidapp") return new CAndroidAppDirectory();
 #endif
   }
 

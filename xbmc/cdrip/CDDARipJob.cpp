@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  */
 
 #include "CDDARipJob.h"
+#include "system.h"
 #ifdef HAVE_LIBMP3LAME
 #include "EncoderLame.h"
 #endif
@@ -38,7 +39,6 @@
 #include "guilib/LocalizeStrings.h"
 #include "settings/AdvancedSettings.h"
 #include "utils/StringUtils.h"
-#include "settings/GUISettings.h"
 #include "storage/MediaManager.h"
 
 using namespace MUSIC_INFO;
@@ -71,7 +71,7 @@ bool CCDDARipJob::DoWork()
   if (file.IsRemote())
     m_output = SetupTempFile();
   
-  if (m_output.IsEmpty())
+  if (m_output.empty())
   {
     CLog::Log(LOGERROR, "CCDDARipper: Error opening file");
     return false;
@@ -90,12 +90,11 @@ bool CCDDARipJob::DoWork()
   CGUIDialogExtendedProgressBar* pDlgProgress = 
       (CGUIDialogExtendedProgressBar*)g_windowManager.GetWindow(WINDOW_DIALOG_EXT_PROGRESS);
   CGUIDialogProgressBarHandle* handle = pDlgProgress->GetHandle(g_localizeStrings.Get(605));
-  CStdString strLine0;
+
   int iTrack = atoi(m_input.substr(13, m_input.size() - 13 - 5).c_str());
-  strLine0.Format("%02i. %s - %s", iTrack,
-                  StringUtils::Join(m_tag.GetArtist(),
-                              g_advancedSettings.m_musicItemSeparator).c_str(),
-                  m_tag.GetTitle().c_str());
+  CStdString strLine0 = StringUtils::Format("%02i. %s - %s", iTrack,
+                                            StringUtils::Join(m_tag.GetArtist(), g_advancedSettings.m_musicItemSeparator).c_str(),
+                                            m_tag.GetTitle().c_str());
   handle->SetText(strLine0);
 
   // start ripping
@@ -199,6 +198,10 @@ CEncoder* CCDDARipJob::SetupEncoder(CFile& reader)
   case CDDARIP_ENCODER_FLAC:
     encoder = new CEncoderFlac();
     break;
+  case CDDARIP_ENCODER_FFMPEG_M4A:
+  case CDDARIP_ENCODER_FFMPEG_WMA:
+    encoder = new CEncoderFFmpeg();
+    break;
   case CDDARIP_ENCODER_WAV:
   default:
     encoder = new CEncoderWav();
@@ -209,8 +212,7 @@ CEncoder* CCDDARipJob::SetupEncoder(CFile& reader)
     return NULL;
 
   // we have to set the tags before we init the Encoder
-  CStdString strTrack;
-  strTrack.Format("%i", strtol(m_input.substr(13, m_input.size() - 13 - 5).c_str(),NULL,10));
+  CStdString strTrack = StringUtils::Format("%i", strtol(m_input.substr(13, m_input.size() - 13 - 5).c_str(),NULL,10));
 
   encoder->SetComment("Ripped with XBMC");
   encoder->SetArtist(StringUtils::Join(m_tag.GetArtist(),
@@ -235,7 +237,7 @@ CEncoder* CCDDARipJob::SetupEncoder(CFile& reader)
 CStdString CCDDARipJob::SetupTempFile()
 {
   char tmp[MAX_PATH];
-#ifndef _LINUX
+#ifndef TARGET_POSIX
   GetTempFileName(CSpecialProtocol::TranslatePath("special://temp/"), "riptrack", 0, tmp);
 #else
   int fd;

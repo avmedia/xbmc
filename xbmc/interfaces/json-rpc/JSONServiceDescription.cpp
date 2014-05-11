@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "utils/log.h"
 #include "utils/StdString.h"
 #include "utils/JSONVariantParser.h"
+#include "utils/StringUtils.h"
 #include "JSONRPC.h"
 #include "PlayerOperations.h"
 #include "PlaylistOperations.h"
@@ -36,6 +37,10 @@
 #include "XBMCOperations.h"
 #include "ApplicationOperations.h"
 #include "PVROperations.h"
+#include "ProfilesOperations.h"
+#include "FavouritesOperations.h"
+#include "TextureOperations.h"
+#include "SettingsOperations.h"
 
 using namespace std;
 using namespace JSONRPC;
@@ -122,6 +127,7 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
   { "VideoLibrary.GetTVShows",                      CVideoLibrary::GetTVShows },
   { "VideoLibrary.GetTVShowDetails",                CVideoLibrary::GetTVShowDetails },
   { "VideoLibrary.GetSeasons",                      CVideoLibrary::GetSeasons },
+  { "VideoLibrary.GetSeasonDetails",                CVideoLibrary::GetSeasonDetails },
   { "VideoLibrary.GetEpisodes",                     CVideoLibrary::GetEpisodes },
   { "VideoLibrary.GetEpisodeDetails",               CVideoLibrary::GetEpisodeDetails },
   { "VideoLibrary.GetMusicVideos",                  CVideoLibrary::GetMusicVideos },
@@ -130,7 +136,9 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
   { "VideoLibrary.GetRecentlyAddedEpisodes",        CVideoLibrary::GetRecentlyAddedEpisodes },
   { "VideoLibrary.GetRecentlyAddedMusicVideos",     CVideoLibrary::GetRecentlyAddedMusicVideos },
   { "VideoLibrary.SetMovieDetails",                 CVideoLibrary::SetMovieDetails },
+  { "VideoLibrary.SetMovieSetDetails",              CVideoLibrary::SetMovieSetDetails },
   { "VideoLibrary.SetTVShowDetails",                CVideoLibrary::SetTVShowDetails },
+  { "VideoLibrary.SetSeasonDetails",                CVideoLibrary::SetSeasonDetails },
   { "VideoLibrary.SetEpisodeDetails",               CVideoLibrary::SetEpisodeDetails },
   { "VideoLibrary.SetMusicVideoDetails",            CVideoLibrary::SetMusicVideoDetails },
   { "VideoLibrary.RemoveMovie",                     CVideoLibrary::RemoveMovie },
@@ -152,6 +160,8 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
   { "GUI.ActivateWindow",                           CGUIOperations::ActivateWindow },
   { "GUI.ShowNotification",                         CGUIOperations::ShowNotification },
   { "GUI.SetFullscreen",                            CGUIOperations::SetFullscreen },
+  { "GUI.SetStereoscopicMode",                      CGUIOperations::SetStereoscopicMode },
+  { "GUI.GetStereoscopicModes",                     CGUIOperations::GetStereoscopicModes },
 
 // PVR operations
   { "PVR.GetProperties",                            CPVROperations::GetProperties },
@@ -159,8 +169,19 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
   { "PVR.GetChannelGroupDetails",                   CPVROperations::GetChannelGroupDetails },
   { "PVR.GetChannels",                              CPVROperations::GetChannels },
   { "PVR.GetChannelDetails",                        CPVROperations::GetChannelDetails },
+  { "PVR.GetBroadcasts",                            CPVROperations::GetBroadcasts },
+  { "PVR.GetBroadcastDetails",                      CPVROperations::GetBroadcastDetails },
+  { "PVR.GetTimers",                                CPVROperations::GetTimers },
+  { "PVR.GetTimerDetails",                          CPVROperations::GetTimerDetails },
+  { "PVR.GetRecordings",                            CPVROperations::GetRecordings },
+  { "PVR.GetRecordingDetails",                      CPVROperations::GetRecordingDetails },
   { "PVR.Record",                                   CPVROperations::Record },
   { "PVR.Scan",                                     CPVROperations::Scan },
+
+// Profiles operations
+  { "Profiles.GetProfiles",                         CProfilesOperations::GetProfiles},
+  { "Profiles.GetCurrentProfile",                   CProfilesOperations::GetCurrentProfile},
+  { "Profiles.LoadProfile",                         CProfilesOperations::LoadProfile},
 
 // System operations
   { "System.GetProperties",                         CSystemOperations::GetProperties },
@@ -190,6 +211,22 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
   { "Application.SetVolume",                        CApplicationOperations::SetVolume },
   { "Application.SetMute",                          CApplicationOperations::SetMute },
   { "Application.Quit",                             CApplicationOperations::Quit },
+
+// Favourites operations
+  { "Favourites.GetFavourites",                     CFavouritesOperations::GetFavourites },
+  { "Favourites.AddFavourite",                      CFavouritesOperations::AddFavourite },
+
+// Textures operations
+  { "Textures.GetTextures",                         CTextureOperations::GetTextures },
+  { "Textures.RemoveTexture",                       CTextureOperations::RemoveTexture },
+
+// Settings operations
+  { "Settings.GetSections",                         CSettingsOperations::GetSections },
+  { "Settings.GetCategories",                       CSettingsOperations::GetCategories },
+  { "Settings.GetSettings",                         CSettingsOperations::GetSettings },
+  { "Settings.GetSettingValue",                     CSettingsOperations::GetSettingValue },
+  { "Settings.SetSettingValue",                     CSettingsOperations::SetSettingValue },
+  { "Settings.ResetSettingValue",                   CSettingsOperations::ResetSettingValue },
 
 // XBMC operations
   { "XBMC.GetInfoLabels",                           CXBMCOperations::GetInfoLabels },
@@ -253,7 +290,7 @@ bool JSONSchemaTypeDefinition::Parse(const CVariant &value, bool isParameter /* 
       // sure that the default value is a valid enum value
       else
       {
-        for (std::vector<CVariant>::const_iterator itr = enums.begin(); itr != enums.end(); itr++)
+        for (std::vector<CVariant>::const_iterator itr = enums.begin(); itr != enums.end(); ++itr)
         {
           if (value["default"] == *itr)
           {
@@ -342,7 +379,7 @@ bool JSONSchemaTypeDefinition::Parse(const CVariant &value, bool isParameter /* 
     {
       // Get all child elements of the "properties"
       // object and loop through them
-      for (CVariant::const_iterator_map itr = value["properties"].begin_map(); itr != value["properties"].end_map(); itr++)
+      for (CVariant::const_iterator_map itr = value["properties"].begin_map(); itr != value["properties"].end_map(); ++itr)
       {
         // Create a new type definition, store the name
         // of the current property into it, parse it
@@ -464,7 +501,7 @@ bool JSONSchemaTypeDefinition::Parse(const CVariant &value, bool isParameter /* 
       // parse all elements and store them
       else if (value["items"].isArray())
       {
-        for (CVariant::const_iterator_array itemItr = value["items"].begin_array(); itemItr != value["items"].end_array(); itemItr++)
+        for (CVariant::const_iterator_array itemItr = value["items"].begin_array(); itemItr != value["items"].end_array(); ++itemItr)
         {
           JSONSchemaTypeDefinitionPtr item = JSONSchemaTypeDefinitionPtr(new JSONSchemaTypeDefinition());
           if (!item->Parse(*itemItr))
@@ -512,7 +549,7 @@ bool JSONSchemaTypeDefinition::Parse(const CVariant &value, bool isParameter /* 
   if (value.isMember("enum") && value["enum"].isArray())
   {
     // Loop through all elements in the "enum" array
-    for (CVariant::const_iterator_array enumItr = value["enum"].begin_array(); enumItr != value["enum"].end_array(); enumItr++)
+    for (CVariant::const_iterator_array enumItr = value["enum"].begin_array(); enumItr != value["enum"].end_array(); ++enumItr)
     {
       // Check for duplicates and eliminate them
       bool approved = true;
@@ -545,7 +582,7 @@ bool JSONSchemaTypeDefinition::Parse(const CVariant &value, bool isParameter /* 
       // sure that the default value is a valid enum value
       else
       {
-        for (std::vector<CVariant>::const_iterator itr = enums.begin(); itr != enums.end(); itr++)
+        for (std::vector<CVariant>::const_iterator itr = enums.begin(); itr != enums.end(); ++itr)
         {
           if (value["default"] == *itr)
           {
@@ -591,14 +628,12 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
   // Let's check the type of the provided parameter
   if (!IsType(value, type))
   {
-    CLog::Log(LOGDEBUG, "JSONRPC: Type mismatch in type %s", name.c_str());
-    errorMessage.Format("Invalid type %s received", ValueTypeToString(value.type()));
+    errorMessage = StringUtils::Format("Invalid type %s received", ValueTypeToString(value.type()));
     errorData["message"] = errorMessage.c_str();
     return InvalidParams;
   }
   else if (value.isNull() && !HasType(type, NullValue))
   {
-    CLog::Log(LOGDEBUG, "JSONRPC: Value is NULL in type %s", name.c_str());
     errorData["message"] = "Received value is null";
     return InvalidParams;
   }
@@ -621,7 +656,6 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
 
     if (!ok)
     {
-      CLog::Log(LOGDEBUG, "JSONRPC: Value in type %s does not match any of the union type definitions", name.c_str());
       errorData["message"] = "Received value does not match any of the union type definitions";
       return InvalidParams;
     }
@@ -639,7 +673,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
       if (status != OK)
       {
         CLog::Log(LOGDEBUG, "JSONRPC: Value does not match extended type %s of type %s", extends.at(extendsIndex)->ID.c_str(), name.c_str());
-        errorMessage.Format("value does not match extended type %s", extends.at(extendsIndex)->ID.c_str(), name.c_str());
+        errorMessage = StringUtils::Format("value does not match extended type %s", extends.at(extendsIndex)->ID.c_str(), name.c_str());
         errorData["message"] = errorMessage.c_str();
         return status;
       }
@@ -657,11 +691,11 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
     {
       CLog::Log(LOGDEBUG, "JSONRPC: Number of array elements does not match minItems and/or maxItems in type %s", name.c_str());
       if (minItems > 0 && maxItems > 0)
-        errorMessage.Format("Between %d and %d array items expected but %d received", minItems, maxItems, value.size());
+        errorMessage = StringUtils::Format("Between %d and %d array items expected but %d received", minItems, maxItems, value.size());
       else if (minItems > 0)
-        errorMessage.Format("At least %d array items expected but only %d received", minItems, value.size());
+        errorMessage = StringUtils::Format("At least %d array items expected but only %d received", minItems, value.size());
       else
-        errorMessage.Format("Only %d array items expected but %d received", maxItems, value.size());
+        errorMessage = StringUtils::Format("Only %d array items expected but %d received", maxItems, value.size());
       errorData["message"] = errorMessage.c_str();
       return InvalidParams;
     }
@@ -681,7 +715,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
         if (status != OK)
         {
           CLog::Log(LOGDEBUG, "JSONRPC: Array element at index %u does not match in type %s", arrayIndex, name.c_str());
-          errorMessage.Format("array element at index %u does not match", arrayIndex);
+          errorMessage = StringUtils::Format("array element at index %u does not match", arrayIndex);
           errorData["message"] = errorMessage.c_str();
           return status;
         }
@@ -701,7 +735,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
       if (value.size() < items.size() || (value.size() != items.size() && additionalItems.size() == 0))
       {
         CLog::Log(LOGDEBUG, "JSONRPC: One of the array elements does not match in type %s", name.c_str());
-        errorMessage.Format("%d array elements expected but %d received", items.size(), value.size());
+        errorMessage = StringUtils::Format("%d array elements expected but %d received", items.size(), value.size());
         errorData["message"] = errorMessage.c_str();
         return InvalidParams;
       }
@@ -741,7 +775,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
           if (!ok)
           {
             CLog::Log(LOGDEBUG, "JSONRPC: Array contains non-conforming additional items in type %s", name.c_str());
-            errorMessage.Format("Array element at index %u does not match the \"additionalItems\" schema", arrayIndex);
+            errorMessage = StringUtils::Format("Array element at index %u does not match the \"additionalItems\" schema", arrayIndex);
             errorData["message"] = errorMessage.c_str();
             return InvalidParams;
           }
@@ -760,7 +794,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
           if (outputValue[checkingIndex] == outputValue[checkedIndex])
           {
             CLog::Log(LOGDEBUG, "JSONRPC: Not unique array element at index %u and %u in type %s", checkingIndex, checkedIndex, name.c_str());
-            errorMessage.Format("Array element at index %u is not unique (same as array element at index %u)", checkingIndex, checkedIndex);
+            errorMessage = StringUtils::Format("Array element at index %u is not unique (same as array element at index %u)", checkingIndex, checkedIndex);
             errorData["message"] = errorMessage.c_str();
             return InvalidParams;
           }
@@ -778,7 +812,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
     unsigned int handled = 0;
     JSONSchemaTypeDefinition::CJsonSchemaPropertiesMap::JSONSchemaPropertiesIterator propertiesEnd = properties.end();
     JSONSchemaTypeDefinition::CJsonSchemaPropertiesMap::JSONSchemaPropertiesIterator propertiesIterator;
-    for (propertiesIterator = properties.begin(); propertiesIterator != propertiesEnd; propertiesIterator++)
+    for (propertiesIterator = properties.begin(); propertiesIterator != propertiesEnd; ++propertiesIterator)
     {
       if (value.isMember(propertiesIterator->second->name))
       {
@@ -852,7 +886,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
   if (enums.size() > 0)
   {
     bool valid = false;
-    for (std::vector<CVariant>::const_iterator enumItr = enums.begin(); enumItr != enums.end(); enumItr++)
+    for (std::vector<CVariant>::const_iterator enumItr = enums.begin(); enumItr != enums.end(); ++enumItr)
     {
       if (*enumItr == value)
       {
@@ -885,10 +919,10 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
     {
       CLog::Log(LOGDEBUG, "JSONRPC: Value does not lay between minimum and maximum in type %s", name.c_str());
       if (value.isDouble())
-        errorMessage.Format("Value between %f (%s) and %f (%s) expected but %f received", 
+        errorMessage = StringUtils::Format("Value between %f (%s) and %f (%s) expected but %f received", 
           minimum, exclusiveMinimum ? "exclusive" : "inclusive", maximum, exclusiveMaximum ? "exclusive" : "inclusive", numberValue);
       else
-        errorMessage.Format("Value between %d (%s) and %d (%s) expected but %d received", 
+        errorMessage = StringUtils::Format("Value between %d (%s) and %d (%s) expected but %d received", 
           (int)minimum, exclusiveMinimum ? "exclusive" : "inclusive", (int)maximum, exclusiveMaximum ? "exclusive" : "inclusive", (int)numberValue);
       errorData["message"] = errorMessage.c_str();
       return InvalidParams;
@@ -897,7 +931,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
     if ((HasType(type, IntegerValue) && divisibleBy > 0 && ((int)numberValue % divisibleBy) != 0))
     {
       CLog::Log(LOGDEBUG, "JSONRPC: Value does not meet divisibleBy requirements in type %s", name.c_str());
-      errorMessage.Format("Value should be divisible by %d but %d received", divisibleBy, (int)numberValue);
+      errorMessage = StringUtils::Format("Value should be divisible by %d but %d received", divisibleBy, (int)numberValue);
       errorData["message"] = errorMessage.c_str();
       return InvalidParams;
     }
@@ -910,7 +944,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
     if (size < minLength)
     {
       CLog::Log(LOGDEBUG, "JSONRPC: Value does not meet minLength requirements in type %s", name.c_str());
-      errorMessage.Format("Value should have a minimum length of %d but has a length of %d", minLength, size);
+      errorMessage = StringUtils::Format("Value should have a minimum length of %d but has a length of %d", minLength, size);
       errorData["message"] = errorMessage.c_str();
       return InvalidParams;
     }
@@ -918,7 +952,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
     if (maxLength >= 0 && size > maxLength)
     {
       CLog::Log(LOGDEBUG, "JSONRPC: Value does not meet maxLength requirements in type %s", name.c_str());
-      errorMessage.Format("Value should have a maximum length of %d but has a length of %d", maxLength, size);
+      errorMessage = StringUtils::Format("Value should have a maximum length of %d but has a length of %d", maxLength, size);
       errorData["message"] = errorMessage.c_str();
       return InvalidParams;
     }
@@ -1073,7 +1107,7 @@ void JSONSchemaTypeDefinition::Print(bool isParameter, bool isGlobal, bool print
 
         JSONSchemaTypeDefinition::CJsonSchemaPropertiesMap::JSONSchemaPropertiesIterator propertiesEnd = properties.end();
         JSONSchemaTypeDefinition::CJsonSchemaPropertiesMap::JSONSchemaPropertiesIterator propertiesIterator;
-        for (propertiesIterator = properties.begin(); propertiesIterator != propertiesEnd; propertiesIterator++)
+        for (propertiesIterator = properties.begin(); propertiesIterator != propertiesEnd; ++propertiesIterator)
         {
           propertiesIterator->second->Print(false, false, true, printDescriptions, output["properties"][propertiesIterator->first]);
         }
@@ -1128,7 +1162,7 @@ JSONSchemaTypeDefinition::CJsonSchemaPropertiesMap::CJsonSchemaPropertiesMap()
 void JSONSchemaTypeDefinition::CJsonSchemaPropertiesMap::add(JSONSchemaTypeDefinitionPtr property)
 {
   CStdString name = property->name;
-  name = name.ToLower();
+  StringUtils::ToLower(name);
   m_propertiesmap[name] = property;
 }
 
@@ -1351,9 +1385,7 @@ bool CJSONServiceDescription::prepareDescription(std::string &description, CVari
 
   if (description.at(0) != '{')
   {
-    CStdString json;
-    json.Format("{%s}", description);
-    description = json;
+    description = StringUtils::Format("{%s}", description.c_str());
   }
 
   descriptionObject = CJSONVariantParser::Parse((const unsigned char *)description.c_str(), description.size());
@@ -1483,7 +1515,7 @@ bool CJSONServiceDescription::AddType(const std::string &jsonType)
 
   if (!globalType->Parse(descriptionObject[typeName]))
   {
-    CLog::Log(LOGERROR, "JSONRPC: Could not parse type \"%s\"", typeName.c_str());
+    CLog::Log(LOGWARNING, "JSONRPC: Could not parse type \"%s\"", typeName.c_str());
     CJSONServiceDescription::removeReferenceTypeDefinition(typeName);
     if (!globalType->missingReference.empty())
     {
@@ -1632,7 +1664,7 @@ bool CJSONServiceDescription::AddEnum(const std::string &name, const std::vector
 bool CJSONServiceDescription::AddEnum(const std::string &name, const std::vector<std::string> &values)
 {
   std::vector<CVariant> enums;
-  for (std::vector<std::string>::const_iterator it = values.begin(); it != values.end(); it++)
+  for (std::vector<std::string>::const_iterator it = values.begin(); it != values.end(); ++it)
     enums.push_back(CVariant(*it));
 
   return AddEnum(name, enums, CVariant::VariantTypeString);
@@ -1641,7 +1673,7 @@ bool CJSONServiceDescription::AddEnum(const std::string &name, const std::vector
 bool CJSONServiceDescription::AddEnum(const std::string &name, const std::vector<int> &values)
 {
   std::vector<CVariant> enums;
-  for (std::vector<int>::const_iterator it = values.begin(); it != values.end(); it++)
+  for (std::vector<int>::const_iterator it = values.begin(); it != values.end(); ++it)
     enums.push_back(CVariant(*it));
 
   return AddEnum(name, enums, CVariant::VariantTypeInteger);
@@ -1669,7 +1701,7 @@ JSONRPC_STATUS CJSONServiceDescription::Print(CVariant &result, ITransportLayer 
 
     if (filterByType == "method")
     {
-      name = name.ToLower();
+      StringUtils::ToLower(name);
 
       CJsonRpcMethodMap::JsonRpcMethodIterator methodIterator = m_actionMap.find(name);
       if (methodIterator != m_actionMap.end() &&
@@ -1681,7 +1713,8 @@ JSONRPC_STATUS CJSONServiceDescription::Print(CVariant &result, ITransportLayer 
     else if (filterByType == "namespace")
     {
       // append a . delimiter to make sure we check for a namespace
-      name = name.ToLower().append(".");
+      StringUtils::ToLower(name);
+      name.append(".");
 
       CJsonRpcMethodMap::JsonRpcMethodIterator methodIterator;
       CJsonRpcMethodMap::JsonRpcMethodIterator methodIteratorEnd = m_actionMap.end();
@@ -1723,7 +1756,7 @@ JSONRPC_STATUS CJSONServiceDescription::Print(CVariant &result, ITransportLayer 
       // Loop through all printed types to get all referenced types
       std::map<std::string, JSONSchemaTypeDefinitionPtr>::const_iterator typeIterator;
       std::map<std::string, JSONSchemaTypeDefinitionPtr>::const_iterator typeIteratorEnd = types.end();
-      for (typeIterator = types.begin(); typeIterator != typeIteratorEnd; typeIterator++)
+      for (typeIterator = types.begin(); typeIterator != typeIteratorEnd; ++typeIterator)
         getReferencedTypes(typeIterator->second, referencedTypes);
 
       // Loop through all printed method's parameters and return value to get all referenced types
@@ -1759,7 +1792,7 @@ JSONRPC_STATUS CJSONServiceDescription::Print(CVariant &result, ITransportLayer 
 
   std::map<std::string, JSONSchemaTypeDefinitionPtr>::const_iterator typeIterator;
   std::map<std::string, JSONSchemaTypeDefinitionPtr>::const_iterator typeIteratorEnd = types.end();
-  for (typeIterator = types.begin(); typeIterator != typeIteratorEnd; typeIterator++)
+  for (typeIterator = types.begin(); typeIterator != typeIteratorEnd; ++typeIterator)
   {
     CVariant currentType = CVariant(CVariant::VariantTypeObject);
     typeIterator->second->Print(false, true, true, printDescriptions, currentType);
@@ -1811,7 +1844,7 @@ JSONRPC_STATUS CJSONServiceDescription::Print(CVariant &result, ITransportLayer 
   // Print notification description
   std::map<std::string, CVariant>::const_iterator notificationIterator;
   std::map<std::string, CVariant>::const_iterator notificationIteratorEnd = notifications.end();
-  for (notificationIterator = notifications.begin(); notificationIterator != notificationIteratorEnd; notificationIterator++)
+  for (notificationIterator = notifications.begin(); notificationIterator != notificationIteratorEnd; ++notificationIterator)
     result["notifications"][notificationIterator->first] = notificationIterator->second[notificationIterator->first];
 
   return OK;
@@ -1947,7 +1980,7 @@ void CJSONServiceDescription::getReferencedTypes(const JSONSchemaTypeDefinitionP
   {
     JSONSchemaTypeDefinition::CJsonSchemaPropertiesMap::JSONSchemaPropertiesIterator iter;
     JSONSchemaTypeDefinition::CJsonSchemaPropertiesMap::JSONSchemaPropertiesIterator iterEnd = type->properties.end();
-    for (iter = type->properties.begin(); iter != iterEnd; iter++)
+    for (iter = type->properties.begin(); iter != iterEnd; ++iter)
       getReferencedTypes(iter->second, referencedTypes);
   }
   // If the current type is an array we need to check its items
@@ -1983,7 +2016,7 @@ void CJSONServiceDescription::CJsonRpcMethodMap::clear()
 void CJSONServiceDescription::CJsonRpcMethodMap::add(const JsonRpcMethod &method)
 {
   CStdString name = method.name;
-  name = name.ToLower();
+  StringUtils::ToLower(name);
   m_actionmap[name] = method;
 }
 

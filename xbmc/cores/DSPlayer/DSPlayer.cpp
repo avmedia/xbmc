@@ -33,7 +33,6 @@
 #include "xbmc/GUIInfoManager.h"
 #include "utils/SystemInfo.h"
 #include "input/MouseStat.h"
-#include "settings/GUISettings.h"
 #include "settings/Settings.h"
 #include "FileItem.h"
 #include "utils/log.h"
@@ -144,7 +143,7 @@ void CDSPlayer::ShowEditionDlg(bool playStart)
 	CGUIDialogSelect *dialog = (CGUIDialogSelect *) g_windowManager.GetWindow(WINDOW_DIALOG_SELECT);
 
 	bool listAllTitles = false;
-	UINT minLength = g_guiSettings.GetInt("dsplayer.mintitlelength");
+	UINT minLength = CSettings::Get().GetInt("dsplayer.mintitlelength");
 
 	while (true)
 	{
@@ -233,7 +232,7 @@ bool CDSPlayer::OpenFileInternal(const CFileItem& file)
 
 		if (PlayerState != DSPLAYER_ERROR)
 		{
-			if(g_guiSettings.GetBool("dsplayer.showbdtitlechoice"))
+			if(CSettings::Get().GetBool("dsplayer.showbdtitlechoice"))
 				ShowEditionDlg(true);
 
 			// Seek
@@ -279,7 +278,7 @@ bool CDSPlayer::OpenFile(const CFileItem& file,const CPlayerOptions &options)
 	return OpenFileInternal(fileItem);
 }
 
-bool CDSPlayer::CloseFile()
+bool CDSPlayer::CloseFile(bool reopen)
 {
 	CSingleLock lock(m_CleanSection);
 
@@ -333,6 +332,30 @@ void CDSPlayer::GetGeneralInfo(CStdString& strGeneralInfo)
 {
   CSingleLock lock(m_StateSection);
   strGeneralInfo = g_dsGraph->GetGeneralInfo();
+}
+
+int CDSPlayer::GetSourceBitrate()
+{
+	// TODO
+	return 0;
+}
+
+void CDSPlayer::GetVideoStreamInfo(SPlayerVideoStreamInfo &info)
+{
+	  CSingleLock lock(m_StateSection);
+	  g_dsGraph->GetVideoStreamInfo(info);
+}
+
+bool CDSPlayer::GetStreamDetails(CStreamDetails &details)
+{
+	CSingleLock lock(m_StateSection);
+	return g_dsGraph->GetStreamDetails(details);
+}
+
+void CDSPlayer::GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info)
+{
+	CSingleLock lock(m_StateSection);
+	g_dsGraph->GetAudioStreamInfo(index, info);
 }
 
 //CThread
@@ -571,7 +594,7 @@ void CDSPlayer::ToFFRW(int iSpeed)
   m_pGraphThread.SetSpeedChanged(true);
 }
 
-void CDSPlayer::Seek(bool bPlus, bool bLargeStep)
+void CDSPlayer::Seek(bool bPlus, bool bLargeStep, bool bChapterOverride)
 {
   PostMessage( new CDSMsgPlayerSeek(bPlus, bLargeStep) );
 }
@@ -775,9 +798,9 @@ bool CDSPlayer::ShowPVRChannelInfo()
 {
 	bool bReturn(false);
 
-	if (g_guiSettings.GetBool("pvrmenu.infoswitch"))
+	if (CSettings::Get().GetBool("pvrmenu.infoswitch"))
 	{
-		int iTimeout = g_guiSettings.GetBool("pvrmenu.infotimeout") ? g_guiSettings.GetInt("pvrmenu.infotime") : 0;
+		int iTimeout = CSettings::Get().GetBool("pvrmenu.infotimeout") ? CSettings::Get().GetInt("pvrmenu.infotime") : 0;
 		g_PVRManager.ShowPlayerInfo(iTimeout);
 
 		bReturn = true;

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,15 +23,14 @@
 #include "Application.h"
 #include "ApplicationMessenger.h"
 #include "GUIUserMessages.h"
-#include "settings/GUISettings.h"
 #include "dialogs/GUIDialogOK.h"
 #include "dialogs/GUIDialogSelect.h"
 #include "pvr/PVRManager.h"
 #include "pvr/PVRDatabase.h"
 #include "guilib/GUIWindowManager.h"
 #include "settings/DisplaySettings.h"
-#include "settings/Settings.h"
 #include "settings/MediaSettings.h"
+#include "settings/Settings.h"
 #include "pvr/channels/PVRChannelGroups.h"
 #include "pvr/channels/PVRChannelGroupInternal.h"
 #include "pvr/recordings/PVRRecordings.h"
@@ -98,6 +97,8 @@ bool CPVRClients::IsConnectedClient(int iClientId) const
 
 bool CPVRClients::IsConnectedClient(const AddonPtr addon)
 {
+  CSingleLock lock(m_critSection);
+  
   for (PVR_CLIENTMAP_CITR itr = m_clientMap.begin(); itr != m_clientMap.end(); itr++)
     if (itr->second->ID() == addon->ID())
       return itr->second->ReadyToUse();
@@ -173,7 +174,7 @@ int CPVRClients::GetFirstConnectedClientID(void)
 {
   CSingleLock lock(m_critSection);
 
-  for (PVR_CLIENTMAP_ITR itr = m_clientMap.begin(); itr != m_clientMap.end(); itr++)
+  for (PVR_CLIENTMAP_CITR itr = m_clientMap.begin(); itr != m_clientMap.end(); itr++)
     if (itr->second->ReadyToUse())
       return itr->second->GetID();
 
@@ -311,9 +312,9 @@ bool CPVRClients::SwitchChannel(const CPVRChannel &channel)
       // different backend
       currentChannel->ClientID() != channel.ClientID() ||
       // stream URL should always be opened as a new file
-      !channel.StreamURL().IsEmpty() || !currentChannel->StreamURL().IsEmpty())
+      !channel.StreamURL().empty() || !currentChannel->StreamURL().empty())
   {
-    if (channel.StreamURL().IsEmpty())
+    if (channel.StreamURL().empty())
     {
       CloseStream();
       bSwitchSuccessful = OpenStream(channel, true);
@@ -368,9 +369,11 @@ bool CPVRClients::GetPlayingRecording(CPVRRecording &recording) const
 
 bool CPVRClients::HasTimerSupport(int iClientId)
 {
-  CSingleLock lock(m_critSection);
+  PVR_CLIENT client;
+  if (GetConnectedClient(iClientId, client))
+    return client->SupportsTimers();
 
-  return IsConnectedClient(iClientId) && m_clientMap[iClientId]->SupportsTimers();
+  return false;
 }
 
 PVR_ERROR CPVRClients::GetTimers(CPVRTimers *timers)
@@ -380,7 +383,7 @@ PVR_ERROR CPVRClients::GetTimers(CPVRTimers *timers)
   GetConnectedClients(clients);
 
   /* get the timer list from each client */
-  for (PVR_CLIENTMAP_ITR itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
+  for (PVR_CLIENTMAP_CITR itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
   {
     PVR_ERROR currentError = (*itrClients).second->GetTimers(timers);
     if (currentError != PVR_ERROR_NOT_IMPLEMENTED &&
@@ -453,7 +456,7 @@ PVR_ERROR CPVRClients::GetRecordings(CPVRRecordings *recordings)
   PVR_CLIENTMAP clients;
   GetConnectedClients(clients);
 
-  for (PVR_CLIENTMAP_ITR itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
+  for (PVR_CLIENTMAP_CITR itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
   {
     PVR_ERROR currentError = (*itrClients).second->GetRecordings(recordings);
     if (currentError != PVR_ERROR_NOT_IMPLEMENTED &&
@@ -601,7 +604,7 @@ PVR_ERROR CPVRClients::GetChannels(CPVRChannelGroupInternal *group)
   GetConnectedClients(clients);
 
   /* get the channel list from each client */
-  for (PVR_CLIENTMAP_ITR itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
+  for (PVR_CLIENTMAP_CITR itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
   {
     PVR_ERROR currentError = (*itrClients).second->GetChannels(*group, group->IsRadio());
     if (currentError != PVR_ERROR_NOT_IMPLEMENTED &&
@@ -621,7 +624,7 @@ PVR_ERROR CPVRClients::GetChannelGroups(CPVRChannelGroups *groups)
   PVR_CLIENTMAP clients;
   GetConnectedClients(clients);
 
-  for (PVR_CLIENTMAP_ITR itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
+  for (PVR_CLIENTMAP_CITR itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
   {
     PVR_ERROR currentError = (*itrClients).second->GetChannelGroups(groups);
     if (currentError != PVR_ERROR_NOT_IMPLEMENTED &&
@@ -642,7 +645,7 @@ PVR_ERROR CPVRClients::GetChannelGroupMembers(CPVRChannelGroup *group)
   GetConnectedClients(clients);
 
   /* get the member list from each client */
-  for (PVR_CLIENTMAP_ITR itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
+  for (PVR_CLIENTMAP_CITR itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
   {
     PVR_ERROR currentError = (*itrClients).second->GetChannelGroupMembers(group);
     if (currentError != PVR_ERROR_NOT_IMPLEMENTED &&
@@ -683,7 +686,7 @@ bool CPVRClients::GetMenuHooks(int iClientID, PVR_MENUHOOK_CAT cat, PVR_MENUHOOK
   return bReturn;
 }
 
-void CPVRClients::ProcessMenuHooks(int iClientID, PVR_MENUHOOK_CAT cat)
+void CPVRClients::ProcessMenuHooks(int iClientID, PVR_MENUHOOK_CAT cat, const CFileItem *item)
 {
   PVR_MENUHOOKS *hooks = NULL;
 
@@ -704,7 +707,7 @@ void CPVRClients::ProcessMenuHooks(int iClientID, PVR_MENUHOOK_CAT cat)
       pDialog->Reset();
       pDialog->SetHeading(19196);
 
-      PVR_CLIENTMAP_ITR itrClients;
+      PVR_CLIENTMAP_CITR itrClients;
       for (itrClients = clients.begin(); itrClients != clients.end(); itrClients++)
       {
         pDialog->Add(itrClients->second->GetBackendName());
@@ -735,12 +738,16 @@ void CPVRClients::ProcessMenuHooks(int iClientID, PVR_MENUHOOK_CAT cat)
     pDialog->Reset();
     pDialog->SetHeading(19196);
     for (unsigned int i = 0; i < hooks->size(); i++)
-      pDialog->Add(client->GetString(hooks->at(i).iLocalizedStringId));
+      if (hooks->at(i).category == cat || hooks->at(i).category == PVR_MENUHOOK_ALL)
+      {
+        pDialog->Add(client->GetString(hooks->at(i).iLocalizedStringId));
+        hookIDs.push_back(i);
+      }
     pDialog->DoModal();
 
     int selection = pDialog->GetSelectedLabel();
     if (selection >= 0)
-      client->CallMenuHook(hooks->at(selection));
+      client->CallMenuHook(hooks->at(hookIDs.at(selection)), item);
   }
 }
 
@@ -854,7 +861,7 @@ int CPVRClients::RegisterClient(AddonPtr client)
   // load and initialise the client libraries
   {
     CSingleLock lock(m_critSection);
-    PVR_CLIENTMAP_ITR existingClient = m_clientMap.find(iClientId);
+    PVR_CLIENTMAP_CITR existingClient = m_clientMap.find(iClientId);
     if (existingClient != m_clientMap.end())
     {
       // return existing client
@@ -877,8 +884,8 @@ int CPVRClients::RegisterClient(AddonPtr client)
 bool CPVRClients::UpdateAndInitialiseClients(bool bInitialiseAllClients /* = false */)
 {
   bool bReturn(true);
-  ADDON::VECADDONS map;
-  ADDON::VECADDONS disableAddons;
+  VECADDONS map;
+  VECADDONS disableAddons;
   {
     CSingleLock lock(m_critSection);
     map = m_addons;
@@ -891,14 +898,14 @@ bool CPVRClients::UpdateAndInitialiseClients(bool bInitialiseAllClients /* = fal
   {
     const AddonPtr clientAddon = map.at(iClientPtr);
     bool bEnabled = clientAddon->Enabled() &&
-        !m_addonDb.IsAddonDisabled(clientAddon->ID());
+        !CAddonMgr::Get().IsAddonDisabled(clientAddon->ID());
 
     if (!bEnabled && IsKnownClient(clientAddon))
     {
       CSingleLock lock(m_critSection);
       /* stop the client and remove it from the db */
       StopClient(clientAddon, false);
-      ADDON::VECADDONS::iterator addonPtr = std::find(m_addons.begin(), m_addons.end(), clientAddon);
+      VECADDONS::iterator addonPtr = std::find(m_addons.begin(), m_addons.end(), clientAddon);
       if (addonPtr != m_addons.end())
         m_addons.erase(addonPtr);
 
@@ -955,7 +962,7 @@ bool CPVRClients::UpdateAndInitialiseClients(bool bInitialiseAllClients /* = fal
         }
       }
 
-      if (bDisabled && (g_PVRManager.GetState() == ManagerStateStarted || g_PVRManager.GetState() == ManagerStateStarting))
+      if (bDisabled && (g_PVRManager.IsStarted() || g_PVRManager.IsInitialising()))
         CGUIDialogOK::ShowAndGetInput(24070, 24071, 16029, 0);
     }
   }
@@ -964,13 +971,13 @@ bool CPVRClients::UpdateAndInitialiseClients(bool bInitialiseAllClients /* = fal
   if (disableAddons.size() > 0)
   {
     CSingleLock lock(m_critSection);
-    for (ADDON::VECADDONS::iterator it = disableAddons.begin(); it != disableAddons.end(); it++)
+    for (VECADDONS::iterator it = disableAddons.begin(); it != disableAddons.end(); it++)
     {
       // disable in the add-on db
-      m_addonDb.DisableAddon((*it)->ID(), true);
+      CAddonMgr::Get().DisableAddon((*it)->ID(), true);
 
       // remove from the pvr add-on list
-      ADDON::VECADDONS::iterator addonPtr = std::find(m_addons.begin(), m_addons.end(), *it);
+      VECADDONS::iterator addonPtr = std::find(m_addons.begin(), m_addons.end(), *it);
       if (addonPtr != m_addons.end())
         m_addons.erase(addonPtr);
     }
@@ -1008,7 +1015,7 @@ void CPVRClients::Process(void)
 
 void CPVRClients::ShowDialogNoClientsEnabled(void)
 {
-  if (g_PVRManager.GetState() != ManagerStateStarted && g_PVRManager.GetState() != ManagerStateStarting)
+  if (!g_PVRManager.IsStarted() && !g_PVRManager.IsInitialising())
     return;
 
   CGUIDialogOK::ShowAndGetInput(19240, 19241, 19242, 19243);
@@ -1059,66 +1066,32 @@ void CPVRClients::LoadCurrentChannelSettings(void)
   if (!database)
     return;
 
-  if (g_application.m_pPlayer)
+  if (g_application.m_pPlayer->HasPlayer())
   {
-    /* set the default settings first */
+    /* store the current settings so we can compare if anything has changed */
+    CVideoSettings previousSettings = CMediaSettings::Get().GetCurrentVideoSettings();
+
+    /* load the persisted channel settings and set them as current */
     CVideoSettings loadedChannelSettings = CMediaSettings::Get().GetDefaultVideoSettings();
-
-    /* try to load the settings from the database */
     database->GetChannelSettings(*channel, loadedChannelSettings);
+    CMediaSettings::Get().GetCurrentVideoSettings() = loadedChannelSettings;
 
-    CMediaSettings::Get().GetCurrentVideoSettings() = CMediaSettings::Get().GetDefaultVideoSettings();
-    CMediaSettings::Get().GetCurrentVideoSettings().m_Brightness          = loadedChannelSettings.m_Brightness;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_Contrast            = loadedChannelSettings.m_Contrast;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_Gamma               = loadedChannelSettings.m_Gamma;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_Crop                = loadedChannelSettings.m_Crop;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_CropLeft            = loadedChannelSettings.m_CropLeft;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_CropRight           = loadedChannelSettings.m_CropRight;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_CropTop             = loadedChannelSettings.m_CropTop;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_CropBottom          = loadedChannelSettings.m_CropBottom;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_CustomPixelRatio    = loadedChannelSettings.m_CustomPixelRatio;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_CustomZoomAmount    = loadedChannelSettings.m_CustomZoomAmount;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_CustomVerticalShift = loadedChannelSettings.m_CustomVerticalShift;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_NoiseReduction      = loadedChannelSettings.m_NoiseReduction;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_Sharpness           = loadedChannelSettings.m_Sharpness;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_InterlaceMethod     = loadedChannelSettings.m_InterlaceMethod;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_OutputToAllSpeakers = loadedChannelSettings.m_OutputToAllSpeakers;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_AudioDelay          = loadedChannelSettings.m_AudioDelay;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream         = loadedChannelSettings.m_AudioStream;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn          = loadedChannelSettings.m_SubtitleOn;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleDelay       = loadedChannelSettings.m_SubtitleDelay;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_CustomNonLinStretch = loadedChannelSettings.m_CustomNonLinStretch;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_ScalingMethod       = loadedChannelSettings.m_ScalingMethod;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_PostProcess         = loadedChannelSettings.m_PostProcess;
-    CMediaSettings::Get().GetCurrentVideoSettings().m_DeinterlaceMode     = loadedChannelSettings.m_DeinterlaceMode;
-
-    /* only change the view mode if it's different */
-    if (CMediaSettings::Get().GetCurrentVideoSettings().m_ViewMode != loadedChannelSettings.m_ViewMode)
-    {
-      CMediaSettings::Get().GetCurrentVideoSettings().m_ViewMode = loadedChannelSettings.m_ViewMode;
-
-      g_renderManager.SetViewMode(CMediaSettings::Get().GetCurrentVideoSettings().m_ViewMode);
-      CMediaSettings::Get().GetCurrentVideoSettings().m_CustomZoomAmount = CDisplaySettings::Get().GetZoomAmount();
-      CMediaSettings::Get().GetCurrentVideoSettings().m_CustomPixelRatio = CDisplaySettings::Get().GetPixelRatio();
-    }
+    /* update the view mode if it set to custom or differs from the previous mode */
+    if (previousSettings.m_ViewMode != loadedChannelSettings.m_ViewMode || loadedChannelSettings.m_ViewMode == ViewModeCustom)
+      g_renderManager.SetViewMode(loadedChannelSettings.m_ViewMode);
 
     /* only change the subtitle stream, if it's different */
-    if (CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream != loadedChannelSettings.m_SubtitleStream)
-    {
-      CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream = loadedChannelSettings.m_SubtitleStream;
-
-      g_application.m_pPlayer->SetSubtitle(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream);
-    }
+    if (previousSettings.m_SubtitleStream != loadedChannelSettings.m_SubtitleStream)
+      g_application.m_pPlayer->SetSubtitle(loadedChannelSettings.m_SubtitleStream);
 
     /* only change the audio stream if it's different */
-    if (g_application.m_pPlayer->GetAudioStream() != CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream &&
-        CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream >= 0)
-      g_application.m_pPlayer->SetAudioStream(CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream);
+    if (g_application.m_pPlayer->GetAudioStream() != loadedChannelSettings.m_AudioStream && loadedChannelSettings.m_AudioStream >= 0)
+      g_application.m_pPlayer->SetAudioStream(loadedChannelSettings.m_AudioStream);
 
-    g_application.m_pPlayer->SetAVDelay(CMediaSettings::Get().GetCurrentVideoSettings().m_AudioDelay);
-    g_application.m_pPlayer->SetDynamicRangeCompression((long)(CMediaSettings::Get().GetCurrentVideoSettings().m_VolumeAmplification * 100));
-    g_application.m_pPlayer->SetSubtitleVisible(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn);
-    g_application.m_pPlayer->SetSubTitleDelay(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleDelay);
+    g_application.m_pPlayer->SetAVDelay(loadedChannelSettings.m_AudioDelay);
+    g_application.m_pPlayer->SetDynamicRangeCompression((long)(loadedChannelSettings.m_VolumeAmplification * 100));
+    g_application.m_pPlayer->SetSubtitleVisible(loadedChannelSettings.m_SubtitleOn);
+    g_application.m_pPlayer->SetSubTitleDelay(loadedChannelSettings.m_SubtitleDelay);
 
     /* settings can be saved on next channel switch */
     m_bIsValidChannelSettings = true;
@@ -1127,7 +1100,7 @@ void CPVRClients::LoadCurrentChannelSettings(void)
 
 bool CPVRClients::UpdateAddons(void)
 {
-  ADDON::VECADDONS addons;
+  VECADDONS addons;
   bool bReturn(CAddonMgr::Get().GetAddons(ADDON_PVRDLL, addons, true));
 
   if (bReturn)
@@ -1149,13 +1122,13 @@ bool CPVRClients::UpdateAddons(void)
 
   if ((!bReturn || addons.size() == 0) && !m_bNoAddonWarningDisplayed &&
       !CAddonMgr::Get().HasAddons(ADDON_PVRDLL, false) &&
-      (g_PVRManager.GetState() == ManagerStateStarted || g_PVRManager.GetState() == ManagerStateStarting))
+      (g_PVRManager.IsStarted() || g_PVRManager.IsInitialising()))
   {
     // No PVR add-ons could be found
     // You need a tuner, backend software, and an add-on for the backend to be able to use PVR.
     // Please visit xbmc.org/pvr to learn more.
     m_bNoAddonWarningDisplayed = true;
-    g_guiSettings.SetBool("pvrmanager.enabled", false);
+    CSettings::Get().SetBool("pvrmanager.enabled", false);
     CGUIDialogOK::ShowAndGetInput(19271, 19272, 19273, 19274);
     CGUIMessage msg(GUI_MSG_UPDATE, WINDOW_SETTINGS_MYPVR, 0);
     g_windowManager.SendThreadMessage(msg, WINDOW_SETTINGS_MYPVR);
@@ -1170,7 +1143,7 @@ void CPVRClients::Notify(const Observable &obs, const ObservableMessage msg)
     UpdateAddons();
 }
 
-bool CPVRClients::GetClient(const CStdString &strId, ADDON::AddonPtr &addon) const
+bool CPVRClients::GetClient(const CStdString &strId, AddonPtr &addon) const
 {
   CSingleLock lock(m_critSection);
   for (PVR_CLIENTMAP_CITR itr = m_clientMap.begin(); itr != m_clientMap.end(); itr++)
@@ -1428,4 +1401,43 @@ bool CPVRClients::IsEncrypted(void) const
   if (GetPlayingClient(client))
     return client->IsPlayingEncryptedChannel();
   return false;
+}
+
+time_t CPVRClients::GetPlayingTime() const
+{
+  PVR_CLIENT client;
+  time_t time = 0;
+
+  if (GetPlayingClient(client))
+  {
+     time = client->GetPlayingTime();
+  }
+
+  return time;
+}
+
+time_t CPVRClients::GetBufferTimeStart() const
+{
+  PVR_CLIENT client;
+  time_t time = 0;
+
+  if (GetPlayingClient(client))
+  {
+    time = client->GetBufferTimeStart();
+  }
+
+  return time;
+}
+
+time_t CPVRClients::GetBufferTimeEnd() const
+{
+  PVR_CLIENT client;
+  time_t time = 0;
+
+  if (GetPlayingClient(client))
+  {
+    time = client->GetBufferTimeEnd();
+  }
+
+  return time;
 }

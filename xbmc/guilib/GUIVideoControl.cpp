@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,7 +43,8 @@ CGUIVideoControl::~CGUIVideoControl(void)
 void CGUIVideoControl::Process(unsigned int currentTime, CDirtyRegionList &dirtyregions)
 {
   // TODO Proper processing which marks when its actually changed. Just mark always for now.
-  MarkDirtyRegion();
+  if (g_renderManager.RendererHandlesPresent())
+    MarkDirtyRegion();
 
   CGUIControl::Process(currentTime, dirtyregions);
 }
@@ -54,22 +55,22 @@ void CGUIVideoControl::Render()
   // don't render if we aren't playing video, or if the renderer isn't started
   // (otherwise the lock we have from CApplication::Render() may clash with the startup
   // locks in the RenderManager.)
-  if (g_application.IsPlayingVideo() && g_renderManager.IsStarted())
+  if (g_application.m_pPlayer->IsPlayingVideo() && g_renderManager.IsStarted())
   {
 #else
-  if (g_application.IsPlayingVideo())
+  if (g_application.m_pPlayer->IsPlayingVideo())
   {
 #endif
-    if (!g_application.m_pPlayer->IsPaused())
+    if (!g_application.m_pPlayer->IsPausedPlayback())
       g_application.ResetScreenSaver();
 
     g_graphicsContext.SetViewWindow(m_posX, m_posY, m_posX + m_width, m_posY + m_height);
 
 #ifdef HAS_VIDEO_PLAYBACK
     color_t alpha = g_graphicsContext.MergeAlpha(0xFF000000) >> 24;
-    g_renderManager.RenderUpdate(false, 0, alpha);
+    g_renderManager.Render(false, 0, alpha);
 #else
-    ((CDummyVideoPlayer *)g_application.m_pPlayer)->Render();
+    ((CDummyVideoPlayer *)g_application.m_pPlayer->GetInternal())->Render();
 #endif
   }
   CGUIControl::Render();
@@ -77,7 +78,7 @@ void CGUIVideoControl::Render()
 
 EVENT_RESULT CGUIVideoControl::OnMouseEvent(const CPoint &point, const CMouseEvent &event)
 {
-  if (!g_application.IsPlayingVideo()) return EVENT_RESULT_UNHANDLED;
+  if (!g_application.m_pPlayer->IsPlayingVideo()) return EVENT_RESULT_UNHANDLED;
   if (event.m_id == ACTION_MOUSE_LEFT_CLICK)
   { // switch to fullscreen
     CGUIMessage message(GUI_MSG_FULLSCREEN, GetID(), GetParentID());

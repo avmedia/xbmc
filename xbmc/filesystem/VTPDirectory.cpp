@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "VTPSession.h"
 #include "URL.h"
 #include "utils/URIUtils.h"
+#include "utils/StringUtils.h"
 #include "FileItem.h"
 
 
@@ -47,13 +48,12 @@ bool CVTPDirectory::GetChannels(const CStdString& base, CFileItemList &items)
   vector<CVTPSession::Channel>::iterator it;
   for(it = channels.begin(); it != channels.end(); it++)
   {
-    CStdString buffer;
     CFileItemPtr item(new CFileItem("", false));
 
-    buffer.Format("%s/%d.ts", base.c_str(), it->index);
+    CStdString buffer = StringUtils::Format("%s/%d.ts", base.c_str(), it->index);
     item->SetPath(buffer);
     item->m_strTitle = it->name;
-    buffer.Format("%d - %s", it->index, it->name);
+    buffer = StringUtils::Format("%d - %s", it->index, it->name.c_str());
     item->SetLabel(buffer);
 
     items.Add(item);
@@ -79,7 +79,7 @@ bool CVTPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items
   if(!m_session->Open(url.GetHostName(), url.GetPort()))
     return false;
 
-  if(url.GetFileName().IsEmpty())
+  if(url.GetFileName().empty())
   {
     CFileItemPtr item;
 

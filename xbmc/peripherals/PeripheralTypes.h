@@ -21,10 +21,11 @@
 
 #include <map>
 #include <stdio.h>
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include "PlatformDefs.h"
 #endif
 #include "utils/StdString.h"
+#include "utils/StringUtils.h"
 
 class CSetting;
 
@@ -71,14 +72,20 @@ namespace PERIPHERALS
     int m_iProductId;
   };
 
+  struct PeripheralDeviceSetting
+  {
+    CSetting* m_setting;
+    int       m_order;
+  };
+
   struct PeripheralDeviceMapping
   {
-    std::vector<PeripheralID>        m_PeripheralID;
-    PeripheralBusType                m_busType;
-    PeripheralType                   m_class;
-    CStdString                       m_strDeviceName;
-    PeripheralType                   m_mappedTo;
-    std::map<CStdString, CSetting *> m_settings;
+    std::vector<PeripheralID>                     m_PeripheralID;
+    PeripheralBusType                             m_busType;
+    PeripheralType                                m_class;
+    CStdString                                    m_strDeviceName;
+    PeripheralType                                m_mappedTo;
+    std::map<CStdString, PeripheralDeviceSetting> m_settings;
   };
 
   class PeripheralTypeTranslator
@@ -112,7 +119,7 @@ namespace PERIPHERALS
     static PeripheralType GetTypeFromString(const CStdString &strType)
     {
       CStdString strTypeLowerCase(strType);
-      strTypeLowerCase.ToLower();
+      StringUtils::ToLower(strTypeLowerCase);
 
       if (strTypeLowerCase.Equals("bluetooth"))
         return PERIPHERAL_BLUETOOTH;
@@ -154,7 +161,7 @@ namespace PERIPHERALS
     static PeripheralBusType GetBusTypeFromString(const CStdString &strType)
     {
       CStdString strTypeLowerCase(strType);
-      strTypeLowerCase.ToLower();
+      StringUtils::ToLower(strTypeLowerCase);
 
       if (strTypeLowerCase.Equals("usb"))
         return PERIPHERAL_BUS_USB;
@@ -182,7 +189,7 @@ namespace PERIPHERALS
       if (iVal > 65536)
         iVal = 65536;
 
-      strHexString.Format("%04X", iVal);
+      strHexString = StringUtils::Format("%04X", iVal);
     };
   };
 

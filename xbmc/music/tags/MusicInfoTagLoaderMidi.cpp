@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,10 +55,10 @@ bool CMusicInfoTagLoaderMidi::Load(const CStdString & strFileName, CMusicInfoTag
 
   URIUtils::RemoveSlashAtEnd(path );
 
-  if ( !path.IsEmpty() )
+  if ( !path.empty() )
   {
     CStdString artist = URIUtils::GetFileName( path );
-    if ( !artist.IsEmpty() )
+    if ( !artist.empty() )
       tag.SetArtist( artist );
   }
 

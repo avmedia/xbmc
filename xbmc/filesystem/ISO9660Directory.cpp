@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "iso9660.h"
 #include "Util.h"
 #include "utils/URIUtils.h"
+#include "utils/StringUtils.h"
 #include "URL.h"
 #include "FileItem.h"
 
@@ -53,7 +54,7 @@ bool CISO9660Directory::GetDirectory(const CStdString& strPath, CFileItemList &i
   CStdString strDirectory = url.GetFileName();
   if (strDirectory != "")
   {
-    strSearchMask.Format("\\%s", strDirectory.c_str());
+    strSearchMask = StringUtils::Format("\\%s", strDirectory.c_str());
   }
   else
   {

@@ -22,7 +22,7 @@
 #include "PlayerSelectionRule.h"
 #include "video/VideoInfoTag.h"
 #include "utils/StreamDetails.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/RegExp.h"
 #include "utils/XBMCTinyXML.h"
@@ -38,7 +38,7 @@ CPlayerSelectionRule::~CPlayerSelectionRule()
 void CPlayerSelectionRule::Initialize(TiXmlElement* pRule)
 {
   m_name = pRule->Attribute("name");
-  if (!m_name || m_name.IsEmpty())
+  if (!m_name || m_name.empty())
     m_name = "un-named";
 
   CLog::Log(LOGDEBUG, "CPlayerSelectionRule::Initialize: creating rule: %s", m_name.c_str());
@@ -67,7 +67,7 @@ void CPlayerSelectionRule::Initialize(TiXmlElement* pRule)
   m_bStreamDetails = m_audioCodec.length() > 0 || m_audioChannels.length() > 0 ||
     m_videoCodec.length() > 0 || m_videoResolution.length() > 0 || m_videoAspect.length() > 0;
 
-  if (m_bStreamDetails && !g_guiSettings.GetBool("myvideos.extractflags"))
+  if (m_bStreamDetails && !CSettings::Get().GetBool("myvideos.extractflags"))
   {
       CLog::Log(LOGWARNING, "CPlayerSelectionRule::Initialize: rule: %s needs media flagging, which is disabled", m_name.c_str());
   }
@@ -118,7 +118,7 @@ void CPlayerSelectionRule::GetPlayers(const CFileItem& item, VECPLAYERCORES &vec
   if (m_tDVDFile >= 0 && (m_tDVDFile > 0) != item.IsDVDFile()) return;
   if (m_tDVDImage >= 0 && (m_tDVDImage > 0) != item.IsDVDImage()) return;
 
-  CRegExp regExp;
+  CRegExp regExp(false, CRegExp::autoUtf8);
 
   if (m_bStreamDetails)
   {

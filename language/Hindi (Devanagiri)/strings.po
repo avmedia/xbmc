@@ -1,13 +1,12 @@
 # XBMC Media Center language file
-# XBMC-core v12.0
 msgid ""
 msgstr ""
-"Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
+"Project-Id-Version: XBMC Main\n"
 "Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: XBMC Translation Team\n"
-"Language-Team: Hindi (Devanagiri) (http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/hi/)\n"
+"Language-Team: Hindi (Devanagiri) (http://www.transifex.com/projects/p/xbmc-main/language/hi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -16,7 +15,7 @@ msgstr ""
 
 msgctxt "#0"
 msgid "Programs"
-msgstr "करिअक्रम"
+msgstr "कार्यक्रम"
 
 msgctxt "#1"
 msgid "Pictures"
@@ -206,6 +205,26 @@ msgctxt "#62"
 msgid "Dec"
 msgstr "देक"
 
+msgctxt "#88"
+msgid "South"
+msgstr "दक्षिण"
+
+msgctxt "#89"
+msgid "North"
+msgstr "उत्तर"
+
+msgctxt "#90"
+msgid "West"
+msgstr "पश्चिम"
+
+msgctxt "#91"
+msgid "East"
+msgstr "पूर्व"
+
+msgctxt "#92"
+msgid "Variable"
+msgstr "वेरिएबल"
+
 msgctxt "#98"
 msgid "View: Auto"
 msgstr "द्रिस्तिकों: ऑटो"
@@ -374,6 +393,14 @@ msgctxt "#139"
 msgid "Temperatures:"
 msgstr "तापमान: "
 
+msgctxt "#140"
+msgid "CPU:"
+msgstr "सी.पी.यू"
+
+msgctxt "#141"
+msgid "GPU:"
+msgstr "जी.पी.यू"
+
 msgctxt "#142"
 msgid "Time:"
 msgstr "वक्त:"
@@ -382,9 +409,45 @@ msgctxt "#143"
 msgid "Current:"
 msgstr "वर्तमाना:"
 
+msgctxt "#144"
+msgid "Build:"
+msgstr "गठन"
+
+msgctxt "#145"
+msgid "Network:"
+msgstr "नेटवर्क"
+
+msgctxt "#146"
+msgid "Type:"
+msgstr "टाइप"
+
+msgctxt "#147"
+msgid "Static"
+msgstr "स्थिर"
+
+msgctxt "#148"
+msgid "DHCP"
+msgstr "डी अच् सी पी"
+
+msgctxt "#149"
+msgid "MAC address"
+msgstr "मैक एड्रेस"
+
 msgctxt "#150"
 msgid "IP address"
 msgstr "IP पता"
+
+msgctxt "#151"
+msgid "Link:"
+msgstr "कड़ी"
+
+msgctxt "#152"
+msgid "Half duplex"
+msgstr "हाफ डुप्लेक्स"
+
+msgctxt "#153"
+msgid "Full duplex"
+msgstr "फुल डुप्लेक्स"
 
 msgctxt "#154"
 msgid "Storage"
@@ -437,6 +500,10 @@ msgstr "कद अंधार है"
 msgctxt "#166"
 msgid "Skin"
 msgstr "विषय"
+
+msgctxt "#167"
+msgid "Cancel file operations"
+msgstr "फ़ाइल कार्रवाई रद्द करे"
 
 msgctxt "#169"
 msgid "Resolution"
@@ -686,17 +753,9 @@ msgctxt "#249"
 msgid "Music"
 msgstr "संगीतें"
 
-msgctxt "#250"
-msgid "Visualization"
-msgstr "कल्पना"
-
 msgctxt "#251"
 msgid "Select destination directory"
 msgstr "चुन्लेना अभिप्राय की निदेशिका"
-
-msgctxt "#252"
-msgid "Output stereo to all speakers"
-msgstr "ओउत्पुत सभी वक्तों करने के लिए स्तेरेओ"
 
 msgctxt "#253"
 msgid "Number of channels"
@@ -823,8 +882,8 @@ msgid "Font"
 msgstr "अक्सर"
 
 msgctxt "#289"
-msgid "- Size"
-msgstr "- अकारण"
+msgid "Size"
+msgstr "आकार"
 
 msgctxt "#291"
 msgid "Video"
@@ -853,10 +912,6 @@ msgstr "श्रव्य ओफ्फ्सेट"
 msgctxt "#298"
 msgid "Bookmarks"
 msgstr "प्रस्थ स्मरति"
-
-msgctxt "#302"
-msgid "- MP3 capable receiver"
-msgstr "- MP3 कापबले रिसीवर"
 
 msgctxt "#303"
 msgid "Delay"
@@ -970,18 +1025,6 @@ msgctxt "#336"
 msgid "Framerate conversion"
 msgstr "फ्रेमरेट रूपांतरण"
 
-msgctxt "#337"
-msgid "Audio output"
-msgstr "ऑडियो आउटपुट"
-
-msgctxt "#338"
-msgid "Analog"
-msgstr "अनुरूप"
-
-msgctxt "#339"
-msgid "Optical/Coax"
-msgstr "ऑप्टिकल / मनाना"
-
 msgctxt "#340"
 msgid "Various artists"
 msgstr "विभिन्न कलाकारों"
@@ -1005,10 +1048,6 @@ msgstr "एक्टर्स"
 msgctxt "#345"
 msgid "Year"
 msgstr "वर्ष"
-
-msgctxt "#346"
-msgid "Boost volume level on downmix"
-msgstr "दोव्न्मिक्स पर वॉल्यूम स्तर बूस्ट"
 
 msgctxt "#350"
 msgid "Programs"
@@ -1330,10 +1369,6 @@ msgctxt "#439"
 msgid "Cache"
 msgstr "कैश"
 
-msgctxt "#440"
-msgid "Harddisk"
-msgstr "हार्ड डिस्क"
-
 msgctxt "#442"
 msgid "Local network"
 msgstr "स्थानीय नेटवर्क"
@@ -1537,10 +1572,6 @@ msgstr "लोड हो रहा है फाइलों से जानक
 msgctxt "#507"
 msgid "Sort by: Usage"
 msgstr "इसके द्वारा सॉर्ट करें: यूसेज"
-
-msgctxt "#510"
-msgid "Enable visualizations"
-msgstr "विसुअलिज़तिओन्स  सक्षम करें"
 
 msgctxt "#511"
 msgid "Enable video mode switching"
@@ -1950,14 +1981,6 @@ msgctxt "#636"
 msgid "Custom"
 msgstr "रिवाज"
 
-msgctxt "#637"
-msgid "Replay gain"
-msgstr "रिप्ले लाभ"
-
-msgctxt "#638"
-msgid "Replaygain volume adjustments"
-msgstr "रिप्ले लाभ की मात्रा का समायोजन"
-
 msgctxt "#639"
 msgid "Use track levels"
 msgstr "ट्रैक स्तर का उपयोग करें"
@@ -1965,10 +1988,6 @@ msgstr "ट्रैक स्तर का उपयोग करें"
 msgctxt "#640"
 msgid "Use album levels"
 msgstr "एलबम के स्तर का प्रयोग करें"
-
-msgctxt "#643"
-msgid "Avoid clipping on replay gained files"
-msgstr "पुनरावृत्ति पर क्लिपिंग बचें फ़ाइलें प्राप्त"
 
 msgctxt "#644"
 msgid "Crop black bars"
@@ -2070,10 +2089,6 @@ msgctxt "#705"
 msgid "Network"
 msgstr "नेटवर्क"
 
-msgctxt "#706"
-msgid "- Server"
-msgstr "- सर्वर"
-
 msgctxt "#708"
 msgid "Use an HTTP proxy server to access the internet"
 msgstr "एक HTTP प्रॉक्सी सर्वर का प्रयोग करें इंटरनेट एक्सेस"
@@ -2082,9 +2097,9 @@ msgctxt "#713"
 msgid "HTTP proxy"
 msgstr "HTTP प्रॉक्सी."
 
-msgctxt "#715"
-msgid "- Assignment"
-msgstr "- असाइनमेंट"
+msgctxt "#719"
+msgid "IP address"
+msgstr "IP पता"
 
 msgctxt "#723"
 msgid "Save & restart"
@@ -2095,32 +2110,20 @@ msgid "Changes not saved. Continue without saving?"
 msgstr "सहेजे नहीं गए परिवर्तन. बचत के बिना जारी रखें?"
 
 msgctxt "#730"
-msgid "- Port"
-msgstr "-बंदरगाह"
+msgid "Port"
+msgstr "बंदरगाह"
 
 msgctxt "#732"
 msgid "Save & apply"
 msgstr "सहेजें और लागू"
-
-msgctxt "#733"
-msgid "- Password"
-msgstr "- पासवर्ड"
 
 msgctxt "#734"
 msgid "No pass"
 msgstr "कोई उत्तीर्ण"
 
 msgctxt "#735"
-msgid "- Character set"
-msgstr "- कैरेक्टर सेट"
-
-msgctxt "#736"
-msgid "- Style"
-msgstr "- शैली"
-
-msgctxt "#737"
-msgid "- Colour"
-msgstr "- रंगीन"
+msgid "Character set"
+msgstr "वर्ण सेट"
 
 msgctxt "#738"
 msgid "Normal"
@@ -2251,16 +2254,8 @@ msgid "Network interface"
 msgstr "नेटवर्क इंटरफेस"
 
 msgctxt "#776"
-msgid "- Wireless network name (ESSID)"
-msgstr "- वायरलेस नेटवर्क नाम (ESSID)"
-
-msgctxt "#777"
-msgid "- Wireless password"
-msgstr "- वायरलेस पासवर्ड"
-
-msgctxt "#778"
-msgid "- Wireless security"
-msgstr "- वायरलेस सुरक्षा"
+msgid "Wireless network name (ESSID)"
+msgstr "वायरलेस नेटवर्क नाम (ESSID)"
 
 msgctxt "#779"
 msgid "Save and apply network interface settings"
@@ -2329,10 +2324,6 @@ msgstr "इंटरनेट का उपयोग"
 msgctxt "#850"
 msgid "Invalid port number entered"
 msgstr "अवैध पोर्ट संख्या दर्ज"
-
-msgctxt "#1000"
-msgid "- Preview"
-msgstr "- पूर्वावलोकन"
 
 msgctxt "#1001"
 msgid "Unable to connect"
@@ -2502,10 +2493,6 @@ msgctxt "#1043"
 msgid "Program Add-ons"
 msgstr "कार्यक्रम परिवर्धन"
 
-msgctxt "#1044"
-msgid "Set plugin thumb"
-msgstr "पप्लगइन अंगूठा सेट करें"
-
 msgctxt "#1045"
 msgid "Add-on settings"
 msgstr "इसके अतिरिक्त सेटिंग्स"
@@ -2519,8 +2506,8 @@ msgid "Other..."
 msgstr "अन्य ..."
 
 msgctxt "#1048"
-msgid "- Username"
-msgstr "- उपयोगकर्ता नाम"
+msgid "Username"
+msgstr "उपयोगकर्ता नाम"
 
 msgctxt "#1049"
 msgid "Script settings"
@@ -2690,6 +2677,22 @@ msgctxt "#10025"
 msgid "Videos"
 msgstr "विडियो"
 
+msgctxt "#10037"
+msgid "Standard"
+msgstr "मानक"
+
+msgctxt "#10038"
+msgid "Advanced"
+msgstr "उन्नत"
+
+msgctxt "#10134"
+msgid "Favourites"
+msgstr "प्रिय"
+
+msgctxt "#10140"
+msgid "Add-on settings"
+msgstr "इसके अतिरिक्त सेटिंग्स"
+
 msgctxt "#10506"
 msgid "Programs"
 msgstr "करिअक्रम"
@@ -2770,9 +2773,17 @@ msgctxt "#13280"
 msgid "Video"
 msgstr "विडियो"
 
-msgctxt "#13303"
-msgid "- Fonts"
-msgstr "- फ़ॉन्ट्स"
+msgctxt "#13281"
+msgid "Hardware"
+msgstr "हार्डवेयर"
+
+msgctxt "#13283"
+msgid "Operating system:"
+msgstr "प्रचालन तंत्र:"
+
+msgctxt "#13286"
+msgid "Video encoder:"
+msgstr "वीडियो एनकोडर:"
 
 msgctxt "#13305"
 msgid "Show RSS news feeds"
@@ -2798,6 +2809,10 @@ msgctxt "#13327"
 msgid "Karaoke"
 msgstr "कराओके"
 
+msgctxt "#13340"
+msgid "Leave as is"
+msgstr "मानक"
+
 msgctxt "#13346"
 msgid "Movie information"
 msgstr "मूवी जानकारी"
@@ -2818,9 +2833,9 @@ msgctxt "#13387"
 msgid "Track naming template - right"
 msgstr "ट्रैक नामकरण टेम्पलेट - ठीक है"
 
-msgctxt "#13392"
-msgid "Use visualization if playing audio"
-msgstr "दृश्य का प्रयोग करें अगर ऑडियो खेल"
+msgctxt "#13388"
+msgid "Preset"
+msgstr "मानक"
 
 msgctxt "#13398"
 msgid "Shortcuts"
@@ -2898,10 +2913,6 @@ msgctxt "#14071"
 msgid "Allow file renaming and deletion"
 msgstr "फ़ाइल का नाम बदलने और विलोपन की अनुमति दें"
 
-msgctxt "#14078"
-msgid "- Colours"
-msgstr "- रंगीन"
-
 msgctxt "#14081"
 msgid "File lists"
 msgstr "फ़ाइल सूचियाँ"
@@ -2966,42 +2977,6 @@ msgctxt "#15108"
 msgid "Navigation sounds"
 msgstr "नेविगेशन लगता है"
 
-msgctxt "#15111"
-msgid "- Theme"
-msgstr "- विषय"
-
-msgctxt "#15201"
-msgid "Submit songs to Last.fm"
-msgstr "Last.fm के लिए गाने सबमिट"
-
-msgctxt "#15202"
-msgid "Last.fm username"
-msgstr "Last.fm उपयोगकर्ता नाम"
-
-msgctxt "#15203"
-msgid "Last.fm password"
-msgstr "Last.fm पासवर्ड"
-
-msgctxt "#15217"
-msgid "Submit songs to Libre.fm"
-msgstr "Libre.fm के लिए गाने सबमिट"
-
-msgctxt "#15218"
-msgid "Libre.fm username"
-msgstr "Libre.fm उपयोगकर्ता नाम"
-
-msgctxt "#15219"
-msgid "Libre.fm password"
-msgstr "Libre.fm पासवर्ड"
-
-msgctxt "#15221"
-msgid "Song submission"
-msgstr "सांग प्रस्तुत"
-
-msgctxt "#15250"
-msgid "Submit Last.fm radio to Last.fm"
-msgstr "Last.fm के लिए Last.fm रेडियो सबमिट"
-
 msgctxt "#16000"
 msgid "General"
 msgstr "सामान्य"
@@ -3025,6 +3000,10 @@ msgstr "अगला"
 msgctxt "#19177"
 msgid "Playback"
 msgstr "प्लेबैक"
+
+msgctxt "#19607"
+msgid "Fashion"
+msgstr "विधि"
 
 msgctxt "#20000"
 msgid "Saved music folder"
@@ -3059,8 +3038,8 @@ msgid "Master lock code and settings"
 msgstr "मास्टर ताला कोड और सेटिंग्स"
 
 msgctxt "#20109"
-msgid "- Zoom"
-msgstr "- ज़ूम"
+msgid "Zoom"
+msgstr "ज़ूम"
 
 msgctxt "#20142"
 msgid "Username"
@@ -3130,10 +3109,6 @@ msgctxt "#20402"
 msgid "Download actor thumbnails when adding to library"
 msgstr "अभिनेता थंबनेल डाउनलोड जब पुस्तकालय को जोड़ने"
 
-msgctxt "#20412"
-msgid "Flatten TV shows"
-msgstr "टीवी शो समतल"
-
 msgctxt "#20433"
 msgid "Extract thumbnails and video information"
 msgstr "निकालें थंबनेल और वीडियो जानकारी"
@@ -3145,14 +3120,6 @@ msgstr "दिखाएँ छुपी फ़ाइलें और निर�
 msgctxt "#21360"
 msgid "Share video and music libraries through UPnP"
 msgstr "शेयर और UPnP के माध्यम से वीडियो संगीत पुस्तकालयों"
-
-msgctxt "#21366"
-msgid "Subtitle folder"
-msgstr "उपशीर्षक फ़ोल्डर"
-
-msgctxt "#21369"
-msgid "Enable mouse and Touch Screen support"
-msgstr "माउस सक्षम"
 
 msgctxt "#21372"
 msgid "Forced DVD player region"
@@ -3179,16 +3146,12 @@ msgid "Enable custom background"
 msgstr "कस्टम पृष्ठभूमि सक्षम"
 
 msgctxt "#21417"
-msgid "- Settings"
-msgstr "- सेटिंग्स"
+msgid "Settings"
+msgstr "सेट्टिंग"
 
 msgctxt "#21449"
 msgid "Remote control sends keyboard presses"
 msgstr "रिमोट कंट्रोल कुंजीपटल प्रेस भेजता"
-
-msgctxt "#21450"
-msgid "- Edit"
-msgstr "- संपादित करें"
 
 msgctxt "#21452"
 msgid "Get More..."
@@ -3201,6 +3164,30 @@ msgstr "संकल्प"
 msgctxt "#21806"
 msgid "Comment"
 msgstr "टिप्पणी"
+
+msgctxt "#21862"
+msgid "Caption"
+msgstr "शीर्षक"
+
+msgctxt "#21863"
+msgid "Author"
+msgstr "रचयिता"
+
+msgctxt "#21864"
+msgid "Headline"
+msgstr "शीर्षक"
+
+msgctxt "#21865"
+msgid "Special instructions"
+msgstr "विशेष निर्देश"
+
+msgctxt "#21866"
+msgid "Category"
+msgstr "श्रेणी"
+
+msgctxt "#21874"
+msgid "State"
+msgstr "क्षेत्र"
 
 msgctxt "#21875"
 msgid "Country"
@@ -3230,10 +3217,6 @@ msgctxt "#22014"
 msgid "Use dim if paused during video playback"
 msgstr "मंद का प्रयोग करें अगर वीडियो प्लेबैक के दौरान रोके गए"
 
-msgctxt "#22021"
-msgid "Allowed error in aspect ratio to minimize black bars"
-msgstr "पहलू अनुपात में रख सकते त्रुटि काली सलाखों के कम से कम"
-
 msgctxt "#22022"
 msgid "Show video files in listings"
 msgstr "लिस्टिंग में वीडियो फ़ाइलों को दिखाएँ"
@@ -3243,16 +3226,8 @@ msgid "Font"
 msgstr "फ़ॉन्ट"
 
 msgctxt "#22031"
-msgid "- Size"
-msgstr "- आकार"
-
-msgctxt "#22032"
-msgid "- Colours"
-msgstr "- रंगीन"
-
-msgctxt "#22033"
-msgid "- Charset"
-msgstr "- वर्ण सेट"
+msgid "Size"
+msgstr "आकार"
 
 msgctxt "#22036"
 msgid "Import karaoke titles..."
@@ -3290,10 +3265,6 @@ msgctxt "#24008"
 msgid "Screensaver"
 msgstr "स्क्रीनसेवर"
 
-msgctxt "#24010"
-msgid "Visualization"
-msgstr "कल्पना"
-
 msgctxt "#24012"
 msgid "Subtitles"
 msgstr "उपशीर्षक"
@@ -3321,6 +3292,10 @@ msgstr "कलाकार जानकारी"
 msgctxt "#24018"
 msgid "Services"
 msgstr "सेवाएँ"
+
+msgctxt "#24023"
+msgid "Disabled"
+msgstr "विकलांग"
 
 msgctxt "#24027"
 msgid "Weather"
@@ -3351,9 +3326,13 @@ msgid "Background"
 msgstr "पृष्ठभूमि"
 
 msgctxt "#34100"
-msgid "Speaker Configuration"
-msgstr "वक्ता विन्यास"
+msgid "Number of channels"
+msgstr "मर्गें की संख्या"
 
 msgctxt "#35502"
 msgid "Name"
 msgstr "नाम"
+
+msgctxt "#36428"
+msgid "Record"
+msgstr "लिखना"

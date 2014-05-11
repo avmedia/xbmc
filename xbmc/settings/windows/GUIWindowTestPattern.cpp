@@ -1,8 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
- *
- *      Test patterns designed by Ofer LaOr - hometheater.co.il
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,10 +23,20 @@
 #include "guilib/GUIWindowManager.h"
 #include "guilib/Key.h"
 #include "guilib/WindowIDs.h"
+#include "windowing/WindowingFactory.h"
+
 
 CGUIWindowTestPattern::CGUIWindowTestPattern(void)
     : CGUIWindow(WINDOW_TEST_PATTERN, "")
+    , m_white(1.0)
+    , m_black(0.0)
 {
+  m_pattern = 0;
+  m_bounceX = 0;
+  m_bounceY = 0;
+  m_bounceDirectionX = 0;
+  m_bounceDirectionY = 0;
+  m_blinkFrame = 0;
   m_needsScaling = false;
 }
 
@@ -78,16 +86,29 @@ void CGUIWindowTestPattern::Process(unsigned int currentTime, CDirtyRegionList &
     MarkDirtyRegion();
   CGUIWindow::Process(currentTime, dirtyregions);
   m_renderRegion.SetRect(0, 0, (float)g_graphicsContext.GetWidth(), (float)g_graphicsContext.GetHeight());
+
+
+  if(g_Windowing.UseLimitedColor())
+  {
+    m_white = 235.0f / 255;
+    m_black =  16.0f / 255;
+  }
+  else
+  {
+    m_white = 1.0f;
+    m_black = 0.0f;
+  }
 }
 
 void CGUIWindowTestPattern::Render()
 {
   BeginRender();
+  const RESOLUTION_INFO info = g_graphicsContext.GetResInfo();
 
-  int top = CDisplaySettings::Get().GetResolutionInfo(g_graphicsContext.GetVideoResolution()).Overscan.top;
-  int bottom = CDisplaySettings::Get().GetResolutionInfo(g_graphicsContext.GetVideoResolution()).Overscan.bottom;
-  int left = CDisplaySettings::Get().GetResolutionInfo(g_graphicsContext.GetVideoResolution()).Overscan.left;
-  int right = CDisplaySettings::Get().GetResolutionInfo(g_graphicsContext.GetVideoResolution()).Overscan.right;
+  int top    = info.Overscan.top;
+  int bottom = info.Overscan.bottom;
+  int left   = info.Overscan.left;
+  int right  = info.Overscan.right;
 
   switch (m_pattern)
   {

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -108,10 +108,11 @@ extern "C"
    * Call one of the menu hooks (if supported).
    * Supported PVR_MENUHOOK instances have to be added in ADDON_Create(), by calling AddMenuHook() on the callback.
    * @param menuhook The hook to call.
+   * @param item The selected item for which the hook was called.
    * @return PVR_ERROR_NO_ERROR if the hook was called successfully.
    * @remarks Optional. Return PVR_ERROR_NOT_IMPLEMENTED if this add-on won't provide this function.
    */
-  PVR_ERROR CallMenuHook(const PVR_MENUHOOK& menuhook);
+  PVR_ERROR CallMenuHook(const PVR_MENUHOOK& menuhook, const PVR_MENUHOOK_DATA &item);
   //@}
 
   /*! @name PVR EPG methods
@@ -575,6 +576,25 @@ extern "C"
   void SetSpeed(int speed);
 
   /*!
+   *  Get actual playing time from addon. With timeshift enabled this is
+   *  different to live.
+   *  @return time as UTC
+   */
+  time_t GetPlayingTime();
+
+  /*!
+   *  Get time of oldest packet in timeshift buffer
+   *  @return time as UTC
+   */
+  time_t GetBufferTimeStart();
+
+  /*!
+   *  Get time of latest packet in timeshift buffer
+   *  @return time as UTC
+   */
+  time_t GetBufferTimeEnd();
+
+  /*!
    * Called by XBMC to assign the function pointers of this add-on to pClient.
    * @param pClient The struct to assign the function pointers to.
    */
@@ -650,6 +670,10 @@ extern "C"
     pClient->DemuxAbort                     = DemuxAbort;
     pClient->DemuxFlush                     = DemuxFlush;
     pClient->DemuxRead                      = DemuxRead;
+
+    pClient->GetPlayingTime                 = GetPlayingTime;
+    pClient->GetBufferTimeStart             = GetBufferTimeStart;
+    pClient->GetBufferTimeEnd               = GetBufferTimeEnd;
   };
 };
 

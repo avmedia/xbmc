@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@
 #include "DllLibCMyth.h"
 #include "video/VideoInfoTag.h"
 #include "URL.h"
-#include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/Settings.h"
 #include "FileItem.h"
 #include "utils/StringUtils.h"
 #include "guilib/LocalizeStrings.h"
@@ -71,7 +71,7 @@ DIR_CACHE_TYPE CMythDirectory::GetCacheType(const CStdString& strPath) const
   if (fileName == "recordings"
   ||  fileName == "guide"
   ||  fileName == "movies"
-  ||  fileName.Left(7) == "tvshows")
+  ||  StringUtils::StartsWith(fileName, "tvshows"))
     return DIR_CACHE_ALWAYS;
 
   return DIR_CACHE_ONCE;
@@ -129,16 +129,15 @@ bool CMythDirectory::GetGuide(const CStdString& base, CFileItemList &items)
 
       CLog::Log(LOGDEBUG, "%s - Adding channel number %d: %s", __FUNCTION__, channum, name.c_str());
 
-      CStdString number;
-      number.Format("%d", channum); // CStdString easier for string manipulation than int.
+      CStdString number = StringUtils::Format("%d", channum); // CStdString easier for string manipulation than int.
       url.SetFileName("guide/" + number);
       CFileItemPtr item(new CFileItem(url.Get(), true));
       item->m_strTitle = number;
-      if (!name.IsEmpty())
+      if (!name.empty())
         item->m_strTitle += " - " + name; // e.g. 3 - TV3
 
       CStdString icon = GetValue(m_dll->channel_icon(channel));
-      if (!icon.IsEmpty())
+      if (!icon.empty())
       {
         url.SetFileName("files/channels/" + URIUtils::GetFileName(icon)); // e.g. files/channels/tv3.jpg
         item->SetArt("thumb", url.Get());
@@ -150,7 +149,7 @@ bool CMythDirectory::GetGuide(const CStdString& base, CFileItemList &items)
     }
   }
 
-  items.AddSortMethod(SORT_METHOD_LABEL, 551 /* Name */, LABEL_MASKS("", "", "%K", ""));
+  items.AddSortMethod(SortByLabel, 551 /* Name */, LABEL_MASKS("", "", "%K", ""));
 
   m_dll->ref_release(list);
   return true;
@@ -190,8 +189,10 @@ bool CMythDirectory::GetGuideForChannel(const CStdString& base, CFileItemList &i
       CDateTime localstart;
       if (program[i].starttime)
         localstart = CTimeUtils::GetLocalTime(program[i].starttime);
-      item->m_strTitle.Format("%s - %s", localstart.GetAsLocalizedTime("HH:mm", false), title); // e.g. 20:30 - Mythbusters
-      if (!subtitle.IsEmpty())
+      item->m_strTitle = StringUtils::Format("%s - %s",
+                                             localstart.GetAsLocalizedTime("HH:mm", false).c_str(),
+                                             title.c_str()); // e.g. 20:30 - Mythbusters
+      if (!subtitle.empty())
         item->m_strTitle     += " - \"" + subtitle + "\""; // e.g. 20:30 - Mythbusters - "The Pirate Special"
       item->m_dateTime        = localstart;
 
@@ -200,7 +201,7 @@ bool CMythDirectory::GetGuideForChannel(const CStdString& base, CFileItemList &i
        */
       CVideoInfoTag* tag      = item->GetVideoInfoTag();
       tag->m_strTitle         = title;
-      if (!subtitle.IsEmpty())
+      if (!subtitle.empty())
         tag->m_strTitle      += " - \"" + subtitle + "\""; // e.g. Mythbusters - "The Pirate Special"
       tag->m_strShowTitle     = title;
       tag->m_strOriginalTitle = title;
@@ -227,7 +228,7 @@ bool CMythDirectory::GetGuideForChannel(const CStdString& base, CFileItemList &i
    * result in the guide being shown in the wrong order for skins that sort by date in descending
    * order by default with no option to change to ascending, e.g. Confluence.
    */
-  items.AddSortMethod(SORT_METHOD_NONE, 552 /* Date */, LABEL_MASKS("%K", "%J")); // Still leave the date label
+  items.AddSortMethod(SortByNone, 552 /* Date */, LABEL_MASKS("%K", "%J")); // Still leave the date label
 
   m_dll->ref_release(program);
   return true;
@@ -279,7 +280,7 @@ bool CMythDirectory::GetRecordings(const CStdString& base, CFileItemList &items,
         url.SetFileName("movies/" + path);
         break;
       case TV_SHOWS:
-        if (filter.CompareNoCase(name))
+        if (!StringUtils::EqualsNoCase(filter, name))
         {
           m_dll->ref_release(program);
           continue;
@@ -308,7 +309,7 @@ bool CMythDirectory::GetRecordings(const CStdString& base, CFileItemList &items,
         CStdString label(item->m_strTitle);
         unsigned short year = m_dll->proginfo_year(program);
         if (year > 0)
-          label.AppendFormat(" (%d)", year);
+          label += StringUtils::Format(" (%d)", year);
         item->SetLabel(label);
         item->SetLabelPreformated(true);
       }
@@ -325,13 +326,8 @@ bool CMythDirectory::GetRecordings(const CStdString& base, CFileItemList &items,
    * the subtitle doesn't influence the sort order and they are sorted by date.
    */
   if (type != TV_SHOWS)
-  {
-    if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
-      items.AddSortMethod(SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE, 556, LABEL_MASKS("%K", "%J"));
-    else
-      items.AddSortMethod(SORT_METHOD_VIDEO_SORT_TITLE, 556, LABEL_MASKS("%K", "%J"));
-  }
-  items.AddSortMethod(SORT_METHOD_DATE, 552 /* Date */, LABEL_MASKS("%K", "%J"));
+    items.AddSortMethod(SortBySortTitle, 556 /* Name */, LABEL_MASKS("%K", "%J"), CSettings::Get().GetBool("filelists.ignorethewhensorting") ? SortAttributeIgnoreArticle : SortAttributeNone);
+  items.AddSortMethod(SortByDate, 552 /* Date */, LABEL_MASKS("%K", "%J"));
 
   return true;
 }
@@ -392,11 +388,8 @@ bool CMythDirectory::GetTvShowFolders(const CStdString& base, CFileItemList &ite
   }
   m_dll->ref_release(list);
 
-  if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
-    items.AddSortMethod(SORT_METHOD_LABEL_IGNORE_THE, 551 /* Name */, LABEL_MASKS("", "", "%L", "%J"));
-  else
-    items.AddSortMethod(SORT_METHOD_LABEL, 551 /* Name */, LABEL_MASKS("", "", "%L", "%J"));
-  items.AddSortMethod(SORT_METHOD_DATE, 552 /* Date */, LABEL_MASKS("", "", "%L", "%J"));
+  items.AddSortMethod(SortByLabel, 551 /* Name */, LABEL_MASKS("", "", "%L", "%J"), CSettings::Get().GetBool("filelists.ignorethewhensorting") ? SortAttributeIgnoreArticle : SortAttributeNone);
+  items.AddSortMethod(SortByDate, 552 /* Date */, LABEL_MASKS("", "", "%L", "%J"));
 
   return true;
 }
@@ -464,15 +457,12 @@ bool CMythDirectory::GetChannels(const CStdString& base, CFileItemList &items)
     m_dll->ref_release(program);
   }
 
-  items.AddSortMethod(SORT_METHOD_LABEL, 551 /* Name */, LABEL_MASKS("%K", "%B"));
+  items.AddSortMethod(SortByLabel, 551 /* Name */, LABEL_MASKS("%K", "%B"));
 
   /*
    * Video sort title is set to the channel number.
    */
-  if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
-    items.AddSortMethod(SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE, 556 /* Title */, LABEL_MASKS("%K", "%B"));
-  else
-    items.AddSortMethod(SORT_METHOD_VIDEO_SORT_TITLE, 556 /* Title */, LABEL_MASKS("%K", "%B"));
+  items.AddSortMethod(SortBySortTitle, 556 /* Title */, LABEL_MASKS("%K", "%B"), CSettings::Get().GetBool("filelists.ignorethewhensorting") ? SortAttributeIgnoreArticle : SortAttributeNone);
 
   return true;
 }
@@ -528,7 +518,7 @@ bool CMythDirectory::GetDirectory(const CStdString& strPath, CFileItemList &item
     item->SetLabel(g_localizeStrings.Get(22020)); // Guide
     items.Add(item);
 
-    items.AddSortMethod(SORT_METHOD_NONE, 564 /* Type */, LABEL_MASKS("", "", "%L", "")); // No sorting, as added to list.
+    items.AddSortMethod(SortByNone, 564 /* Type */, LABEL_MASKS("", "", "%L", "")); // No sorting, as added to list.
 
     /*
      * Clear the directory cache so the cached sub-folders are guaranteed to be accurate.
@@ -541,16 +531,16 @@ bool CMythDirectory::GetDirectory(const CStdString& strPath, CFileItemList &item
     return GetChannels(base, items);
   else if (fileName == "guide")
     return GetGuide(base, items);
-  else if (fileName.Left(6) == "guide/")
-    return GetGuideForChannel(base, items, atoi(fileName.Mid(6)));
+  else if (StringUtils::StartsWith(fileName, "guide/"))
+    return GetGuideForChannel(base, items, atoi(fileName.substr(6).c_str()));
   else if (fileName == "movies")
     return GetRecordings(base, items, MOVIES);
   else if (fileName == "recordings")
     return GetRecordings(base, items);
   else if (fileName == "tvshows")
     return GetTvShowFolders(base, items);
-  else if (fileName.Left(8) == "tvshows/")
-    return GetRecordings(base, items, TV_SHOWS, fileName.Mid(8));
+  else if (StringUtils::StartsWith(fileName, "tvshows/"))
+    return GetRecordings(base, items, TV_SHOWS, fileName.substr(8).c_str());
   return false;
 }
 
@@ -568,11 +558,11 @@ bool CMythDirectory::Exists(const char* strPath)
   if (fileName == ""
   ||  fileName == "channels"
   ||  fileName == "guide"
-  ||  fileName.Left(6) == "guide/"
+  ||  StringUtils::StartsWith(fileName, "guide/")
   ||  fileName == "movies"
   ||  fileName == "recordings"
   ||  fileName == "tvshows"
-  ||  fileName.Left(8) == "tvshows/")
+  ||  StringUtils::StartsWith(fileName, "tvshows/"))
     return true;
 
   return false;
@@ -617,10 +607,10 @@ bool CMythDirectory::IsMovie(const cmyth_proginfo_t program)
 
   const int iMovieLength = g_advancedSettings.m_iMythMovieLength; // Minutes
   if (iMovieLength > 0) // Use hack to identify movie based on length (used if EPG is dubious).
-    return GetValue(m_dll->proginfo_programid(program)).Left(2) == "MV"
+    return StringUtils::StartsWith(GetValue(m_dll->proginfo_programid(program)), "MV")
         || m_dll->proginfo_length_sec(program) > iMovieLength * 60; // Minutes to seconds
   else
-    return GetValue(m_dll->proginfo_programid(program)).Left(2) == "MV";
+    return StringUtils::StartsWith(GetValue(m_dll->proginfo_programid(program)), "MV");
 }
 
 bool CMythDirectory::IsTvShow(const cmyth_proginfo_t program)
@@ -645,13 +635,13 @@ bool CMythDirectory::SupportsWriteFileOperations(const CStdString& strPath)
    * TV Shows directory has sub-folders so extra check is included so only files get the file
    * operations.
    */
-  return filename.Left(11) == "recordings/" ||
-         filename.Left(7)  == "movies/" ||
-        (filename.Left(8)  == "tvshows/" && URIUtils::GetExtension(filename) != "");
+  return StringUtils::StartsWith(filename, "recordings/") ||
+         StringUtils::StartsWith(filename, "movies/") ||
+        (StringUtils::StartsWith(filename, "tvshows/") && URIUtils::HasExtension(filename));
 }
 
 bool CMythDirectory::IsLiveTV(const CStdString& strPath)
 {
   CURL url(strPath);
-  return url.GetFileName().Left(9) == "channels/";
+  return StringUtils::StartsWith(url.GetFileName(), "channels/");
 }

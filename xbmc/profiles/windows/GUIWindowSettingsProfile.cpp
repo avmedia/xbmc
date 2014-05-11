@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -253,7 +253,7 @@ bool CGUIWindowSettingsProfile::GetAutoLoginProfileChoice(int &iProfile)
     CFileItemPtr item(new CFileItem(profile->getName()));
     item->SetProperty("Addon.Summary", locked); // lock setting
     CStdString thumb = profile->getThumb();
-    if (thumb.IsEmpty())
+    if (thumb.empty())
       thumb = "unknown-user.png";
     item->SetIconImage(thumb);
     items.Add(item);
@@ -261,8 +261,6 @@ bool CGUIWindowSettingsProfile::GetAutoLoginProfileChoice(int &iProfile)
 
   dialog->SetHeading(20093); // Profile name
   dialog->Reset();
-  dialog->SetUseDetails(true);
-  dialog->EnableButton(true, 222); // Cancel
   dialog->SetItems(&items);
   dialog->SetSelected(autoLoginProfileId);
   dialog->DoModal();

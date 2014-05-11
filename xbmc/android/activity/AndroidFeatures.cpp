@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "utils/log.h"
 
 #include <cpu-features.h>
-#include "JNIThreading.h"
+#include "android/jni/JNIThreading.h"
 
 bool CAndroidFeatures::HasNeon()
 {
@@ -55,6 +55,7 @@ int CAndroidFeatures::GetVersion()
     // <= 13 Honeycomb
     // <= 15 IceCreamSandwich
     //       JellyBean
+    // <= 19 KitKat
     version = iSdkVersion;
 
     jenv->DeleteLocalRef(jcOsBuild);

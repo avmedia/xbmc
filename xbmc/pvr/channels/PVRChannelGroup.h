@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 
 #include "FileItem.h"
 #include "PVRChannel.h"
+#include "settings/lib/ISettingCallback.h"
 #include "utils/JobManager.h"
 
 #include <boost/shared_ptr.hpp>
@@ -49,14 +50,20 @@ namespace PVR
     CPVRChannelPtr channel;
     unsigned int   iChannelNumber;
   } PVRChannelGroupMember;
-
+  
+  enum EpgDateType
+  {
+    EPG_FIRST_DATE = 0,
+    EPG_LAST_DATE = 1
+  };
+  
   class CPVRChannelGroup;
   typedef boost::shared_ptr<PVR::CPVRChannelGroup> CPVRChannelGroupPtr;
 
   /** A group of channels */
-  class CPVRChannelGroup : private Observer,
-                           public Observable,
-                           public IJobCallback
+  class CPVRChannelGroup : public Observable,
+                           public IJobCallback,
+                           public ISettingCallback
 
   {
     friend class CPVRChannelGroups;
@@ -232,7 +239,7 @@ namespace PVR
 
     //@}
 
-    void Notify(const Observable &obs, const ObservableMessage msg);
+    virtual void OnSettingChanged(const CSetting *setting);
 
     /*!
      * @brief Get a channel given it's EPG ID.
@@ -364,8 +371,20 @@ namespace PVR
      * @return The amount of entries that were added.
      */
     int GetEPGNext(CFileItemList &results);
+    
+    /*!
+     * @brief Get the start time of the first entry.
+     * @return The start time.
+     */
+    CDateTime GetFirstEPGDate(void) const;
+    
+    /*!
+     * @brief Get the end time of the last entry.
+     * @return The end time.
+     */
+    CDateTime GetLastEPGDate(void) const;
 
-    bool UpdateChannel(const CFileItem &channel, bool bHidden, bool bVirtual, bool bEPGEnabled, bool bParentalLocked, int iEPGSource, int iChannelNumber, const CStdString &strChannelName, const CStdString &strIconPath, const CStdString &strStreamURL);
+    bool UpdateChannel(const CFileItem &channel, bool bHidden, bool bVirtual, bool bEPGEnabled, bool bParentalLocked, int iEPGSource, int iChannelNumber, const CStdString &strChannelName, const CStdString &strIconPath, const CStdString &strStreamURL, bool bUserSetIcon = false);
 
     bool ToggleChannelLocked(const CFileItem &channel);
 
@@ -378,6 +397,13 @@ namespace PVR
      * @return The channel or NULL if it wasn't found.
      */
     CPVRChannelPtr GetByClient(int iUniqueChannelId, int iClientID) const;
+
+    /*!
+     * @brief Get a channel given it's unique ID.
+     * @param iUniqueID The unique ID.
+     * @return The channel or NULL if it wasn't found.
+     */
+    CPVRChannelPtr GetByUniqueID(int iUniqueID) const;
 
     void SetSelectedGroup(bool bSetTo);
     bool IsSelectedGroup(void) const;
@@ -412,6 +438,13 @@ namespace PVR
     virtual bool AddAndUpdateChannels(const CPVRChannelGroup &channels, bool bUseBackendChannelNumbers);
 
     bool RemoveDeletedChannels(const CPVRChannelGroup &channels);
+
+    /*!
+     * @brief Create an EPG table for each channel.
+     * @brief bForce Create the tables, even if they already have been created before.
+     * @return True if all tables were created successfully, false otherwise.
+     */
+    virtual bool CreateChannelEpgs(bool bForce = false);
 
     /*!
      * @brief Remove invalid channels from this container.
@@ -462,13 +495,6 @@ namespace PVR
     void ResetChannelNumbers(void);
 
     /*!
-     * @brief Get a channel given it's unique ID.
-     * @param iUniqueID The unique ID.
-     * @return The channel or NULL if it wasn't found.
-     */
-    CPVRChannelPtr GetByUniqueID(int iUniqueID) const;
-
-    /*!
      * @brief Get a channel given it's channel ID.
      * @param iChannelID The channel ID.
      * @return The channel or NULL if it wasn't found.
@@ -487,6 +513,10 @@ namespace PVR
     bool             m_bPreventSortAndRenumber;     /*!< true when sorting and renumbering should not be done after adding/updating channels to the group */
     std::vector<PVRChannelGroupMember> m_members;
     CCriticalSection m_critSection;
+    
+  private:
+    CDateTime GetEPGDate(EpgDateType epgDateType) const;
+    
   };
 
   class CPVRPersistGroupJob : public CJob

@@ -23,6 +23,7 @@
 #pragma once
 #include <list>
 #include "mpeg2def.h"
+#include "utils/StdString.h"
 
 enum BDVM_VideoFormat
 {

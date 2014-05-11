@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "filesystem/File.h"
 #include "music/tags/MusicInfoTag.h"
 
-#include "cores/AudioEngine/AEAudioFormat.h"
+#include "cores/AudioEngine/Utils/AEAudioFormat.h"
 
 #define READ_EOF      -1
 #define READ_SUCCESS   0
@@ -39,6 +39,7 @@ public:
     m_SampleRate = 0;
     m_EncodedSampleRate = 0;
     m_BitsPerSample = 0;
+    m_BitsPerCodedSample = 0;
     m_DataFormat = AE_FMT_INVALID;
     m_Channels = 0;
     m_Bitrate = 0;
@@ -101,6 +102,7 @@ public:
   int m_SampleRate;
   int m_EncodedSampleRate;
   int m_BitsPerSample;
+  int m_BitsPerCodedSample;
   enum AEDataFormat m_DataFormat;
   int m_Bitrate;
   CStdString m_CodecName;

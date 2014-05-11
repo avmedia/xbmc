@@ -77,7 +77,7 @@ extern "C" {
 using namespace PERIPHERALS;
 
 CPeripheralBusUSB::CPeripheralBusUSB(CPeripherals *manager) :
-    CPeripheralBus(manager, PERIPHERAL_BUS_USB)
+    CPeripheralBus("PeripBusUSBUdev", manager, PERIPHERAL_BUS_USB)
 {
   /* the Process() method in this class overrides the one in CPeripheralBus, so leave this set to true */
   m_bNeedsPolling = true;
@@ -119,7 +119,7 @@ bool CPeripheralBusUSB::PerformDeviceScan(PeripheralScanResults &results)
   udev_list_entry_foreach(dev_list_entry, devices)
   {
     strPath = udev_list_entry_get_name(dev_list_entry);
-    if (strPath.IsEmpty())
+    if (strPath.empty())
       bContinue = false;
 
     if (bContinue)
@@ -138,7 +138,7 @@ bool CPeripheralBusUSB::PerformDeviceScan(PeripheralScanResults &results)
     if (bContinue)
     {
       strClass = udev_device_get_sysattr_value(dev, "bDeviceClass");
-      if (strClass.IsEmpty())
+      if (strClass.empty())
         bContinue = false;
     }
 
@@ -221,9 +221,9 @@ void CPeripheralBusUSB::Clear(void)
 
 bool CPeripheralBusUSB::WaitForUpdate()
 {
-  int m_udevFd = udev_monitor_get_fd(m_udevMon);
+  int udevFd = udev_monitor_get_fd(m_udevMon);
 
-  if (m_udevFd < 0)
+  if (udevFd < 0)
   {
     CLog::Log(LOGERROR, "%s - get udev monitor", __FUNCTION__);
     return false;
@@ -231,7 +231,7 @@ bool CPeripheralBusUSB::WaitForUpdate()
 
   /* poll for udev changes */
   struct pollfd pollFd;
-  pollFd.fd = m_udevFd;
+  pollFd.fd = udevFd;
   pollFd.events = POLLIN;
   int iPollResult;
   while (!m_bStop && ((iPollResult = poll(&pollFd, 1, 100)) <= 0))

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2007-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -412,7 +412,7 @@ extern "C" ADDON_STATUS ADDON_SetSetting(const char* id, const void* value)
     }
     return ADDON_STATUS_OK;
   }
-  // It is now time to set the settings got from xmbc
+  // It is now time to set the settings got from xbmc
   if (strcmp(id, "quality")==0)
     ChooseQuality (*(int*)value);
   else if (strcmp(id, "shuffle")==0)

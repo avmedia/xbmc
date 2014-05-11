@@ -32,6 +32,7 @@
 #include "streams.h"
 #include "utils/CharsetConverter.h"
 #include "system.h"
+#include "utils/StdString.h"
 
 /// Informations about a filter
 struct SFilterInfos

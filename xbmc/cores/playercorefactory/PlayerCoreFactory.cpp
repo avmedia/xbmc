@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,12 +21,13 @@
 #include "utils/BitstreamStats.h"
 #include "PlayerCoreFactory.h"
 #include "threads/SingleLock.h"
+#include "cores/AudioEngine/Utils/AEUtil.h"
 #include "cores/dvdplayer/DVDPlayer.h"
 #include "cores/paplayer/PAPlayer.h"
 #include "cores/paplayer/DVDPlayerCodec.h"
 #include "dialogs/GUIDialogContextMenu.h"
 #include "utils/HttpHeader.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "URL.h"
 #include "FileItem.h"
 #include "profiles/ProfilesManager.h"
@@ -39,6 +40,8 @@
 #include "PlayerCoreConfig.h"
 #include "PlayerSelectionRule.h"
 #include "guilib/LocalizeStrings.h"
+#include "cores/AudioEngine/AEFactory.h"
+#include "utils/StringUtils.h"
 
 #define PLAYERCOREFACTORY_XML "playercorefactory.xml"
 
@@ -83,7 +86,7 @@ template<typename T> void unique (T &con)
 
 IPlayer* CPlayerCoreFactory::CreatePlayer(const CStdString& strCore, IPlayerCallback& callback) const
 {
-  return CreatePlayer( GetPlayerCore(strCore), callback );
+  return CreatePlayer(GetPlayerCore(strCore), callback );
 }
 
 IPlayer* CPlayerCoreFactory::CreatePlayer(const PLAYERCOREID eCore, IPlayerCallback& callback) const
@@ -164,7 +167,7 @@ void CPlayerCoreFactory::GetPlayers( const CFileItem& item, VECPLAYERCORES &vecC
 {
   CURL url(item.GetPath());
 
-  CLog::Log(LOGDEBUG, "CPlayerCoreFactory::GetPlayers(%s)", item.GetPath().c_str());
+  CLog::Log(LOGDEBUG, "CPlayerCoreFactory::GetPlayers(%s)", CURL::GetRedacted(item.GetPath()).c_str());
 
   // Process rules
   for(unsigned int i = 0; i < m_vecCoreSelectionRules.size(); i++)
@@ -191,13 +194,8 @@ void CPlayerCoreFactory::GetPlayers( const CFileItem& item, VECPLAYERCORES &vecC
 
     if (bAdd)
     {
-      if( g_guiSettings.GetInt("audiooutput.mode") == AUDIO_ANALOG )
-      {
-        CLog::Log(LOGDEBUG, "CPlayerCoreFactory::GetPlayers: adding PAPlayer (%d)", EPC_PAPLAYER);
-        vecCores.push_back(EPC_PAPLAYER);
-      }
-      else if (url.GetFileType().Equals("ac3") 
-            || url.GetFileType().Equals("dts"))
+      if ((url.GetFileType().Equals("ac3"))
+            || (url.GetFileType().Equals("dts")))
       {
         CLog::Log(LOGDEBUG, "CPlayerCoreFactory::GetPlayers: adding DVDPlayer (%d)", EPC_DVDPLAYER);
         vecCores.push_back(EPC_DVDPLAYER);
@@ -217,7 +215,7 @@ void CPlayerCoreFactory::GetPlayers( const CFileItem& item, VECPLAYERCORES &vecC
   if (item.IsVideo() || !item.IsAudio())
   {
 #ifdef HAS_DS_PLAYER
-	  bool dsplayer = g_guiSettings.GetBool("dsplayer.defaultvideoplayer");
+	  bool dsplayer = CSettings::Get().GetBool("dsplayer.defaultvideoplayer");
 	  PLAYERCOREID eVideoDefault = dsplayer ? EPC_DSPLAYER : GetPlayerCore("videodefaultplayer");
 #else
 	  PLAYERCOREID eVideoDefault = GetPlayerCore("videodefaultplayer");
@@ -306,6 +304,7 @@ PLAYERCOREID CPlayerCoreFactory::SelectPlayerDialog(float posX, float posY) cons
 bool CPlayerCoreFactory::LoadConfiguration(const std::string &file, bool clear)
 {
   CSingleLock lock(m_section);
+
   CLog::Log(LOGNOTICE, "Loading player core factory settings from %s.", file.c_str());
   if (!XFILE::CFile::Exists(file))
   { // tell the user it doesn't exist
@@ -345,13 +344,6 @@ bool CPlayerCoreFactory::LoadConfiguration(const std::string &file, bool clear)
     paplayer->m_bPlaysAudio = true;
     m_vecCoreConfigs.push_back(paplayer);
 
-#if defined(HAS_AMLPLAYER)
-    CPlayerCoreConfig* amlplayer = new CPlayerCoreConfig("AMLPlayer", EPC_AMLPLAYER, NULL);
-    amlplayer->m_bPlaysAudio = true;
-    amlplayer->m_bPlaysVideo = true;
-    m_vecCoreConfigs.push_back(amlplayer);
-#endif
-
 #if defined(HAS_OMXPLAYER)
     CPlayerCoreConfig* omxplayer = new CPlayerCoreConfig("OMXPlayer", EPC_OMXPLAYER, NULL);
     omxplayer->m_bPlaysAudio = true;
@@ -383,7 +375,7 @@ bool CPlayerCoreFactory::LoadConfiguration(const std::string &file, bool clear)
       CStdString name = pPlayer->Attribute("name");
       CStdString type = pPlayer->Attribute("type");
       if (type.length() == 0) type = name;
-      type.ToLower();
+      StringUtils::ToLower(type);
 
       EPLAYERCORES eCore = EPC_NONE;
       if (type == "dvdplayer" || type == "mplayer") eCore = EPC_DVDPLAYER;

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,21 +28,20 @@
 #include "profiles/windows/GUIWindowSettingsProfile.h"
 #include "dialogs/GUIDialogContextMenu.h"
 #include "GUIPassword.h"
-#ifdef HAS_PYTHON
-#include "interfaces/python/XBPython.h"
-#endif
 #ifdef HAS_JSONRPC
 #include "interfaces/json-rpc/JSONRPC.h"
 #endif
 #include "interfaces/Builtins.h"
 #include "utils/Weather.h"
+#include "utils/StringUtils.h"
 #include "network/Network.h"
 #include "addons/Skin.h"
 #include "guilib/GUIMessage.h"
 #include "GUIUserMessages.h"
 #include "guilib/GUIWindowManager.h"
+#include "guilib/StereoscopicsManager.h"
 #include "dialogs/GUIDialogOK.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "FileItem.h"
 #include "guilib/Key.h"
 #include "guilib/LocalizeStrings.h"
@@ -106,7 +105,8 @@ bool CGUIWindowLoginScreen::OnMessage(CGUIMessage& message)
 
           if (bOkay)
           {
-            LoadProfile(iItem);
+            if (iItem >= 0)
+              LoadProfile((unsigned int)iItem);
           }
           else
           {
@@ -140,8 +140,8 @@ bool CGUIWindowLoginScreen::OnAction(const CAction &action)
   if (action.GetID() == ACTION_BUILT_IN_FUNCTION)
   {
     CStdString actionName = action.GetName();
-    actionName.ToLower();
-    if (actionName.Find("shutdown") != -1)
+    StringUtils::ToLower(actionName);
+    if (actionName.find("shutdown") != std::string::npos)
       CBuiltins::Execute(action.GetName());
     return true;
   }
@@ -159,8 +159,7 @@ void CGUIWindowLoginScreen::FrameMove()
   if (GetFocusedControlID() == CONTROL_BIG_LIST && g_windowManager.GetTopMostModalDialogID() == WINDOW_INVALID)
     if (m_viewControl.HasControl(CONTROL_BIG_LIST))
       m_iSelectedItem = m_viewControl.GetSelectedItem();
-  CStdString strLabel;
-  strLabel.Format(g_localizeStrings.Get(20114),m_iSelectedItem+1, CProfilesManager::Get().GetNumberOfProfiles());
+  CStdString strLabel = StringUtils::Format(g_localizeStrings.Get(20114), m_iSelectedItem+1, CProfilesManager::Get().GetNumberOfProfiles());
   SET_CONTROL_LABEL(CONTROL_LABEL_SELECTED_PROFILE,strLabel);
   CGUIWindow::FrameMove();
 }
@@ -200,13 +199,13 @@ void CGUIWindowLoginScreen::Update()
     const CProfile *profile = CProfilesManager::Get().GetProfile(i);
     CFileItemPtr item(new CFileItem(profile->getName()));
     CStdString strLabel;
-    if (profile->getDate().IsEmpty())
+    if (profile->getDate().empty())
       strLabel = g_localizeStrings.Get(20113);
     else
-      strLabel.Format(g_localizeStrings.Get(20112), profile->getDate());
+      strLabel = StringUtils::Format(g_localizeStrings.Get(20112).c_str(), profile->getDate().c_str());
     item->SetLabel2(strLabel);
     item->SetArt("thumb", profile->getThumb());
-    if (profile->getThumb().IsEmpty() || profile->getThumb().Equals("-"))
+    if (profile->getThumb().empty() || profile->getThumb().Equals("-"))
       item->SetArt("thumb", "unknown-user.png");
     item->SetLabelPreformated(true);
     m_vecItems->Add(item);
@@ -234,7 +233,7 @@ bool CGUIWindowLoginScreen::OnPopupMenu(int iItem)
   if (choice == 3)
   {
     if (g_passwordManager.CheckLock(CProfilesManager::Get().GetMasterProfile().getLockMode(),CProfilesManager::Get().GetMasterProfile().getLockCode(),20075))
-      g_passwordManager.iMasterLockRetriesLeft = g_guiSettings.GetInt("masterlock.maxretries");
+      g_passwordManager.iMasterLockRetriesLeft = CSettings::Get().GetInt("masterlock.maxretries");
     else // be inconvenient
       CApplicationMessenger::Get().Shutdown();
 
@@ -250,7 +249,8 @@ bool CGUIWindowLoginScreen::OnPopupMenu(int iItem)
   {
     int iDelete = m_viewControl.GetSelectedItem();
     m_viewControl.Clear();
-    CProfilesManager::Get().DeleteProfile(iDelete);
+    if (iDelete >= 0)
+      CProfilesManager::Get().DeleteProfile((size_t)iDelete);
     Update();
     m_viewControl.SetSelectedItem(0);
   }
@@ -306,9 +306,7 @@ void CGUIWindowLoginScreen::LoadProfile(unsigned int profile)
   ADDON::CAddonMgr::Get().ReInit();
 
   g_weatherManager.Refresh();
-#ifdef HAS_PYTHON
-  g_pythonParser.m_bLogin = true;
-#endif
+  g_application.SetLoggingIn(true);
 
 #ifdef HAS_JSONRPC
   JSONRPC::CJSONRPC::Initialize();
@@ -323,4 +321,5 @@ void CGUIWindowLoginScreen::LoadProfile(unsigned int profile)
   g_windowManager.ChangeActiveWindow(g_SkinInfo->GetFirstWindow());
 
   g_application.UpdateLibraries();
+  CStereoscopicsManager::Get().Initialize();
 }

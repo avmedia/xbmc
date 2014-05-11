@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ bool CUPnPFile::Open(const CURL& url)
     {
       throw new CRedirectException(pNewImp, pNewUrl);
     }
-    SAFE_DELETE(pNewUrl);    
+    delete pNewUrl;    
   }
   return false;
 }
@@ -64,7 +64,7 @@ int CUPnPFile::Stat(const CURL& url, struct __stat64* buffer)
     {
       throw new CRedirectException(pNewImp, pNewUrl);
     }
-    SAFE_DELETE(pNewUrl);
+    delete pNewUrl;
   }
   return -1;
 }
@@ -81,7 +81,7 @@ bool CUPnPFile::Exists(const CURL& url)
     {
       throw new CRedirectException(pNewImp, pNewUrl);
     }
-    SAFE_DELETE(pNewUrl);
+    delete pNewUrl;
   }
   return false;
 }

@@ -1,7 +1,7 @@
 #pragma once
 /*
 *      Copyright (C) 2012-2013 Team XBMC
-*      http://www.xbmc.org
+*      http://xbmc.org
 *
 *  This Program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ public:
   //! \param input The input file url
   //! \param output The output file url
   //! \param tag The music tag to attach to track
-  //! \param encoder The encoder to use. See GUISettings.h
+  //! \param encoder The encoder to use. See Encoder.h
   //! \param eject Should we eject tray on finish?
   //! \param rate The sample rate of the input
   //! \param channels Number of audio channels in input
@@ -52,6 +52,7 @@ public:
   virtual const char* GetType() const { return "cdrip"; };
   virtual bool operator==(const CJob *job) const;
   virtual bool DoWork();
+  CStdString GetOutput() const { return m_output; }
 protected:
   //! \brief Setup the audio encoder
   CEncoder* SetupEncoder(XFILE::CFile& reader);

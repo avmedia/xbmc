@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -63,6 +63,6 @@ namespace XFILE
     static CFileItemPtr GetMoreItem(const CStdString &content);
 
     static void GenerateListing(CURL &path, ADDON::VECADDONS& addons, CFileItemList &items, bool reposAsFolders = true);
-    static CFileItemPtr FileItemFromAddon(ADDON::AddonPtr &addon, const CStdString &basePath, bool folder = false);
+    static CFileItemPtr FileItemFromAddon(const ADDON::AddonPtr &addon, const CStdString &basePath, bool folder = false);
   };
 }
